@@ -1,4 +1,4 @@
-# 📚 مخزن آینه‌‌ای از مطالب وب‌سایت دات‌نت تيپس (Mirror Repository)
+# 📚 مخزن آینه‌‌ای از مطالب وب‌سایت دات‌نت تيپس
 
 این مخزن، **آینه‌ای از مطالب منتشرشده در سایت دات‌نت تيپس** است.
 
@@ -10,7 +10,7 @@
 
 نسخهٔ منتشرشدهٔ این مخزن در آدرس زیر قابل مشاهده است:
 
-**https://VahidN.github.io/dntips.mirror/**
+**[https://VahidN.github.io/dntips.mirror/](https://vahidn.github.io/dntips.mirror/)**
 
 ---
 
