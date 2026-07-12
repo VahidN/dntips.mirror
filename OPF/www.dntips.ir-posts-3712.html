@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <title>‫‫چالش‌های الگوی Service Locator و پیاده‌سازی Scoped Interceptors در EF Core</title>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">
+	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>
+	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫چالش‌های الگوی Service Locator و پیاده‌سازی Scoped Interceptors در EF Core";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+</head>
+
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۶۹۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۴</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><div></div><a href='www.dntips.ir-posts-3711.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫راهنمای رفع خطای طولانی بودن مسیر فایل‌ها (Filename too long) در ویندوز و گیت</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫چالش‌های الگوی Service Locator و پیاده‌سازی Scoped Interceptors در EF Core</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۵/۰۴/۲۰ ۰۸:۱۵</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-3712.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در معماری برنامه‌های مبتنی بر ASP.NET Core، سیستم تزریق وابستگی (Dependency Injection یا به اختصار DI) نقشی حیاتی در مدیریت چرخه عمر سرویس‌ها (Service Lifetimes) ایفا می‌کند. فریم‌ورک سرویس‌ها را در سه لایه کلی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Transient</code> ،<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Scoped</code> و <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Singleton</code> مدیریت می‌کند. با این حال، در سناریوهای پیچیده توسعه نرم‌افزار، توسعه‌دهندگان اغلب با چالش &quot;تداخل چرخه عمر سرویس‌ها&quot; (Capturing a Scoped Service inside a Singleton) مواجه می‌شوند؛ وضعیتی که در آن یک سرویس با طول عمر طولانی‌تر (مانند یک Singleton Middleware یا یک EF Core Interceptor) نیاز به دسترسی به یک سرویس با طول عمر کوتاه‌تر (مانند <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">DbContext</code> یا اطلاعات کاربر جاری) دارد.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">یک راهکار رایج اما چالش‌برانگیز برای حل این مشکل، رجوع به الگوی <strong>Service Locator</strong> از طریق <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">HttpContext.RequestServices</code> است. این مقاله به تحلیل عمیق سازوکار این الگو، مخاطرات و بن‌بست‌های فنی آن پرداخته و در نهایت، الگوهای جایگزین و استانداردی مانند <strong>Scoped Interceptors</strong> را در محیط‌های مجهز به مکانیزم Pool (مانند <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">AddDbContextPool</code>) تبیین می‌کند.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۱. سازوکار و چالش‌های الگوی Service Locator در ASP.NET Core</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">هنگامی که درون یک سرویس Singleton یا مکانیزم‌های میانی (Middleware)، به یک سرویس Scoped نیاز داریم، ساده‌ترین رویکرد، دسترسی مستقیم به کانتینر خدمات درخواست جاری از طریق خصوصیت <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">RequestServices</code> در اکوسیستم <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">HttpContext</code> است.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>مکانیزم عملکرد (Core Mechanism)</strong></div><ul><li><strong>هم‌راستایی محدوده (Scope Alignment):</strong> محیط <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">HttpContext.RequestServices</code> به طور مستقیم به کانتینر Scoped ایجاد شده برای آن درخواست HTTP خاص اشاره دارد.</li><li><strong>تطابق طول عمر (Lifetime Match):</strong> هر سرویسی که از این طریق Resolve یا نمونه‌سازی شود، دقیقاً تا پایان همان درخواست وب زنده خواهد ماند.</li><li><strong>آزادسازی خودکار (Automatic Disposal):</strong> فریم‌ورک ASP.NET Core در پایان چرخه عمر درخواست وب، به طور خودکار متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Dispose</code> را روی سرویس‌های نمونه‌سازی شده فراخوانی می‌کند.</li></ul><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>نمونه کد: استفاده در کدهای میان‌افزار (Middleware)</strong></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public class CustomMiddleware
+{
+    private readonly RequestDelegate _next;
+
+    // سرویس‌های Singleton تنها می‌توانند سایر Singletonها یا Transientها را از طریق سازنده دریافت کنند.
+    public CustomMiddleware(RequestDelegate next)
+    {
+        _next = next;
+    }
+
+    public async Task InvokeAsync(HttpContext context)
+    {
+        // نمونه‌سازی امن یک سرویس Scoped به ازای هر درخواست وب
+        var dbContext = context.RequestServices.GetRequiredService&lt;MyDbContext&gt;();
+        
+        await _next(context);
+    }
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>مخاطرات جدی این الگو (Critical Pitfalls)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">اگرچه این روش مشکل تداخل چالش‌های طول عمر را حل می‌کند، اما در ابعاد کلان خطرات معماری زیر را به همراه دارد:</div><ul><li><strong>پنهان‌سازی وابستگی‌ها (Hidden Dependencies):</strong> این الگو وابستگی‌های کلاس را از امضای سازنده (Constructor) حذف و آن‌ها را پنهان می‌کند. این امر فرآیند نوشتن آزمون‌های واحد (Unit Testing) را به شدت دشوار می‌سازد.</li><li><strong>ضد الگوی Service Locator:</strong> استفاده مکرر از این ساختار، کد را به سمت اتصال ناخواسته (Coupling) سوق داده و اصل وارونگی وابستگی (Dependency Inversion Principle) را نقض می‌کند.</li><li><strong>عدم ایمنی نخ‌ها (Thread Safety):</strong> شیء <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">HttpContext</code> به هیچ وجه Thread-safe نیست. استفاده از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">RequestServices</code> درون کارهای موازی (مانند <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Task.WhenAll</code>) که خارج از نخ اصلی درخواست اجرا می‌شوند، کانتینر را دچار فساد داده‌ای (Scope Corruption) می‌کند.</li></ul><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۲. بررسی مورد کاوی: انتزاع اطلاعات کاربر در EF Core Interceptors</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">یکی از ملموس‌ترین سناریوهای تداخل چرخه عمر، استفاده از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">SaveChangesInterceptor</code> در EF Core برای ثبت اطلاعات حسابرسی (Audit Logs) است. اینترسپتورها به طور پیش‌فرض و سنتی به صورت Singleton ثبت می‌شوند، اما سرویسی که اطلاعات کاربر جاری را نگهداری می‌کند (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ICurrentUserService</code>) باید Scoped باشد تا به درخواست وب جاری متصل گردد.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>راهکار اولیه با IHttpContextAccessor (و چالش‌های آن)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">یک پیاده‌سازی متداول، تزریق <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IHttpContextAccessor</code> به درون اینترسپتور Singleton و دسترسی به <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">RequestServices</code> است:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
+
+public class AuditInterceptor : SaveChangesInterceptor
+{
+    private readonly IHttpContextAccessor _httpContextAccessor;
+
+    public AuditInterceptor(IHttpContextAccessor httpContextAccessor)
+    {
+        _httpContextAccessor = httpContextAccessor;
+    }
+
+    public override InterceptionResult&lt;int&gt; SavingChanges(
+        DbContextEventData eventData, InterceptionResult&lt;int&gt; result)
+    {
+        UpdateAuditProperties(eventData.Context);
+        return base.SavingChanges(eventData, result);
+    }
+
+    private void UpdateAuditProperties(DbContext? context)
+    {
+        if (context == null) return;
+
+        var httpContext = _httpContextAccessor.HttpContext;
+        if (httpContext == null) return; // مواقعی که درخواست وب وجود ندارد (مانند Migrationها یا Background Tasks)
+
+        // نمونه‌سازی سرویس Scoped از دل کانتینر درخواست وب جاری
+        var currentUserService = httpContext.RequestServices.GetRequiredService&lt;ICurrentUserService&gt;();
+        var currentUserId = currentUserService.UserId;
+
+        foreach (var entry in context.ChangeTracker.Entries&lt;IAuditable&gt;())
+        {
+            if (entry.State == EntityState.Added)
+            {
+                entry.Entity.CreatedBy = currentUserId;
+            }
+        }
+    }
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>خطرات این الگو در EF Core</strong></div><ul><li><strong>نخ‌های پس‌زمینه و محتوای تهی (Null Contexts):</strong> اگر متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">SaveChanges</code> از طریق یک Background Worker، یک Job در Hangfire یا ابزار CLI مربوط به EF Migrations صدا زده شود، مقدار <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">HttpContext</code> تهی (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">null</code>) خواهد بود و خطر خطای <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">NullReferenceException</code> وجود دارد.</li><li><strong>حلقه وابستگی متقابل (Stack Overflow Error):</strong> اگر سرویس <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ICurrentUserService</code> خود برای یافتن اطلاعات کاربر نیاز به کوئری زدن روی همان <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">DbContext</code> داشته باشد، یک حلقه بی‌انتها شکل می‌گیرد:</li><li><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">SaveChanges -&gt; Interceptor -&gt; RequestServices -&gt; CurrentUserService -&gt; DbContext Query -&gt; SaveChanges</code></li><li>این روند در نهایت منجر به کرش برنامه به دلیل خطای خطای سرریز پشته می‌شود.</li></ul><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۳. پارادایم جایگزین: الگو و فلسفه Scoped Interceptor</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">یک سوال بنیادین در جامعه توسعه‌دهندگان دات‌نت این است: <strong>&quot;آیا ثبت Interceptor به صورت Singleton الزامی است؟&quot;</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">پاسخ قطعاً <strong>خیر</strong> است. ثبت یک اینترسپتور به صورت Singleton صرفاً یک توصیه بهینه‌سازی برای کلاس‌های <strong>Stateless</strong> (بدون وضعیت) است؛ مانند اینترسپتوری که فقط وظیفه لاگ‌گیری ساده دستورات SQL را دارد و به هیچ سرویس لایه درخواستی وابسته نیست. اما زمانی که اینترسپتور دارای وضعیت (State) یا وابسته به سرویس‌های Scoped است، <strong>طبیعی‌ترین و استانداردترین حالت، ثبت آن به صورت Scoped است.</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در این حالت، تمامی اجزا هم‌گام با یکدیگر در یک Scope مشترک متولد شده و از بین می‌روند:</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Request Scope -&gt; DbContext (Scoped) , ICurrentUserService (Scoped) , AuditInterceptor (Scoped)</code></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>چالش بزرگ: مکانیزم DbContext Pooling</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">اگر برنامه شما از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">AddDbContextPool</code> برای بالا بردن کارایی استفاده کند، یک چالش فنی جدید پدید می‌آید. در فرآیند Pooling، کدهای بخش کانفیگ دات‌نت (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">options lambda</code>) <strong>تنها یک‌بار</strong> در زمان استارت‌آپ برنامه کامپایل و کش می‌شوند. بنابراین اگر کدی مانند زیر بنویسید:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">// ❌ خطای منطقی در کدهای با معماری Pool
+builder.Services.AddDbContextPool&lt;MyDbContext&gt;((sp, options) =&gt; {
+    var interceptor = sp.GetRequiredService&lt;AuditInterceptor&gt;(); // سرویس در استارت‌آپ قفل می‌شود!
+    options.AddInterceptors(interceptor);
+});</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">این کار باعث می‌شود اینترسپتور شما عملاً رفتار Singleton به خود بگیرد و سرویس‌های درونی آن ارتقای چرخه عمر ناخواسته (Capturing) پیدا کنند.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>راه‌حل بهینه: تزریق دینامیک در متد OnConfiguring</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">برای حل تعارضِ هم‌زمانِ <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">AddDbContextPool</code> و سرویس‌های <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Scoped</code>، باید فرآیند نمونه‌سازی اینترسپتور را به زمانِ &quot;اجاره داده شدنِ&quot; کانتکست از Pool منتقل کنیم. این کار با اورراید کردن متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">OnConfiguring</code> درون خود کلاس <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">DbContext</code> محقق می‌شود:</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>گام ۱: تعریف کدهای پاک با تزریق مستقیم در سازنده اینترسپتور</strong></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public class AuditInterceptor : SaveChangesInterceptor
+{
+    private readonly ICurrentUserService _currentUserService;
+
+    // تزریق کاملاً استاندارد و بدون نیاز به HttpContextAccessor
+    public AuditInterceptor(ICurrentUserService currentUserService)
+    {
+        _currentUserService = currentUserService;
+    }
+
+    public override InterceptionResult&lt;int&gt; SavingChanges(
+        DbContextEventData eventData, InterceptionResult&lt;int&gt; result)
+    {
+        // منطق حسابرسی با استفاده از _currentUserService
+        return base.SavingChanges(eventData, result);
+    }
+
+}</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>گام ۲: پیکربندی کانتکست از طریق IServiceProvider</strong></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public class ApplicationDbContext : DbContext
+{
+    private readonly IServiceProvider _serviceProvider;
+
+    public ApplicationDbContext(
+        DbContextOptions&lt;ApplicationDbContext&gt; options, 
+        IServiceProvider serviceProvider) 
+        : base(options)
+    {
+        _serviceProvider = serviceProvider;
+    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        // حل دینامیک اینترسپتور از Scope درخواست جاری در هر بار استفاده از پول
+        var scopedInterceptor = _serviceProvider.GetRequiredService&lt;AuditInterceptor&gt;();
+        optionsBuilder.AddInterceptors(scopedInterceptor);
+
+        base.OnConfiguring(optionsBuilder);
+    }
+
+}</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>گام ۳: ثبت روابط در Program.cs</strong></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">builder.Services.AddScoped&lt;ICurrentUserService, CurrentUserService&gt;();
+builder.Services.AddScoped&lt;AuditInterceptor&gt;(); // ثبت به صورت Scoped
+
+// ثبت به صورت Pool بدون دغدغه تداخل چرخه عمر سرویس‌ها
+builder.Services.AddDbContextPool&lt;ApplicationDbContext&gt;(options =&gt;
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString(&quot;DefaultConnection&quot;));
+});</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>این سازوکار در پشت صحنه چگونه کار می‌کند؟</strong></div><ul><li><strong>چرخه درخواست (Request Cycle):</strong> هسته EF Core یک نمونه از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ApplicationDbContext</code> را از Pool اجاره می‌کند.</li><li><strong>جابجایی محدوده (Scope Swap):</strong> فریم‌ورک EF Core به صورت داخلی زیرساخت‌های متصل به <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">_serviceProvider</code> کانتکست را با Scope درخواست HTTP جاری هماهنگ و به‌روزرسانی می‌کند.</li><li><strong>نمونه‌سازی دقیق (Resolution):</strong> متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">OnConfiguring</code> اجرا شده و دقیقاً نمونه <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">AuditInterceptor</code> مربوط به همان Request جاری را دریافت می‌کند. این رویکرد حتی در کارهای پس‌زمینه (Background Services) نیز در صورت ساخت دستی Scope به درستی کار خواهد کرد.</li></ul><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>نتیجه‌گیری</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">الگوی <strong>Service Locator</strong> و رجوع به <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">HttpContext.RequestServices</code> اگرچه در نگاه اول راهکاری سریع برای فرار از خطاهای محدوده سرویس‌ها (DI Lifetimes) به نظر می‌رسد، اما به دلیل سست کردن پایه‌های تست‌پذیری، پنهان کردن وابستگی‌ها و عدم ایمنی در پردازش‌های چندنخی، انتخابی ایده‌آل برای پروژه‌های سازمانی نیست.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">بررسی فلسفه چرخه عمر معماری دات‌نت نشان می‌دهد که تغییر رویکرد به سمت <strong>Scoped Interceptors</strong> پایداری سیستم را به شدت افزایش می‌دهد. با استفاده از روش اورراید متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">OnConfiguring</code> و تزریق غیرمستقیم کانتینر سرویس‌ها به <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">DbContext</code>، می‌توان حتی در ساختارهای بهینه‌سازی‌شده‌ای مانند <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">AddDbContextPool</code> نیز به طراحی کاملاً تمیز، مستقل از محیط وب (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">HttpContext</code>) و سازگار با اصول برنامه‌نویسی شیءگرا دست یافت.</div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-23526.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>بررسی دوره‌های عمر وابستگی‌ها در .NET: فراتر از Singleton، Scoped و Transient</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-24298.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>طول عمر Dependency Injection برای `DbContext` در .NET: انتخاب محدوده مناسب</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/questions/details/42#comment-101'><span class='badge bg-primary rounded-pill me-2'>پاسخ به پرسش‌ها</span>درج زمان مشترک برای فیلد های Audit در رکورد های درج و ویرایش</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2971.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مهارت‌های تزریق وابستگی‌ها در برنامه‌های NET Core. - قسمت چهارم - پرهیز از الگوی Service Locator در برنامه‌های وب</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2749.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مقدمه‌ای بر تزریق وابستگی‌ها درASP.NET Core</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3201.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>تزریق وابستگی‌ها در ASP.NET Core - بخش 4 - طول حیات سرویس ها یا Service Lifetime</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3712.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>چالش‌های الگوی Service Locator و پیاده‌سازی Scoped Interceptors در EF Core</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3712.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>چالش‌های الگوی Service Locator و پیاده‌سازی Scoped Interceptors در EF Core</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2448.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>ارتقاء به ASP.NET Core 1.0 - قسمت 6 - سرویس‌ها و تزریق وابستگی‌ها</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2972.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>مهارت‌های تزریق وابستگی‌ها در برنامه‌های NET Core. - قسمت پنجم - استفاده از الگوی Service Locator در مکان‌های ویژه‌ی برنامه‌های وب</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>میلاد احمدی مقدم</strong>  در  <span dir='ltr'>۱۴۰۵/۰۴/۲۰ ۱۲:۳۹</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl">دقیقا همین کد رو پیاده سازی کردم ولی داخل متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">OnConfiguring</code> هنگام گرفتن Interceptor خطا داد:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+{
+    // حل دینامیک اینترسپتور از Scope درخواست جاری در هر بار استفاده از پول
+    var scopedInterceptor = serviceProvider.GetRequiredService&lt;AuditInterceptor&gt;();
+    optionsBuilder.AddInterceptors(scopedInterceptor);
+
+    base.OnConfiguring(optionsBuilder);
+}</pre><div><br></div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Runtime error: System.InvalidOperationException: &#39;Cannot resolve scoped service &#39;Kardani.Persistence.Interceptors.UpdateAuditableEntitiesInterceptor&#39; from root provider.&#39;</pre><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl">برای تست اینکه شاید مشکل از سایر بخش ها باشه یه پروژه خام درست کردم و کد های شما رو قرار دادم؛ مجددا به این خطا برخورد کردم. به محض اینکه کدم رو از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">AddDbContextPool</code> به <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">AddDbContext</code> تغییر دادم بدون مشکل کار کرد.</div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۴۰۵/۰۴/۲۰ ۱۲:۵۵</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">این خطا دقیقاً به این دلیل رخ می‌دهد که نمونه‌ی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IServiceProvider</code> که به کانتکست شما پاس داده شده‌است، <strong>Root Provider</strong> (کانتینر اصلی برنامه در زمان استارت‌آپ) است، نه کانتینر مربوط به <strong>Scope درخواست جاری</strong>. هنگامی که از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">AddDbContextPool</code> استفاده می‌کنید، فرآیند ساخت و مدیریت کانتکست کمی متفاوت است. برای حل این مشکل، شما باید به جای تزریق مستقیم <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IServiceProvider</code> معمولی، از سرویسی به نام <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ICurrentDbContextDependencies</code> یا روش اصولی‌ترِ تنظیم کانیتنر داخلی EF Core استفاده کنید تا مطمئن شوید کانتکست به Scope درخواست دسترسی دارد. از آنجایی که مشکل اصلی، عدم دسترسی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">OnConfiguring</code> به کانتینر دامنه‌ی درخواست (Request Scope) در ساختار Pool است، فریم‌ورک EF Core کانیتنری به نام <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ApplicationServiceProvider</code> را درون خودِ <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">optionsBuilder</code> قرار می‌دهد که دقیقاً به Scope جاری اشاره می‌کند. کد متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">OnConfiguring</code> خود را به شکل زیر تغییر دهید:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+{
+    // ۱. دسترسی به کانتینر درونی و اختصاصی لایه درخواست جاری
+    var internalServiceProvider = optionsBuilder.Options.FindExtension&lt;CoreOptionsExtension&gt;()
+                                  ?.ApplicationServiceProvider;
+
+    if (internalServiceProvider != null)
+    {
+        // ۲. حل مشکل: حالا اینترسپتور از Scope جاری گرفته می‌شود، نه از Root!
+        var scopedInterceptor = internalServiceProvider.GetRequiredService&lt;UpdateAuditableEntitiesInterceptor&gt;();
+        optionsBuilder.AddInterceptors(scopedInterceptor);
+    }
+
+    base.OnConfiguring(optionsBuilder);
+}</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><em>برای استفاده از </em><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CoreOptionsExtension</code><em> نیاز است این فضای نام را بالای کانتکست اضافه کنید: </em><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">using Microsoft.EntityFrameworkCore.Infrastructure;</code></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">این روش‌های تکمیلی هم وجود دارند:</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">اگر روش اول برای شما به دلیل ساختارهای پیچیده نسخه‌های قدیمی‌تر در دسترس نبود، می‌توانید به جای تزریق مستقیم <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IServiceProvider</code> به سازنده کانتکست، <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IHttpContextAccessor</code> را تزریق کنید. با این کار به راحتی به کانتینرِ نخِ جاری (RequestServices) دسترسی خواهید داشت که کاملاً درون Scope است.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>۱. کدهای کلاس DbContext را به این شکل تغییر دهید:</strong></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+
+public class ApplicationDbContext : DbContext
+{
+    private readonly IHttpContextAccessor _httpContextAccessor;
+
+    public ApplicationDbContext(
+        DbContextOptions&lt;ApplicationDbContext&gt; options, 
+        IHttpContextAccessor httpContextAccessor) // تزریق اکسسور به جای سرویس پرووایدر
+        : base(options)
+    {
+        _httpContextAccessor = httpContextAccessor;
+    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        // دسترسی امن به RequestServices که همان Scoped Provider درخواست وب جاری است
+        var scopedProvider = _httpContextAccessor.HttpContext?.RequestServices;
+
+        if (scopedProvider != null)
+        {
+            var scopedInterceptor = scopedProvider.GetRequiredService&lt;UpdateAuditableEntitiesInterceptor&gt;();
+            optionsBuilder.AddInterceptors(scopedInterceptor);
+        }
+
+        base.OnConfiguring(optionsBuilder);
+    }
+}</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>۲. مطمئن شوید در فایل </strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Program.cs</code><strong> خط زیر فعال است:</strong></div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">builder.Services.AddHttpContextAccessor(); // حتماً باید ثبت شده باشد</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;">و یا استفاده از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">AddDbContext</code> معمولی به‌جای <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">AddDbContextPool</code> (اگر اجباری به استفاده از Pool ندارید)</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">اگر حجم درخواست‌های سمت دیتابیس شما در ثانیه به شدت بالا نیست (مثلاً کمتر از چند هزار درخواست در ثانیه)، استفاده از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">AddDbContextPool</code> مزیت چشمگیری نسبت به <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">AddDbContext</code> معمولی ندارد. با تغییر به <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">AddDbContext</code> معمولی، مشکل ارجاع به Root Provider به طور کامل و خودکار توسط خودِ فریم‌ورک حل می‌شود. در فایل <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Program.cs</code> کانفیگ را به شکل زیر تغییر دهید و دیگر نیازی به نوشتن متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">OnConfiguring</code> درون کانتکست <strong>نخواهید داشت</strong>:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">builder.Services.AddScoped&lt;UpdateAuditableEntitiesInterceptor&gt;();
+
+// استفاده از حالت Scoped استاندارد بدون Pooling
+builder.Services.AddDbContext&lt;ApplicationDbContext&gt;((sp, options) =&gt;
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString(&quot;DefaultConnection&quot;));
+    
+    // در این حالت sp دقیقاً همان Scoped Provider است و خطایی رخ نمی‌دهد
+    var interceptor = sp.GetRequiredService&lt;UpdateAuditableEntitiesInterceptor&gt;();
+    options.AddInterceptors(interceptor);
+});</pre></div>
+</div></li></ul></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+</body>
+
+</html>
