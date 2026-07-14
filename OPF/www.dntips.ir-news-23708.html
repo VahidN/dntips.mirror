@@ -1,17 +1,69 @@
 <!DOCTYPE html>
 <html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
-
 <head>
-    <title>‫‫مدیریت صفحه‌بندی مجموعه داده‌ها با `PagedListResult`</title>
+    <title>‫‫مدیریت صفحه‌بندی مجموعه داده‌ها با `PagedListResult`</title>     <meta name="description" content="کتابخانه &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PagedListResult&lt;/code&gt; یک ابزار متمرکز برای استانداردسازی صفحه‌بندی، مرتب‌سازی، جستجو و فیلتر کردن داده‌ها در سمت سرور در .NET است. این کتابخانه با تعریف قراردادهای قوی (مدل‌های درخواست و نتیجه) و مجموعه‌ای از توسعه‌های پرس و جو، یک خط لوله واضح از درخواست به اجرا و سپس نتیجه را ارائه می‌دهد.
+
+هدف اصلی این پروژه، حذف منطق تکراری صفحه‌بندی در APIها و سرویس‌های برنامه است، در حالی که رفتار پرس و جو را صریح، قابل آزمایش و قابل توسعه نگه می‌دارد. این کتابخانه بر اساس چندین اصل طراحی ثابت بنا شده است، از جمله صفحه‌بندی مبتنی بر قرارداد، اجرای متمرکز بر &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IQueryable&lt;/code&gt; و جداسازی دغدغه‌ها.
+
+ساختار این کتابخانه به چندین پروژه تقسیم شده است که هر کدام مسئولیت محدودی دارند. پروژه &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PagedListResult.DataModels&lt;/code&gt; به عنوان پایه و اساس کل راه حل عمل می‌کند و هیچ منطق اجرای پرس و جویی ندارد. هدف اصلی آن تعریف قراردادهای پایدار و قابل سریال‌سازی است که آنچه مصرف‌کننده می‌خواهد و آنچه سیستم برمی‌گرداند را توصیف می‌کنند.
+
+مدل &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PagedRequest&lt;/code&gt;، ریشه تجمیع ورودی صفحه‌بندی است و تمام اهداف پرس و جو را در یک شی واحد جمع‌آوری می‌کند. این مدل شامل مسئولیت‌هایی مانند نرمال‌سازی شاخص صفحه، تعریف اندازه صفحه، تعریف مرتب‌سازی اختیاری، تعریف جستجوی اختیاری و مجموعه فیلتر اختیاری است.
+
+صفحه‌بندی به صورت منطقی بیان می‌شود، نه به صورت اجرایی. &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Page&lt;/code&gt; نشان‌دهنده شاخص صفحه درخواستی و &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PageSize&lt;/code&gt; نشان‌دهنده اندازه منطقی صفحه است. لایه‌های اجرا تصمیم می‌گیرند که چگونه این موارد را به عملیات &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Skip&lt;/code&gt; و &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Take&lt;/code&gt; ترجمه کنند.">
+    <meta name="author" content="راویAI">
+    <meta itemprop="name" content="مدیریت صفحه‌بندی مجموعه داده‌ها با `PagedListResult`">
+    <meta itemprop="description" content="کتابخانه &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PagedListResult&lt;/code&gt; یک ابزار متمرکز برای استانداردسازی صفحه‌بندی، مرتب‌سازی، جستجو و فیلتر کردن داده‌ها در سمت سرور در .NET است. این کتابخانه با تعریف قراردادهای قوی (مدل‌های درخواست و نتیجه) و مجموعه‌ای از توسعه‌های پرس و جو، یک خط لوله واضح از درخواست به اجرا و سپس نتیجه را ارائه می‌دهد.
+
+هدف اصلی این پروژه، حذف منطق تکراری صفحه‌بندی در APIها و سرویس‌های برنامه است، در حالی که رفتار پرس و جو را صریح، قابل آزمایش و قابل توسعه نگه می‌دارد. این کتابخانه بر اساس چندین اصل طراحی ثابت بنا شده است، از جمله صفحه‌بندی مبتنی بر قرارداد، اجرای متمرکز بر &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IQueryable&lt;/code&gt; و جداسازی دغدغه‌ها.
+
+ساختار این کتابخانه به چندین پروژه تقسیم شده است که هر کدام مسئولیت محدودی دارند. پروژه &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PagedListResult.DataModels&lt;/code&gt; به عنوان پایه و اساس کل راه حل عمل می‌کند و هیچ منطق اجرای پرس و جویی ندارد. هدف اصلی آن تعریف قراردادهای پایدار و قابل سریال‌سازی است که آنچه مصرف‌کننده می‌خواهد و آنچه سیستم برمی‌گرداند را توصیف می‌کنند.
+
+مدل &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PagedRequest&lt;/code&gt;، ریشه تجمیع ورودی صفحه‌بندی است و تمام اهداف پرس و جو را در یک شی واحد جمع‌آوری می‌کند. این مدل شامل مسئولیت‌هایی مانند نرمال‌سازی شاخص صفحه، تعریف اندازه صفحه، تعریف مرتب‌سازی اختیاری، تعریف جستجوی اختیاری و مجموعه فیلتر اختیاری است.
+
+صفحه‌بندی به صورت منطقی بیان می‌شود، نه به صورت اجرایی. &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Page&lt;/code&gt; نشان‌دهنده شاخص صفحه درخواستی و &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PageSize&lt;/code&gt; نشان‌دهنده اندازه منطقی صفحه است. لایه‌های اجرا تصمیم می‌گیرند که چگونه این موارد را به عملیات &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Skip&lt;/code&gt; و &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Take&lt;/code&gt; ترجمه کنند.">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="مدیریت صفحه‌بندی مجموعه داده‌ها با `PagedListResult`">
+    <meta property="og:description" content="کتابخانه &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PagedListResult&lt;/code&gt; یک ابزار متمرکز برای استانداردسازی صفحه‌بندی، مرتب‌سازی، جستجو و فیلتر کردن داده‌ها در سمت سرور در .NET است. این کتابخانه با تعریف قراردادهای قوی (مدل‌های درخواست و نتیجه) و مجموعه‌ای از توسعه‌های پرس و جو، یک خط لوله واضح از درخواست به اجرا و سپس نتیجه را ارائه می‌دهد.
+
+هدف اصلی این پروژه، حذف منطق تکراری صفحه‌بندی در APIها و سرویس‌های برنامه است، در حالی که رفتار پرس و جو را صریح، قابل آزمایش و قابل توسعه نگه می‌دارد. این کتابخانه بر اساس چندین اصل طراحی ثابت بنا شده است، از جمله صفحه‌بندی مبتنی بر قرارداد، اجرای متمرکز بر &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IQueryable&lt;/code&gt; و جداسازی دغدغه‌ها.
+
+ساختار این کتابخانه به چندین پروژه تقسیم شده است که هر کدام مسئولیت محدودی دارند. پروژه &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PagedListResult.DataModels&lt;/code&gt; به عنوان پایه و اساس کل راه حل عمل می‌کند و هیچ منطق اجرای پرس و جویی ندارد. هدف اصلی آن تعریف قراردادهای پایدار و قابل سریال‌سازی است که آنچه مصرف‌کننده می‌خواهد و آنچه سیستم برمی‌گرداند را توصیف می‌کنند.
+
+مدل &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PagedRequest&lt;/code&gt;، ریشه تجمیع ورودی صفحه‌بندی است و تمام اهداف پرس و جو را در یک شی واحد جمع‌آوری می‌کند. این مدل شامل مسئولیت‌هایی مانند نرمال‌سازی شاخص صفحه، تعریف اندازه صفحه، تعریف مرتب‌سازی اختیاری، تعریف جستجوی اختیاری و مجموعه فیلتر اختیاری است.
+
+صفحه‌بندی به صورت منطقی بیان می‌شود، نه به صورت اجرایی. &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Page&lt;/code&gt; نشان‌دهنده شاخص صفحه درخواستی و &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PageSize&lt;/code&gt; نشان‌دهنده اندازه منطقی صفحه است. لایه‌های اجرا تصمیم می‌گیرند که چگونه این موارد را به عملیات &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Skip&lt;/code&gt; و &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Take&lt;/code&gt; ترجمه کنند.">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="مدیریت صفحه‌بندی مجموعه داده‌ها با `PagedListResult`">
+    <meta name="twitter:description" content="کتابخانه &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PagedListResult&lt;/code&gt; یک ابزار متمرکز برای استانداردسازی صفحه‌بندی، مرتب‌سازی، جستجو و فیلتر کردن داده‌ها در سمت سرور در .NET است. این کتابخانه با تعریف قراردادهای قوی (مدل‌های درخواست و نتیجه) و مجموعه‌ای از توسعه‌های پرس و جو، یک خط لوله واضح از درخواست به اجرا و سپس نتیجه را ارائه می‌دهد.
+
+هدف اصلی این پروژه، حذف منطق تکراری صفحه‌بندی در APIها و سرویس‌های برنامه است، در حالی که رفتار پرس و جو را صریح، قابل آزمایش و قابل توسعه نگه می‌دارد. این کتابخانه بر اساس چندین اصل طراحی ثابت بنا شده است، از جمله صفحه‌بندی مبتنی بر قرارداد، اجرای متمرکز بر &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IQueryable&lt;/code&gt; و جداسازی دغدغه‌ها.
+
+ساختار این کتابخانه به چندین پروژه تقسیم شده است که هر کدام مسئولیت محدودی دارند. پروژه &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PagedListResult.DataModels&lt;/code&gt; به عنوان پایه و اساس کل راه حل عمل می‌کند و هیچ منطق اجرای پرس و جویی ندارد. هدف اصلی آن تعریف قراردادهای پایدار و قابل سریال‌سازی است که آنچه مصرف‌کننده می‌خواهد و آنچه سیستم برمی‌گرداند را توصیف می‌کنند.
+
+مدل &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PagedRequest&lt;/code&gt;، ریشه تجمیع ورودی صفحه‌بندی است و تمام اهداف پرس و جو را در یک شی واحد جمع‌آوری می‌کند. این مدل شامل مسئولیت‌هایی مانند نرمال‌سازی شاخص صفحه، تعریف اندازه صفحه، تعریف مرتب‌سازی اختیاری، تعریف جستجوی اختیاری و مجموعه فیلتر اختیاری است.
+
+صفحه‌بندی به صورت منطقی بیان می‌شود، نه به صورت اجرایی. &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Page&lt;/code&gt; نشان‌دهنده شاخص صفحه درخواستی و &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PageSize&lt;/code&gt; نشان‌دهنده اندازه منطقی صفحه است. لایه‌های اجرا تصمیم می‌گیرند که چگونه این موارد را به عملیات &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Skip&lt;/code&gt; و &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Take&lt;/code&gt; ترجمه کنند.">
+    <meta name="twitter:card" content="کتابخانه &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PagedListResult&lt;/code&gt; یک ابزار متمرکز برای استانداردسازی صفحه‌بندی، مرتب‌سازی، جستجو و فیلتر کردن داده‌ها در سمت سرور در .NET است. این کتابخانه با تعریف قراردادهای قوی (مدل‌های درخواست و نتیجه) و مجموعه‌ای از توسعه‌های پرس و جو، یک خط لوله واضح از درخواست به اجرا و سپس نتیجه را ارائه می‌دهد.
+
+هدف اصلی این پروژه، حذف منطق تکراری صفحه‌بندی در APIها و سرویس‌های برنامه است، در حالی که رفتار پرس و جو را صریح، قابل آزمایش و قابل توسعه نگه می‌دارد. این کتابخانه بر اساس چندین اصل طراحی ثابت بنا شده است، از جمله صفحه‌بندی مبتنی بر قرارداد، اجرای متمرکز بر &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IQueryable&lt;/code&gt; و جداسازی دغدغه‌ها.
+
+ساختار این کتابخانه به چندین پروژه تقسیم شده است که هر کدام مسئولیت محدودی دارند. پروژه &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PagedListResult.DataModels&lt;/code&gt; به عنوان پایه و اساس کل راه حل عمل می‌کند و هیچ منطق اجرای پرس و جویی ندارد. هدف اصلی آن تعریف قراردادهای پایدار و قابل سریال‌سازی است که آنچه مصرف‌کننده می‌خواهد و آنچه سیستم برمی‌گرداند را توصیف می‌کنند.
+
+مدل &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PagedRequest&lt;/code&gt;، ریشه تجمیع ورودی صفحه‌بندی است و تمام اهداف پرس و جو را در یک شی واحد جمع‌آوری می‌کند. این مدل شامل مسئولیت‌هایی مانند نرمال‌سازی شاخص صفحه، تعریف اندازه صفحه، تعریف مرتب‌سازی اختیاری، تعریف جستجوی اختیاری و مجموعه فیلتر اختیاری است.
+
+صفحه‌بندی به صورت منطقی بیان می‌شود، نه به صورت اجرایی. &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Page&lt;/code&gt; نشان‌دهنده شاخص صفحه درخواستی و &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PageSize&lt;/code&gt; نشان‌دهنده اندازه منطقی صفحه است. لایه‌های اجرا تصمیم می‌گیرند که چگونه این موارد را به عملیات &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Skip&lt;/code&gt; و &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Take&lt;/code&gt; ترجمه کنند.">
+    <meta property="article:published_time" content="Fri, 06 Feb 2026 05:53:16 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
     <meta content='IE=edge' http-equiv='X-UA-Compatible'>
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">
-	
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
 	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
-
     <link href="vs.min.css" rel="stylesheet" type="text/css">
-    <script src="highlight.min.js" type="text/javascript"></script>
-	
+    <script src="highlight.min.js" type="text/javascript"></script>	
     <link href="styles.css" rel="stylesheet" type="text/css">	
     <style>
       @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
@@ -42,8 +94,8 @@
         }
      }
     </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
 </head>
-
 <body dir='rtl'>
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
@@ -53,7 +105,7 @@
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۳۶۹۵</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۶۹۷</span></td>
 </tr>
 <tr>
 <td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
@@ -73,7 +125,7 @@
 </tr>
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۲۲</span></td>
 </tr>
 </tbody>
 </table>
@@ -131,8 +183,5 @@
 
 <!-- to load custom fonts for printing -->
 <div class="useSamimFD">&nbsp;</div>
-
-<script src="SyntaxHighlighter.js" type="text/javascript"></script>
 </body>
-
 </html>

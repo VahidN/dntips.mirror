@@ -1,17 +1,439 @@
 <!DOCTYPE html>
 <html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
-
 <head>
-    <title>‫‫تاریخچه اعتبارسنجی اطلاعات در Minimal API‌ها</title>
+    <title>‫‫تاریخچه اعتبارسنجی اطلاعات در Minimal API‌ها</title>     <meta name="description" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;اعتبارسنجی اطلاعات (Validation) یکی از ارکان اساسی برای تضمین صحت و امنیت داده‌های ورودی به برنامه‌ها محسوب می‌شود. با ظهور Minimal API‌ها در چارچوب دات‌نت، رویکردی سبک و ساده برای ساخت رابط‌های برنامه‌نویسی کاربردی (API) معرفی شد که نیاز به کدهای اضافی و پیچیدگی‌های رایج در روش‌های سنتی را کاهش داد. با این حال، فقدان پشتیبانی داخلی برای اعتبارسنجی در نسخه‌های اولیه Minimal API‌ها، توسعه‌دهندگان را با چالش‌هایی مواجه کرد. این مقاله به بررسی سیر تحول اعتبارسنجی در Minimal API‌ها، از روش‌های دستی تا معرفی قابلیت‌های پیشرفته در دات‌نت 10 می‌پردازد. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;معرفی Minimal API و چالش‌های اولیه اعتبارسنجی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;Minimal API‌ها که در دات‌نت 6 معرفی شدند، رویکردی مینیمال برای تعریف نقاط پایانی (Endpoints) در فایل Program.cs ارائه می‌دهند. این روش با حذف وابستگی‌های اضافی و کاهش کدهای تکراری، توسعه سریع‌تر و ساده‌تر API‌ها را ممکن می‌سازد. با این حال، در نسخه‌های اولیه، Minimal API‌ها فاقد پشتیبانی داخلی برای اعتبارسنجی خودکار بودند. این موضوع توسعه‌دهندگان را مجبور می‌کرد که اعتبارسنجی را به صورت دستی در بدنه نقاط پایانی پیاده‌سازی کنند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;به عنوان مثال، فرض کنید می‌خواهیم یک درخواست برای ایجاد یادداشت (Note) را اعتبارسنجی کنیم. در رویکرد دستی، کد به این صورت خواهد بود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;app.MapPost(&amp;quot;/v1/notes&amp;quot;, (CreateNoteRequest request) =&amp;gt;
+{
+    if (string.IsNullOrWhiteSpace(request.Value))
+    {
+        return Results.BadRequest();
+    }
+
+    if (Guid.Empty == request.Id)
+    {
+        return Results.BadRequest();
+    }
+
+    // ذخیره یادداشت در پایگاه داده
+    return Results.Ok();
+});&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این روش، اگرچه ساده به نظر می‌رسد، مشکلات متعددی ایجاد می‌کند. ترکیب منطق اعتبارسنجی با منطق کسب‌وکار (Business Logic) اصل مسئولیت واحد (Single Responsibility Principle) را نقض می‌کند. همچنین، آزمایش (Testing) این کدها پیچیده‌تر می‌شود، زیرا باید اعتبارسنجی و منطق کسب‌وکار به طور جداگانه بررسی شوند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;استفاده از FluentValidation به عنوان راه‌حل اولیه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;برای رفع مشکلات روش دستی، توسعه‌دهندگان به ابزارهایی مانند FluentValidation روی آوردند. این ابزار امکان تعریف قوانین اعتبارسنجی به صورت جداگانه را فراهم می‌کند. در این روش، اعتبارسنجی با استفاده از ویژگی [FromServices] و تزریق وابستگی (Dependency Injection) انجام می‌شود. کد زیر نمونه‌ای از این رویکرد است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;app.MapPost(&amp;quot;/v2/notes&amp;quot;, async ([FromServices] IValidator&amp;lt;CreateNoteRequest&amp;gt; validator, CreateNoteRequest request) =&amp;gt;
+{
+    var validationResult = await validator.ValidateAsync(request);
+
+    if (!validationResult.IsValid)
+    {
+        return Results.BadRequest(validationResult.Errors.Select(error =&amp;gt; error.ErrorMessage));
+    }
+
+    // ذخیره یادداشت در پایگاه داده
+    return Results.Ok();
+});&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;اگرچه این روش جداسازی بهتری بین اعتبارسنجی و منطق کسب‌وکار ایجاد می‌کند، اما همچنان مشکلاتی مانند پیچیدگی در پیکربندی و نیاز به کد اضافی برای هر نقطه پایانی وجود دارد. علاوه بر این، توسعه‌دهندگانی که به اعتبارسنجی مبتنی بر مدل (Model-Based Validation) در کنترلرهای سنتی عادت داشتند، این روش را غیرطبیعی می‌یافتند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;معرفی فیلترهای نقطه پایانی در دات‌نت 7&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;با انتشار دات‌نت 7، مفهوم فیلترهای نقطه پایانی (Endpoint Filters) معرفی شد که امکان جداسازی بهتر منطق اعتبارسنجی را فراهم کرد. این فیلترها قبل از اجرای نقطه پایانی، درخواست را بررسی می‌کنند. کد زیر نمونه‌ای از استفاده از فیلتر اعتبارسنجی است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;app.MapPost(&amp;quot;/v3/notes&amp;quot;, (CreateNoteRequest request) =&amp;gt;
+{
+    // ذخیره یادداشت در پایگاه داده
+    return Results.Ok();
+})
+.AddEndpointFilter&amp;lt;ValidationFilter&amp;lt;CreateNoteRequest&amp;gt;&amp;gt;();
+
+public sealed class ValidationFilter&amp;lt;TRequest&amp;gt;(IValidator&amp;lt;TRequest&amp;gt; validator) : IEndpointFilter
+    where TRequest : class
+{
+    public async ValueTask&amp;lt;object?&amp;gt; InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
+    {
+        var argument = context.Arguments.SingleOrDefault(argument =&amp;gt; argument?.GetType() == typeof(TRequest));
+
+        if (argument is not TRequest request)
+        {
+            throw new ArgumentException($&amp;quot;Could not find request with the following type `{typeof(TRequest)}`&amp;quot;);
+        }
+
+        var validationResult = await validator.ValidateAsync(request);
+
+        if (!validationResult.IsValid)
+        {
+            return Results.BadRequest(validationResult.Errors.Select(error =&amp;gt; error.ErrorMessage));
+        }
+
+        return await next(context);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رویکرد، منطق اعتبارسنجی را از بدنه نقطه پایانی جدا می‌کند و قابلیت استفاده مجدد را افزایش می‌دهد. با این حال، پیچیدگی پیاده‌سازی و عدم پشتیبانی مستقیم از اعتبارسنجی مبتنی بر ویژگی‌ها (Data Annotations) همچنان برای برخی توسعه‌دهندگان مشکل‌ساز بود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;تحول بزرگ: اعتبارسنجی داخلی در دات‌نت 10&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در دات‌نت 10، مایکروسافت پشتیبانی داخلی برای اعتبارسنجی مبتنی بر ویژگی‌ها را به Minimal API‌ها اضافه کرد. این قابلیت، که در حال حاضر در مرحله پیش‌نمایش (Preview) قرار دارد، امکان استفاده از ویژگی‌های موجود در فضای نام System.ComponentModel.DataAnnotations را فراهم می‌کند. این ویژگی‌ها شامل اعتبارسنجی رشته‌های پرس‌وجو (Query Strings)، سرآیندها (Headers)، پارامترهای مسیر (Route Parameters) و بدنه درخواست (Request Body) می‌شوند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;برای استفاده از این قابلیت، ابتدا باید مدل داده را با ویژگی‌های مناسب تعریف کنیم. به عنوان مثال:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class CreateNoteRequest
+{
+    [Filled]
+    public Guid Id { get; set; }
+    
+    [Required]
+    public string Value { get; set; }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در اینجا، ویژگی Required تضمین می‌کند که مقدار Value خالی نباشد. برای اعتبارسنجی Guid و اطمینان از غیرخالی بودن آن، یک ویژگی سفارشی به نام Filled ایجاد می‌شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[AttributeUsage(AttributeTargets.Property)]
+public sealed class FilledAttribute : ValidationAttribute
+{
+    public override bool IsValid(object? value)
+    {
+        if (value is not Guid guid)
+        {
+            return false;
+        }
+
+        return guid != Guid.Empty;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;برای فعال‌سازی اعتبارسنجی داخلی، باید خدمات مربوطه در ظرف تزریق وابستگی (DI Container) ثبت شوند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;builder.Services.AddValidation();&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;همچنین، تنظیمات خاصی در فایل پروژه (.csproj) مورد نیاز است:&lt;/div&gt;&lt;pre data-language=&quot;xml&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;lt;PropertyGroup&amp;gt;
+    &amp;lt;InterceptorsNamespaces&amp;gt;$(InterceptorsNamespaces);Microsoft.AspNetCore.Http.Validation.Generated&amp;lt;/InterceptorsNamespaces&amp;gt;
+&amp;lt;/PropertyGroup&amp;gt;&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;با این تنظیمات، نقطه پایانی به سادگی تعریف می‌شود و اعتبارسنجی به صورت خودکار انجام می‌شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;app.MapPost(&amp;quot;/v4/notes&amp;quot;, (CreateNoteRequest request) =&amp;gt;
+{
+    // ذخیره یادداشت در پایگاه داده
+    return Results.Ok();
+});&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در صورت نیاز به غیرفعال کردن اعتبارسنجی برای یک نقطه پایانی خاص، می‌توان از متد DisableValidation استفاده کرد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;app.MapPost(&amp;quot;/v4/notes&amp;quot;, (CreateNoteRequest request) =&amp;gt;
+{
+    // ذخیره یادداشت در پایگاه داده
+    return Results.Ok();
+}).DisableValidation();&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چالش‌ها و ملاحظات&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;اگرچه اعتبارسنجی داخلی در دات‌نت 10 پیشرفت چشمگیری محسوب می‌شود، اما همچنان در مرحله پیش‌نمایش است و مشکلاتی مانند عدم پشتیبانی کامل از اعتبارسنجی Guid و پیچیدگی تنظیمات اولیه وجود دارد. علاوه بر این، استفاده از اعتبارسنجی مبتنی بر مدل ممکن است بر عملکرد Minimal API‌ها تأثیر بگذارد، زیرا فرآیند اتصال مدل (Model Binding) پیچیدگی‌های خاص خود را دارد. توسعه‌دهندگان باید بین سادگی و عملکرد تعادل برقرار کنند و بسته به نیاز پروژه خود، رویکرد مناسب را انتخاب کنند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;اعتبارسنجی در Minimal API‌ها از روش‌های دستی و پراکنده در نسخه‌های اولیه به یک سیستم منسجم و مبتنی بر مدل در دات‌نت 10 تکامل یافته است. این پیشرفت‌ها، توسعه API‌های امن‌تر و قابل نگهداری‌تر را آسان‌تر کرده‌اند. با این حال، توسعه‌دهندگان باید از محدودیت‌های فعلی، مانند تنظیمات پیچیده و تأثیرات احتمالی بر عملکرد، آگاه باشند. در آینده، انتظار می‌رود که با رفع این محدودیت‌ها و ساده‌سازی فرآیندها، Minimal API‌ها به گزینه‌ای حتی قدرتمندتر برای توسعه وب تبدیل شوند.&lt;/div&gt;">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="تاریخچه اعتبارسنجی اطلاعات در Minimal API‌ها">
+    <meta itemprop="description" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;اعتبارسنجی اطلاعات (Validation) یکی از ارکان اساسی برای تضمین صحت و امنیت داده‌های ورودی به برنامه‌ها محسوب می‌شود. با ظهور Minimal API‌ها در چارچوب دات‌نت، رویکردی سبک و ساده برای ساخت رابط‌های برنامه‌نویسی کاربردی (API) معرفی شد که نیاز به کدهای اضافی و پیچیدگی‌های رایج در روش‌های سنتی را کاهش داد. با این حال، فقدان پشتیبانی داخلی برای اعتبارسنجی در نسخه‌های اولیه Minimal API‌ها، توسعه‌دهندگان را با چالش‌هایی مواجه کرد. این مقاله به بررسی سیر تحول اعتبارسنجی در Minimal API‌ها، از روش‌های دستی تا معرفی قابلیت‌های پیشرفته در دات‌نت 10 می‌پردازد. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;معرفی Minimal API و چالش‌های اولیه اعتبارسنجی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;Minimal API‌ها که در دات‌نت 6 معرفی شدند، رویکردی مینیمال برای تعریف نقاط پایانی (Endpoints) در فایل Program.cs ارائه می‌دهند. این روش با حذف وابستگی‌های اضافی و کاهش کدهای تکراری، توسعه سریع‌تر و ساده‌تر API‌ها را ممکن می‌سازد. با این حال، در نسخه‌های اولیه، Minimal API‌ها فاقد پشتیبانی داخلی برای اعتبارسنجی خودکار بودند. این موضوع توسعه‌دهندگان را مجبور می‌کرد که اعتبارسنجی را به صورت دستی در بدنه نقاط پایانی پیاده‌سازی کنند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;به عنوان مثال، فرض کنید می‌خواهیم یک درخواست برای ایجاد یادداشت (Note) را اعتبارسنجی کنیم. در رویکرد دستی، کد به این صورت خواهد بود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;app.MapPost(&amp;quot;/v1/notes&amp;quot;, (CreateNoteRequest request) =&amp;gt;
+{
+    if (string.IsNullOrWhiteSpace(request.Value))
+    {
+        return Results.BadRequest();
+    }
+
+    if (Guid.Empty == request.Id)
+    {
+        return Results.BadRequest();
+    }
+
+    // ذخیره یادداشت در پایگاه داده
+    return Results.Ok();
+});&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این روش، اگرچه ساده به نظر می‌رسد، مشکلات متعددی ایجاد می‌کند. ترکیب منطق اعتبارسنجی با منطق کسب‌وکار (Business Logic) اصل مسئولیت واحد (Single Responsibility Principle) را نقض می‌کند. همچنین، آزمایش (Testing) این کدها پیچیده‌تر می‌شود، زیرا باید اعتبارسنجی و منطق کسب‌وکار به طور جداگانه بررسی شوند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;استفاده از FluentValidation به عنوان راه‌حل اولیه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;برای رفع مشکلات روش دستی، توسعه‌دهندگان به ابزارهایی مانند FluentValidation روی آوردند. این ابزار امکان تعریف قوانین اعتبارسنجی به صورت جداگانه را فراهم می‌کند. در این روش، اعتبارسنجی با استفاده از ویژگی [FromServices] و تزریق وابستگی (Dependency Injection) انجام می‌شود. کد زیر نمونه‌ای از این رویکرد است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;app.MapPost(&amp;quot;/v2/notes&amp;quot;, async ([FromServices] IValidator&amp;lt;CreateNoteRequest&amp;gt; validator, CreateNoteRequest request) =&amp;gt;
+{
+    var validationResult = await validator.ValidateAsync(request);
+
+    if (!validationResult.IsValid)
+    {
+        return Results.BadRequest(validationResult.Errors.Select(error =&amp;gt; error.ErrorMessage));
+    }
+
+    // ذخیره یادداشت در پایگاه داده
+    return Results.Ok();
+});&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;اگرچه این روش جداسازی بهتری بین اعتبارسنجی و منطق کسب‌وکار ایجاد می‌کند، اما همچنان مشکلاتی مانند پیچیدگی در پیکربندی و نیاز به کد اضافی برای هر نقطه پایانی وجود دارد. علاوه بر این، توسعه‌دهندگانی که به اعتبارسنجی مبتنی بر مدل (Model-Based Validation) در کنترلرهای سنتی عادت داشتند، این روش را غیرطبیعی می‌یافتند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;معرفی فیلترهای نقطه پایانی در دات‌نت 7&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;با انتشار دات‌نت 7، مفهوم فیلترهای نقطه پایانی (Endpoint Filters) معرفی شد که امکان جداسازی بهتر منطق اعتبارسنجی را فراهم کرد. این فیلترها قبل از اجرای نقطه پایانی، درخواست را بررسی می‌کنند. کد زیر نمونه‌ای از استفاده از فیلتر اعتبارسنجی است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;app.MapPost(&amp;quot;/v3/notes&amp;quot;, (CreateNoteRequest request) =&amp;gt;
+{
+    // ذخیره یادداشت در پایگاه داده
+    return Results.Ok();
+})
+.AddEndpointFilter&amp;lt;ValidationFilter&amp;lt;CreateNoteRequest&amp;gt;&amp;gt;();
+
+public sealed class ValidationFilter&amp;lt;TRequest&amp;gt;(IValidator&amp;lt;TRequest&amp;gt; validator) : IEndpointFilter
+    where TRequest : class
+{
+    public async ValueTask&amp;lt;object?&amp;gt; InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
+    {
+        var argument = context.Arguments.SingleOrDefault(argument =&amp;gt; argument?.GetType() == typeof(TRequest));
+
+        if (argument is not TRequest request)
+        {
+            throw new ArgumentException($&amp;quot;Could not find request with the following type `{typeof(TRequest)}`&amp;quot;);
+        }
+
+        var validationResult = await validator.ValidateAsync(request);
+
+        if (!validationResult.IsValid)
+        {
+            return Results.BadRequest(validationResult.Errors.Select(error =&amp;gt; error.ErrorMessage));
+        }
+
+        return await next(context);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رویکرد، منطق اعتبارسنجی را از بدنه نقطه پایانی جدا می‌کند و قابلیت استفاده مجدد را افزایش می‌دهد. با این حال، پیچیدگی پیاده‌سازی و عدم پشتیبانی مستقیم از اعتبارسنجی مبتنی بر ویژگی‌ها (Data Annotations) همچنان برای برخی توسعه‌دهندگان مشکل‌ساز بود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;تحول بزرگ: اعتبارسنجی داخلی در دات‌نت 10&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در دات‌نت 10، مایکروسافت پشتیبانی داخلی برای اعتبارسنجی مبتنی بر ویژگی‌ها را به Minimal API‌ها اضافه کرد. این قابلیت، که در حال حاضر در مرحله پیش‌نمایش (Preview) قرار دارد، امکان استفاده از ویژگی‌های موجود در فضای نام System.ComponentModel.DataAnnotations را فراهم می‌کند. این ویژگی‌ها شامل اعتبارسنجی رشته‌های پرس‌وجو (Query Strings)، سرآیندها (Headers)، پارامترهای مسیر (Route Parameters) و بدنه درخواست (Request Body) می‌شوند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;برای استفاده از این قابلیت، ابتدا باید مدل داده را با ویژگی‌های مناسب تعریف کنیم. به عنوان مثال:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class CreateNoteRequest
+{
+    [Filled]
+    public Guid Id { get; set; }
+    
+    [Required]
+    public string Value { get; set; }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در اینجا، ویژگی Required تضمین می‌کند که مقدار Value خالی نباشد. برای اعتبارسنجی Guid و اطمینان از غیرخالی بودن آن، یک ویژگی سفارشی به نام Filled ایجاد می‌شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[AttributeUsage(AttributeTargets.Property)]
+public sealed class FilledAttribute : ValidationAttribute
+{
+    public override bool IsValid(object? value)
+    {
+        if (value is not Guid guid)
+        {
+            return false;
+        }
+
+        return guid != Guid.Empty;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;برای فعال‌سازی اعتبارسنجی داخلی، باید خدمات مربوطه در ظرف تزریق وابستگی (DI Container) ثبت شوند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;builder.Services.AddValidation();&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;همچنین، تنظیمات خاصی در فایل پروژه (.csproj) مورد نیاز است:&lt;/div&gt;&lt;pre data-language=&quot;xml&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;lt;PropertyGroup&amp;gt;
+    &amp;lt;InterceptorsNamespaces&amp;gt;$(InterceptorsNamespaces);Microsoft.AspNetCore.Http.Validation.Generated&amp;lt;/InterceptorsNamespaces&amp;gt;
+&amp;lt;/PropertyGroup&amp;gt;&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;با این تنظیمات، نقطه پایانی به سادگی تعریف می‌شود و اعتبارسنجی به صورت خودکار انجام می‌شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;app.MapPost(&amp;quot;/v4/notes&amp;quot;, (CreateNoteRequest request) =&amp;gt;
+{
+    // ذخیره یادداشت در پایگاه داده
+    return Results.Ok();
+});&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در صورت نیاز به غیرفعال کردن اعتبارسنجی برای یک نقطه پایانی خاص، می‌توان از متد DisableValidation استفاده کرد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;app.MapPost(&amp;quot;/v4/notes&amp;quot;, (CreateNoteRequest request) =&amp;gt;
+{
+    // ذخیره یادداشت در پایگاه داده
+    return Results.Ok();
+}).DisableValidation();&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چالش‌ها و ملاحظات&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;اگرچه اعتبارسنجی داخلی در دات‌نت 10 پیشرفت چشمگیری محسوب می‌شود، اما همچنان در مرحله پیش‌نمایش است و مشکلاتی مانند عدم پشتیبانی کامل از اعتبارسنجی Guid و پیچیدگی تنظیمات اولیه وجود دارد. علاوه بر این، استفاده از اعتبارسنجی مبتنی بر مدل ممکن است بر عملکرد Minimal API‌ها تأثیر بگذارد، زیرا فرآیند اتصال مدل (Model Binding) پیچیدگی‌های خاص خود را دارد. توسعه‌دهندگان باید بین سادگی و عملکرد تعادل برقرار کنند و بسته به نیاز پروژه خود، رویکرد مناسب را انتخاب کنند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;اعتبارسنجی در Minimal API‌ها از روش‌های دستی و پراکنده در نسخه‌های اولیه به یک سیستم منسجم و مبتنی بر مدل در دات‌نت 10 تکامل یافته است. این پیشرفت‌ها، توسعه API‌های امن‌تر و قابل نگهداری‌تر را آسان‌تر کرده‌اند. با این حال، توسعه‌دهندگان باید از محدودیت‌های فعلی، مانند تنظیمات پیچیده و تأثیرات احتمالی بر عملکرد، آگاه باشند. در آینده، انتظار می‌رود که با رفع این محدودیت‌ها و ساده‌سازی فرآیندها، Minimal API‌ها به گزینه‌ای حتی قدرتمندتر برای توسعه وب تبدیل شوند.&lt;/div&gt;">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="تاریخچه اعتبارسنجی اطلاعات در Minimal API‌ها">
+    <meta property="og:description" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;اعتبارسنجی اطلاعات (Validation) یکی از ارکان اساسی برای تضمین صحت و امنیت داده‌های ورودی به برنامه‌ها محسوب می‌شود. با ظهور Minimal API‌ها در چارچوب دات‌نت، رویکردی سبک و ساده برای ساخت رابط‌های برنامه‌نویسی کاربردی (API) معرفی شد که نیاز به کدهای اضافی و پیچیدگی‌های رایج در روش‌های سنتی را کاهش داد. با این حال، فقدان پشتیبانی داخلی برای اعتبارسنجی در نسخه‌های اولیه Minimal API‌ها، توسعه‌دهندگان را با چالش‌هایی مواجه کرد. این مقاله به بررسی سیر تحول اعتبارسنجی در Minimal API‌ها، از روش‌های دستی تا معرفی قابلیت‌های پیشرفته در دات‌نت 10 می‌پردازد. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;معرفی Minimal API و چالش‌های اولیه اعتبارسنجی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;Minimal API‌ها که در دات‌نت 6 معرفی شدند، رویکردی مینیمال برای تعریف نقاط پایانی (Endpoints) در فایل Program.cs ارائه می‌دهند. این روش با حذف وابستگی‌های اضافی و کاهش کدهای تکراری، توسعه سریع‌تر و ساده‌تر API‌ها را ممکن می‌سازد. با این حال، در نسخه‌های اولیه، Minimal API‌ها فاقد پشتیبانی داخلی برای اعتبارسنجی خودکار بودند. این موضوع توسعه‌دهندگان را مجبور می‌کرد که اعتبارسنجی را به صورت دستی در بدنه نقاط پایانی پیاده‌سازی کنند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;به عنوان مثال، فرض کنید می‌خواهیم یک درخواست برای ایجاد یادداشت (Note) را اعتبارسنجی کنیم. در رویکرد دستی، کد به این صورت خواهد بود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;app.MapPost(&amp;quot;/v1/notes&amp;quot;, (CreateNoteRequest request) =&amp;gt;
+{
+    if (string.IsNullOrWhiteSpace(request.Value))
+    {
+        return Results.BadRequest();
+    }
+
+    if (Guid.Empty == request.Id)
+    {
+        return Results.BadRequest();
+    }
+
+    // ذخیره یادداشت در پایگاه داده
+    return Results.Ok();
+});&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این روش، اگرچه ساده به نظر می‌رسد، مشکلات متعددی ایجاد می‌کند. ترکیب منطق اعتبارسنجی با منطق کسب‌وکار (Business Logic) اصل مسئولیت واحد (Single Responsibility Principle) را نقض می‌کند. همچنین، آزمایش (Testing) این کدها پیچیده‌تر می‌شود، زیرا باید اعتبارسنجی و منطق کسب‌وکار به طور جداگانه بررسی شوند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;استفاده از FluentValidation به عنوان راه‌حل اولیه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;برای رفع مشکلات روش دستی، توسعه‌دهندگان به ابزارهایی مانند FluentValidation روی آوردند. این ابزار امکان تعریف قوانین اعتبارسنجی به صورت جداگانه را فراهم می‌کند. در این روش، اعتبارسنجی با استفاده از ویژگی [FromServices] و تزریق وابستگی (Dependency Injection) انجام می‌شود. کد زیر نمونه‌ای از این رویکرد است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;app.MapPost(&amp;quot;/v2/notes&amp;quot;, async ([FromServices] IValidator&amp;lt;CreateNoteRequest&amp;gt; validator, CreateNoteRequest request) =&amp;gt;
+{
+    var validationResult = await validator.ValidateAsync(request);
+
+    if (!validationResult.IsValid)
+    {
+        return Results.BadRequest(validationResult.Errors.Select(error =&amp;gt; error.ErrorMessage));
+    }
+
+    // ذخیره یادداشت در پایگاه داده
+    return Results.Ok();
+});&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;اگرچه این روش جداسازی بهتری بین اعتبارسنجی و منطق کسب‌وکار ایجاد می‌کند، اما همچنان مشکلاتی مانند پیچیدگی در پیکربندی و نیاز به کد اضافی برای هر نقطه پایانی وجود دارد. علاوه بر این، توسعه‌دهندگانی که به اعتبارسنجی مبتنی بر مدل (Model-Based Validation) در کنترلرهای سنتی عادت داشتند، این روش را غیرطبیعی می‌یافتند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;معرفی فیلترهای نقطه پایانی در دات‌نت 7&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;با انتشار دات‌نت 7، مفهوم فیلترهای نقطه پایانی (Endpoint Filters) معرفی شد که امکان جداسازی بهتر منطق اعتبارسنجی را فراهم کرد. این فیلترها قبل از اجرای نقطه پایانی، درخواست را بررسی می‌کنند. کد زیر نمونه‌ای از استفاده از فیلتر اعتبارسنجی است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;app.MapPost(&amp;quot;/v3/notes&amp;quot;, (CreateNoteRequest request) =&amp;gt;
+{
+    // ذخیره یادداشت در پایگاه داده
+    return Results.Ok();
+})
+.AddEndpointFilter&amp;lt;ValidationFilter&amp;lt;CreateNoteRequest&amp;gt;&amp;gt;();
+
+public sealed class ValidationFilter&amp;lt;TRequest&amp;gt;(IValidator&amp;lt;TRequest&amp;gt; validator) : IEndpointFilter
+    where TRequest : class
+{
+    public async ValueTask&amp;lt;object?&amp;gt; InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
+    {
+        var argument = context.Arguments.SingleOrDefault(argument =&amp;gt; argument?.GetType() == typeof(TRequest));
+
+        if (argument is not TRequest request)
+        {
+            throw new ArgumentException($&amp;quot;Could not find request with the following type `{typeof(TRequest)}`&amp;quot;);
+        }
+
+        var validationResult = await validator.ValidateAsync(request);
+
+        if (!validationResult.IsValid)
+        {
+            return Results.BadRequest(validationResult.Errors.Select(error =&amp;gt; error.ErrorMessage));
+        }
+
+        return await next(context);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رویکرد، منطق اعتبارسنجی را از بدنه نقطه پایانی جدا می‌کند و قابلیت استفاده مجدد را افزایش می‌دهد. با این حال، پیچیدگی پیاده‌سازی و عدم پشتیبانی مستقیم از اعتبارسنجی مبتنی بر ویژگی‌ها (Data Annotations) همچنان برای برخی توسعه‌دهندگان مشکل‌ساز بود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;تحول بزرگ: اعتبارسنجی داخلی در دات‌نت 10&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در دات‌نت 10، مایکروسافت پشتیبانی داخلی برای اعتبارسنجی مبتنی بر ویژگی‌ها را به Minimal API‌ها اضافه کرد. این قابلیت، که در حال حاضر در مرحله پیش‌نمایش (Preview) قرار دارد، امکان استفاده از ویژگی‌های موجود در فضای نام System.ComponentModel.DataAnnotations را فراهم می‌کند. این ویژگی‌ها شامل اعتبارسنجی رشته‌های پرس‌وجو (Query Strings)، سرآیندها (Headers)، پارامترهای مسیر (Route Parameters) و بدنه درخواست (Request Body) می‌شوند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;برای استفاده از این قابلیت، ابتدا باید مدل داده را با ویژگی‌های مناسب تعریف کنیم. به عنوان مثال:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class CreateNoteRequest
+{
+    [Filled]
+    public Guid Id { get; set; }
+    
+    [Required]
+    public string Value { get; set; }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در اینجا، ویژگی Required تضمین می‌کند که مقدار Value خالی نباشد. برای اعتبارسنجی Guid و اطمینان از غیرخالی بودن آن، یک ویژگی سفارشی به نام Filled ایجاد می‌شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[AttributeUsage(AttributeTargets.Property)]
+public sealed class FilledAttribute : ValidationAttribute
+{
+    public override bool IsValid(object? value)
+    {
+        if (value is not Guid guid)
+        {
+            return false;
+        }
+
+        return guid != Guid.Empty;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;برای فعال‌سازی اعتبارسنجی داخلی، باید خدمات مربوطه در ظرف تزریق وابستگی (DI Container) ثبت شوند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;builder.Services.AddValidation();&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;همچنین، تنظیمات خاصی در فایل پروژه (.csproj) مورد نیاز است:&lt;/div&gt;&lt;pre data-language=&quot;xml&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;lt;PropertyGroup&amp;gt;
+    &amp;lt;InterceptorsNamespaces&amp;gt;$(InterceptorsNamespaces);Microsoft.AspNetCore.Http.Validation.Generated&amp;lt;/InterceptorsNamespaces&amp;gt;
+&amp;lt;/PropertyGroup&amp;gt;&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;با این تنظیمات، نقطه پایانی به سادگی تعریف می‌شود و اعتبارسنجی به صورت خودکار انجام می‌شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;app.MapPost(&amp;quot;/v4/notes&amp;quot;, (CreateNoteRequest request) =&amp;gt;
+{
+    // ذخیره یادداشت در پایگاه داده
+    return Results.Ok();
+});&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در صورت نیاز به غیرفعال کردن اعتبارسنجی برای یک نقطه پایانی خاص، می‌توان از متد DisableValidation استفاده کرد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;app.MapPost(&amp;quot;/v4/notes&amp;quot;, (CreateNoteRequest request) =&amp;gt;
+{
+    // ذخیره یادداشت در پایگاه داده
+    return Results.Ok();
+}).DisableValidation();&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چالش‌ها و ملاحظات&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;اگرچه اعتبارسنجی داخلی در دات‌نت 10 پیشرفت چشمگیری محسوب می‌شود، اما همچنان در مرحله پیش‌نمایش است و مشکلاتی مانند عدم پشتیبانی کامل از اعتبارسنجی Guid و پیچیدگی تنظیمات اولیه وجود دارد. علاوه بر این، استفاده از اعتبارسنجی مبتنی بر مدل ممکن است بر عملکرد Minimal API‌ها تأثیر بگذارد، زیرا فرآیند اتصال مدل (Model Binding) پیچیدگی‌های خاص خود را دارد. توسعه‌دهندگان باید بین سادگی و عملکرد تعادل برقرار کنند و بسته به نیاز پروژه خود، رویکرد مناسب را انتخاب کنند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;اعتبارسنجی در Minimal API‌ها از روش‌های دستی و پراکنده در نسخه‌های اولیه به یک سیستم منسجم و مبتنی بر مدل در دات‌نت 10 تکامل یافته است. این پیشرفت‌ها، توسعه API‌های امن‌تر و قابل نگهداری‌تر را آسان‌تر کرده‌اند. با این حال، توسعه‌دهندگان باید از محدودیت‌های فعلی، مانند تنظیمات پیچیده و تأثیرات احتمالی بر عملکرد، آگاه باشند. در آینده، انتظار می‌رود که با رفع این محدودیت‌ها و ساده‌سازی فرآیندها، Minimal API‌ها به گزینه‌ای حتی قدرتمندتر برای توسعه وب تبدیل شوند.&lt;/div&gt;">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="تاریخچه اعتبارسنجی اطلاعات در Minimal API‌ها">
+    <meta name="twitter:description" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;اعتبارسنجی اطلاعات (Validation) یکی از ارکان اساسی برای تضمین صحت و امنیت داده‌های ورودی به برنامه‌ها محسوب می‌شود. با ظهور Minimal API‌ها در چارچوب دات‌نت، رویکردی سبک و ساده برای ساخت رابط‌های برنامه‌نویسی کاربردی (API) معرفی شد که نیاز به کدهای اضافی و پیچیدگی‌های رایج در روش‌های سنتی را کاهش داد. با این حال، فقدان پشتیبانی داخلی برای اعتبارسنجی در نسخه‌های اولیه Minimal API‌ها، توسعه‌دهندگان را با چالش‌هایی مواجه کرد. این مقاله به بررسی سیر تحول اعتبارسنجی در Minimal API‌ها، از روش‌های دستی تا معرفی قابلیت‌های پیشرفته در دات‌نت 10 می‌پردازد. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;معرفی Minimal API و چالش‌های اولیه اعتبارسنجی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;Minimal API‌ها که در دات‌نت 6 معرفی شدند، رویکردی مینیمال برای تعریف نقاط پایانی (Endpoints) در فایل Program.cs ارائه می‌دهند. این روش با حذف وابستگی‌های اضافی و کاهش کدهای تکراری، توسعه سریع‌تر و ساده‌تر API‌ها را ممکن می‌سازد. با این حال، در نسخه‌های اولیه، Minimal API‌ها فاقد پشتیبانی داخلی برای اعتبارسنجی خودکار بودند. این موضوع توسعه‌دهندگان را مجبور می‌کرد که اعتبارسنجی را به صورت دستی در بدنه نقاط پایانی پیاده‌سازی کنند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;به عنوان مثال، فرض کنید می‌خواهیم یک درخواست برای ایجاد یادداشت (Note) را اعتبارسنجی کنیم. در رویکرد دستی، کد به این صورت خواهد بود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;app.MapPost(&amp;quot;/v1/notes&amp;quot;, (CreateNoteRequest request) =&amp;gt;
+{
+    if (string.IsNullOrWhiteSpace(request.Value))
+    {
+        return Results.BadRequest();
+    }
+
+    if (Guid.Empty == request.Id)
+    {
+        return Results.BadRequest();
+    }
+
+    // ذخیره یادداشت در پایگاه داده
+    return Results.Ok();
+});&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این روش، اگرچه ساده به نظر می‌رسد، مشکلات متعددی ایجاد می‌کند. ترکیب منطق اعتبارسنجی با منطق کسب‌وکار (Business Logic) اصل مسئولیت واحد (Single Responsibility Principle) را نقض می‌کند. همچنین، آزمایش (Testing) این کدها پیچیده‌تر می‌شود، زیرا باید اعتبارسنجی و منطق کسب‌وکار به طور جداگانه بررسی شوند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;استفاده از FluentValidation به عنوان راه‌حل اولیه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;برای رفع مشکلات روش دستی، توسعه‌دهندگان به ابزارهایی مانند FluentValidation روی آوردند. این ابزار امکان تعریف قوانین اعتبارسنجی به صورت جداگانه را فراهم می‌کند. در این روش، اعتبارسنجی با استفاده از ویژگی [FromServices] و تزریق وابستگی (Dependency Injection) انجام می‌شود. کد زیر نمونه‌ای از این رویکرد است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;app.MapPost(&amp;quot;/v2/notes&amp;quot;, async ([FromServices] IValidator&amp;lt;CreateNoteRequest&amp;gt; validator, CreateNoteRequest request) =&amp;gt;
+{
+    var validationResult = await validator.ValidateAsync(request);
+
+    if (!validationResult.IsValid)
+    {
+        return Results.BadRequest(validationResult.Errors.Select(error =&amp;gt; error.ErrorMessage));
+    }
+
+    // ذخیره یادداشت در پایگاه داده
+    return Results.Ok();
+});&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;اگرچه این روش جداسازی بهتری بین اعتبارسنجی و منطق کسب‌وکار ایجاد می‌کند، اما همچنان مشکلاتی مانند پیچیدگی در پیکربندی و نیاز به کد اضافی برای هر نقطه پایانی وجود دارد. علاوه بر این، توسعه‌دهندگانی که به اعتبارسنجی مبتنی بر مدل (Model-Based Validation) در کنترلرهای سنتی عادت داشتند، این روش را غیرطبیعی می‌یافتند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;معرفی فیلترهای نقطه پایانی در دات‌نت 7&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;با انتشار دات‌نت 7، مفهوم فیلترهای نقطه پایانی (Endpoint Filters) معرفی شد که امکان جداسازی بهتر منطق اعتبارسنجی را فراهم کرد. این فیلترها قبل از اجرای نقطه پایانی، درخواست را بررسی می‌کنند. کد زیر نمونه‌ای از استفاده از فیلتر اعتبارسنجی است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;app.MapPost(&amp;quot;/v3/notes&amp;quot;, (CreateNoteRequest request) =&amp;gt;
+{
+    // ذخیره یادداشت در پایگاه داده
+    return Results.Ok();
+})
+.AddEndpointFilter&amp;lt;ValidationFilter&amp;lt;CreateNoteRequest&amp;gt;&amp;gt;();
+
+public sealed class ValidationFilter&amp;lt;TRequest&amp;gt;(IValidator&amp;lt;TRequest&amp;gt; validator) : IEndpointFilter
+    where TRequest : class
+{
+    public async ValueTask&amp;lt;object?&amp;gt; InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
+    {
+        var argument = context.Arguments.SingleOrDefault(argument =&amp;gt; argument?.GetType() == typeof(TRequest));
+
+        if (argument is not TRequest request)
+        {
+            throw new ArgumentException($&amp;quot;Could not find request with the following type `{typeof(TRequest)}`&amp;quot;);
+        }
+
+        var validationResult = await validator.ValidateAsync(request);
+
+        if (!validationResult.IsValid)
+        {
+            return Results.BadRequest(validationResult.Errors.Select(error =&amp;gt; error.ErrorMessage));
+        }
+
+        return await next(context);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رویکرد، منطق اعتبارسنجی را از بدنه نقطه پایانی جدا می‌کند و قابلیت استفاده مجدد را افزایش می‌دهد. با این حال، پیچیدگی پیاده‌سازی و عدم پشتیبانی مستقیم از اعتبارسنجی مبتنی بر ویژگی‌ها (Data Annotations) همچنان برای برخی توسعه‌دهندگان مشکل‌ساز بود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;تحول بزرگ: اعتبارسنجی داخلی در دات‌نت 10&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در دات‌نت 10، مایکروسافت پشتیبانی داخلی برای اعتبارسنجی مبتنی بر ویژگی‌ها را به Minimal API‌ها اضافه کرد. این قابلیت، که در حال حاضر در مرحله پیش‌نمایش (Preview) قرار دارد، امکان استفاده از ویژگی‌های موجود در فضای نام System.ComponentModel.DataAnnotations را فراهم می‌کند. این ویژگی‌ها شامل اعتبارسنجی رشته‌های پرس‌وجو (Query Strings)، سرآیندها (Headers)، پارامترهای مسیر (Route Parameters) و بدنه درخواست (Request Body) می‌شوند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;برای استفاده از این قابلیت، ابتدا باید مدل داده را با ویژگی‌های مناسب تعریف کنیم. به عنوان مثال:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class CreateNoteRequest
+{
+    [Filled]
+    public Guid Id { get; set; }
+    
+    [Required]
+    public string Value { get; set; }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در اینجا، ویژگی Required تضمین می‌کند که مقدار Value خالی نباشد. برای اعتبارسنجی Guid و اطمینان از غیرخالی بودن آن، یک ویژگی سفارشی به نام Filled ایجاد می‌شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[AttributeUsage(AttributeTargets.Property)]
+public sealed class FilledAttribute : ValidationAttribute
+{
+    public override bool IsValid(object? value)
+    {
+        if (value is not Guid guid)
+        {
+            return false;
+        }
+
+        return guid != Guid.Empty;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;برای فعال‌سازی اعتبارسنجی داخلی، باید خدمات مربوطه در ظرف تزریق وابستگی (DI Container) ثبت شوند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;builder.Services.AddValidation();&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;همچنین، تنظیمات خاصی در فایل پروژه (.csproj) مورد نیاز است:&lt;/div&gt;&lt;pre data-language=&quot;xml&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;lt;PropertyGroup&amp;gt;
+    &amp;lt;InterceptorsNamespaces&amp;gt;$(InterceptorsNamespaces);Microsoft.AspNetCore.Http.Validation.Generated&amp;lt;/InterceptorsNamespaces&amp;gt;
+&amp;lt;/PropertyGroup&amp;gt;&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;با این تنظیمات، نقطه پایانی به سادگی تعریف می‌شود و اعتبارسنجی به صورت خودکار انجام می‌شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;app.MapPost(&amp;quot;/v4/notes&amp;quot;, (CreateNoteRequest request) =&amp;gt;
+{
+    // ذخیره یادداشت در پایگاه داده
+    return Results.Ok();
+});&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در صورت نیاز به غیرفعال کردن اعتبارسنجی برای یک نقطه پایانی خاص، می‌توان از متد DisableValidation استفاده کرد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;app.MapPost(&amp;quot;/v4/notes&amp;quot;, (CreateNoteRequest request) =&amp;gt;
+{
+    // ذخیره یادداشت در پایگاه داده
+    return Results.Ok();
+}).DisableValidation();&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چالش‌ها و ملاحظات&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;اگرچه اعتبارسنجی داخلی در دات‌نت 10 پیشرفت چشمگیری محسوب می‌شود، اما همچنان در مرحله پیش‌نمایش است و مشکلاتی مانند عدم پشتیبانی کامل از اعتبارسنجی Guid و پیچیدگی تنظیمات اولیه وجود دارد. علاوه بر این، استفاده از اعتبارسنجی مبتنی بر مدل ممکن است بر عملکرد Minimal API‌ها تأثیر بگذارد، زیرا فرآیند اتصال مدل (Model Binding) پیچیدگی‌های خاص خود را دارد. توسعه‌دهندگان باید بین سادگی و عملکرد تعادل برقرار کنند و بسته به نیاز پروژه خود، رویکرد مناسب را انتخاب کنند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;اعتبارسنجی در Minimal API‌ها از روش‌های دستی و پراکنده در نسخه‌های اولیه به یک سیستم منسجم و مبتنی بر مدل در دات‌نت 10 تکامل یافته است. این پیشرفت‌ها، توسعه API‌های امن‌تر و قابل نگهداری‌تر را آسان‌تر کرده‌اند. با این حال، توسعه‌دهندگان باید از محدودیت‌های فعلی، مانند تنظیمات پیچیده و تأثیرات احتمالی بر عملکرد، آگاه باشند. در آینده، انتظار می‌رود که با رفع این محدودیت‌ها و ساده‌سازی فرآیندها، Minimal API‌ها به گزینه‌ای حتی قدرتمندتر برای توسعه وب تبدیل شوند.&lt;/div&gt;">
+    <meta name="twitter:card" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;اعتبارسنجی اطلاعات (Validation) یکی از ارکان اساسی برای تضمین صحت و امنیت داده‌های ورودی به برنامه‌ها محسوب می‌شود. با ظهور Minimal API‌ها در چارچوب دات‌نت، رویکردی سبک و ساده برای ساخت رابط‌های برنامه‌نویسی کاربردی (API) معرفی شد که نیاز به کدهای اضافی و پیچیدگی‌های رایج در روش‌های سنتی را کاهش داد. با این حال، فقدان پشتیبانی داخلی برای اعتبارسنجی در نسخه‌های اولیه Minimal API‌ها، توسعه‌دهندگان را با چالش‌هایی مواجه کرد. این مقاله به بررسی سیر تحول اعتبارسنجی در Minimal API‌ها، از روش‌های دستی تا معرفی قابلیت‌های پیشرفته در دات‌نت 10 می‌پردازد. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;معرفی Minimal API و چالش‌های اولیه اعتبارسنجی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;Minimal API‌ها که در دات‌نت 6 معرفی شدند، رویکردی مینیمال برای تعریف نقاط پایانی (Endpoints) در فایل Program.cs ارائه می‌دهند. این روش با حذف وابستگی‌های اضافی و کاهش کدهای تکراری، توسعه سریع‌تر و ساده‌تر API‌ها را ممکن می‌سازد. با این حال، در نسخه‌های اولیه، Minimal API‌ها فاقد پشتیبانی داخلی برای اعتبارسنجی خودکار بودند. این موضوع توسعه‌دهندگان را مجبور می‌کرد که اعتبارسنجی را به صورت دستی در بدنه نقاط پایانی پیاده‌سازی کنند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;به عنوان مثال، فرض کنید می‌خواهیم یک درخواست برای ایجاد یادداشت (Note) را اعتبارسنجی کنیم. در رویکرد دستی، کد به این صورت خواهد بود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;app.MapPost(&amp;quot;/v1/notes&amp;quot;, (CreateNoteRequest request) =&amp;gt;
+{
+    if (string.IsNullOrWhiteSpace(request.Value))
+    {
+        return Results.BadRequest();
+    }
+
+    if (Guid.Empty == request.Id)
+    {
+        return Results.BadRequest();
+    }
+
+    // ذخیره یادداشت در پایگاه داده
+    return Results.Ok();
+});&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این روش، اگرچه ساده به نظر می‌رسد، مشکلات متعددی ایجاد می‌کند. ترکیب منطق اعتبارسنجی با منطق کسب‌وکار (Business Logic) اصل مسئولیت واحد (Single Responsibility Principle) را نقض می‌کند. همچنین، آزمایش (Testing) این کدها پیچیده‌تر می‌شود، زیرا باید اعتبارسنجی و منطق کسب‌وکار به طور جداگانه بررسی شوند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;استفاده از FluentValidation به عنوان راه‌حل اولیه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;برای رفع مشکلات روش دستی، توسعه‌دهندگان به ابزارهایی مانند FluentValidation روی آوردند. این ابزار امکان تعریف قوانین اعتبارسنجی به صورت جداگانه را فراهم می‌کند. در این روش، اعتبارسنجی با استفاده از ویژگی [FromServices] و تزریق وابستگی (Dependency Injection) انجام می‌شود. کد زیر نمونه‌ای از این رویکرد است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;app.MapPost(&amp;quot;/v2/notes&amp;quot;, async ([FromServices] IValidator&amp;lt;CreateNoteRequest&amp;gt; validator, CreateNoteRequest request) =&amp;gt;
+{
+    var validationResult = await validator.ValidateAsync(request);
+
+    if (!validationResult.IsValid)
+    {
+        return Results.BadRequest(validationResult.Errors.Select(error =&amp;gt; error.ErrorMessage));
+    }
+
+    // ذخیره یادداشت در پایگاه داده
+    return Results.Ok();
+});&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;اگرچه این روش جداسازی بهتری بین اعتبارسنجی و منطق کسب‌وکار ایجاد می‌کند، اما همچنان مشکلاتی مانند پیچیدگی در پیکربندی و نیاز به کد اضافی برای هر نقطه پایانی وجود دارد. علاوه بر این، توسعه‌دهندگانی که به اعتبارسنجی مبتنی بر مدل (Model-Based Validation) در کنترلرهای سنتی عادت داشتند، این روش را غیرطبیعی می‌یافتند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;معرفی فیلترهای نقطه پایانی در دات‌نت 7&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;با انتشار دات‌نت 7، مفهوم فیلترهای نقطه پایانی (Endpoint Filters) معرفی شد که امکان جداسازی بهتر منطق اعتبارسنجی را فراهم کرد. این فیلترها قبل از اجرای نقطه پایانی، درخواست را بررسی می‌کنند. کد زیر نمونه‌ای از استفاده از فیلتر اعتبارسنجی است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;app.MapPost(&amp;quot;/v3/notes&amp;quot;, (CreateNoteRequest request) =&amp;gt;
+{
+    // ذخیره یادداشت در پایگاه داده
+    return Results.Ok();
+})
+.AddEndpointFilter&amp;lt;ValidationFilter&amp;lt;CreateNoteRequest&amp;gt;&amp;gt;();
+
+public sealed class ValidationFilter&amp;lt;TRequest&amp;gt;(IValidator&amp;lt;TRequest&amp;gt; validator) : IEndpointFilter
+    where TRequest : class
+{
+    public async ValueTask&amp;lt;object?&amp;gt; InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
+    {
+        var argument = context.Arguments.SingleOrDefault(argument =&amp;gt; argument?.GetType() == typeof(TRequest));
+
+        if (argument is not TRequest request)
+        {
+            throw new ArgumentException($&amp;quot;Could not find request with the following type `{typeof(TRequest)}`&amp;quot;);
+        }
+
+        var validationResult = await validator.ValidateAsync(request);
+
+        if (!validationResult.IsValid)
+        {
+            return Results.BadRequest(validationResult.Errors.Select(error =&amp;gt; error.ErrorMessage));
+        }
+
+        return await next(context);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رویکرد، منطق اعتبارسنجی را از بدنه نقطه پایانی جدا می‌کند و قابلیت استفاده مجدد را افزایش می‌دهد. با این حال، پیچیدگی پیاده‌سازی و عدم پشتیبانی مستقیم از اعتبارسنجی مبتنی بر ویژگی‌ها (Data Annotations) همچنان برای برخی توسعه‌دهندگان مشکل‌ساز بود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;تحول بزرگ: اعتبارسنجی داخلی در دات‌نت 10&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در دات‌نت 10، مایکروسافت پشتیبانی داخلی برای اعتبارسنجی مبتنی بر ویژگی‌ها را به Minimal API‌ها اضافه کرد. این قابلیت، که در حال حاضر در مرحله پیش‌نمایش (Preview) قرار دارد، امکان استفاده از ویژگی‌های موجود در فضای نام System.ComponentModel.DataAnnotations را فراهم می‌کند. این ویژگی‌ها شامل اعتبارسنجی رشته‌های پرس‌وجو (Query Strings)، سرآیندها (Headers)، پارامترهای مسیر (Route Parameters) و بدنه درخواست (Request Body) می‌شوند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;برای استفاده از این قابلیت، ابتدا باید مدل داده را با ویژگی‌های مناسب تعریف کنیم. به عنوان مثال:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class CreateNoteRequest
+{
+    [Filled]
+    public Guid Id { get; set; }
+    
+    [Required]
+    public string Value { get; set; }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در اینجا، ویژگی Required تضمین می‌کند که مقدار Value خالی نباشد. برای اعتبارسنجی Guid و اطمینان از غیرخالی بودن آن، یک ویژگی سفارشی به نام Filled ایجاد می‌شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[AttributeUsage(AttributeTargets.Property)]
+public sealed class FilledAttribute : ValidationAttribute
+{
+    public override bool IsValid(object? value)
+    {
+        if (value is not Guid guid)
+        {
+            return false;
+        }
+
+        return guid != Guid.Empty;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;برای فعال‌سازی اعتبارسنجی داخلی، باید خدمات مربوطه در ظرف تزریق وابستگی (DI Container) ثبت شوند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;builder.Services.AddValidation();&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;همچنین، تنظیمات خاصی در فایل پروژه (.csproj) مورد نیاز است:&lt;/div&gt;&lt;pre data-language=&quot;xml&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;lt;PropertyGroup&amp;gt;
+    &amp;lt;InterceptorsNamespaces&amp;gt;$(InterceptorsNamespaces);Microsoft.AspNetCore.Http.Validation.Generated&amp;lt;/InterceptorsNamespaces&amp;gt;
+&amp;lt;/PropertyGroup&amp;gt;&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;با این تنظیمات، نقطه پایانی به سادگی تعریف می‌شود و اعتبارسنجی به صورت خودکار انجام می‌شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;app.MapPost(&amp;quot;/v4/notes&amp;quot;, (CreateNoteRequest request) =&amp;gt;
+{
+    // ذخیره یادداشت در پایگاه داده
+    return Results.Ok();
+});&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در صورت نیاز به غیرفعال کردن اعتبارسنجی برای یک نقطه پایانی خاص، می‌توان از متد DisableValidation استفاده کرد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;app.MapPost(&amp;quot;/v4/notes&amp;quot;, (CreateNoteRequest request) =&amp;gt;
+{
+    // ذخیره یادداشت در پایگاه داده
+    return Results.Ok();
+}).DisableValidation();&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چالش‌ها و ملاحظات&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;اگرچه اعتبارسنجی داخلی در دات‌نت 10 پیشرفت چشمگیری محسوب می‌شود، اما همچنان در مرحله پیش‌نمایش است و مشکلاتی مانند عدم پشتیبانی کامل از اعتبارسنجی Guid و پیچیدگی تنظیمات اولیه وجود دارد. علاوه بر این، استفاده از اعتبارسنجی مبتنی بر مدل ممکن است بر عملکرد Minimal API‌ها تأثیر بگذارد، زیرا فرآیند اتصال مدل (Model Binding) پیچیدگی‌های خاص خود را دارد. توسعه‌دهندگان باید بین سادگی و عملکرد تعادل برقرار کنند و بسته به نیاز پروژه خود، رویکرد مناسب را انتخاب کنند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;اعتبارسنجی در Minimal API‌ها از روش‌های دستی و پراکنده در نسخه‌های اولیه به یک سیستم منسجم و مبتنی بر مدل در دات‌نت 10 تکامل یافته است. این پیشرفت‌ها، توسعه API‌های امن‌تر و قابل نگهداری‌تر را آسان‌تر کرده‌اند. با این حال، توسعه‌دهندگان باید از محدودیت‌های فعلی، مانند تنظیمات پیچیده و تأثیرات احتمالی بر عملکرد، آگاه باشند. در آینده، انتظار می‌رود که با رفع این محدودیت‌ها و ساده‌سازی فرآیندها، Minimal API‌ها به گزینه‌ای حتی قدرتمندتر برای توسعه وب تبدیل شوند.&lt;/div&gt;">
+    <meta property="article:published_time" content="Wed, 07 May 2025 03:40:20 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
     <meta content='IE=edge' http-equiv='X-UA-Compatible'>
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">
-	
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
 	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
-
     <link href="vs.min.css" rel="stylesheet" type="text/css">
-    <script src="highlight.min.js" type="text/javascript"></script>
-	
+    <script src="highlight.min.js" type="text/javascript"></script>	
     <link href="styles.css" rel="stylesheet" type="text/css">	
     <style>
       @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
@@ -42,8 +464,8 @@
         }
      }
     </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
 </head>
-
 <body dir='rtl'>
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
@@ -53,7 +475,7 @@
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۳۶۹۵</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۶۹۷</span></td>
 </tr>
 <tr>
 <td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
@@ -73,7 +495,7 @@
 </tr>
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۲۲</span></td>
 </tr>
 </tbody>
 </table>
@@ -205,8 +627,5 @@ public sealed class FilledAttribute : ValidationAttribute
 
 <!-- to load custom fonts for printing -->
 <div class="useSamimFD">&nbsp;</div>
-
-<script src="SyntaxHighlighter.js" type="text/javascript"></script>
 </body>
-
 </html>

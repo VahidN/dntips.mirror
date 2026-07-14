@@ -1,17 +1,1079 @@
 <!DOCTYPE html>
 <html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
-
 <head>
-    <title>‫‫مدیریت خطا در برنامه‌نویسی ناهمگام #C: درک Task.FromException</title>
+    <title>‫‫مدیریت خطا در برنامه‌نویسی ناهمگام #C: درک Task.FromException</title>     <meta name="description" content="&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برنامه‌نویسی ناهمگام (Asynchronous Programming) به برنامه‌نویسان اجازه می‌دهد تا برنامه‌های پاسخگوتر و کارآمدتری بسازند. با این حال، مدیریت استثناها (Exception Handling) در محیط‌های ناهمگام می‌تواند پیچیدگی‌هایی به همراه داشته باشد. در حالی که توسعه‌دهندگان به استفاده از بلوک‌های &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;try-catch&lt;/code&gt; برای مدیریت خطاها عادت دارند، متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; رویکردی قدرتمند برای مدیریت استثناها در الگوی ناهمگام مبتنی بر تسک (Task-based Asynchronous Pattern - TAP) ارائه می‌دهد. این مقاله به بررسی عمیق &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt;، کاربردهای آن، الگوهای پیشرفته، بهترین شیوه‌ها و یک مثال کاربردی در دنیای واقعی می‌پردازد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه‌ای بر&lt;/strong&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; یک متد استاتیک است که یک شیء &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task&lt;/code&gt; را ایجاد می‌کند که در وضعیت خطا (Faulted State) به پایان رسیده است و شامل استثنای مشخص‌شده است. این متد بخشی از کتابخانه موازی تسک (Task Parallel Library - TPL) است و راهی صریح برای ایجاد یک تسک خطاخورده فراهم می‌کند. دو نسخه از این متد وجود دارد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static Task FromException(Exception exception)&lt;/code&gt;: برای تسک‌هایی که نتیجه‌ای باز نمی‌گردانند.&lt;/li&gt;&lt;li&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static Task&amp;lt;TResult&amp;gt; FromException&amp;lt;TResult&amp;gt;(Exception exception)&lt;/code&gt;: برای تسک‌هایی که یک نتیجه از نوع &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;TResult&lt;/code&gt; را باز می‌گردانند.&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;کاربرد پایه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در سناریوهای پایه، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; برای تبدیل یک استثنای گرفته شده به یک تسک خطاخورده استفاده می‌شود. به عنوان مثال، در یک متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;async&lt;/code&gt;، اگر عملیاتی ناموفق باشد، می‌توان به جای پرتاب مستقیم استثنا، یک تسک خطاخورده را بازگرداند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task ProcessDataAsync()
+{
+    try
+    {
+        // عملیات ناهمگام
+        await DoWorkAsync();
+    }
+    catch (Exception ex)
+    {
+        return Task.FromException(ex);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همچنین، برای تسک‌های عمومی (Generic Tasks) که دارای یک نوع بازگشتی (Return Type) خاص هستند، می‌توان از نسخه عمومی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; استفاده کرد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;string&amp;gt; GetDataAsync()
+{
+    try
+    {
+        return await FetchDataAsync();
+    }
+    catch (Exception ex)
+    {
+        return Task.FromException&amp;lt;string&amp;gt;(ex);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رویکرد تضمین می‌کند که جریان کنترل ناهمگام حفظ شود و مصرف‌کننده تسک بتواند استثنا را به صورت استاندارد مدیریت کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;موارد استفاده رایج&lt;/strong&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; در سناریوهای مختلفی که نیاز به مدیریت صریح خطا در تسک‌های ناهمگام است، بسیار مفید است.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;سناریوهای اعتبارسنجی (Validation Scenarios)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در مواردی که پارامترهای ورودی قبل از اجرای منطق اصلی نیاز به اعتبارسنجی دارند، می‌توان از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; برای بازگرداندن سریع یک تسک خطاخورده با استثنای اعتبارسنجی مناسب استفاده کرد. این کار از ادامه اجرای کد با داده‌های نامعتبر جلوگیری می‌کند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;ValidationResult&amp;gt; ValidateDataAsync(DataModel data)
+{
+    if (data == null)
+    {
+        return await Task.FromException&amp;lt;ValidationResult&amp;gt;(
+            new ArgumentNullException(nameof(data)));
+    }
+    
+    if (!IsValid(data))
+    {
+        return await Task.FromException&amp;lt;ValidationResult&amp;gt;(
+            new ValidationException(&amp;quot;Invalid data format&amp;quot;));
+    }
+    
+    return await PerformValidationAsync(data);
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;انتشار خطا (Error Propagation)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;زمانی که نیاز است خطاها به سمت بالا در زنجیره فراخوانی (Call Stack) منتشر شوند، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; یک روش تمیز را فراهم می‌کند. این رویکرد به ویژه در لایه‌های مختلف یک برنامه مفید است که هر لایه مسئول مدیریت خطاهای خاص خود است اما در نهایت خطا را برای مدیریت نهایی به لایه‌های بالاتر منتقل می‌کند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ProcessWithErrorHandlingAsync()
+{
+    try
+    {
+        var data = await LoadDataAsync();
+        return await ProcessDataAsync(data);
+    }
+    catch (DataLoadException ex)
+    {
+        // _logger.LogError(ex, &amp;quot;Failed to load data&amp;quot;); // فرض بر وجود لاگر
+        return await Task.FromException&amp;lt;Result&amp;gt;(ex);
+    }
+    catch (ProcessingException ex)
+    {
+        // _logger.LogError(ex, &amp;quot;Failed to process data&amp;quot;); // فرض بر وجود لاگر
+        return await Task.FromException&amp;lt;Result&amp;gt;(ex);
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;انواع استثناهای سفارشی (Custom Exception Types)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;هنگام کار با استثناهای سفارشی که منطق تجاری خاصی را نشان می‌دهند، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; به شما امکان می‌دهد تا این استثناها را به طور صریح در یک تسک خطاخورده کپسوله کنید:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class BusinessException : Exception
+{
+    public BusinessException(string message) : base(message) { }
+}
+
+public async Task&amp;lt;BusinessResult&amp;gt; ProcessBusinessLogicAsync()
+{
+    if (!IsBusinessRuleValid())
+    {
+        return await Task.FromException&amp;lt;BusinessResult&amp;gt;(
+            new BusinessException(&amp;quot;Business rule violation&amp;quot;));
+    }
+    
+    return await ExecuteBusinessLogicAsync();
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الگوهای پیشرفته با&lt;/strong&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; می‌تواند در پیاده‌سازی الگوهای پیچیده‌تر مدیریت خطا در سیستم‌های توزیع‌شده و مقاوم نیز به کار رود.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;تجمیع استثنا (Exception Aggregation)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در سناریوهایی که چندین عملیات مستقل ممکن است شکست بخورند و شما نیاز به جمع‌آوری تمام خطاها دارید، می‌توانید از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;AggregateException&lt;/code&gt; استفاده کنید:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ProcessMultipleItemsAsync(IEnumerable&amp;lt;Item&amp;gt; items)
+{
+    var exceptions = new List&amp;lt;Exception&amp;gt;();
+    
+    foreach (var item in items)
+    {
+        try
+        {
+            await ProcessItemAsync(item);
+        }
+        catch (Exception ex)
+        {
+            exceptions.Add(ex);
+        }
+    }
+    
+    if (exceptions.Any())
+    {
+        return await Task.FromException&amp;lt;Result&amp;gt;(
+            new AggregateException(exceptions));
+    }
+    
+    return new Result();
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این الگو، حتی اگر برخی از عملیات شکست بخورند، برنامه می‌تواند به پردازش ادامه دهد و در نهایت تمام استثناهای رخ داده را گزارش کند.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الگوی تلاش مجدد (Retry Pattern)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;هنگام پیاده‌سازی یک الگوی تلاش مجدد برای عملیات‌های مستعد خطا، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; می‌تواند برای بازگرداندن یک استثنای خاص پس از اتمام تمام تلاش‌ها استفاده شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ExecuteWithRetryAsync(
+    Func&amp;lt;Task&amp;lt;Result&amp;gt;&amp;gt; operation,
+    int maxRetries)
+{
+    for (int i = 0; i &amp;lt; maxRetries; i++)
+    {
+        try
+        {
+            return await operation();
+        }
+        catch (Exception ex)
+        {
+            if (i == maxRetries - 1)
+            {
+                return await Task.FromException&amp;lt;Result&amp;gt;(
+                    new RetryException($&amp;quot;Failed after {maxRetries} attempts&amp;quot;, ex));
+            }
+            
+            await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, i))); // تاخیر نمایی
+        }
+    }
+    
+    // این خط نباید قابل دسترسی باشد مگر اینکه مشکلی در منطق وجود داشته باشد
+    return await Task.FromException&amp;lt;Result&amp;gt;(
+        new InvalidOperationException(&amp;quot;Should not reach here&amp;quot;));
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این الگو به سیستم‌ها اجازه می‌دهد تا از خطاهای موقتی بازیابی شوند و در صورت شکست‌های پایدار، خطا را به شکل کنترل‌شده‌ای گزارش کنند.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الگوی مدارشکن (Circuit Breaker Pattern)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;الگوی مدارشکن برای جلوگیری از فراخوانی مکرر سرویس‌های معیوب طراحی شده است. &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; می‌تواند به عنوان بخشی از این الگو برای بازگرداندن فوری یک تسک خطاخورده زمانی که مدار باز (Open) است، استفاده شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class CircuitBreaker
+{
+    // private readonly ILogger&amp;lt;CircuitBreaker&amp;gt; _logger; // فرض بر وجود لاگر
+    private bool _isOpen;
+    
+    public async Task&amp;lt;Result&amp;gt; ExecuteAsync(Func&amp;lt;Task&amp;lt;Result&amp;gt;&amp;gt; operation)
+    {
+        if (_isOpen)
+        {
+            return await Task.FromException&amp;lt;Result&amp;gt;(
+                new CircuitBreakerException(&amp;quot;Circuit is open&amp;quot;));
+        }
+        
+        try
+        {
+            return await operation();
+        }
+        catch (Exception ex)
+        {
+            _isOpen = true;
+            // _logger.LogError(ex, &amp;quot;Circuit breaker opened&amp;quot;); // فرض بر وجود لاگر
+            return await Task.FromException&amp;lt;Result&amp;gt;(ex);
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این الگو به سیستم کمک می‌کند تا از فروپاشی (Cascade Failure) جلوگیری کند و به سرویس معیوب فرصت بازیابی دهد.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;بهترین شیوه‌ها (Best Practices)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای استفاده مؤثر از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; و حفظ کد قابل نگهداری، رعایت بهترین شیوه‌ها ضروری است.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;استفاده از استثناهای خاص (Specific Exceptions)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همیشه از خاص‌ترین نوع استثنای ممکن استفاده کنید. این کار به مصرف‌کنندگان تسک کمک می‌کند تا نوع مشکل را به طور دقیق‌تری تشخیص داده و مدیریت کنند. پرتاب یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Exception&lt;/code&gt; عمومی کمتر مفید است زیرا اطلاعات کافی در مورد ماهیت خطا ارائه نمی‌دهد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// خوب
+return Task.FromException(new ValidationException(&amp;quot;Invalid input&amp;quot;));
+
+// بد
+return Task.FromException(new Exception(&amp;quot;Invalid input&amp;quot;));&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;درج اطلاعات متنی (Contextual Information)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همراه با استثنا، پیام‌های خطای معنی‌دار و اطلاعات متنی مرتبط را ارائه دهید. این اطلاعات به رفع اشکال (Debugging) و درک سریع‌تر علت خطا کمک می‌کند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ProcessWithContextAsync(InputData data)
+{
+    try
+    {
+        return await ProcessAsync(data);
+    }
+    catch (Exception ex)
+    {
+        return await Task.FromException&amp;lt;Result&amp;gt;(
+            new ProcessingException(
+                $&amp;quot;Failed to process data with ID: {data.Id}&amp;quot;,
+                ex));
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ثبت استثناها (Logging Exceptions)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همیشه استثناها را قبل از ایجاد تسک‌های خطاخورده ثبت (Log) کنید. ثبت خطاها برای پایش (Monitoring) و عیب‌یابی برنامه‌ها در محیط‌های تولید (Production Environments) بسیار مهم است. این کار به شما امکان می‌دهد تا الگوهای خطا را شناسایی کرده و به مشکلات به سرعت پاسخ دهید:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ProcessWithLoggingAsync()
+{
+    try
+    {
+        return await ProcessAsync();
+    }
+    catch (Exception ex)
+    {
+        // _logger.LogError(ex, &amp;quot;Operation failed&amp;quot;); // فرض بر وجود لاگر
+        return await Task.FromException&amp;lt;Result&amp;gt;(ex);
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مثال کاربردی در دنیای واقعی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای درک بهتر نحوه استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; در یک سناریوی واقعی، یک سرویس پردازش داده را در نظر بگیرید:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class DataProcessingService
+{
+    // private readonly ILogger&amp;lt;DataProcessingService&amp;gt; _logger; // فرض بر وجود لاگر
+    private readonly IDataValidator _validator;
+    private readonly IDataProcessor _processor;
+    
+    public DataProcessingService(IDataValidator validator, IDataProcessor processor) // سازنده
+    {
+        _validator = validator;
+        _processor = processor;
+    }
+
+    public async Task&amp;lt;ProcessedData&amp;gt; ProcessDataAsync(RawData data)
+    {
+        try
+        {
+            // اعتبارسنجی ورودی
+            if (!await _validator.ValidateAsync(data))
+            {
+                // _logger.LogWarning(&amp;quot;Invalid data received: {@Data}&amp;quot;, data); // فرض بر وجود لاگر
+                return await Task.FromException&amp;lt;ProcessedData&amp;gt;(
+                    new ValidationException(&amp;quot;Invalid data format&amp;quot;));
+            }
+            
+            // پردازش داده
+            var result = await _processor.ProcessAsync(data);
+            
+            // اعتبارسنجی خروجی
+            if (!IsValid(result)) // فرض بر وجود متد IsValid
+            {
+                // _logger.LogError(&amp;quot;Invalid result generated: {@Result}&amp;quot;, result); // فرض بر وجود لاگر
+                return await Task.FromException&amp;lt;ProcessedData&amp;gt;(
+                    new ProcessingException(&amp;quot;Invalid result generated&amp;quot;));
+            }
+            
+            return result;
+        }
+        catch (Exception ex)
+        {
+            // _logger.LogError(ex, &amp;quot;Failed to process data: {@Data}&amp;quot;, data); // فرض بر وجود لاگر
+            return await Task.FromException&amp;lt;ProcessedData&amp;gt;(ex);
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این مثال، سرویس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;DataProcessingService&lt;/code&gt; از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; در چندین نقطه استفاده می‌کند:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;اگر داده‌های ورودی نامعتبر باشند، یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ValidationException&lt;/code&gt; را در یک تسک خطاخورده بازمی‌گرداند.&lt;/li&gt;&lt;li&gt;اگر نتیجه پردازش نامعتبر باشد، یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ProcessingException&lt;/code&gt; را بازمی‌گرداند.&lt;/li&gt;&lt;li&gt;برای هر استثنای دیگری که در طول پردازش رخ می‌دهد، استثنا را ثبت کرده و آن را در یک تسک خطاخورده کپسوله می‌کند. این رویکرد تضمین می‌کند که تمامی خطاها به طور سازگار و قابل پیش‌بینی در طول فرایند ناهمگام مدیریت می‌شوند.&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; ابزاری قدرتمند برای مدیریت استثناها در کد ناهمگام #C است. این متد راهی تمیز و کارآمد برای انتشار خطاها و حفظ زمینه ناهمگام فراهم می‌کند. با درک زمانی که باید از آن استفاده کرد و با رعایت بهترین شیوه‌ها مانند استفاده از استثناهای خاص، گنجاندن اطلاعات متنی و ثبت خطاها، توسعه‌دهندگان می‌توانند کدی مقاوم‌تر و قابل نگهداری ایجاد کنند. در حالی که &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; ممکن است در هر عملیات ناهمگام مورد نیاز نباشد، تسلط بر آن می‌تواند به طور قابل توجهی کیفیت و استحکام برنامه‌های .NET را بهبود بخشد.&lt;/div&gt;">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="مدیریت خطا در برنامه‌نویسی ناهمگام #C: درک Task.FromException">
+    <meta itemprop="description" content="&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برنامه‌نویسی ناهمگام (Asynchronous Programming) به برنامه‌نویسان اجازه می‌دهد تا برنامه‌های پاسخگوتر و کارآمدتری بسازند. با این حال، مدیریت استثناها (Exception Handling) در محیط‌های ناهمگام می‌تواند پیچیدگی‌هایی به همراه داشته باشد. در حالی که توسعه‌دهندگان به استفاده از بلوک‌های &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;try-catch&lt;/code&gt; برای مدیریت خطاها عادت دارند، متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; رویکردی قدرتمند برای مدیریت استثناها در الگوی ناهمگام مبتنی بر تسک (Task-based Asynchronous Pattern - TAP) ارائه می‌دهد. این مقاله به بررسی عمیق &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt;، کاربردهای آن، الگوهای پیشرفته، بهترین شیوه‌ها و یک مثال کاربردی در دنیای واقعی می‌پردازد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه‌ای بر&lt;/strong&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; یک متد استاتیک است که یک شیء &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task&lt;/code&gt; را ایجاد می‌کند که در وضعیت خطا (Faulted State) به پایان رسیده است و شامل استثنای مشخص‌شده است. این متد بخشی از کتابخانه موازی تسک (Task Parallel Library - TPL) است و راهی صریح برای ایجاد یک تسک خطاخورده فراهم می‌کند. دو نسخه از این متد وجود دارد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static Task FromException(Exception exception)&lt;/code&gt;: برای تسک‌هایی که نتیجه‌ای باز نمی‌گردانند.&lt;/li&gt;&lt;li&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static Task&amp;lt;TResult&amp;gt; FromException&amp;lt;TResult&amp;gt;(Exception exception)&lt;/code&gt;: برای تسک‌هایی که یک نتیجه از نوع &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;TResult&lt;/code&gt; را باز می‌گردانند.&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;کاربرد پایه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در سناریوهای پایه، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; برای تبدیل یک استثنای گرفته شده به یک تسک خطاخورده استفاده می‌شود. به عنوان مثال، در یک متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;async&lt;/code&gt;، اگر عملیاتی ناموفق باشد، می‌توان به جای پرتاب مستقیم استثنا، یک تسک خطاخورده را بازگرداند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task ProcessDataAsync()
+{
+    try
+    {
+        // عملیات ناهمگام
+        await DoWorkAsync();
+    }
+    catch (Exception ex)
+    {
+        return Task.FromException(ex);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همچنین، برای تسک‌های عمومی (Generic Tasks) که دارای یک نوع بازگشتی (Return Type) خاص هستند، می‌توان از نسخه عمومی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; استفاده کرد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;string&amp;gt; GetDataAsync()
+{
+    try
+    {
+        return await FetchDataAsync();
+    }
+    catch (Exception ex)
+    {
+        return Task.FromException&amp;lt;string&amp;gt;(ex);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رویکرد تضمین می‌کند که جریان کنترل ناهمگام حفظ شود و مصرف‌کننده تسک بتواند استثنا را به صورت استاندارد مدیریت کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;موارد استفاده رایج&lt;/strong&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; در سناریوهای مختلفی که نیاز به مدیریت صریح خطا در تسک‌های ناهمگام است، بسیار مفید است.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;سناریوهای اعتبارسنجی (Validation Scenarios)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در مواردی که پارامترهای ورودی قبل از اجرای منطق اصلی نیاز به اعتبارسنجی دارند، می‌توان از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; برای بازگرداندن سریع یک تسک خطاخورده با استثنای اعتبارسنجی مناسب استفاده کرد. این کار از ادامه اجرای کد با داده‌های نامعتبر جلوگیری می‌کند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;ValidationResult&amp;gt; ValidateDataAsync(DataModel data)
+{
+    if (data == null)
+    {
+        return await Task.FromException&amp;lt;ValidationResult&amp;gt;(
+            new ArgumentNullException(nameof(data)));
+    }
+    
+    if (!IsValid(data))
+    {
+        return await Task.FromException&amp;lt;ValidationResult&amp;gt;(
+            new ValidationException(&amp;quot;Invalid data format&amp;quot;));
+    }
+    
+    return await PerformValidationAsync(data);
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;انتشار خطا (Error Propagation)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;زمانی که نیاز است خطاها به سمت بالا در زنجیره فراخوانی (Call Stack) منتشر شوند، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; یک روش تمیز را فراهم می‌کند. این رویکرد به ویژه در لایه‌های مختلف یک برنامه مفید است که هر لایه مسئول مدیریت خطاهای خاص خود است اما در نهایت خطا را برای مدیریت نهایی به لایه‌های بالاتر منتقل می‌کند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ProcessWithErrorHandlingAsync()
+{
+    try
+    {
+        var data = await LoadDataAsync();
+        return await ProcessDataAsync(data);
+    }
+    catch (DataLoadException ex)
+    {
+        // _logger.LogError(ex, &amp;quot;Failed to load data&amp;quot;); // فرض بر وجود لاگر
+        return await Task.FromException&amp;lt;Result&amp;gt;(ex);
+    }
+    catch (ProcessingException ex)
+    {
+        // _logger.LogError(ex, &amp;quot;Failed to process data&amp;quot;); // فرض بر وجود لاگر
+        return await Task.FromException&amp;lt;Result&amp;gt;(ex);
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;انواع استثناهای سفارشی (Custom Exception Types)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;هنگام کار با استثناهای سفارشی که منطق تجاری خاصی را نشان می‌دهند، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; به شما امکان می‌دهد تا این استثناها را به طور صریح در یک تسک خطاخورده کپسوله کنید:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class BusinessException : Exception
+{
+    public BusinessException(string message) : base(message) { }
+}
+
+public async Task&amp;lt;BusinessResult&amp;gt; ProcessBusinessLogicAsync()
+{
+    if (!IsBusinessRuleValid())
+    {
+        return await Task.FromException&amp;lt;BusinessResult&amp;gt;(
+            new BusinessException(&amp;quot;Business rule violation&amp;quot;));
+    }
+    
+    return await ExecuteBusinessLogicAsync();
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الگوهای پیشرفته با&lt;/strong&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; می‌تواند در پیاده‌سازی الگوهای پیچیده‌تر مدیریت خطا در سیستم‌های توزیع‌شده و مقاوم نیز به کار رود.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;تجمیع استثنا (Exception Aggregation)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در سناریوهایی که چندین عملیات مستقل ممکن است شکست بخورند و شما نیاز به جمع‌آوری تمام خطاها دارید، می‌توانید از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;AggregateException&lt;/code&gt; استفاده کنید:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ProcessMultipleItemsAsync(IEnumerable&amp;lt;Item&amp;gt; items)
+{
+    var exceptions = new List&amp;lt;Exception&amp;gt;();
+    
+    foreach (var item in items)
+    {
+        try
+        {
+            await ProcessItemAsync(item);
+        }
+        catch (Exception ex)
+        {
+            exceptions.Add(ex);
+        }
+    }
+    
+    if (exceptions.Any())
+    {
+        return await Task.FromException&amp;lt;Result&amp;gt;(
+            new AggregateException(exceptions));
+    }
+    
+    return new Result();
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این الگو، حتی اگر برخی از عملیات شکست بخورند، برنامه می‌تواند به پردازش ادامه دهد و در نهایت تمام استثناهای رخ داده را گزارش کند.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الگوی تلاش مجدد (Retry Pattern)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;هنگام پیاده‌سازی یک الگوی تلاش مجدد برای عملیات‌های مستعد خطا، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; می‌تواند برای بازگرداندن یک استثنای خاص پس از اتمام تمام تلاش‌ها استفاده شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ExecuteWithRetryAsync(
+    Func&amp;lt;Task&amp;lt;Result&amp;gt;&amp;gt; operation,
+    int maxRetries)
+{
+    for (int i = 0; i &amp;lt; maxRetries; i++)
+    {
+        try
+        {
+            return await operation();
+        }
+        catch (Exception ex)
+        {
+            if (i == maxRetries - 1)
+            {
+                return await Task.FromException&amp;lt;Result&amp;gt;(
+                    new RetryException($&amp;quot;Failed after {maxRetries} attempts&amp;quot;, ex));
+            }
+            
+            await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, i))); // تاخیر نمایی
+        }
+    }
+    
+    // این خط نباید قابل دسترسی باشد مگر اینکه مشکلی در منطق وجود داشته باشد
+    return await Task.FromException&amp;lt;Result&amp;gt;(
+        new InvalidOperationException(&amp;quot;Should not reach here&amp;quot;));
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این الگو به سیستم‌ها اجازه می‌دهد تا از خطاهای موقتی بازیابی شوند و در صورت شکست‌های پایدار، خطا را به شکل کنترل‌شده‌ای گزارش کنند.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الگوی مدارشکن (Circuit Breaker Pattern)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;الگوی مدارشکن برای جلوگیری از فراخوانی مکرر سرویس‌های معیوب طراحی شده است. &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; می‌تواند به عنوان بخشی از این الگو برای بازگرداندن فوری یک تسک خطاخورده زمانی که مدار باز (Open) است، استفاده شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class CircuitBreaker
+{
+    // private readonly ILogger&amp;lt;CircuitBreaker&amp;gt; _logger; // فرض بر وجود لاگر
+    private bool _isOpen;
+    
+    public async Task&amp;lt;Result&amp;gt; ExecuteAsync(Func&amp;lt;Task&amp;lt;Result&amp;gt;&amp;gt; operation)
+    {
+        if (_isOpen)
+        {
+            return await Task.FromException&amp;lt;Result&amp;gt;(
+                new CircuitBreakerException(&amp;quot;Circuit is open&amp;quot;));
+        }
+        
+        try
+        {
+            return await operation();
+        }
+        catch (Exception ex)
+        {
+            _isOpen = true;
+            // _logger.LogError(ex, &amp;quot;Circuit breaker opened&amp;quot;); // فرض بر وجود لاگر
+            return await Task.FromException&amp;lt;Result&amp;gt;(ex);
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این الگو به سیستم کمک می‌کند تا از فروپاشی (Cascade Failure) جلوگیری کند و به سرویس معیوب فرصت بازیابی دهد.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;بهترین شیوه‌ها (Best Practices)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای استفاده مؤثر از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; و حفظ کد قابل نگهداری، رعایت بهترین شیوه‌ها ضروری است.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;استفاده از استثناهای خاص (Specific Exceptions)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همیشه از خاص‌ترین نوع استثنای ممکن استفاده کنید. این کار به مصرف‌کنندگان تسک کمک می‌کند تا نوع مشکل را به طور دقیق‌تری تشخیص داده و مدیریت کنند. پرتاب یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Exception&lt;/code&gt; عمومی کمتر مفید است زیرا اطلاعات کافی در مورد ماهیت خطا ارائه نمی‌دهد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// خوب
+return Task.FromException(new ValidationException(&amp;quot;Invalid input&amp;quot;));
+
+// بد
+return Task.FromException(new Exception(&amp;quot;Invalid input&amp;quot;));&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;درج اطلاعات متنی (Contextual Information)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همراه با استثنا، پیام‌های خطای معنی‌دار و اطلاعات متنی مرتبط را ارائه دهید. این اطلاعات به رفع اشکال (Debugging) و درک سریع‌تر علت خطا کمک می‌کند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ProcessWithContextAsync(InputData data)
+{
+    try
+    {
+        return await ProcessAsync(data);
+    }
+    catch (Exception ex)
+    {
+        return await Task.FromException&amp;lt;Result&amp;gt;(
+            new ProcessingException(
+                $&amp;quot;Failed to process data with ID: {data.Id}&amp;quot;,
+                ex));
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ثبت استثناها (Logging Exceptions)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همیشه استثناها را قبل از ایجاد تسک‌های خطاخورده ثبت (Log) کنید. ثبت خطاها برای پایش (Monitoring) و عیب‌یابی برنامه‌ها در محیط‌های تولید (Production Environments) بسیار مهم است. این کار به شما امکان می‌دهد تا الگوهای خطا را شناسایی کرده و به مشکلات به سرعت پاسخ دهید:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ProcessWithLoggingAsync()
+{
+    try
+    {
+        return await ProcessAsync();
+    }
+    catch (Exception ex)
+    {
+        // _logger.LogError(ex, &amp;quot;Operation failed&amp;quot;); // فرض بر وجود لاگر
+        return await Task.FromException&amp;lt;Result&amp;gt;(ex);
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مثال کاربردی در دنیای واقعی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای درک بهتر نحوه استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; در یک سناریوی واقعی، یک سرویس پردازش داده را در نظر بگیرید:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class DataProcessingService
+{
+    // private readonly ILogger&amp;lt;DataProcessingService&amp;gt; _logger; // فرض بر وجود لاگر
+    private readonly IDataValidator _validator;
+    private readonly IDataProcessor _processor;
+    
+    public DataProcessingService(IDataValidator validator, IDataProcessor processor) // سازنده
+    {
+        _validator = validator;
+        _processor = processor;
+    }
+
+    public async Task&amp;lt;ProcessedData&amp;gt; ProcessDataAsync(RawData data)
+    {
+        try
+        {
+            // اعتبارسنجی ورودی
+            if (!await _validator.ValidateAsync(data))
+            {
+                // _logger.LogWarning(&amp;quot;Invalid data received: {@Data}&amp;quot;, data); // فرض بر وجود لاگر
+                return await Task.FromException&amp;lt;ProcessedData&amp;gt;(
+                    new ValidationException(&amp;quot;Invalid data format&amp;quot;));
+            }
+            
+            // پردازش داده
+            var result = await _processor.ProcessAsync(data);
+            
+            // اعتبارسنجی خروجی
+            if (!IsValid(result)) // فرض بر وجود متد IsValid
+            {
+                // _logger.LogError(&amp;quot;Invalid result generated: {@Result}&amp;quot;, result); // فرض بر وجود لاگر
+                return await Task.FromException&amp;lt;ProcessedData&amp;gt;(
+                    new ProcessingException(&amp;quot;Invalid result generated&amp;quot;));
+            }
+            
+            return result;
+        }
+        catch (Exception ex)
+        {
+            // _logger.LogError(ex, &amp;quot;Failed to process data: {@Data}&amp;quot;, data); // فرض بر وجود لاگر
+            return await Task.FromException&amp;lt;ProcessedData&amp;gt;(ex);
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این مثال، سرویس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;DataProcessingService&lt;/code&gt; از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; در چندین نقطه استفاده می‌کند:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;اگر داده‌های ورودی نامعتبر باشند، یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ValidationException&lt;/code&gt; را در یک تسک خطاخورده بازمی‌گرداند.&lt;/li&gt;&lt;li&gt;اگر نتیجه پردازش نامعتبر باشد، یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ProcessingException&lt;/code&gt; را بازمی‌گرداند.&lt;/li&gt;&lt;li&gt;برای هر استثنای دیگری که در طول پردازش رخ می‌دهد، استثنا را ثبت کرده و آن را در یک تسک خطاخورده کپسوله می‌کند. این رویکرد تضمین می‌کند که تمامی خطاها به طور سازگار و قابل پیش‌بینی در طول فرایند ناهمگام مدیریت می‌شوند.&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; ابزاری قدرتمند برای مدیریت استثناها در کد ناهمگام #C است. این متد راهی تمیز و کارآمد برای انتشار خطاها و حفظ زمینه ناهمگام فراهم می‌کند. با درک زمانی که باید از آن استفاده کرد و با رعایت بهترین شیوه‌ها مانند استفاده از استثناهای خاص، گنجاندن اطلاعات متنی و ثبت خطاها، توسعه‌دهندگان می‌توانند کدی مقاوم‌تر و قابل نگهداری ایجاد کنند. در حالی که &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; ممکن است در هر عملیات ناهمگام مورد نیاز نباشد، تسلط بر آن می‌تواند به طور قابل توجهی کیفیت و استحکام برنامه‌های .NET را بهبود بخشد.&lt;/div&gt;">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="مدیریت خطا در برنامه‌نویسی ناهمگام #C: درک Task.FromException">
+    <meta property="og:description" content="&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برنامه‌نویسی ناهمگام (Asynchronous Programming) به برنامه‌نویسان اجازه می‌دهد تا برنامه‌های پاسخگوتر و کارآمدتری بسازند. با این حال، مدیریت استثناها (Exception Handling) در محیط‌های ناهمگام می‌تواند پیچیدگی‌هایی به همراه داشته باشد. در حالی که توسعه‌دهندگان به استفاده از بلوک‌های &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;try-catch&lt;/code&gt; برای مدیریت خطاها عادت دارند، متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; رویکردی قدرتمند برای مدیریت استثناها در الگوی ناهمگام مبتنی بر تسک (Task-based Asynchronous Pattern - TAP) ارائه می‌دهد. این مقاله به بررسی عمیق &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt;، کاربردهای آن، الگوهای پیشرفته، بهترین شیوه‌ها و یک مثال کاربردی در دنیای واقعی می‌پردازد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه‌ای بر&lt;/strong&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; یک متد استاتیک است که یک شیء &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task&lt;/code&gt; را ایجاد می‌کند که در وضعیت خطا (Faulted State) به پایان رسیده است و شامل استثنای مشخص‌شده است. این متد بخشی از کتابخانه موازی تسک (Task Parallel Library - TPL) است و راهی صریح برای ایجاد یک تسک خطاخورده فراهم می‌کند. دو نسخه از این متد وجود دارد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static Task FromException(Exception exception)&lt;/code&gt;: برای تسک‌هایی که نتیجه‌ای باز نمی‌گردانند.&lt;/li&gt;&lt;li&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static Task&amp;lt;TResult&amp;gt; FromException&amp;lt;TResult&amp;gt;(Exception exception)&lt;/code&gt;: برای تسک‌هایی که یک نتیجه از نوع &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;TResult&lt;/code&gt; را باز می‌گردانند.&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;کاربرد پایه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در سناریوهای پایه، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; برای تبدیل یک استثنای گرفته شده به یک تسک خطاخورده استفاده می‌شود. به عنوان مثال، در یک متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;async&lt;/code&gt;، اگر عملیاتی ناموفق باشد، می‌توان به جای پرتاب مستقیم استثنا، یک تسک خطاخورده را بازگرداند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task ProcessDataAsync()
+{
+    try
+    {
+        // عملیات ناهمگام
+        await DoWorkAsync();
+    }
+    catch (Exception ex)
+    {
+        return Task.FromException(ex);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همچنین، برای تسک‌های عمومی (Generic Tasks) که دارای یک نوع بازگشتی (Return Type) خاص هستند، می‌توان از نسخه عمومی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; استفاده کرد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;string&amp;gt; GetDataAsync()
+{
+    try
+    {
+        return await FetchDataAsync();
+    }
+    catch (Exception ex)
+    {
+        return Task.FromException&amp;lt;string&amp;gt;(ex);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رویکرد تضمین می‌کند که جریان کنترل ناهمگام حفظ شود و مصرف‌کننده تسک بتواند استثنا را به صورت استاندارد مدیریت کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;موارد استفاده رایج&lt;/strong&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; در سناریوهای مختلفی که نیاز به مدیریت صریح خطا در تسک‌های ناهمگام است، بسیار مفید است.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;سناریوهای اعتبارسنجی (Validation Scenarios)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در مواردی که پارامترهای ورودی قبل از اجرای منطق اصلی نیاز به اعتبارسنجی دارند، می‌توان از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; برای بازگرداندن سریع یک تسک خطاخورده با استثنای اعتبارسنجی مناسب استفاده کرد. این کار از ادامه اجرای کد با داده‌های نامعتبر جلوگیری می‌کند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;ValidationResult&amp;gt; ValidateDataAsync(DataModel data)
+{
+    if (data == null)
+    {
+        return await Task.FromException&amp;lt;ValidationResult&amp;gt;(
+            new ArgumentNullException(nameof(data)));
+    }
+    
+    if (!IsValid(data))
+    {
+        return await Task.FromException&amp;lt;ValidationResult&amp;gt;(
+            new ValidationException(&amp;quot;Invalid data format&amp;quot;));
+    }
+    
+    return await PerformValidationAsync(data);
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;انتشار خطا (Error Propagation)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;زمانی که نیاز است خطاها به سمت بالا در زنجیره فراخوانی (Call Stack) منتشر شوند، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; یک روش تمیز را فراهم می‌کند. این رویکرد به ویژه در لایه‌های مختلف یک برنامه مفید است که هر لایه مسئول مدیریت خطاهای خاص خود است اما در نهایت خطا را برای مدیریت نهایی به لایه‌های بالاتر منتقل می‌کند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ProcessWithErrorHandlingAsync()
+{
+    try
+    {
+        var data = await LoadDataAsync();
+        return await ProcessDataAsync(data);
+    }
+    catch (DataLoadException ex)
+    {
+        // _logger.LogError(ex, &amp;quot;Failed to load data&amp;quot;); // فرض بر وجود لاگر
+        return await Task.FromException&amp;lt;Result&amp;gt;(ex);
+    }
+    catch (ProcessingException ex)
+    {
+        // _logger.LogError(ex, &amp;quot;Failed to process data&amp;quot;); // فرض بر وجود لاگر
+        return await Task.FromException&amp;lt;Result&amp;gt;(ex);
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;انواع استثناهای سفارشی (Custom Exception Types)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;هنگام کار با استثناهای سفارشی که منطق تجاری خاصی را نشان می‌دهند، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; به شما امکان می‌دهد تا این استثناها را به طور صریح در یک تسک خطاخورده کپسوله کنید:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class BusinessException : Exception
+{
+    public BusinessException(string message) : base(message) { }
+}
+
+public async Task&amp;lt;BusinessResult&amp;gt; ProcessBusinessLogicAsync()
+{
+    if (!IsBusinessRuleValid())
+    {
+        return await Task.FromException&amp;lt;BusinessResult&amp;gt;(
+            new BusinessException(&amp;quot;Business rule violation&amp;quot;));
+    }
+    
+    return await ExecuteBusinessLogicAsync();
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الگوهای پیشرفته با&lt;/strong&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; می‌تواند در پیاده‌سازی الگوهای پیچیده‌تر مدیریت خطا در سیستم‌های توزیع‌شده و مقاوم نیز به کار رود.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;تجمیع استثنا (Exception Aggregation)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در سناریوهایی که چندین عملیات مستقل ممکن است شکست بخورند و شما نیاز به جمع‌آوری تمام خطاها دارید، می‌توانید از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;AggregateException&lt;/code&gt; استفاده کنید:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ProcessMultipleItemsAsync(IEnumerable&amp;lt;Item&amp;gt; items)
+{
+    var exceptions = new List&amp;lt;Exception&amp;gt;();
+    
+    foreach (var item in items)
+    {
+        try
+        {
+            await ProcessItemAsync(item);
+        }
+        catch (Exception ex)
+        {
+            exceptions.Add(ex);
+        }
+    }
+    
+    if (exceptions.Any())
+    {
+        return await Task.FromException&amp;lt;Result&amp;gt;(
+            new AggregateException(exceptions));
+    }
+    
+    return new Result();
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این الگو، حتی اگر برخی از عملیات شکست بخورند، برنامه می‌تواند به پردازش ادامه دهد و در نهایت تمام استثناهای رخ داده را گزارش کند.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الگوی تلاش مجدد (Retry Pattern)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;هنگام پیاده‌سازی یک الگوی تلاش مجدد برای عملیات‌های مستعد خطا، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; می‌تواند برای بازگرداندن یک استثنای خاص پس از اتمام تمام تلاش‌ها استفاده شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ExecuteWithRetryAsync(
+    Func&amp;lt;Task&amp;lt;Result&amp;gt;&amp;gt; operation,
+    int maxRetries)
+{
+    for (int i = 0; i &amp;lt; maxRetries; i++)
+    {
+        try
+        {
+            return await operation();
+        }
+        catch (Exception ex)
+        {
+            if (i == maxRetries - 1)
+            {
+                return await Task.FromException&amp;lt;Result&amp;gt;(
+                    new RetryException($&amp;quot;Failed after {maxRetries} attempts&amp;quot;, ex));
+            }
+            
+            await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, i))); // تاخیر نمایی
+        }
+    }
+    
+    // این خط نباید قابل دسترسی باشد مگر اینکه مشکلی در منطق وجود داشته باشد
+    return await Task.FromException&amp;lt;Result&amp;gt;(
+        new InvalidOperationException(&amp;quot;Should not reach here&amp;quot;));
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این الگو به سیستم‌ها اجازه می‌دهد تا از خطاهای موقتی بازیابی شوند و در صورت شکست‌های پایدار، خطا را به شکل کنترل‌شده‌ای گزارش کنند.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الگوی مدارشکن (Circuit Breaker Pattern)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;الگوی مدارشکن برای جلوگیری از فراخوانی مکرر سرویس‌های معیوب طراحی شده است. &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; می‌تواند به عنوان بخشی از این الگو برای بازگرداندن فوری یک تسک خطاخورده زمانی که مدار باز (Open) است، استفاده شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class CircuitBreaker
+{
+    // private readonly ILogger&amp;lt;CircuitBreaker&amp;gt; _logger; // فرض بر وجود لاگر
+    private bool _isOpen;
+    
+    public async Task&amp;lt;Result&amp;gt; ExecuteAsync(Func&amp;lt;Task&amp;lt;Result&amp;gt;&amp;gt; operation)
+    {
+        if (_isOpen)
+        {
+            return await Task.FromException&amp;lt;Result&amp;gt;(
+                new CircuitBreakerException(&amp;quot;Circuit is open&amp;quot;));
+        }
+        
+        try
+        {
+            return await operation();
+        }
+        catch (Exception ex)
+        {
+            _isOpen = true;
+            // _logger.LogError(ex, &amp;quot;Circuit breaker opened&amp;quot;); // فرض بر وجود لاگر
+            return await Task.FromException&amp;lt;Result&amp;gt;(ex);
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این الگو به سیستم کمک می‌کند تا از فروپاشی (Cascade Failure) جلوگیری کند و به سرویس معیوب فرصت بازیابی دهد.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;بهترین شیوه‌ها (Best Practices)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای استفاده مؤثر از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; و حفظ کد قابل نگهداری، رعایت بهترین شیوه‌ها ضروری است.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;استفاده از استثناهای خاص (Specific Exceptions)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همیشه از خاص‌ترین نوع استثنای ممکن استفاده کنید. این کار به مصرف‌کنندگان تسک کمک می‌کند تا نوع مشکل را به طور دقیق‌تری تشخیص داده و مدیریت کنند. پرتاب یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Exception&lt;/code&gt; عمومی کمتر مفید است زیرا اطلاعات کافی در مورد ماهیت خطا ارائه نمی‌دهد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// خوب
+return Task.FromException(new ValidationException(&amp;quot;Invalid input&amp;quot;));
+
+// بد
+return Task.FromException(new Exception(&amp;quot;Invalid input&amp;quot;));&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;درج اطلاعات متنی (Contextual Information)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همراه با استثنا، پیام‌های خطای معنی‌دار و اطلاعات متنی مرتبط را ارائه دهید. این اطلاعات به رفع اشکال (Debugging) و درک سریع‌تر علت خطا کمک می‌کند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ProcessWithContextAsync(InputData data)
+{
+    try
+    {
+        return await ProcessAsync(data);
+    }
+    catch (Exception ex)
+    {
+        return await Task.FromException&amp;lt;Result&amp;gt;(
+            new ProcessingException(
+                $&amp;quot;Failed to process data with ID: {data.Id}&amp;quot;,
+                ex));
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ثبت استثناها (Logging Exceptions)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همیشه استثناها را قبل از ایجاد تسک‌های خطاخورده ثبت (Log) کنید. ثبت خطاها برای پایش (Monitoring) و عیب‌یابی برنامه‌ها در محیط‌های تولید (Production Environments) بسیار مهم است. این کار به شما امکان می‌دهد تا الگوهای خطا را شناسایی کرده و به مشکلات به سرعت پاسخ دهید:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ProcessWithLoggingAsync()
+{
+    try
+    {
+        return await ProcessAsync();
+    }
+    catch (Exception ex)
+    {
+        // _logger.LogError(ex, &amp;quot;Operation failed&amp;quot;); // فرض بر وجود لاگر
+        return await Task.FromException&amp;lt;Result&amp;gt;(ex);
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مثال کاربردی در دنیای واقعی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای درک بهتر نحوه استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; در یک سناریوی واقعی، یک سرویس پردازش داده را در نظر بگیرید:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class DataProcessingService
+{
+    // private readonly ILogger&amp;lt;DataProcessingService&amp;gt; _logger; // فرض بر وجود لاگر
+    private readonly IDataValidator _validator;
+    private readonly IDataProcessor _processor;
+    
+    public DataProcessingService(IDataValidator validator, IDataProcessor processor) // سازنده
+    {
+        _validator = validator;
+        _processor = processor;
+    }
+
+    public async Task&amp;lt;ProcessedData&amp;gt; ProcessDataAsync(RawData data)
+    {
+        try
+        {
+            // اعتبارسنجی ورودی
+            if (!await _validator.ValidateAsync(data))
+            {
+                // _logger.LogWarning(&amp;quot;Invalid data received: {@Data}&amp;quot;, data); // فرض بر وجود لاگر
+                return await Task.FromException&amp;lt;ProcessedData&amp;gt;(
+                    new ValidationException(&amp;quot;Invalid data format&amp;quot;));
+            }
+            
+            // پردازش داده
+            var result = await _processor.ProcessAsync(data);
+            
+            // اعتبارسنجی خروجی
+            if (!IsValid(result)) // فرض بر وجود متد IsValid
+            {
+                // _logger.LogError(&amp;quot;Invalid result generated: {@Result}&amp;quot;, result); // فرض بر وجود لاگر
+                return await Task.FromException&amp;lt;ProcessedData&amp;gt;(
+                    new ProcessingException(&amp;quot;Invalid result generated&amp;quot;));
+            }
+            
+            return result;
+        }
+        catch (Exception ex)
+        {
+            // _logger.LogError(ex, &amp;quot;Failed to process data: {@Data}&amp;quot;, data); // فرض بر وجود لاگر
+            return await Task.FromException&amp;lt;ProcessedData&amp;gt;(ex);
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این مثال، سرویس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;DataProcessingService&lt;/code&gt; از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; در چندین نقطه استفاده می‌کند:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;اگر داده‌های ورودی نامعتبر باشند، یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ValidationException&lt;/code&gt; را در یک تسک خطاخورده بازمی‌گرداند.&lt;/li&gt;&lt;li&gt;اگر نتیجه پردازش نامعتبر باشد، یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ProcessingException&lt;/code&gt; را بازمی‌گرداند.&lt;/li&gt;&lt;li&gt;برای هر استثنای دیگری که در طول پردازش رخ می‌دهد، استثنا را ثبت کرده و آن را در یک تسک خطاخورده کپسوله می‌کند. این رویکرد تضمین می‌کند که تمامی خطاها به طور سازگار و قابل پیش‌بینی در طول فرایند ناهمگام مدیریت می‌شوند.&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; ابزاری قدرتمند برای مدیریت استثناها در کد ناهمگام #C است. این متد راهی تمیز و کارآمد برای انتشار خطاها و حفظ زمینه ناهمگام فراهم می‌کند. با درک زمانی که باید از آن استفاده کرد و با رعایت بهترین شیوه‌ها مانند استفاده از استثناهای خاص، گنجاندن اطلاعات متنی و ثبت خطاها، توسعه‌دهندگان می‌توانند کدی مقاوم‌تر و قابل نگهداری ایجاد کنند. در حالی که &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; ممکن است در هر عملیات ناهمگام مورد نیاز نباشد، تسلط بر آن می‌تواند به طور قابل توجهی کیفیت و استحکام برنامه‌های .NET را بهبود بخشد.&lt;/div&gt;">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="مدیریت خطا در برنامه‌نویسی ناهمگام #C: درک Task.FromException">
+    <meta name="twitter:description" content="&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برنامه‌نویسی ناهمگام (Asynchronous Programming) به برنامه‌نویسان اجازه می‌دهد تا برنامه‌های پاسخگوتر و کارآمدتری بسازند. با این حال، مدیریت استثناها (Exception Handling) در محیط‌های ناهمگام می‌تواند پیچیدگی‌هایی به همراه داشته باشد. در حالی که توسعه‌دهندگان به استفاده از بلوک‌های &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;try-catch&lt;/code&gt; برای مدیریت خطاها عادت دارند، متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; رویکردی قدرتمند برای مدیریت استثناها در الگوی ناهمگام مبتنی بر تسک (Task-based Asynchronous Pattern - TAP) ارائه می‌دهد. این مقاله به بررسی عمیق &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt;، کاربردهای آن، الگوهای پیشرفته، بهترین شیوه‌ها و یک مثال کاربردی در دنیای واقعی می‌پردازد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه‌ای بر&lt;/strong&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; یک متد استاتیک است که یک شیء &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task&lt;/code&gt; را ایجاد می‌کند که در وضعیت خطا (Faulted State) به پایان رسیده است و شامل استثنای مشخص‌شده است. این متد بخشی از کتابخانه موازی تسک (Task Parallel Library - TPL) است و راهی صریح برای ایجاد یک تسک خطاخورده فراهم می‌کند. دو نسخه از این متد وجود دارد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static Task FromException(Exception exception)&lt;/code&gt;: برای تسک‌هایی که نتیجه‌ای باز نمی‌گردانند.&lt;/li&gt;&lt;li&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static Task&amp;lt;TResult&amp;gt; FromException&amp;lt;TResult&amp;gt;(Exception exception)&lt;/code&gt;: برای تسک‌هایی که یک نتیجه از نوع &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;TResult&lt;/code&gt; را باز می‌گردانند.&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;کاربرد پایه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در سناریوهای پایه، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; برای تبدیل یک استثنای گرفته شده به یک تسک خطاخورده استفاده می‌شود. به عنوان مثال، در یک متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;async&lt;/code&gt;، اگر عملیاتی ناموفق باشد، می‌توان به جای پرتاب مستقیم استثنا، یک تسک خطاخورده را بازگرداند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task ProcessDataAsync()
+{
+    try
+    {
+        // عملیات ناهمگام
+        await DoWorkAsync();
+    }
+    catch (Exception ex)
+    {
+        return Task.FromException(ex);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همچنین، برای تسک‌های عمومی (Generic Tasks) که دارای یک نوع بازگشتی (Return Type) خاص هستند، می‌توان از نسخه عمومی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; استفاده کرد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;string&amp;gt; GetDataAsync()
+{
+    try
+    {
+        return await FetchDataAsync();
+    }
+    catch (Exception ex)
+    {
+        return Task.FromException&amp;lt;string&amp;gt;(ex);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رویکرد تضمین می‌کند که جریان کنترل ناهمگام حفظ شود و مصرف‌کننده تسک بتواند استثنا را به صورت استاندارد مدیریت کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;موارد استفاده رایج&lt;/strong&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; در سناریوهای مختلفی که نیاز به مدیریت صریح خطا در تسک‌های ناهمگام است، بسیار مفید است.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;سناریوهای اعتبارسنجی (Validation Scenarios)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در مواردی که پارامترهای ورودی قبل از اجرای منطق اصلی نیاز به اعتبارسنجی دارند، می‌توان از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; برای بازگرداندن سریع یک تسک خطاخورده با استثنای اعتبارسنجی مناسب استفاده کرد. این کار از ادامه اجرای کد با داده‌های نامعتبر جلوگیری می‌کند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;ValidationResult&amp;gt; ValidateDataAsync(DataModel data)
+{
+    if (data == null)
+    {
+        return await Task.FromException&amp;lt;ValidationResult&amp;gt;(
+            new ArgumentNullException(nameof(data)));
+    }
+    
+    if (!IsValid(data))
+    {
+        return await Task.FromException&amp;lt;ValidationResult&amp;gt;(
+            new ValidationException(&amp;quot;Invalid data format&amp;quot;));
+    }
+    
+    return await PerformValidationAsync(data);
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;انتشار خطا (Error Propagation)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;زمانی که نیاز است خطاها به سمت بالا در زنجیره فراخوانی (Call Stack) منتشر شوند، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; یک روش تمیز را فراهم می‌کند. این رویکرد به ویژه در لایه‌های مختلف یک برنامه مفید است که هر لایه مسئول مدیریت خطاهای خاص خود است اما در نهایت خطا را برای مدیریت نهایی به لایه‌های بالاتر منتقل می‌کند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ProcessWithErrorHandlingAsync()
+{
+    try
+    {
+        var data = await LoadDataAsync();
+        return await ProcessDataAsync(data);
+    }
+    catch (DataLoadException ex)
+    {
+        // _logger.LogError(ex, &amp;quot;Failed to load data&amp;quot;); // فرض بر وجود لاگر
+        return await Task.FromException&amp;lt;Result&amp;gt;(ex);
+    }
+    catch (ProcessingException ex)
+    {
+        // _logger.LogError(ex, &amp;quot;Failed to process data&amp;quot;); // فرض بر وجود لاگر
+        return await Task.FromException&amp;lt;Result&amp;gt;(ex);
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;انواع استثناهای سفارشی (Custom Exception Types)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;هنگام کار با استثناهای سفارشی که منطق تجاری خاصی را نشان می‌دهند، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; به شما امکان می‌دهد تا این استثناها را به طور صریح در یک تسک خطاخورده کپسوله کنید:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class BusinessException : Exception
+{
+    public BusinessException(string message) : base(message) { }
+}
+
+public async Task&amp;lt;BusinessResult&amp;gt; ProcessBusinessLogicAsync()
+{
+    if (!IsBusinessRuleValid())
+    {
+        return await Task.FromException&amp;lt;BusinessResult&amp;gt;(
+            new BusinessException(&amp;quot;Business rule violation&amp;quot;));
+    }
+    
+    return await ExecuteBusinessLogicAsync();
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الگوهای پیشرفته با&lt;/strong&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; می‌تواند در پیاده‌سازی الگوهای پیچیده‌تر مدیریت خطا در سیستم‌های توزیع‌شده و مقاوم نیز به کار رود.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;تجمیع استثنا (Exception Aggregation)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در سناریوهایی که چندین عملیات مستقل ممکن است شکست بخورند و شما نیاز به جمع‌آوری تمام خطاها دارید، می‌توانید از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;AggregateException&lt;/code&gt; استفاده کنید:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ProcessMultipleItemsAsync(IEnumerable&amp;lt;Item&amp;gt; items)
+{
+    var exceptions = new List&amp;lt;Exception&amp;gt;();
+    
+    foreach (var item in items)
+    {
+        try
+        {
+            await ProcessItemAsync(item);
+        }
+        catch (Exception ex)
+        {
+            exceptions.Add(ex);
+        }
+    }
+    
+    if (exceptions.Any())
+    {
+        return await Task.FromException&amp;lt;Result&amp;gt;(
+            new AggregateException(exceptions));
+    }
+    
+    return new Result();
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این الگو، حتی اگر برخی از عملیات شکست بخورند، برنامه می‌تواند به پردازش ادامه دهد و در نهایت تمام استثناهای رخ داده را گزارش کند.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الگوی تلاش مجدد (Retry Pattern)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;هنگام پیاده‌سازی یک الگوی تلاش مجدد برای عملیات‌های مستعد خطا، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; می‌تواند برای بازگرداندن یک استثنای خاص پس از اتمام تمام تلاش‌ها استفاده شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ExecuteWithRetryAsync(
+    Func&amp;lt;Task&amp;lt;Result&amp;gt;&amp;gt; operation,
+    int maxRetries)
+{
+    for (int i = 0; i &amp;lt; maxRetries; i++)
+    {
+        try
+        {
+            return await operation();
+        }
+        catch (Exception ex)
+        {
+            if (i == maxRetries - 1)
+            {
+                return await Task.FromException&amp;lt;Result&amp;gt;(
+                    new RetryException($&amp;quot;Failed after {maxRetries} attempts&amp;quot;, ex));
+            }
+            
+            await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, i))); // تاخیر نمایی
+        }
+    }
+    
+    // این خط نباید قابل دسترسی باشد مگر اینکه مشکلی در منطق وجود داشته باشد
+    return await Task.FromException&amp;lt;Result&amp;gt;(
+        new InvalidOperationException(&amp;quot;Should not reach here&amp;quot;));
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این الگو به سیستم‌ها اجازه می‌دهد تا از خطاهای موقتی بازیابی شوند و در صورت شکست‌های پایدار، خطا را به شکل کنترل‌شده‌ای گزارش کنند.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الگوی مدارشکن (Circuit Breaker Pattern)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;الگوی مدارشکن برای جلوگیری از فراخوانی مکرر سرویس‌های معیوب طراحی شده است. &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; می‌تواند به عنوان بخشی از این الگو برای بازگرداندن فوری یک تسک خطاخورده زمانی که مدار باز (Open) است، استفاده شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class CircuitBreaker
+{
+    // private readonly ILogger&amp;lt;CircuitBreaker&amp;gt; _logger; // فرض بر وجود لاگر
+    private bool _isOpen;
+    
+    public async Task&amp;lt;Result&amp;gt; ExecuteAsync(Func&amp;lt;Task&amp;lt;Result&amp;gt;&amp;gt; operation)
+    {
+        if (_isOpen)
+        {
+            return await Task.FromException&amp;lt;Result&amp;gt;(
+                new CircuitBreakerException(&amp;quot;Circuit is open&amp;quot;));
+        }
+        
+        try
+        {
+            return await operation();
+        }
+        catch (Exception ex)
+        {
+            _isOpen = true;
+            // _logger.LogError(ex, &amp;quot;Circuit breaker opened&amp;quot;); // فرض بر وجود لاگر
+            return await Task.FromException&amp;lt;Result&amp;gt;(ex);
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این الگو به سیستم کمک می‌کند تا از فروپاشی (Cascade Failure) جلوگیری کند و به سرویس معیوب فرصت بازیابی دهد.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;بهترین شیوه‌ها (Best Practices)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای استفاده مؤثر از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; و حفظ کد قابل نگهداری، رعایت بهترین شیوه‌ها ضروری است.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;استفاده از استثناهای خاص (Specific Exceptions)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همیشه از خاص‌ترین نوع استثنای ممکن استفاده کنید. این کار به مصرف‌کنندگان تسک کمک می‌کند تا نوع مشکل را به طور دقیق‌تری تشخیص داده و مدیریت کنند. پرتاب یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Exception&lt;/code&gt; عمومی کمتر مفید است زیرا اطلاعات کافی در مورد ماهیت خطا ارائه نمی‌دهد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// خوب
+return Task.FromException(new ValidationException(&amp;quot;Invalid input&amp;quot;));
+
+// بد
+return Task.FromException(new Exception(&amp;quot;Invalid input&amp;quot;));&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;درج اطلاعات متنی (Contextual Information)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همراه با استثنا، پیام‌های خطای معنی‌دار و اطلاعات متنی مرتبط را ارائه دهید. این اطلاعات به رفع اشکال (Debugging) و درک سریع‌تر علت خطا کمک می‌کند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ProcessWithContextAsync(InputData data)
+{
+    try
+    {
+        return await ProcessAsync(data);
+    }
+    catch (Exception ex)
+    {
+        return await Task.FromException&amp;lt;Result&amp;gt;(
+            new ProcessingException(
+                $&amp;quot;Failed to process data with ID: {data.Id}&amp;quot;,
+                ex));
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ثبت استثناها (Logging Exceptions)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همیشه استثناها را قبل از ایجاد تسک‌های خطاخورده ثبت (Log) کنید. ثبت خطاها برای پایش (Monitoring) و عیب‌یابی برنامه‌ها در محیط‌های تولید (Production Environments) بسیار مهم است. این کار به شما امکان می‌دهد تا الگوهای خطا را شناسایی کرده و به مشکلات به سرعت پاسخ دهید:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ProcessWithLoggingAsync()
+{
+    try
+    {
+        return await ProcessAsync();
+    }
+    catch (Exception ex)
+    {
+        // _logger.LogError(ex, &amp;quot;Operation failed&amp;quot;); // فرض بر وجود لاگر
+        return await Task.FromException&amp;lt;Result&amp;gt;(ex);
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مثال کاربردی در دنیای واقعی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای درک بهتر نحوه استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; در یک سناریوی واقعی، یک سرویس پردازش داده را در نظر بگیرید:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class DataProcessingService
+{
+    // private readonly ILogger&amp;lt;DataProcessingService&amp;gt; _logger; // فرض بر وجود لاگر
+    private readonly IDataValidator _validator;
+    private readonly IDataProcessor _processor;
+    
+    public DataProcessingService(IDataValidator validator, IDataProcessor processor) // سازنده
+    {
+        _validator = validator;
+        _processor = processor;
+    }
+
+    public async Task&amp;lt;ProcessedData&amp;gt; ProcessDataAsync(RawData data)
+    {
+        try
+        {
+            // اعتبارسنجی ورودی
+            if (!await _validator.ValidateAsync(data))
+            {
+                // _logger.LogWarning(&amp;quot;Invalid data received: {@Data}&amp;quot;, data); // فرض بر وجود لاگر
+                return await Task.FromException&amp;lt;ProcessedData&amp;gt;(
+                    new ValidationException(&amp;quot;Invalid data format&amp;quot;));
+            }
+            
+            // پردازش داده
+            var result = await _processor.ProcessAsync(data);
+            
+            // اعتبارسنجی خروجی
+            if (!IsValid(result)) // فرض بر وجود متد IsValid
+            {
+                // _logger.LogError(&amp;quot;Invalid result generated: {@Result}&amp;quot;, result); // فرض بر وجود لاگر
+                return await Task.FromException&amp;lt;ProcessedData&amp;gt;(
+                    new ProcessingException(&amp;quot;Invalid result generated&amp;quot;));
+            }
+            
+            return result;
+        }
+        catch (Exception ex)
+        {
+            // _logger.LogError(ex, &amp;quot;Failed to process data: {@Data}&amp;quot;, data); // فرض بر وجود لاگر
+            return await Task.FromException&amp;lt;ProcessedData&amp;gt;(ex);
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این مثال، سرویس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;DataProcessingService&lt;/code&gt; از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; در چندین نقطه استفاده می‌کند:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;اگر داده‌های ورودی نامعتبر باشند، یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ValidationException&lt;/code&gt; را در یک تسک خطاخورده بازمی‌گرداند.&lt;/li&gt;&lt;li&gt;اگر نتیجه پردازش نامعتبر باشد، یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ProcessingException&lt;/code&gt; را بازمی‌گرداند.&lt;/li&gt;&lt;li&gt;برای هر استثنای دیگری که در طول پردازش رخ می‌دهد، استثنا را ثبت کرده و آن را در یک تسک خطاخورده کپسوله می‌کند. این رویکرد تضمین می‌کند که تمامی خطاها به طور سازگار و قابل پیش‌بینی در طول فرایند ناهمگام مدیریت می‌شوند.&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; ابزاری قدرتمند برای مدیریت استثناها در کد ناهمگام #C است. این متد راهی تمیز و کارآمد برای انتشار خطاها و حفظ زمینه ناهمگام فراهم می‌کند. با درک زمانی که باید از آن استفاده کرد و با رعایت بهترین شیوه‌ها مانند استفاده از استثناهای خاص، گنجاندن اطلاعات متنی و ثبت خطاها، توسعه‌دهندگان می‌توانند کدی مقاوم‌تر و قابل نگهداری ایجاد کنند. در حالی که &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; ممکن است در هر عملیات ناهمگام مورد نیاز نباشد، تسلط بر آن می‌تواند به طور قابل توجهی کیفیت و استحکام برنامه‌های .NET را بهبود بخشد.&lt;/div&gt;">
+    <meta name="twitter:card" content="&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برنامه‌نویسی ناهمگام (Asynchronous Programming) به برنامه‌نویسان اجازه می‌دهد تا برنامه‌های پاسخگوتر و کارآمدتری بسازند. با این حال، مدیریت استثناها (Exception Handling) در محیط‌های ناهمگام می‌تواند پیچیدگی‌هایی به همراه داشته باشد. در حالی که توسعه‌دهندگان به استفاده از بلوک‌های &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;try-catch&lt;/code&gt; برای مدیریت خطاها عادت دارند، متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; رویکردی قدرتمند برای مدیریت استثناها در الگوی ناهمگام مبتنی بر تسک (Task-based Asynchronous Pattern - TAP) ارائه می‌دهد. این مقاله به بررسی عمیق &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt;، کاربردهای آن، الگوهای پیشرفته، بهترین شیوه‌ها و یک مثال کاربردی در دنیای واقعی می‌پردازد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه‌ای بر&lt;/strong&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; یک متد استاتیک است که یک شیء &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task&lt;/code&gt; را ایجاد می‌کند که در وضعیت خطا (Faulted State) به پایان رسیده است و شامل استثنای مشخص‌شده است. این متد بخشی از کتابخانه موازی تسک (Task Parallel Library - TPL) است و راهی صریح برای ایجاد یک تسک خطاخورده فراهم می‌کند. دو نسخه از این متد وجود دارد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static Task FromException(Exception exception)&lt;/code&gt;: برای تسک‌هایی که نتیجه‌ای باز نمی‌گردانند.&lt;/li&gt;&lt;li&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static Task&amp;lt;TResult&amp;gt; FromException&amp;lt;TResult&amp;gt;(Exception exception)&lt;/code&gt;: برای تسک‌هایی که یک نتیجه از نوع &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;TResult&lt;/code&gt; را باز می‌گردانند.&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;کاربرد پایه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در سناریوهای پایه، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; برای تبدیل یک استثنای گرفته شده به یک تسک خطاخورده استفاده می‌شود. به عنوان مثال، در یک متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;async&lt;/code&gt;، اگر عملیاتی ناموفق باشد، می‌توان به جای پرتاب مستقیم استثنا، یک تسک خطاخورده را بازگرداند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task ProcessDataAsync()
+{
+    try
+    {
+        // عملیات ناهمگام
+        await DoWorkAsync();
+    }
+    catch (Exception ex)
+    {
+        return Task.FromException(ex);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همچنین، برای تسک‌های عمومی (Generic Tasks) که دارای یک نوع بازگشتی (Return Type) خاص هستند، می‌توان از نسخه عمومی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; استفاده کرد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;string&amp;gt; GetDataAsync()
+{
+    try
+    {
+        return await FetchDataAsync();
+    }
+    catch (Exception ex)
+    {
+        return Task.FromException&amp;lt;string&amp;gt;(ex);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رویکرد تضمین می‌کند که جریان کنترل ناهمگام حفظ شود و مصرف‌کننده تسک بتواند استثنا را به صورت استاندارد مدیریت کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;موارد استفاده رایج&lt;/strong&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; در سناریوهای مختلفی که نیاز به مدیریت صریح خطا در تسک‌های ناهمگام است، بسیار مفید است.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;سناریوهای اعتبارسنجی (Validation Scenarios)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در مواردی که پارامترهای ورودی قبل از اجرای منطق اصلی نیاز به اعتبارسنجی دارند، می‌توان از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; برای بازگرداندن سریع یک تسک خطاخورده با استثنای اعتبارسنجی مناسب استفاده کرد. این کار از ادامه اجرای کد با داده‌های نامعتبر جلوگیری می‌کند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;ValidationResult&amp;gt; ValidateDataAsync(DataModel data)
+{
+    if (data == null)
+    {
+        return await Task.FromException&amp;lt;ValidationResult&amp;gt;(
+            new ArgumentNullException(nameof(data)));
+    }
+    
+    if (!IsValid(data))
+    {
+        return await Task.FromException&amp;lt;ValidationResult&amp;gt;(
+            new ValidationException(&amp;quot;Invalid data format&amp;quot;));
+    }
+    
+    return await PerformValidationAsync(data);
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;انتشار خطا (Error Propagation)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;زمانی که نیاز است خطاها به سمت بالا در زنجیره فراخوانی (Call Stack) منتشر شوند، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; یک روش تمیز را فراهم می‌کند. این رویکرد به ویژه در لایه‌های مختلف یک برنامه مفید است که هر لایه مسئول مدیریت خطاهای خاص خود است اما در نهایت خطا را برای مدیریت نهایی به لایه‌های بالاتر منتقل می‌کند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ProcessWithErrorHandlingAsync()
+{
+    try
+    {
+        var data = await LoadDataAsync();
+        return await ProcessDataAsync(data);
+    }
+    catch (DataLoadException ex)
+    {
+        // _logger.LogError(ex, &amp;quot;Failed to load data&amp;quot;); // فرض بر وجود لاگر
+        return await Task.FromException&amp;lt;Result&amp;gt;(ex);
+    }
+    catch (ProcessingException ex)
+    {
+        // _logger.LogError(ex, &amp;quot;Failed to process data&amp;quot;); // فرض بر وجود لاگر
+        return await Task.FromException&amp;lt;Result&amp;gt;(ex);
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;انواع استثناهای سفارشی (Custom Exception Types)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;هنگام کار با استثناهای سفارشی که منطق تجاری خاصی را نشان می‌دهند، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; به شما امکان می‌دهد تا این استثناها را به طور صریح در یک تسک خطاخورده کپسوله کنید:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class BusinessException : Exception
+{
+    public BusinessException(string message) : base(message) { }
+}
+
+public async Task&amp;lt;BusinessResult&amp;gt; ProcessBusinessLogicAsync()
+{
+    if (!IsBusinessRuleValid())
+    {
+        return await Task.FromException&amp;lt;BusinessResult&amp;gt;(
+            new BusinessException(&amp;quot;Business rule violation&amp;quot;));
+    }
+    
+    return await ExecuteBusinessLogicAsync();
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الگوهای پیشرفته با&lt;/strong&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; می‌تواند در پیاده‌سازی الگوهای پیچیده‌تر مدیریت خطا در سیستم‌های توزیع‌شده و مقاوم نیز به کار رود.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;تجمیع استثنا (Exception Aggregation)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در سناریوهایی که چندین عملیات مستقل ممکن است شکست بخورند و شما نیاز به جمع‌آوری تمام خطاها دارید، می‌توانید از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;AggregateException&lt;/code&gt; استفاده کنید:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ProcessMultipleItemsAsync(IEnumerable&amp;lt;Item&amp;gt; items)
+{
+    var exceptions = new List&amp;lt;Exception&amp;gt;();
+    
+    foreach (var item in items)
+    {
+        try
+        {
+            await ProcessItemAsync(item);
+        }
+        catch (Exception ex)
+        {
+            exceptions.Add(ex);
+        }
+    }
+    
+    if (exceptions.Any())
+    {
+        return await Task.FromException&amp;lt;Result&amp;gt;(
+            new AggregateException(exceptions));
+    }
+    
+    return new Result();
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این الگو، حتی اگر برخی از عملیات شکست بخورند، برنامه می‌تواند به پردازش ادامه دهد و در نهایت تمام استثناهای رخ داده را گزارش کند.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الگوی تلاش مجدد (Retry Pattern)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;هنگام پیاده‌سازی یک الگوی تلاش مجدد برای عملیات‌های مستعد خطا، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; می‌تواند برای بازگرداندن یک استثنای خاص پس از اتمام تمام تلاش‌ها استفاده شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ExecuteWithRetryAsync(
+    Func&amp;lt;Task&amp;lt;Result&amp;gt;&amp;gt; operation,
+    int maxRetries)
+{
+    for (int i = 0; i &amp;lt; maxRetries; i++)
+    {
+        try
+        {
+            return await operation();
+        }
+        catch (Exception ex)
+        {
+            if (i == maxRetries - 1)
+            {
+                return await Task.FromException&amp;lt;Result&amp;gt;(
+                    new RetryException($&amp;quot;Failed after {maxRetries} attempts&amp;quot;, ex));
+            }
+            
+            await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, i))); // تاخیر نمایی
+        }
+    }
+    
+    // این خط نباید قابل دسترسی باشد مگر اینکه مشکلی در منطق وجود داشته باشد
+    return await Task.FromException&amp;lt;Result&amp;gt;(
+        new InvalidOperationException(&amp;quot;Should not reach here&amp;quot;));
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این الگو به سیستم‌ها اجازه می‌دهد تا از خطاهای موقتی بازیابی شوند و در صورت شکست‌های پایدار، خطا را به شکل کنترل‌شده‌ای گزارش کنند.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الگوی مدارشکن (Circuit Breaker Pattern)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;الگوی مدارشکن برای جلوگیری از فراخوانی مکرر سرویس‌های معیوب طراحی شده است. &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; می‌تواند به عنوان بخشی از این الگو برای بازگرداندن فوری یک تسک خطاخورده زمانی که مدار باز (Open) است، استفاده شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class CircuitBreaker
+{
+    // private readonly ILogger&amp;lt;CircuitBreaker&amp;gt; _logger; // فرض بر وجود لاگر
+    private bool _isOpen;
+    
+    public async Task&amp;lt;Result&amp;gt; ExecuteAsync(Func&amp;lt;Task&amp;lt;Result&amp;gt;&amp;gt; operation)
+    {
+        if (_isOpen)
+        {
+            return await Task.FromException&amp;lt;Result&amp;gt;(
+                new CircuitBreakerException(&amp;quot;Circuit is open&amp;quot;));
+        }
+        
+        try
+        {
+            return await operation();
+        }
+        catch (Exception ex)
+        {
+            _isOpen = true;
+            // _logger.LogError(ex, &amp;quot;Circuit breaker opened&amp;quot;); // فرض بر وجود لاگر
+            return await Task.FromException&amp;lt;Result&amp;gt;(ex);
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این الگو به سیستم کمک می‌کند تا از فروپاشی (Cascade Failure) جلوگیری کند و به سرویس معیوب فرصت بازیابی دهد.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;بهترین شیوه‌ها (Best Practices)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای استفاده مؤثر از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; و حفظ کد قابل نگهداری، رعایت بهترین شیوه‌ها ضروری است.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;استفاده از استثناهای خاص (Specific Exceptions)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همیشه از خاص‌ترین نوع استثنای ممکن استفاده کنید. این کار به مصرف‌کنندگان تسک کمک می‌کند تا نوع مشکل را به طور دقیق‌تری تشخیص داده و مدیریت کنند. پرتاب یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Exception&lt;/code&gt; عمومی کمتر مفید است زیرا اطلاعات کافی در مورد ماهیت خطا ارائه نمی‌دهد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// خوب
+return Task.FromException(new ValidationException(&amp;quot;Invalid input&amp;quot;));
+
+// بد
+return Task.FromException(new Exception(&amp;quot;Invalid input&amp;quot;));&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;درج اطلاعات متنی (Contextual Information)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همراه با استثنا، پیام‌های خطای معنی‌دار و اطلاعات متنی مرتبط را ارائه دهید. این اطلاعات به رفع اشکال (Debugging) و درک سریع‌تر علت خطا کمک می‌کند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ProcessWithContextAsync(InputData data)
+{
+    try
+    {
+        return await ProcessAsync(data);
+    }
+    catch (Exception ex)
+    {
+        return await Task.FromException&amp;lt;Result&amp;gt;(
+            new ProcessingException(
+                $&amp;quot;Failed to process data with ID: {data.Id}&amp;quot;,
+                ex));
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ثبت استثناها (Logging Exceptions)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همیشه استثناها را قبل از ایجاد تسک‌های خطاخورده ثبت (Log) کنید. ثبت خطاها برای پایش (Monitoring) و عیب‌یابی برنامه‌ها در محیط‌های تولید (Production Environments) بسیار مهم است. این کار به شما امکان می‌دهد تا الگوهای خطا را شناسایی کرده و به مشکلات به سرعت پاسخ دهید:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ProcessWithLoggingAsync()
+{
+    try
+    {
+        return await ProcessAsync();
+    }
+    catch (Exception ex)
+    {
+        // _logger.LogError(ex, &amp;quot;Operation failed&amp;quot;); // فرض بر وجود لاگر
+        return await Task.FromException&amp;lt;Result&amp;gt;(ex);
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مثال کاربردی در دنیای واقعی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای درک بهتر نحوه استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; در یک سناریوی واقعی، یک سرویس پردازش داده را در نظر بگیرید:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class DataProcessingService
+{
+    // private readonly ILogger&amp;lt;DataProcessingService&amp;gt; _logger; // فرض بر وجود لاگر
+    private readonly IDataValidator _validator;
+    private readonly IDataProcessor _processor;
+    
+    public DataProcessingService(IDataValidator validator, IDataProcessor processor) // سازنده
+    {
+        _validator = validator;
+        _processor = processor;
+    }
+
+    public async Task&amp;lt;ProcessedData&amp;gt; ProcessDataAsync(RawData data)
+    {
+        try
+        {
+            // اعتبارسنجی ورودی
+            if (!await _validator.ValidateAsync(data))
+            {
+                // _logger.LogWarning(&amp;quot;Invalid data received: {@Data}&amp;quot;, data); // فرض بر وجود لاگر
+                return await Task.FromException&amp;lt;ProcessedData&amp;gt;(
+                    new ValidationException(&amp;quot;Invalid data format&amp;quot;));
+            }
+            
+            // پردازش داده
+            var result = await _processor.ProcessAsync(data);
+            
+            // اعتبارسنجی خروجی
+            if (!IsValid(result)) // فرض بر وجود متد IsValid
+            {
+                // _logger.LogError(&amp;quot;Invalid result generated: {@Result}&amp;quot;, result); // فرض بر وجود لاگر
+                return await Task.FromException&amp;lt;ProcessedData&amp;gt;(
+                    new ProcessingException(&amp;quot;Invalid result generated&amp;quot;));
+            }
+            
+            return result;
+        }
+        catch (Exception ex)
+        {
+            // _logger.LogError(ex, &amp;quot;Failed to process data: {@Data}&amp;quot;, data); // فرض بر وجود لاگر
+            return await Task.FromException&amp;lt;ProcessedData&amp;gt;(ex);
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این مثال، سرویس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;DataProcessingService&lt;/code&gt; از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; در چندین نقطه استفاده می‌کند:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;اگر داده‌های ورودی نامعتبر باشند، یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ValidationException&lt;/code&gt; را در یک تسک خطاخورده بازمی‌گرداند.&lt;/li&gt;&lt;li&gt;اگر نتیجه پردازش نامعتبر باشد، یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ProcessingException&lt;/code&gt; را بازمی‌گرداند.&lt;/li&gt;&lt;li&gt;برای هر استثنای دیگری که در طول پردازش رخ می‌دهد، استثنا را ثبت کرده و آن را در یک تسک خطاخورده کپسوله می‌کند. این رویکرد تضمین می‌کند که تمامی خطاها به طور سازگار و قابل پیش‌بینی در طول فرایند ناهمگام مدیریت می‌شوند.&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; ابزاری قدرتمند برای مدیریت استثناها در کد ناهمگام #C است. این متد راهی تمیز و کارآمد برای انتشار خطاها و حفظ زمینه ناهمگام فراهم می‌کند. با درک زمانی که باید از آن استفاده کرد و با رعایت بهترین شیوه‌ها مانند استفاده از استثناهای خاص، گنجاندن اطلاعات متنی و ثبت خطاها، توسعه‌دهندگان می‌توانند کدی مقاوم‌تر و قابل نگهداری ایجاد کنند. در حالی که &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromException&lt;/code&gt; ممکن است در هر عملیات ناهمگام مورد نیاز نباشد، تسلط بر آن می‌تواند به طور قابل توجهی کیفیت و استحکام برنامه‌های .NET را بهبود بخشد.&lt;/div&gt;">
+    <meta property="article:published_time" content="Wed, 28 May 2025 05:09:42 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
     <meta content='IE=edge' http-equiv='X-UA-Compatible'>
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">
-	
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
 	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
-
     <link href="vs.min.css" rel="stylesheet" type="text/css">
-    <script src="highlight.min.js" type="text/javascript"></script>
-	
+    <script src="highlight.min.js" type="text/javascript"></script>	
     <link href="styles.css" rel="stylesheet" type="text/css">	
     <style>
       @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
@@ -42,8 +1104,8 @@
         }
      }
     </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
 </head>
-
 <body dir='rtl'>
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
@@ -53,7 +1115,7 @@
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۳۶۹۵</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۶۹۷</span></td>
 </tr>
 <tr>
 <td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
@@ -73,7 +1135,7 @@
 </tr>
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۲۲</span></td>
 </tr>
 </tbody>
 </table>
@@ -333,8 +1395,5 @@ return Task.FromException(new Exception(&quot;Invalid input&quot;));</pre><div d
 
 <!-- to load custom fonts for printing -->
 <div class="useSamimFD">&nbsp;</div>
-
-<script src="SyntaxHighlighter.js" type="text/javascript"></script>
 </body>
-
 </html>

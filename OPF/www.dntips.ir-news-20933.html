@@ -1,17 +1,29 @@
 <!DOCTYPE html>
 <html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
-
 <head>
-    <title>‫‫بررسی عملکرد RocksDB نسخه‌های 9.8 تا 10.10 بر روی سرورهای 8 و 48 هسته‌ای</title>
+    <title>‫‫بررسی عملکرد RocksDB نسخه‌های 9.8 تا 10.10 بر روی سرورهای 8 و 48 هسته‌ای</title>     <meta name="description" content="این مقاله به بررسی عملکرد RocksDB با استفاده از db_bench بر روی سرورهای 8 و 48 هسته‌ای می‌پردازد. نتایج نشان می‌دهند که در نسخه‌های 9.8 تا 10.10، تغییرات قابل توجهی در عملکرد وجود ندارد و RocksDB به طور کلی عملکرد ثابتی دارد. با این حال، در نسخه‌ی 10.6.2، یک رگرسیون در بارهای کاری سنگین نوشتن (write-heavy workloads) مشاهده شده که با رفع باگ 13996 برطرف شده است. آزمایش‌ها با استفاده از نسخه‌های 9.8 تا 10.0 RocksDB و کامپایلر clang نسخه 18.3.1 با فعال‌سازی LTO انجام شده است. سرورهای مورد استفاده دارای 8 و 48 هسته و سیستم‌عامل Ubuntu 22.04 هستند. آزمایش‌ها شامل بارهای کاری مختلف مانند byrx (پایگاه داده کش شده)، iobuf (پایگاه داده بزرگتر از RAM با IO بافر شده) و iodir (پایگاه داده بزرگتر از RAM با O_DIRECT) هستند. نتایج نشان می‌دهند که در اکثر موارد، عملکرد پایدار است، اما در آزمایش overwrite، ممکن است رگرسیون یا بهبودهایی مشاهده شود که احتمالاً ناشی از نویز در نتایج پایه (RocksDB 9.8) باشد.">
+    <meta name="author" content="راویAI">
+    <meta itemprop="name" content="بررسی عملکرد RocksDB نسخه‌های 9.8 تا 10.10 بر روی سرورهای 8 و 48 هسته‌ای">
+    <meta itemprop="description" content="این مقاله به بررسی عملکرد RocksDB با استفاده از db_bench بر روی سرورهای 8 و 48 هسته‌ای می‌پردازد. نتایج نشان می‌دهند که در نسخه‌های 9.8 تا 10.10، تغییرات قابل توجهی در عملکرد وجود ندارد و RocksDB به طور کلی عملکرد ثابتی دارد. با این حال، در نسخه‌ی 10.6.2، یک رگرسیون در بارهای کاری سنگین نوشتن (write-heavy workloads) مشاهده شده که با رفع باگ 13996 برطرف شده است. آزمایش‌ها با استفاده از نسخه‌های 9.8 تا 10.0 RocksDB و کامپایلر clang نسخه 18.3.1 با فعال‌سازی LTO انجام شده است. سرورهای مورد استفاده دارای 8 و 48 هسته و سیستم‌عامل Ubuntu 22.04 هستند. آزمایش‌ها شامل بارهای کاری مختلف مانند byrx (پایگاه داده کش شده)، iobuf (پایگاه داده بزرگتر از RAM با IO بافر شده) و iodir (پایگاه داده بزرگتر از RAM با O_DIRECT) هستند. نتایج نشان می‌دهند که در اکثر موارد، عملکرد پایدار است، اما در آزمایش overwrite، ممکن است رگرسیون یا بهبودهایی مشاهده شود که احتمالاً ناشی از نویز در نتایج پایه (RocksDB 9.8) باشد.">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="بررسی عملکرد RocksDB نسخه‌های 9.8 تا 10.10 بر روی سرورهای 8 و 48 هسته‌ای">
+    <meta property="og:description" content="این مقاله به بررسی عملکرد RocksDB با استفاده از db_bench بر روی سرورهای 8 و 48 هسته‌ای می‌پردازد. نتایج نشان می‌دهند که در نسخه‌های 9.8 تا 10.10، تغییرات قابل توجهی در عملکرد وجود ندارد و RocksDB به طور کلی عملکرد ثابتی دارد. با این حال، در نسخه‌ی 10.6.2، یک رگرسیون در بارهای کاری سنگین نوشتن (write-heavy workloads) مشاهده شده که با رفع باگ 13996 برطرف شده است. آزمایش‌ها با استفاده از نسخه‌های 9.8 تا 10.0 RocksDB و کامپایلر clang نسخه 18.3.1 با فعال‌سازی LTO انجام شده است. سرورهای مورد استفاده دارای 8 و 48 هسته و سیستم‌عامل Ubuntu 22.04 هستند. آزمایش‌ها شامل بارهای کاری مختلف مانند byrx (پایگاه داده کش شده)، iobuf (پایگاه داده بزرگتر از RAM با IO بافر شده) و iodir (پایگاه داده بزرگتر از RAM با O_DIRECT) هستند. نتایج نشان می‌دهند که در اکثر موارد، عملکرد پایدار است، اما در آزمایش overwrite، ممکن است رگرسیون یا بهبودهایی مشاهده شود که احتمالاً ناشی از نویز در نتایج پایه (RocksDB 9.8) باشد.">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="بررسی عملکرد RocksDB نسخه‌های 9.8 تا 10.10 بر روی سرورهای 8 و 48 هسته‌ای">
+    <meta name="twitter:description" content="این مقاله به بررسی عملکرد RocksDB با استفاده از db_bench بر روی سرورهای 8 و 48 هسته‌ای می‌پردازد. نتایج نشان می‌دهند که در نسخه‌های 9.8 تا 10.10، تغییرات قابل توجهی در عملکرد وجود ندارد و RocksDB به طور کلی عملکرد ثابتی دارد. با این حال، در نسخه‌ی 10.6.2، یک رگرسیون در بارهای کاری سنگین نوشتن (write-heavy workloads) مشاهده شده که با رفع باگ 13996 برطرف شده است. آزمایش‌ها با استفاده از نسخه‌های 9.8 تا 10.0 RocksDB و کامپایلر clang نسخه 18.3.1 با فعال‌سازی LTO انجام شده است. سرورهای مورد استفاده دارای 8 و 48 هسته و سیستم‌عامل Ubuntu 22.04 هستند. آزمایش‌ها شامل بارهای کاری مختلف مانند byrx (پایگاه داده کش شده)، iobuf (پایگاه داده بزرگتر از RAM با IO بافر شده) و iodir (پایگاه داده بزرگتر از RAM با O_DIRECT) هستند. نتایج نشان می‌دهند که در اکثر موارد، عملکرد پایدار است، اما در آزمایش overwrite، ممکن است رگرسیون یا بهبودهایی مشاهده شود که احتمالاً ناشی از نویز در نتایج پایه (RocksDB 9.8) باشد.">
+    <meta name="twitter:card" content="این مقاله به بررسی عملکرد RocksDB با استفاده از db_bench بر روی سرورهای 8 و 48 هسته‌ای می‌پردازد. نتایج نشان می‌دهند که در نسخه‌های 9.8 تا 10.10، تغییرات قابل توجهی در عملکرد وجود ندارد و RocksDB به طور کلی عملکرد ثابتی دارد. با این حال، در نسخه‌ی 10.6.2، یک رگرسیون در بارهای کاری سنگین نوشتن (write-heavy workloads) مشاهده شده که با رفع باگ 13996 برطرف شده است. آزمایش‌ها با استفاده از نسخه‌های 9.8 تا 10.0 RocksDB و کامپایلر clang نسخه 18.3.1 با فعال‌سازی LTO انجام شده است. سرورهای مورد استفاده دارای 8 و 48 هسته و سیستم‌عامل Ubuntu 22.04 هستند. آزمایش‌ها شامل بارهای کاری مختلف مانند byrx (پایگاه داده کش شده)، iobuf (پایگاه داده بزرگتر از RAM با IO بافر شده) و iodir (پایگاه داده بزرگتر از RAM با O_DIRECT) هستند. نتایج نشان می‌دهند که در اکثر موارد، عملکرد پایدار است، اما در آزمایش overwrite، ممکن است رگرسیون یا بهبودهایی مشاهده شود که احتمالاً ناشی از نویز در نتایج پایه (RocksDB 9.8) باشد.">
+    <meta property="article:published_time" content="Mon, 05 Jan 2026 23:28:55 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
     <meta content='IE=edge' http-equiv='X-UA-Compatible'>
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">
-	
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
 	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
-
     <link href="vs.min.css" rel="stylesheet" type="text/css">
-    <script src="highlight.min.js" type="text/javascript"></script>
-	
+    <script src="highlight.min.js" type="text/javascript"></script>	
     <link href="styles.css" rel="stylesheet" type="text/css">	
     <style>
       @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
@@ -42,8 +54,8 @@
         }
      }
     </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
 </head>
-
 <body dir='rtl'>
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
@@ -53,7 +65,7 @@
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۳۶۹۵</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۶۹۷</span></td>
 </tr>
 <tr>
 <td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
@@ -73,7 +85,7 @@
 </tr>
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۲۲</span></td>
 </tr>
 </tbody>
 </table>
@@ -123,8 +135,5 @@
 
 <!-- to load custom fonts for printing -->
 <div class="useSamimFD">&nbsp;</div>
-
-<script src="SyntaxHighlighter.js" type="text/javascript"></script>
 </body>
-
 </html>

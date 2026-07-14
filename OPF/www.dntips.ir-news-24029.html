@@ -1,17 +1,69 @@
 <!DOCTYPE html>
 <html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
-
 <head>
-    <title>‫‫پشتیبانی از TLS پسا-کوانتومی در .NET 10 با ML-KEM در یک کلاینت HTTP Dockerized</title>
+    <title>‫‫پشتیبانی از TLS پسا-کوانتومی در .NET 10 با ML-KEM در یک کلاینت HTTP Dockerized</title>     <meta name="description" content="این مقاله به بررسی نحوه پیاده‌سازی TLS پسا-کوانتومی (Post-Quantum TLS) در .NET 10 بر روی لینوکس با استفاده از ML-KEM در یک کلاینت HTTP Dockerized می‌پردازد. با توجه به پیشرفت‌های کوانتومی، رمزنگاری ترافیک امروزی ممکن است در آینده توسط سیستم‌های کوانتومی رمزگشایی شود، بنابراین مهاجرت به روش‌های مقاوم در برابر کوانتوم ضروری است.
+
+یک مسیر عملی برای این مهاجرت، استفاده از تبادل کلید ترکیبی (hybrid TLS key exchange) است که ترکیبی از تبادل کلید کلاسیک و پسا-کوانتومی است. .NET 10 با پشتیبانی از APIهای ML-KEM، این امکان را فراهم می‌کند. این مقاله به طور خاص، مخزن دمو &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PQCHttpClient&lt;/code&gt; را بررسی می‌کند و نشان می‌دهد که چگونه یک برنامه .NET در یک کانتینر لینوکس، مذاکرات TLS پسا-کوانتومی را انجام می‌دهد.
+
+برای توسعه‌دهندگان .NET که بر روی لینوکس (VMها، کانتینرها، Kubernetes) کار می‌کنند، رفتار TLS و رمزنگاری آن‌ها به کتابخانه‌های پلتفرم بومی بستگی دارد. در سناریوهای ML-KEM، این بدان معناست که .NET 10 سطح API مدیریت شده (&lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;System.Security.Cryptography.MLKem&lt;/code&gt;) را ارائه می‌دهد، اما پشتیبانی از زمان اجرا به نسخه OpenSSL بارگذاری شده در زمان اجرا بستگی دارد. OpenSSL 3.5+ نقش کلیدی در پشتیبانی از گروه‌های ML-KEM TLS در این زمینه دارد.
+
+این پروژه سه نکته مهم را نشان می‌دهد: تشخیص قابلیت (&lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;MLKem.IsSupported&lt;/code&gt;)، ترافیک HTTPS واقعی با استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;HttpClient&lt;/code&gt; بدون کد دست‌دستی، و شواهد مذاکره از طریق هدرهای پاسخ. این یک اثبات مفهوم قوی برای تیم‌هایی است که آمادگی PQC را در محیط‌های کانتینری شبیه به محیط تولید ارزیابی می‌کنند. کد &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Program.cs&lt;/code&gt; نشان می‌دهد که چگونه با استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;HttpClient&lt;/code&gt; و بررسی &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;MLKem.IsSupported&lt;/code&gt;، می‌توان به راحتی از قابلیت‌های پسا-کوانتومی استفاده کرد.
+
+به طور خلاصه، این مقاله نشان می‌دهد که چگونه می‌توان از TLS پسا-کوانتومی در برنامه‌های .NET 10 بر روی لینوکس با استفاده از ML-KEM بهره برد و اهمیت استفاده از OpenSSL 3.5+ و بررسی قابلیت‌های runtime را برای اطمینان از عملکرد صحیح این ویژگی‌ها برجسته می‌کند.">
+    <meta name="author" content="راویAI">
+    <meta itemprop="name" content="پشتیبانی از TLS پسا-کوانتومی در .NET 10 با ML-KEM در یک کلاینت HTTP Dockerized">
+    <meta itemprop="description" content="این مقاله به بررسی نحوه پیاده‌سازی TLS پسا-کوانتومی (Post-Quantum TLS) در .NET 10 بر روی لینوکس با استفاده از ML-KEM در یک کلاینت HTTP Dockerized می‌پردازد. با توجه به پیشرفت‌های کوانتومی، رمزنگاری ترافیک امروزی ممکن است در آینده توسط سیستم‌های کوانتومی رمزگشایی شود، بنابراین مهاجرت به روش‌های مقاوم در برابر کوانتوم ضروری است.
+
+یک مسیر عملی برای این مهاجرت، استفاده از تبادل کلید ترکیبی (hybrid TLS key exchange) است که ترکیبی از تبادل کلید کلاسیک و پسا-کوانتومی است. .NET 10 با پشتیبانی از APIهای ML-KEM، این امکان را فراهم می‌کند. این مقاله به طور خاص، مخزن دمو &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PQCHttpClient&lt;/code&gt; را بررسی می‌کند و نشان می‌دهد که چگونه یک برنامه .NET در یک کانتینر لینوکس، مذاکرات TLS پسا-کوانتومی را انجام می‌دهد.
+
+برای توسعه‌دهندگان .NET که بر روی لینوکس (VMها، کانتینرها، Kubernetes) کار می‌کنند، رفتار TLS و رمزنگاری آن‌ها به کتابخانه‌های پلتفرم بومی بستگی دارد. در سناریوهای ML-KEM، این بدان معناست که .NET 10 سطح API مدیریت شده (&lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;System.Security.Cryptography.MLKem&lt;/code&gt;) را ارائه می‌دهد، اما پشتیبانی از زمان اجرا به نسخه OpenSSL بارگذاری شده در زمان اجرا بستگی دارد. OpenSSL 3.5+ نقش کلیدی در پشتیبانی از گروه‌های ML-KEM TLS در این زمینه دارد.
+
+این پروژه سه نکته مهم را نشان می‌دهد: تشخیص قابلیت (&lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;MLKem.IsSupported&lt;/code&gt;)، ترافیک HTTPS واقعی با استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;HttpClient&lt;/code&gt; بدون کد دست‌دستی، و شواهد مذاکره از طریق هدرهای پاسخ. این یک اثبات مفهوم قوی برای تیم‌هایی است که آمادگی PQC را در محیط‌های کانتینری شبیه به محیط تولید ارزیابی می‌کنند. کد &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Program.cs&lt;/code&gt; نشان می‌دهد که چگونه با استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;HttpClient&lt;/code&gt; و بررسی &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;MLKem.IsSupported&lt;/code&gt;، می‌توان به راحتی از قابلیت‌های پسا-کوانتومی استفاده کرد.
+
+به طور خلاصه، این مقاله نشان می‌دهد که چگونه می‌توان از TLS پسا-کوانتومی در برنامه‌های .NET 10 بر روی لینوکس با استفاده از ML-KEM بهره برد و اهمیت استفاده از OpenSSL 3.5+ و بررسی قابلیت‌های runtime را برای اطمینان از عملکرد صحیح این ویژگی‌ها برجسته می‌کند.">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="پشتیبانی از TLS پسا-کوانتومی در .NET 10 با ML-KEM در یک کلاینت HTTP Dockerized">
+    <meta property="og:description" content="این مقاله به بررسی نحوه پیاده‌سازی TLS پسا-کوانتومی (Post-Quantum TLS) در .NET 10 بر روی لینوکس با استفاده از ML-KEM در یک کلاینت HTTP Dockerized می‌پردازد. با توجه به پیشرفت‌های کوانتومی، رمزنگاری ترافیک امروزی ممکن است در آینده توسط سیستم‌های کوانتومی رمزگشایی شود، بنابراین مهاجرت به روش‌های مقاوم در برابر کوانتوم ضروری است.
+
+یک مسیر عملی برای این مهاجرت، استفاده از تبادل کلید ترکیبی (hybrid TLS key exchange) است که ترکیبی از تبادل کلید کلاسیک و پسا-کوانتومی است. .NET 10 با پشتیبانی از APIهای ML-KEM، این امکان را فراهم می‌کند. این مقاله به طور خاص، مخزن دمو &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PQCHttpClient&lt;/code&gt; را بررسی می‌کند و نشان می‌دهد که چگونه یک برنامه .NET در یک کانتینر لینوکس، مذاکرات TLS پسا-کوانتومی را انجام می‌دهد.
+
+برای توسعه‌دهندگان .NET که بر روی لینوکس (VMها، کانتینرها، Kubernetes) کار می‌کنند، رفتار TLS و رمزنگاری آن‌ها به کتابخانه‌های پلتفرم بومی بستگی دارد. در سناریوهای ML-KEM، این بدان معناست که .NET 10 سطح API مدیریت شده (&lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;System.Security.Cryptography.MLKem&lt;/code&gt;) را ارائه می‌دهد، اما پشتیبانی از زمان اجرا به نسخه OpenSSL بارگذاری شده در زمان اجرا بستگی دارد. OpenSSL 3.5+ نقش کلیدی در پشتیبانی از گروه‌های ML-KEM TLS در این زمینه دارد.
+
+این پروژه سه نکته مهم را نشان می‌دهد: تشخیص قابلیت (&lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;MLKem.IsSupported&lt;/code&gt;)، ترافیک HTTPS واقعی با استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;HttpClient&lt;/code&gt; بدون کد دست‌دستی، و شواهد مذاکره از طریق هدرهای پاسخ. این یک اثبات مفهوم قوی برای تیم‌هایی است که آمادگی PQC را در محیط‌های کانتینری شبیه به محیط تولید ارزیابی می‌کنند. کد &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Program.cs&lt;/code&gt; نشان می‌دهد که چگونه با استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;HttpClient&lt;/code&gt; و بررسی &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;MLKem.IsSupported&lt;/code&gt;، می‌توان به راحتی از قابلیت‌های پسا-کوانتومی استفاده کرد.
+
+به طور خلاصه، این مقاله نشان می‌دهد که چگونه می‌توان از TLS پسا-کوانتومی در برنامه‌های .NET 10 بر روی لینوکس با استفاده از ML-KEM بهره برد و اهمیت استفاده از OpenSSL 3.5+ و بررسی قابلیت‌های runtime را برای اطمینان از عملکرد صحیح این ویژگی‌ها برجسته می‌کند.">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="پشتیبانی از TLS پسا-کوانتومی در .NET 10 با ML-KEM در یک کلاینت HTTP Dockerized">
+    <meta name="twitter:description" content="این مقاله به بررسی نحوه پیاده‌سازی TLS پسا-کوانتومی (Post-Quantum TLS) در .NET 10 بر روی لینوکس با استفاده از ML-KEM در یک کلاینت HTTP Dockerized می‌پردازد. با توجه به پیشرفت‌های کوانتومی، رمزنگاری ترافیک امروزی ممکن است در آینده توسط سیستم‌های کوانتومی رمزگشایی شود، بنابراین مهاجرت به روش‌های مقاوم در برابر کوانتوم ضروری است.
+
+یک مسیر عملی برای این مهاجرت، استفاده از تبادل کلید ترکیبی (hybrid TLS key exchange) است که ترکیبی از تبادل کلید کلاسیک و پسا-کوانتومی است. .NET 10 با پشتیبانی از APIهای ML-KEM، این امکان را فراهم می‌کند. این مقاله به طور خاص، مخزن دمو &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PQCHttpClient&lt;/code&gt; را بررسی می‌کند و نشان می‌دهد که چگونه یک برنامه .NET در یک کانتینر لینوکس، مذاکرات TLS پسا-کوانتومی را انجام می‌دهد.
+
+برای توسعه‌دهندگان .NET که بر روی لینوکس (VMها، کانتینرها، Kubernetes) کار می‌کنند، رفتار TLS و رمزنگاری آن‌ها به کتابخانه‌های پلتفرم بومی بستگی دارد. در سناریوهای ML-KEM، این بدان معناست که .NET 10 سطح API مدیریت شده (&lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;System.Security.Cryptography.MLKem&lt;/code&gt;) را ارائه می‌دهد، اما پشتیبانی از زمان اجرا به نسخه OpenSSL بارگذاری شده در زمان اجرا بستگی دارد. OpenSSL 3.5+ نقش کلیدی در پشتیبانی از گروه‌های ML-KEM TLS در این زمینه دارد.
+
+این پروژه سه نکته مهم را نشان می‌دهد: تشخیص قابلیت (&lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;MLKem.IsSupported&lt;/code&gt;)، ترافیک HTTPS واقعی با استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;HttpClient&lt;/code&gt; بدون کد دست‌دستی، و شواهد مذاکره از طریق هدرهای پاسخ. این یک اثبات مفهوم قوی برای تیم‌هایی است که آمادگی PQC را در محیط‌های کانتینری شبیه به محیط تولید ارزیابی می‌کنند. کد &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Program.cs&lt;/code&gt; نشان می‌دهد که چگونه با استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;HttpClient&lt;/code&gt; و بررسی &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;MLKem.IsSupported&lt;/code&gt;، می‌توان به راحتی از قابلیت‌های پسا-کوانتومی استفاده کرد.
+
+به طور خلاصه، این مقاله نشان می‌دهد که چگونه می‌توان از TLS پسا-کوانتومی در برنامه‌های .NET 10 بر روی لینوکس با استفاده از ML-KEM بهره برد و اهمیت استفاده از OpenSSL 3.5+ و بررسی قابلیت‌های runtime را برای اطمینان از عملکرد صحیح این ویژگی‌ها برجسته می‌کند.">
+    <meta name="twitter:card" content="این مقاله به بررسی نحوه پیاده‌سازی TLS پسا-کوانتومی (Post-Quantum TLS) در .NET 10 بر روی لینوکس با استفاده از ML-KEM در یک کلاینت HTTP Dockerized می‌پردازد. با توجه به پیشرفت‌های کوانتومی، رمزنگاری ترافیک امروزی ممکن است در آینده توسط سیستم‌های کوانتومی رمزگشایی شود، بنابراین مهاجرت به روش‌های مقاوم در برابر کوانتوم ضروری است.
+
+یک مسیر عملی برای این مهاجرت، استفاده از تبادل کلید ترکیبی (hybrid TLS key exchange) است که ترکیبی از تبادل کلید کلاسیک و پسا-کوانتومی است. .NET 10 با پشتیبانی از APIهای ML-KEM، این امکان را فراهم می‌کند. این مقاله به طور خاص، مخزن دمو &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PQCHttpClient&lt;/code&gt; را بررسی می‌کند و نشان می‌دهد که چگونه یک برنامه .NET در یک کانتینر لینوکس، مذاکرات TLS پسا-کوانتومی را انجام می‌دهد.
+
+برای توسعه‌دهندگان .NET که بر روی لینوکس (VMها، کانتینرها، Kubernetes) کار می‌کنند، رفتار TLS و رمزنگاری آن‌ها به کتابخانه‌های پلتفرم بومی بستگی دارد. در سناریوهای ML-KEM، این بدان معناست که .NET 10 سطح API مدیریت شده (&lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;System.Security.Cryptography.MLKem&lt;/code&gt;) را ارائه می‌دهد، اما پشتیبانی از زمان اجرا به نسخه OpenSSL بارگذاری شده در زمان اجرا بستگی دارد. OpenSSL 3.5+ نقش کلیدی در پشتیبانی از گروه‌های ML-KEM TLS در این زمینه دارد.
+
+این پروژه سه نکته مهم را نشان می‌دهد: تشخیص قابلیت (&lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;MLKem.IsSupported&lt;/code&gt;)، ترافیک HTTPS واقعی با استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;HttpClient&lt;/code&gt; بدون کد دست‌دستی، و شواهد مذاکره از طریق هدرهای پاسخ. این یک اثبات مفهوم قوی برای تیم‌هایی است که آمادگی PQC را در محیط‌های کانتینری شبیه به محیط تولید ارزیابی می‌کنند. کد &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Program.cs&lt;/code&gt; نشان می‌دهد که چگونه با استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;HttpClient&lt;/code&gt; و بررسی &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;MLKem.IsSupported&lt;/code&gt;، می‌توان به راحتی از قابلیت‌های پسا-کوانتومی استفاده کرد.
+
+به طور خلاصه، این مقاله نشان می‌دهد که چگونه می‌توان از TLS پسا-کوانتومی در برنامه‌های .NET 10 بر روی لینوکس با استفاده از ML-KEM بهره برد و اهمیت استفاده از OpenSSL 3.5+ و بررسی قابلیت‌های runtime را برای اطمینان از عملکرد صحیح این ویژگی‌ها برجسته می‌کند.">
+    <meta property="article:published_time" content="Sun, 15 Feb 2026 05:32:05 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
     <meta content='IE=edge' http-equiv='X-UA-Compatible'>
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">
-	
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
 	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
-
     <link href="vs.min.css" rel="stylesheet" type="text/css">
-    <script src="highlight.min.js" type="text/javascript"></script>
-	
+    <script src="highlight.min.js" type="text/javascript"></script>	
     <link href="styles.css" rel="stylesheet" type="text/css">	
     <style>
       @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
@@ -42,8 +94,8 @@
         }
      }
     </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
 </head>
-
 <body dir='rtl'>
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
@@ -53,7 +105,7 @@
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۳۶۹۵</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۶۹۷</span></td>
 </tr>
 <tr>
 <td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
@@ -73,7 +125,7 @@
 </tr>
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۲۲</span></td>
 </tr>
 </tbody>
 </table>
@@ -131,8 +183,5 @@
 
 <!-- to load custom fonts for printing -->
 <div class="useSamimFD">&nbsp;</div>
-
-<script src="SyntaxHighlighter.js" type="text/javascript"></script>
 </body>
-
 </html>

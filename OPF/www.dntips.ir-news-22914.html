@@ -1,17 +1,69 @@
 <!DOCTYPE html>
 <html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
-
 <head>
-    <title>‫‫معرفی و استفاده از APIهای System.Diagnostics.Metrics برای اندازه‌گیری عملکرد</title>
+    <title>‫‫معرفی و استفاده از APIهای System.Diagnostics.Metrics برای اندازه‌گیری عملکرد</title>     <meta name="description" content="APIهای System.Diagnostics.Metrics در .NET 6 به عنوان یک ویژگی داخلی معرفی شدند، اما از نسخه‌های قبلی .NET Core و .NET Framework نیز با استفاده از بسته‌ی NuGet System.Diagnostics.DiagnosticSource پشتیبانی می‌شوند. این APIها راهی برای ایجاد و گزارش‌گیری از معیارهای تولید شده توسط یک برنامه، مانند شمارنده‌ها، گیج‌ها و هیستوگرام‌های مقادیر فراهم می‌کنند. هدف اصلی این APIها، تسهیل همکاری با OpenTelemetry و ابزارهای .NET SDK مانند dotnet-counters است.
+
+این APIها دو مفهوم اصلی را ارائه می‌دهند: Instrument و Meter. Instrument مقادیر یک معیار خاص را ثبت می‌کند، در حالی که Meter یک گروه منطقی از چندین Instrument است. به عنوان مثال، Meter System.Runtime شامل Instrumentهایی در مورد عملکرد زمان اجرا و Meter Microsoft.AspNetCore.Hosting شامل Instrumentهایی در مورد درخواست‌های HTTP دریافتی توسط ASP.NET Core است.
+
+انواع مختلفی از Instrumentها وجود دارد، از جمله Counter، UpDownCounter، Gauge و Histogram. Counterها برای شمارش تعداد رخدادها استفاده می‌شوند، UpDownCounterها می‌توانند مقادیر مثبت و منفی را ثبت کنند، Gaugeها مقدار فعلی را نشان می‌دهند و Histogramها مقادیر دلخواه را گزارش می‌دهند. نسخه‌های Observable از Counter، UpDownCounter و Gauge نیز وجود دارند که فقط در صورت درخواست صریح، مقادیر را بازیابی می‌کنند.
+
+انتخاب بین Observable و غیر Observable Instrumentها تا حدودی به ملاحظات عملکردی و تا حدودی به نحوه به دست آوردن مقدار بستگی دارد. استفاده از این APIها به توسعه‌دهندگان .NET امکان می‌دهد تا به طور موثرتری عملکرد برنامه‌های خود را نظارت و تجزیه و تحلیل کنند و درک بهتری از رفتار برنامه در طول زمان داشته باشند.
+
+این APIها به توسعه‌دهندگان کمک می‌کنند تا معیارهای مختلفی مانند تعداد درخواست‌های دریافتی، اندازه هیپ GC، میزان حافظه استفاده شده و مدت زمان هر درخواست را اندازه‌گیری و گزارش کنند. با استفاده از این اطلاعات، توسعه‌دهندگان می‌توانند مشکلات عملکرد را شناسایی و رفع کنند و به طور کلی کیفیت و پایداری برنامه‌های .NET خود را بهبود بخشند.">
+    <meta name="author" content="راویAI">
+    <meta itemprop="name" content="معرفی و استفاده از APIهای System.Diagnostics.Metrics برای اندازه‌گیری عملکرد">
+    <meta itemprop="description" content="APIهای System.Diagnostics.Metrics در .NET 6 به عنوان یک ویژگی داخلی معرفی شدند، اما از نسخه‌های قبلی .NET Core و .NET Framework نیز با استفاده از بسته‌ی NuGet System.Diagnostics.DiagnosticSource پشتیبانی می‌شوند. این APIها راهی برای ایجاد و گزارش‌گیری از معیارهای تولید شده توسط یک برنامه، مانند شمارنده‌ها، گیج‌ها و هیستوگرام‌های مقادیر فراهم می‌کنند. هدف اصلی این APIها، تسهیل همکاری با OpenTelemetry و ابزارهای .NET SDK مانند dotnet-counters است.
+
+این APIها دو مفهوم اصلی را ارائه می‌دهند: Instrument و Meter. Instrument مقادیر یک معیار خاص را ثبت می‌کند، در حالی که Meter یک گروه منطقی از چندین Instrument است. به عنوان مثال، Meter System.Runtime شامل Instrumentهایی در مورد عملکرد زمان اجرا و Meter Microsoft.AspNetCore.Hosting شامل Instrumentهایی در مورد درخواست‌های HTTP دریافتی توسط ASP.NET Core است.
+
+انواع مختلفی از Instrumentها وجود دارد، از جمله Counter، UpDownCounter، Gauge و Histogram. Counterها برای شمارش تعداد رخدادها استفاده می‌شوند، UpDownCounterها می‌توانند مقادیر مثبت و منفی را ثبت کنند، Gaugeها مقدار فعلی را نشان می‌دهند و Histogramها مقادیر دلخواه را گزارش می‌دهند. نسخه‌های Observable از Counter، UpDownCounter و Gauge نیز وجود دارند که فقط در صورت درخواست صریح، مقادیر را بازیابی می‌کنند.
+
+انتخاب بین Observable و غیر Observable Instrumentها تا حدودی به ملاحظات عملکردی و تا حدودی به نحوه به دست آوردن مقدار بستگی دارد. استفاده از این APIها به توسعه‌دهندگان .NET امکان می‌دهد تا به طور موثرتری عملکرد برنامه‌های خود را نظارت و تجزیه و تحلیل کنند و درک بهتری از رفتار برنامه در طول زمان داشته باشند.
+
+این APIها به توسعه‌دهندگان کمک می‌کنند تا معیارهای مختلفی مانند تعداد درخواست‌های دریافتی، اندازه هیپ GC، میزان حافظه استفاده شده و مدت زمان هر درخواست را اندازه‌گیری و گزارش کنند. با استفاده از این اطلاعات، توسعه‌دهندگان می‌توانند مشکلات عملکرد را شناسایی و رفع کنند و به طور کلی کیفیت و پایداری برنامه‌های .NET خود را بهبود بخشند.">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="معرفی و استفاده از APIهای System.Diagnostics.Metrics برای اندازه‌گیری عملکرد">
+    <meta property="og:description" content="APIهای System.Diagnostics.Metrics در .NET 6 به عنوان یک ویژگی داخلی معرفی شدند، اما از نسخه‌های قبلی .NET Core و .NET Framework نیز با استفاده از بسته‌ی NuGet System.Diagnostics.DiagnosticSource پشتیبانی می‌شوند. این APIها راهی برای ایجاد و گزارش‌گیری از معیارهای تولید شده توسط یک برنامه، مانند شمارنده‌ها، گیج‌ها و هیستوگرام‌های مقادیر فراهم می‌کنند. هدف اصلی این APIها، تسهیل همکاری با OpenTelemetry و ابزارهای .NET SDK مانند dotnet-counters است.
+
+این APIها دو مفهوم اصلی را ارائه می‌دهند: Instrument و Meter. Instrument مقادیر یک معیار خاص را ثبت می‌کند، در حالی که Meter یک گروه منطقی از چندین Instrument است. به عنوان مثال، Meter System.Runtime شامل Instrumentهایی در مورد عملکرد زمان اجرا و Meter Microsoft.AspNetCore.Hosting شامل Instrumentهایی در مورد درخواست‌های HTTP دریافتی توسط ASP.NET Core است.
+
+انواع مختلفی از Instrumentها وجود دارد، از جمله Counter، UpDownCounter، Gauge و Histogram. Counterها برای شمارش تعداد رخدادها استفاده می‌شوند، UpDownCounterها می‌توانند مقادیر مثبت و منفی را ثبت کنند، Gaugeها مقدار فعلی را نشان می‌دهند و Histogramها مقادیر دلخواه را گزارش می‌دهند. نسخه‌های Observable از Counter، UpDownCounter و Gauge نیز وجود دارند که فقط در صورت درخواست صریح، مقادیر را بازیابی می‌کنند.
+
+انتخاب بین Observable و غیر Observable Instrumentها تا حدودی به ملاحظات عملکردی و تا حدودی به نحوه به دست آوردن مقدار بستگی دارد. استفاده از این APIها به توسعه‌دهندگان .NET امکان می‌دهد تا به طور موثرتری عملکرد برنامه‌های خود را نظارت و تجزیه و تحلیل کنند و درک بهتری از رفتار برنامه در طول زمان داشته باشند.
+
+این APIها به توسعه‌دهندگان کمک می‌کنند تا معیارهای مختلفی مانند تعداد درخواست‌های دریافتی، اندازه هیپ GC، میزان حافظه استفاده شده و مدت زمان هر درخواست را اندازه‌گیری و گزارش کنند. با استفاده از این اطلاعات، توسعه‌دهندگان می‌توانند مشکلات عملکرد را شناسایی و رفع کنند و به طور کلی کیفیت و پایداری برنامه‌های .NET خود را بهبود بخشند.">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="معرفی و استفاده از APIهای System.Diagnostics.Metrics برای اندازه‌گیری عملکرد">
+    <meta name="twitter:description" content="APIهای System.Diagnostics.Metrics در .NET 6 به عنوان یک ویژگی داخلی معرفی شدند، اما از نسخه‌های قبلی .NET Core و .NET Framework نیز با استفاده از بسته‌ی NuGet System.Diagnostics.DiagnosticSource پشتیبانی می‌شوند. این APIها راهی برای ایجاد و گزارش‌گیری از معیارهای تولید شده توسط یک برنامه، مانند شمارنده‌ها، گیج‌ها و هیستوگرام‌های مقادیر فراهم می‌کنند. هدف اصلی این APIها، تسهیل همکاری با OpenTelemetry و ابزارهای .NET SDK مانند dotnet-counters است.
+
+این APIها دو مفهوم اصلی را ارائه می‌دهند: Instrument و Meter. Instrument مقادیر یک معیار خاص را ثبت می‌کند، در حالی که Meter یک گروه منطقی از چندین Instrument است. به عنوان مثال، Meter System.Runtime شامل Instrumentهایی در مورد عملکرد زمان اجرا و Meter Microsoft.AspNetCore.Hosting شامل Instrumentهایی در مورد درخواست‌های HTTP دریافتی توسط ASP.NET Core است.
+
+انواع مختلفی از Instrumentها وجود دارد، از جمله Counter، UpDownCounter، Gauge و Histogram. Counterها برای شمارش تعداد رخدادها استفاده می‌شوند، UpDownCounterها می‌توانند مقادیر مثبت و منفی را ثبت کنند، Gaugeها مقدار فعلی را نشان می‌دهند و Histogramها مقادیر دلخواه را گزارش می‌دهند. نسخه‌های Observable از Counter، UpDownCounter و Gauge نیز وجود دارند که فقط در صورت درخواست صریح، مقادیر را بازیابی می‌کنند.
+
+انتخاب بین Observable و غیر Observable Instrumentها تا حدودی به ملاحظات عملکردی و تا حدودی به نحوه به دست آوردن مقدار بستگی دارد. استفاده از این APIها به توسعه‌دهندگان .NET امکان می‌دهد تا به طور موثرتری عملکرد برنامه‌های خود را نظارت و تجزیه و تحلیل کنند و درک بهتری از رفتار برنامه در طول زمان داشته باشند.
+
+این APIها به توسعه‌دهندگان کمک می‌کنند تا معیارهای مختلفی مانند تعداد درخواست‌های دریافتی، اندازه هیپ GC، میزان حافظه استفاده شده و مدت زمان هر درخواست را اندازه‌گیری و گزارش کنند. با استفاده از این اطلاعات، توسعه‌دهندگان می‌توانند مشکلات عملکرد را شناسایی و رفع کنند و به طور کلی کیفیت و پایداری برنامه‌های .NET خود را بهبود بخشند.">
+    <meta name="twitter:card" content="APIهای System.Diagnostics.Metrics در .NET 6 به عنوان یک ویژگی داخلی معرفی شدند، اما از نسخه‌های قبلی .NET Core و .NET Framework نیز با استفاده از بسته‌ی NuGet System.Diagnostics.DiagnosticSource پشتیبانی می‌شوند. این APIها راهی برای ایجاد و گزارش‌گیری از معیارهای تولید شده توسط یک برنامه، مانند شمارنده‌ها، گیج‌ها و هیستوگرام‌های مقادیر فراهم می‌کنند. هدف اصلی این APIها، تسهیل همکاری با OpenTelemetry و ابزارهای .NET SDK مانند dotnet-counters است.
+
+این APIها دو مفهوم اصلی را ارائه می‌دهند: Instrument و Meter. Instrument مقادیر یک معیار خاص را ثبت می‌کند، در حالی که Meter یک گروه منطقی از چندین Instrument است. به عنوان مثال، Meter System.Runtime شامل Instrumentهایی در مورد عملکرد زمان اجرا و Meter Microsoft.AspNetCore.Hosting شامل Instrumentهایی در مورد درخواست‌های HTTP دریافتی توسط ASP.NET Core است.
+
+انواع مختلفی از Instrumentها وجود دارد، از جمله Counter، UpDownCounter، Gauge و Histogram. Counterها برای شمارش تعداد رخدادها استفاده می‌شوند، UpDownCounterها می‌توانند مقادیر مثبت و منفی را ثبت کنند، Gaugeها مقدار فعلی را نشان می‌دهند و Histogramها مقادیر دلخواه را گزارش می‌دهند. نسخه‌های Observable از Counter، UpDownCounter و Gauge نیز وجود دارند که فقط در صورت درخواست صریح، مقادیر را بازیابی می‌کنند.
+
+انتخاب بین Observable و غیر Observable Instrumentها تا حدودی به ملاحظات عملکردی و تا حدودی به نحوه به دست آوردن مقدار بستگی دارد. استفاده از این APIها به توسعه‌دهندگان .NET امکان می‌دهد تا به طور موثرتری عملکرد برنامه‌های خود را نظارت و تجزیه و تحلیل کنند و درک بهتری از رفتار برنامه در طول زمان داشته باشند.
+
+این APIها به توسعه‌دهندگان کمک می‌کنند تا معیارهای مختلفی مانند تعداد درخواست‌های دریافتی، اندازه هیپ GC، میزان حافظه استفاده شده و مدت زمان هر درخواست را اندازه‌گیری و گزارش کنند. با استفاده از این اطلاعات، توسعه‌دهندگان می‌توانند مشکلات عملکرد را شناسایی و رفع کنند و به طور کلی کیفیت و پایداری برنامه‌های .NET خود را بهبود بخشند.">
+    <meta property="article:published_time" content="Tue, 27 Jan 2026 20:58:56 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
     <meta content='IE=edge' http-equiv='X-UA-Compatible'>
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">
-	
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
 	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
-
     <link href="vs.min.css" rel="stylesheet" type="text/css">
-    <script src="highlight.min.js" type="text/javascript"></script>
-	
+    <script src="highlight.min.js" type="text/javascript"></script>	
     <link href="styles.css" rel="stylesheet" type="text/css">	
     <style>
       @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
@@ -42,8 +94,8 @@
         }
      }
     </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
 </head>
-
 <body dir='rtl'>
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
@@ -53,7 +105,7 @@
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۳۶۹۵</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۶۹۷</span></td>
 </tr>
 <tr>
 <td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
@@ -73,7 +125,7 @@
 </tr>
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۲۲</span></td>
 </tr>
 </tbody>
 </table>
@@ -131,8 +183,5 @@
 
 <!-- to load custom fonts for printing -->
 <div class="useSamimFD">&nbsp;</div>
-
-<script src="SyntaxHighlighter.js" type="text/javascript"></script>
 </body>
-
 </html>

@@ -1,17 +1,359 @@
 <!DOCTYPE html>
 <html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
-
 <head>
-    <title>‫‫بازنگری در استفاده از MediatR در توسعه برنامه‌های ASP.NET Core</title>
+    <title>‫‫بازنگری در استفاده از MediatR در توسعه برنامه‌های ASP.NET Core</title>     <meta name="description" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;جیمی بوگارد (Jimmy Bogard)، خالق کتابخانه محبوب MediatR، اخیراً اعلام کرده است که این کتابخانه به صورت تجاری عرضه خواهد شد. این تغییر، فرصتی مناسب برای توسعه‌دهندگان برنامه‌های ASP.NET Core فراهم می‌آورد تا نیازمندی‌های خود به این کتابخانه را مورد ارزیابی مجدد قرار دهند و در صورت لزوم، به دنبال راهکارهای جایگزین باشند. سال‌هاست که MediatR به عنوان معماری پیش‌فرض برای برنامه‌های جدی ASP.NET Core در نظر گرفته می‌شود و به عنوان یک بلوک ساختمانی اساسی برای الگوهای CQRS (فرمان جداسازی مسئولیت پرس و جو - Command Query Responsibility Segregation)، جداسازی تمیز (Clean Separation) و قابلیت تست‌پذیری (Testability) شناخته می‌شود. با این حال، بررسی کاربرد آن در پروژه‌های واقعی نشان می‌دهد که مزایای آن بیشتر جنبه نظری دارند، در حالی که هزینه‌های مربوط به بویلرپلیت (Boilerplate)، غیرمستقیم‌سازی (Indirection) و زمان توسعه، کاملاً محسوس هستند. خوشبختانه، روش‌های بهتر و ساده‌تری برای ساخت APIها با استفاده از Minimal APIs (حداقل APIها) و معماری برش عمودی (Vertical Slice Architecture) در حال ظهور هستند و به دلایل موجهی محبوبیت پیدا می‌کنند. این رویکرد، برای توسعه‌دهندگانی که به دنبال نوشتن کد واضح، قابل نگهداری و بدون پیچیدگی‌های غیرضروری هستند، ارزش یادگیری دارد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;MediatR چیست و چرا مورد استفاده قرار می‌گیرد؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;MediatR یک کتابخانه متن‌باز (Open-source) پرطرفدار است که الگوی میانجی (Mediator Pattern) را پیاده‌سازی می‌کند. در این الگو، یک درخواست (Command یا Query) به یک میانجی (ISender یا IMediator) ارسال می‌شود که آن را به یک هندلر (Handler) مناسب هدایت می‌کند. هدف از استفاده از MediatR، کمک به موارد زیر است:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;جداسازی APIها از منطق کسب و کار (Decouple APIs from business logic)&lt;/li&gt;&lt;li&gt;بهبود قابلیت تست‌پذیری (Improve testability)&lt;/li&gt;&lt;li&gt;فعال‌سازی منطق‌های برش عرضی (Cross-cutting logic) قابل استفاده مجدد از طریق رفتارهای خط لوله (Pipeline Behaviors)&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;با این حال، یک تصور نادرست در میان بسیاری از توسعه‌دهندگان وجود دارد که MediatR را معادل با CQRS می‌دانند. حقیقت این است که اکثر تیم‌های توسعه‌دهنده، CQRS واقعی را پیاده‌سازی نمی‌کنند و صرفاً خواندن و نوشتن اطلاعات را در کلاس‌های جداگانه انجام می‌دهند که در نهایت به یک پایگاه داده واحد متصل می‌شوند. این رویکرد، CQRS واقعی نیست و تنها یک لایه غیرضروری بدون مزیت واقعی ایجاد می‌کند. برای انجام چنین کاری، نیازی به MediatR نیست و در بسیاری از موارد، نیازی به خود الگوی CQRS نیز وجود ندارد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پیاده‌سازی یک Endpoint سفارش مبتنی بر MediatR&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای روشن شدن موضوع، فرض کنید می‌خواهیم یک Endpoint نوع POST را پیاده‌سازی کنیم که یک سفارش را با استفاده از EF Core (هسته فریم‌ورک موجودیت - Entity Framework Core) در PostgreSQL ذخیره می‌کند. در دنیای MediatR، پیاده‌سازی Endpoint به این صورت خواهد بود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[HttpPost(&amp;quot;/orders&amp;quot;)]
+public async Task&amp;lt;IActionResult&amp;gt; CreateOrder(CreateOrderCommand command, IMediator mediator)
+{
+    var result = await mediator.Send(command);
+    return result.Match(
+        onSuccess: orderId =&amp;gt; CreatedAtAction(nameof(GetOrder), new { id = orderId }, orderId),
+        onFailure: errors =&amp;gt; Problem(errors)
+    );
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;سپس، منطق اصلی در یک کلاس هندلر جداگانه به همراه چند نوع پشتیبانی‌کننده دیگر پیاده‌سازی می‌شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public record CreateOrderCommand(Guid CustomerId, List&amp;lt;OrderItem&amp;gt; Items) : IRequest&amp;lt;Result&amp;lt;Guid&amp;gt;&amp;gt;;
+
+public record OrderItem(Guid ProductId, int Quantity, decimal Price);
+
+public class CreateOrderCommandHandler : IRequestHandler&amp;lt;CreateOrderCommand, Result&amp;lt;Guid&amp;gt;&amp;gt;
+{
+    private readonly ApplicationDbContext _dbContext;
+
+    public CreateOrderCommandHandler(ApplicationDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+
+    public async Task&amp;lt;Result&amp;lt;Guid&amp;gt;&amp;gt; Handle(CreateOrderCommand request, CancellationToken cancellationToken)
+    {
+        var order = new Order
+        {
+            CustomerId = request.CustomerId,
+            Items = request.Items.Select(i =&amp;gt; new OrderItem
+            {
+                ProductId = i.ProductId,
+                Quantity = i.Quantity,
+                Price = i.Price
+            }).ToList()
+        };
+
+        _dbContext.Orders.Add(order);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return Result.Success(order.Id);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همانطور که مشاهده می‌شود، این رویکرد شامل مراحل و عناصر اضافی متعددی است:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;یک شیء فرمان (Command object) با نام &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CreateOrderCommand&lt;/code&gt;&lt;/li&gt;&lt;li&gt;یک شیء نتیجه (Result object) با نام &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Result&amp;lt;Guid&amp;gt;&lt;/code&gt;&lt;/li&gt;&lt;li&gt;یک کلاس هندلر (Handler class) با نام &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CreateOrderCommandHandler&lt;/code&gt; که رابط &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IRequestHandler&lt;/code&gt; را پیاده‌سازی می‌کند.&lt;/li&gt;&lt;li&gt;یک مرحله ثبت میانجی (Mediator registration step) برای اتصال فرمان و هندلر.&lt;/li&gt;&lt;li&gt;یک Endpoint که وظیفه‌ای جز انتقال درخواست به هندلر ندارد.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;تمام این مراحل فقط برای ذخیره یک یا چند ردیف در پایگاه داده انجام می‌شود. در ادامه، روش انجام همین کار بدون استفاده از MediatR بررسی خواهد شد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;استفاده از Minimal APIs و معماری برش عمودی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در مقابل، پیاده‌سازی دقیقاً همین رفتار با استفاده از معماری برش عمودی (Vertical Slice Architecture) و Minimal APIs به صورت زیر و در قالب یک کلاس Endpoint قابل انجام است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class CreateOrderEndpoint : IEndpoint
+{
+    public void MapEndpoint(IEndpointRouteBuilder endpoints)
+    {
+        endpoints.MapPost(&amp;quot;/orders&amp;quot;, async (CreateOrderRequest request, ApplicationDbContext dbContext) =&amp;gt;
+        {
+            var order = new Order
+            {
+                CustomerId = request.CustomerId,
+                Items = request.Items.Select(i =&amp;gt; new OrderItem
+                {
+                    ProductId = i.ProductId,
+                    Quantity = i.Quantity,
+                    Price = i.Price
+                }).ToList()
+            };
+
+            dbContext.Orders.Add(order);
+            await dbContext.SaveChangesAsync();
+
+            return Results.Created($&amp;quot;/orders/{order.Id}&amp;quot;, order.Id);
+        });
+    }
+}
+
+public record CreateOrderRequest(Guid CustomerId, List&amp;lt;OrderItemRequest&amp;gt; Items);
+public record OrderItemRequest(Guid ProductId, int Quantity, decimal Price);&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;سپس، تنها کاری که باید انجام شود، نگاشت (Map) این ویژگی/Endpoint در فایل &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Program.cs&lt;/code&gt; به این صورت است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;app.AddEndpoint&amp;lt;CreateOrderEndpoint&amp;gt;();&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همانطور که مشاهده می‌شود، در این رویکرد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;نیازی به میانجی (Mediator) نیست.&lt;/li&gt;&lt;li&gt;نیازی به هندلر (Handler) جداگانه نیست.&lt;/li&gt;&lt;li&gt;نیازی به فایل‌های اضافی فقط برای انتقال داده به پایگاه داده نیست.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همه چیز در یک مکان قابل مشاهده است. این امر منجر به تسریع در توسعه و رفع اشکال (Debug) می‌شود و به توسعه‌دهندگان اجازه می‌دهد تا بر روی منطق اصلی تمرکز کرده و از موارد غیرضروری اجتناب کنند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;رفتارهای خط لوله (Pipeline Behaviors) چه می‌شوند؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;طرفداران MediatR اغلب از رابط &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IPipelineBehavior&amp;lt;TRequest, TResponse&amp;gt;&lt;/code&gt; برای اعتبارسنجی (Validation) و ثبت وقایع (Logging) به عنوان یکی از مزایای این کتابخانه یاد می‌کنند. با این حال، برای اعتبارسنجی یک DTO (شیء انتقال داده - Data Transfer Object)، نیازی به یک خط لوله پیچیده نیست و می‌توان این کار را به صورت مستقیم و واضح انجام داد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public record CreateOrderRequest(Guid CustomerId, [NotEmpty] List&amp;lt;OrderItemRequest&amp;gt; Items);
+public record OrderItemRequest(Guid ProductId, [Range(1, 100)] int Quantity, decimal Price);&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رویکرد، تمیز، صریح و قابل تست است و از کلاس‌های رفتار پنهان (Hidden behavior classes)، فیلترهای سراسری جادویی (Magic global filters) و پشته‌های فراخوانی (Stack traces) پیچیده جلوگیری می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;آیا هندلرهای MediatR تست‌پذیرتر نیستند؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این ادعا تنها در صورتی صادق است که تمرکز بر تست کردن موارد اشتباه باشد. هندلرهایی که صرفاً داده‌ها را منتقل می‌کنند، منطق تجاری واقعی ندارند و تست واحد (Unit test) برای آن‌ها مناسب نیست. این نوع رفتارها باید از طریق تست‌های یکپارچگی (Integration test) و با استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;WebApplicationFactory&lt;/code&gt; و بررسی رفتار کامل از طریق لایه HTTP مورد ارزیابی قرار گیرند. اگر منطق تجاری واقعی (مانند محاسبات تخفیف یا تشخیص تقلب) وجود داشته باشد، باید آن را در کلاس‌های جداگانه استخراج کرده و در همانجا تست کرد. برای نوشتن تست‌های خوب، نیازی به انتزاع هندلر (Handler abstraction) نیست، بلکه به مرزهایی نیاز است که واقعاً اهمیت دارند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;MediatR هرگز قرار نبوده است که معماری پیش‌فرض باشد و تنها یک ابزار در میان سایر ابزارها است. در اکثر APIهای دات‌نت امروزی، این ابزار، انتخاب مناسبی نیست. با تجاری شدن این کتابخانه، اکنون زمان آن رسیده است که از خود بپرسید آیا واقعاً به آن نیاز دارید؟ با استفاده از معماری برش عمودی و Minimal APIs، مزایای زیر حاصل می‌شود:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;تعداد فایل‌های کمتر&lt;/li&gt;&lt;li&gt;ساختار تمیزتر&lt;/li&gt;&lt;li&gt;تجربه توسعه روان‌تر&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;توصیه می‌شود از قابلیت‌های پلتفرم دات‌نت استفاده کنید، Endpointهای واضح و متمرکز را به عنوان ویژگی‌ها پیاده‌سازی کنید و از انتزاع‌های غیرضروری موارد ساده اجتناب کنید.&lt;/div&gt;">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="بازنگری در استفاده از MediatR در توسعه برنامه‌های ASP.NET Core">
+    <meta itemprop="description" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;جیمی بوگارد (Jimmy Bogard)، خالق کتابخانه محبوب MediatR، اخیراً اعلام کرده است که این کتابخانه به صورت تجاری عرضه خواهد شد. این تغییر، فرصتی مناسب برای توسعه‌دهندگان برنامه‌های ASP.NET Core فراهم می‌آورد تا نیازمندی‌های خود به این کتابخانه را مورد ارزیابی مجدد قرار دهند و در صورت لزوم، به دنبال راهکارهای جایگزین باشند. سال‌هاست که MediatR به عنوان معماری پیش‌فرض برای برنامه‌های جدی ASP.NET Core در نظر گرفته می‌شود و به عنوان یک بلوک ساختمانی اساسی برای الگوهای CQRS (فرمان جداسازی مسئولیت پرس و جو - Command Query Responsibility Segregation)، جداسازی تمیز (Clean Separation) و قابلیت تست‌پذیری (Testability) شناخته می‌شود. با این حال، بررسی کاربرد آن در پروژه‌های واقعی نشان می‌دهد که مزایای آن بیشتر جنبه نظری دارند، در حالی که هزینه‌های مربوط به بویلرپلیت (Boilerplate)، غیرمستقیم‌سازی (Indirection) و زمان توسعه، کاملاً محسوس هستند. خوشبختانه، روش‌های بهتر و ساده‌تری برای ساخت APIها با استفاده از Minimal APIs (حداقل APIها) و معماری برش عمودی (Vertical Slice Architecture) در حال ظهور هستند و به دلایل موجهی محبوبیت پیدا می‌کنند. این رویکرد، برای توسعه‌دهندگانی که به دنبال نوشتن کد واضح، قابل نگهداری و بدون پیچیدگی‌های غیرضروری هستند، ارزش یادگیری دارد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;MediatR چیست و چرا مورد استفاده قرار می‌گیرد؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;MediatR یک کتابخانه متن‌باز (Open-source) پرطرفدار است که الگوی میانجی (Mediator Pattern) را پیاده‌سازی می‌کند. در این الگو، یک درخواست (Command یا Query) به یک میانجی (ISender یا IMediator) ارسال می‌شود که آن را به یک هندلر (Handler) مناسب هدایت می‌کند. هدف از استفاده از MediatR، کمک به موارد زیر است:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;جداسازی APIها از منطق کسب و کار (Decouple APIs from business logic)&lt;/li&gt;&lt;li&gt;بهبود قابلیت تست‌پذیری (Improve testability)&lt;/li&gt;&lt;li&gt;فعال‌سازی منطق‌های برش عرضی (Cross-cutting logic) قابل استفاده مجدد از طریق رفتارهای خط لوله (Pipeline Behaviors)&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;با این حال، یک تصور نادرست در میان بسیاری از توسعه‌دهندگان وجود دارد که MediatR را معادل با CQRS می‌دانند. حقیقت این است که اکثر تیم‌های توسعه‌دهنده، CQRS واقعی را پیاده‌سازی نمی‌کنند و صرفاً خواندن و نوشتن اطلاعات را در کلاس‌های جداگانه انجام می‌دهند که در نهایت به یک پایگاه داده واحد متصل می‌شوند. این رویکرد، CQRS واقعی نیست و تنها یک لایه غیرضروری بدون مزیت واقعی ایجاد می‌کند. برای انجام چنین کاری، نیازی به MediatR نیست و در بسیاری از موارد، نیازی به خود الگوی CQRS نیز وجود ندارد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پیاده‌سازی یک Endpoint سفارش مبتنی بر MediatR&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای روشن شدن موضوع، فرض کنید می‌خواهیم یک Endpoint نوع POST را پیاده‌سازی کنیم که یک سفارش را با استفاده از EF Core (هسته فریم‌ورک موجودیت - Entity Framework Core) در PostgreSQL ذخیره می‌کند. در دنیای MediatR، پیاده‌سازی Endpoint به این صورت خواهد بود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[HttpPost(&amp;quot;/orders&amp;quot;)]
+public async Task&amp;lt;IActionResult&amp;gt; CreateOrder(CreateOrderCommand command, IMediator mediator)
+{
+    var result = await mediator.Send(command);
+    return result.Match(
+        onSuccess: orderId =&amp;gt; CreatedAtAction(nameof(GetOrder), new { id = orderId }, orderId),
+        onFailure: errors =&amp;gt; Problem(errors)
+    );
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;سپس، منطق اصلی در یک کلاس هندلر جداگانه به همراه چند نوع پشتیبانی‌کننده دیگر پیاده‌سازی می‌شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public record CreateOrderCommand(Guid CustomerId, List&amp;lt;OrderItem&amp;gt; Items) : IRequest&amp;lt;Result&amp;lt;Guid&amp;gt;&amp;gt;;
+
+public record OrderItem(Guid ProductId, int Quantity, decimal Price);
+
+public class CreateOrderCommandHandler : IRequestHandler&amp;lt;CreateOrderCommand, Result&amp;lt;Guid&amp;gt;&amp;gt;
+{
+    private readonly ApplicationDbContext _dbContext;
+
+    public CreateOrderCommandHandler(ApplicationDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+
+    public async Task&amp;lt;Result&amp;lt;Guid&amp;gt;&amp;gt; Handle(CreateOrderCommand request, CancellationToken cancellationToken)
+    {
+        var order = new Order
+        {
+            CustomerId = request.CustomerId,
+            Items = request.Items.Select(i =&amp;gt; new OrderItem
+            {
+                ProductId = i.ProductId,
+                Quantity = i.Quantity,
+                Price = i.Price
+            }).ToList()
+        };
+
+        _dbContext.Orders.Add(order);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return Result.Success(order.Id);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همانطور که مشاهده می‌شود، این رویکرد شامل مراحل و عناصر اضافی متعددی است:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;یک شیء فرمان (Command object) با نام &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CreateOrderCommand&lt;/code&gt;&lt;/li&gt;&lt;li&gt;یک شیء نتیجه (Result object) با نام &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Result&amp;lt;Guid&amp;gt;&lt;/code&gt;&lt;/li&gt;&lt;li&gt;یک کلاس هندلر (Handler class) با نام &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CreateOrderCommandHandler&lt;/code&gt; که رابط &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IRequestHandler&lt;/code&gt; را پیاده‌سازی می‌کند.&lt;/li&gt;&lt;li&gt;یک مرحله ثبت میانجی (Mediator registration step) برای اتصال فرمان و هندلر.&lt;/li&gt;&lt;li&gt;یک Endpoint که وظیفه‌ای جز انتقال درخواست به هندلر ندارد.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;تمام این مراحل فقط برای ذخیره یک یا چند ردیف در پایگاه داده انجام می‌شود. در ادامه، روش انجام همین کار بدون استفاده از MediatR بررسی خواهد شد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;استفاده از Minimal APIs و معماری برش عمودی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در مقابل، پیاده‌سازی دقیقاً همین رفتار با استفاده از معماری برش عمودی (Vertical Slice Architecture) و Minimal APIs به صورت زیر و در قالب یک کلاس Endpoint قابل انجام است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class CreateOrderEndpoint : IEndpoint
+{
+    public void MapEndpoint(IEndpointRouteBuilder endpoints)
+    {
+        endpoints.MapPost(&amp;quot;/orders&amp;quot;, async (CreateOrderRequest request, ApplicationDbContext dbContext) =&amp;gt;
+        {
+            var order = new Order
+            {
+                CustomerId = request.CustomerId,
+                Items = request.Items.Select(i =&amp;gt; new OrderItem
+                {
+                    ProductId = i.ProductId,
+                    Quantity = i.Quantity,
+                    Price = i.Price
+                }).ToList()
+            };
+
+            dbContext.Orders.Add(order);
+            await dbContext.SaveChangesAsync();
+
+            return Results.Created($&amp;quot;/orders/{order.Id}&amp;quot;, order.Id);
+        });
+    }
+}
+
+public record CreateOrderRequest(Guid CustomerId, List&amp;lt;OrderItemRequest&amp;gt; Items);
+public record OrderItemRequest(Guid ProductId, int Quantity, decimal Price);&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;سپس، تنها کاری که باید انجام شود، نگاشت (Map) این ویژگی/Endpoint در فایل &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Program.cs&lt;/code&gt; به این صورت است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;app.AddEndpoint&amp;lt;CreateOrderEndpoint&amp;gt;();&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همانطور که مشاهده می‌شود، در این رویکرد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;نیازی به میانجی (Mediator) نیست.&lt;/li&gt;&lt;li&gt;نیازی به هندلر (Handler) جداگانه نیست.&lt;/li&gt;&lt;li&gt;نیازی به فایل‌های اضافی فقط برای انتقال داده به پایگاه داده نیست.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همه چیز در یک مکان قابل مشاهده است. این امر منجر به تسریع در توسعه و رفع اشکال (Debug) می‌شود و به توسعه‌دهندگان اجازه می‌دهد تا بر روی منطق اصلی تمرکز کرده و از موارد غیرضروری اجتناب کنند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;رفتارهای خط لوله (Pipeline Behaviors) چه می‌شوند؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;طرفداران MediatR اغلب از رابط &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IPipelineBehavior&amp;lt;TRequest, TResponse&amp;gt;&lt;/code&gt; برای اعتبارسنجی (Validation) و ثبت وقایع (Logging) به عنوان یکی از مزایای این کتابخانه یاد می‌کنند. با این حال، برای اعتبارسنجی یک DTO (شیء انتقال داده - Data Transfer Object)، نیازی به یک خط لوله پیچیده نیست و می‌توان این کار را به صورت مستقیم و واضح انجام داد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public record CreateOrderRequest(Guid CustomerId, [NotEmpty] List&amp;lt;OrderItemRequest&amp;gt; Items);
+public record OrderItemRequest(Guid ProductId, [Range(1, 100)] int Quantity, decimal Price);&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رویکرد، تمیز، صریح و قابل تست است و از کلاس‌های رفتار پنهان (Hidden behavior classes)، فیلترهای سراسری جادویی (Magic global filters) و پشته‌های فراخوانی (Stack traces) پیچیده جلوگیری می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;آیا هندلرهای MediatR تست‌پذیرتر نیستند؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این ادعا تنها در صورتی صادق است که تمرکز بر تست کردن موارد اشتباه باشد. هندلرهایی که صرفاً داده‌ها را منتقل می‌کنند، منطق تجاری واقعی ندارند و تست واحد (Unit test) برای آن‌ها مناسب نیست. این نوع رفتارها باید از طریق تست‌های یکپارچگی (Integration test) و با استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;WebApplicationFactory&lt;/code&gt; و بررسی رفتار کامل از طریق لایه HTTP مورد ارزیابی قرار گیرند. اگر منطق تجاری واقعی (مانند محاسبات تخفیف یا تشخیص تقلب) وجود داشته باشد، باید آن را در کلاس‌های جداگانه استخراج کرده و در همانجا تست کرد. برای نوشتن تست‌های خوب، نیازی به انتزاع هندلر (Handler abstraction) نیست، بلکه به مرزهایی نیاز است که واقعاً اهمیت دارند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;MediatR هرگز قرار نبوده است که معماری پیش‌فرض باشد و تنها یک ابزار در میان سایر ابزارها است. در اکثر APIهای دات‌نت امروزی، این ابزار، انتخاب مناسبی نیست. با تجاری شدن این کتابخانه، اکنون زمان آن رسیده است که از خود بپرسید آیا واقعاً به آن نیاز دارید؟ با استفاده از معماری برش عمودی و Minimal APIs، مزایای زیر حاصل می‌شود:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;تعداد فایل‌های کمتر&lt;/li&gt;&lt;li&gt;ساختار تمیزتر&lt;/li&gt;&lt;li&gt;تجربه توسعه روان‌تر&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;توصیه می‌شود از قابلیت‌های پلتفرم دات‌نت استفاده کنید، Endpointهای واضح و متمرکز را به عنوان ویژگی‌ها پیاده‌سازی کنید و از انتزاع‌های غیرضروری موارد ساده اجتناب کنید.&lt;/div&gt;">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="بازنگری در استفاده از MediatR در توسعه برنامه‌های ASP.NET Core">
+    <meta property="og:description" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;جیمی بوگارد (Jimmy Bogard)، خالق کتابخانه محبوب MediatR، اخیراً اعلام کرده است که این کتابخانه به صورت تجاری عرضه خواهد شد. این تغییر، فرصتی مناسب برای توسعه‌دهندگان برنامه‌های ASP.NET Core فراهم می‌آورد تا نیازمندی‌های خود به این کتابخانه را مورد ارزیابی مجدد قرار دهند و در صورت لزوم، به دنبال راهکارهای جایگزین باشند. سال‌هاست که MediatR به عنوان معماری پیش‌فرض برای برنامه‌های جدی ASP.NET Core در نظر گرفته می‌شود و به عنوان یک بلوک ساختمانی اساسی برای الگوهای CQRS (فرمان جداسازی مسئولیت پرس و جو - Command Query Responsibility Segregation)، جداسازی تمیز (Clean Separation) و قابلیت تست‌پذیری (Testability) شناخته می‌شود. با این حال، بررسی کاربرد آن در پروژه‌های واقعی نشان می‌دهد که مزایای آن بیشتر جنبه نظری دارند، در حالی که هزینه‌های مربوط به بویلرپلیت (Boilerplate)، غیرمستقیم‌سازی (Indirection) و زمان توسعه، کاملاً محسوس هستند. خوشبختانه، روش‌های بهتر و ساده‌تری برای ساخت APIها با استفاده از Minimal APIs (حداقل APIها) و معماری برش عمودی (Vertical Slice Architecture) در حال ظهور هستند و به دلایل موجهی محبوبیت پیدا می‌کنند. این رویکرد، برای توسعه‌دهندگانی که به دنبال نوشتن کد واضح، قابل نگهداری و بدون پیچیدگی‌های غیرضروری هستند، ارزش یادگیری دارد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;MediatR چیست و چرا مورد استفاده قرار می‌گیرد؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;MediatR یک کتابخانه متن‌باز (Open-source) پرطرفدار است که الگوی میانجی (Mediator Pattern) را پیاده‌سازی می‌کند. در این الگو، یک درخواست (Command یا Query) به یک میانجی (ISender یا IMediator) ارسال می‌شود که آن را به یک هندلر (Handler) مناسب هدایت می‌کند. هدف از استفاده از MediatR، کمک به موارد زیر است:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;جداسازی APIها از منطق کسب و کار (Decouple APIs from business logic)&lt;/li&gt;&lt;li&gt;بهبود قابلیت تست‌پذیری (Improve testability)&lt;/li&gt;&lt;li&gt;فعال‌سازی منطق‌های برش عرضی (Cross-cutting logic) قابل استفاده مجدد از طریق رفتارهای خط لوله (Pipeline Behaviors)&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;با این حال، یک تصور نادرست در میان بسیاری از توسعه‌دهندگان وجود دارد که MediatR را معادل با CQRS می‌دانند. حقیقت این است که اکثر تیم‌های توسعه‌دهنده، CQRS واقعی را پیاده‌سازی نمی‌کنند و صرفاً خواندن و نوشتن اطلاعات را در کلاس‌های جداگانه انجام می‌دهند که در نهایت به یک پایگاه داده واحد متصل می‌شوند. این رویکرد، CQRS واقعی نیست و تنها یک لایه غیرضروری بدون مزیت واقعی ایجاد می‌کند. برای انجام چنین کاری، نیازی به MediatR نیست و در بسیاری از موارد، نیازی به خود الگوی CQRS نیز وجود ندارد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پیاده‌سازی یک Endpoint سفارش مبتنی بر MediatR&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای روشن شدن موضوع، فرض کنید می‌خواهیم یک Endpoint نوع POST را پیاده‌سازی کنیم که یک سفارش را با استفاده از EF Core (هسته فریم‌ورک موجودیت - Entity Framework Core) در PostgreSQL ذخیره می‌کند. در دنیای MediatR، پیاده‌سازی Endpoint به این صورت خواهد بود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[HttpPost(&amp;quot;/orders&amp;quot;)]
+public async Task&amp;lt;IActionResult&amp;gt; CreateOrder(CreateOrderCommand command, IMediator mediator)
+{
+    var result = await mediator.Send(command);
+    return result.Match(
+        onSuccess: orderId =&amp;gt; CreatedAtAction(nameof(GetOrder), new { id = orderId }, orderId),
+        onFailure: errors =&amp;gt; Problem(errors)
+    );
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;سپس، منطق اصلی در یک کلاس هندلر جداگانه به همراه چند نوع پشتیبانی‌کننده دیگر پیاده‌سازی می‌شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public record CreateOrderCommand(Guid CustomerId, List&amp;lt;OrderItem&amp;gt; Items) : IRequest&amp;lt;Result&amp;lt;Guid&amp;gt;&amp;gt;;
+
+public record OrderItem(Guid ProductId, int Quantity, decimal Price);
+
+public class CreateOrderCommandHandler : IRequestHandler&amp;lt;CreateOrderCommand, Result&amp;lt;Guid&amp;gt;&amp;gt;
+{
+    private readonly ApplicationDbContext _dbContext;
+
+    public CreateOrderCommandHandler(ApplicationDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+
+    public async Task&amp;lt;Result&amp;lt;Guid&amp;gt;&amp;gt; Handle(CreateOrderCommand request, CancellationToken cancellationToken)
+    {
+        var order = new Order
+        {
+            CustomerId = request.CustomerId,
+            Items = request.Items.Select(i =&amp;gt; new OrderItem
+            {
+                ProductId = i.ProductId,
+                Quantity = i.Quantity,
+                Price = i.Price
+            }).ToList()
+        };
+
+        _dbContext.Orders.Add(order);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return Result.Success(order.Id);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همانطور که مشاهده می‌شود، این رویکرد شامل مراحل و عناصر اضافی متعددی است:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;یک شیء فرمان (Command object) با نام &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CreateOrderCommand&lt;/code&gt;&lt;/li&gt;&lt;li&gt;یک شیء نتیجه (Result object) با نام &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Result&amp;lt;Guid&amp;gt;&lt;/code&gt;&lt;/li&gt;&lt;li&gt;یک کلاس هندلر (Handler class) با نام &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CreateOrderCommandHandler&lt;/code&gt; که رابط &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IRequestHandler&lt;/code&gt; را پیاده‌سازی می‌کند.&lt;/li&gt;&lt;li&gt;یک مرحله ثبت میانجی (Mediator registration step) برای اتصال فرمان و هندلر.&lt;/li&gt;&lt;li&gt;یک Endpoint که وظیفه‌ای جز انتقال درخواست به هندلر ندارد.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;تمام این مراحل فقط برای ذخیره یک یا چند ردیف در پایگاه داده انجام می‌شود. در ادامه، روش انجام همین کار بدون استفاده از MediatR بررسی خواهد شد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;استفاده از Minimal APIs و معماری برش عمودی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در مقابل، پیاده‌سازی دقیقاً همین رفتار با استفاده از معماری برش عمودی (Vertical Slice Architecture) و Minimal APIs به صورت زیر و در قالب یک کلاس Endpoint قابل انجام است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class CreateOrderEndpoint : IEndpoint
+{
+    public void MapEndpoint(IEndpointRouteBuilder endpoints)
+    {
+        endpoints.MapPost(&amp;quot;/orders&amp;quot;, async (CreateOrderRequest request, ApplicationDbContext dbContext) =&amp;gt;
+        {
+            var order = new Order
+            {
+                CustomerId = request.CustomerId,
+                Items = request.Items.Select(i =&amp;gt; new OrderItem
+                {
+                    ProductId = i.ProductId,
+                    Quantity = i.Quantity,
+                    Price = i.Price
+                }).ToList()
+            };
+
+            dbContext.Orders.Add(order);
+            await dbContext.SaveChangesAsync();
+
+            return Results.Created($&amp;quot;/orders/{order.Id}&amp;quot;, order.Id);
+        });
+    }
+}
+
+public record CreateOrderRequest(Guid CustomerId, List&amp;lt;OrderItemRequest&amp;gt; Items);
+public record OrderItemRequest(Guid ProductId, int Quantity, decimal Price);&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;سپس، تنها کاری که باید انجام شود، نگاشت (Map) این ویژگی/Endpoint در فایل &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Program.cs&lt;/code&gt; به این صورت است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;app.AddEndpoint&amp;lt;CreateOrderEndpoint&amp;gt;();&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همانطور که مشاهده می‌شود، در این رویکرد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;نیازی به میانجی (Mediator) نیست.&lt;/li&gt;&lt;li&gt;نیازی به هندلر (Handler) جداگانه نیست.&lt;/li&gt;&lt;li&gt;نیازی به فایل‌های اضافی فقط برای انتقال داده به پایگاه داده نیست.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همه چیز در یک مکان قابل مشاهده است. این امر منجر به تسریع در توسعه و رفع اشکال (Debug) می‌شود و به توسعه‌دهندگان اجازه می‌دهد تا بر روی منطق اصلی تمرکز کرده و از موارد غیرضروری اجتناب کنند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;رفتارهای خط لوله (Pipeline Behaviors) چه می‌شوند؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;طرفداران MediatR اغلب از رابط &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IPipelineBehavior&amp;lt;TRequest, TResponse&amp;gt;&lt;/code&gt; برای اعتبارسنجی (Validation) و ثبت وقایع (Logging) به عنوان یکی از مزایای این کتابخانه یاد می‌کنند. با این حال، برای اعتبارسنجی یک DTO (شیء انتقال داده - Data Transfer Object)، نیازی به یک خط لوله پیچیده نیست و می‌توان این کار را به صورت مستقیم و واضح انجام داد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public record CreateOrderRequest(Guid CustomerId, [NotEmpty] List&amp;lt;OrderItemRequest&amp;gt; Items);
+public record OrderItemRequest(Guid ProductId, [Range(1, 100)] int Quantity, decimal Price);&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رویکرد، تمیز، صریح و قابل تست است و از کلاس‌های رفتار پنهان (Hidden behavior classes)، فیلترهای سراسری جادویی (Magic global filters) و پشته‌های فراخوانی (Stack traces) پیچیده جلوگیری می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;آیا هندلرهای MediatR تست‌پذیرتر نیستند؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این ادعا تنها در صورتی صادق است که تمرکز بر تست کردن موارد اشتباه باشد. هندلرهایی که صرفاً داده‌ها را منتقل می‌کنند، منطق تجاری واقعی ندارند و تست واحد (Unit test) برای آن‌ها مناسب نیست. این نوع رفتارها باید از طریق تست‌های یکپارچگی (Integration test) و با استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;WebApplicationFactory&lt;/code&gt; و بررسی رفتار کامل از طریق لایه HTTP مورد ارزیابی قرار گیرند. اگر منطق تجاری واقعی (مانند محاسبات تخفیف یا تشخیص تقلب) وجود داشته باشد، باید آن را در کلاس‌های جداگانه استخراج کرده و در همانجا تست کرد. برای نوشتن تست‌های خوب، نیازی به انتزاع هندلر (Handler abstraction) نیست، بلکه به مرزهایی نیاز است که واقعاً اهمیت دارند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;MediatR هرگز قرار نبوده است که معماری پیش‌فرض باشد و تنها یک ابزار در میان سایر ابزارها است. در اکثر APIهای دات‌نت امروزی، این ابزار، انتخاب مناسبی نیست. با تجاری شدن این کتابخانه، اکنون زمان آن رسیده است که از خود بپرسید آیا واقعاً به آن نیاز دارید؟ با استفاده از معماری برش عمودی و Minimal APIs، مزایای زیر حاصل می‌شود:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;تعداد فایل‌های کمتر&lt;/li&gt;&lt;li&gt;ساختار تمیزتر&lt;/li&gt;&lt;li&gt;تجربه توسعه روان‌تر&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;توصیه می‌شود از قابلیت‌های پلتفرم دات‌نت استفاده کنید، Endpointهای واضح و متمرکز را به عنوان ویژگی‌ها پیاده‌سازی کنید و از انتزاع‌های غیرضروری موارد ساده اجتناب کنید.&lt;/div&gt;">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="بازنگری در استفاده از MediatR در توسعه برنامه‌های ASP.NET Core">
+    <meta name="twitter:description" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;جیمی بوگارد (Jimmy Bogard)، خالق کتابخانه محبوب MediatR، اخیراً اعلام کرده است که این کتابخانه به صورت تجاری عرضه خواهد شد. این تغییر، فرصتی مناسب برای توسعه‌دهندگان برنامه‌های ASP.NET Core فراهم می‌آورد تا نیازمندی‌های خود به این کتابخانه را مورد ارزیابی مجدد قرار دهند و در صورت لزوم، به دنبال راهکارهای جایگزین باشند. سال‌هاست که MediatR به عنوان معماری پیش‌فرض برای برنامه‌های جدی ASP.NET Core در نظر گرفته می‌شود و به عنوان یک بلوک ساختمانی اساسی برای الگوهای CQRS (فرمان جداسازی مسئولیت پرس و جو - Command Query Responsibility Segregation)، جداسازی تمیز (Clean Separation) و قابلیت تست‌پذیری (Testability) شناخته می‌شود. با این حال، بررسی کاربرد آن در پروژه‌های واقعی نشان می‌دهد که مزایای آن بیشتر جنبه نظری دارند، در حالی که هزینه‌های مربوط به بویلرپلیت (Boilerplate)، غیرمستقیم‌سازی (Indirection) و زمان توسعه، کاملاً محسوس هستند. خوشبختانه، روش‌های بهتر و ساده‌تری برای ساخت APIها با استفاده از Minimal APIs (حداقل APIها) و معماری برش عمودی (Vertical Slice Architecture) در حال ظهور هستند و به دلایل موجهی محبوبیت پیدا می‌کنند. این رویکرد، برای توسعه‌دهندگانی که به دنبال نوشتن کد واضح، قابل نگهداری و بدون پیچیدگی‌های غیرضروری هستند، ارزش یادگیری دارد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;MediatR چیست و چرا مورد استفاده قرار می‌گیرد؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;MediatR یک کتابخانه متن‌باز (Open-source) پرطرفدار است که الگوی میانجی (Mediator Pattern) را پیاده‌سازی می‌کند. در این الگو، یک درخواست (Command یا Query) به یک میانجی (ISender یا IMediator) ارسال می‌شود که آن را به یک هندلر (Handler) مناسب هدایت می‌کند. هدف از استفاده از MediatR، کمک به موارد زیر است:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;جداسازی APIها از منطق کسب و کار (Decouple APIs from business logic)&lt;/li&gt;&lt;li&gt;بهبود قابلیت تست‌پذیری (Improve testability)&lt;/li&gt;&lt;li&gt;فعال‌سازی منطق‌های برش عرضی (Cross-cutting logic) قابل استفاده مجدد از طریق رفتارهای خط لوله (Pipeline Behaviors)&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;با این حال، یک تصور نادرست در میان بسیاری از توسعه‌دهندگان وجود دارد که MediatR را معادل با CQRS می‌دانند. حقیقت این است که اکثر تیم‌های توسعه‌دهنده، CQRS واقعی را پیاده‌سازی نمی‌کنند و صرفاً خواندن و نوشتن اطلاعات را در کلاس‌های جداگانه انجام می‌دهند که در نهایت به یک پایگاه داده واحد متصل می‌شوند. این رویکرد، CQRS واقعی نیست و تنها یک لایه غیرضروری بدون مزیت واقعی ایجاد می‌کند. برای انجام چنین کاری، نیازی به MediatR نیست و در بسیاری از موارد، نیازی به خود الگوی CQRS نیز وجود ندارد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پیاده‌سازی یک Endpoint سفارش مبتنی بر MediatR&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای روشن شدن موضوع، فرض کنید می‌خواهیم یک Endpoint نوع POST را پیاده‌سازی کنیم که یک سفارش را با استفاده از EF Core (هسته فریم‌ورک موجودیت - Entity Framework Core) در PostgreSQL ذخیره می‌کند. در دنیای MediatR، پیاده‌سازی Endpoint به این صورت خواهد بود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[HttpPost(&amp;quot;/orders&amp;quot;)]
+public async Task&amp;lt;IActionResult&amp;gt; CreateOrder(CreateOrderCommand command, IMediator mediator)
+{
+    var result = await mediator.Send(command);
+    return result.Match(
+        onSuccess: orderId =&amp;gt; CreatedAtAction(nameof(GetOrder), new { id = orderId }, orderId),
+        onFailure: errors =&amp;gt; Problem(errors)
+    );
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;سپس، منطق اصلی در یک کلاس هندلر جداگانه به همراه چند نوع پشتیبانی‌کننده دیگر پیاده‌سازی می‌شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public record CreateOrderCommand(Guid CustomerId, List&amp;lt;OrderItem&amp;gt; Items) : IRequest&amp;lt;Result&amp;lt;Guid&amp;gt;&amp;gt;;
+
+public record OrderItem(Guid ProductId, int Quantity, decimal Price);
+
+public class CreateOrderCommandHandler : IRequestHandler&amp;lt;CreateOrderCommand, Result&amp;lt;Guid&amp;gt;&amp;gt;
+{
+    private readonly ApplicationDbContext _dbContext;
+
+    public CreateOrderCommandHandler(ApplicationDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+
+    public async Task&amp;lt;Result&amp;lt;Guid&amp;gt;&amp;gt; Handle(CreateOrderCommand request, CancellationToken cancellationToken)
+    {
+        var order = new Order
+        {
+            CustomerId = request.CustomerId,
+            Items = request.Items.Select(i =&amp;gt; new OrderItem
+            {
+                ProductId = i.ProductId,
+                Quantity = i.Quantity,
+                Price = i.Price
+            }).ToList()
+        };
+
+        _dbContext.Orders.Add(order);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return Result.Success(order.Id);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همانطور که مشاهده می‌شود، این رویکرد شامل مراحل و عناصر اضافی متعددی است:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;یک شیء فرمان (Command object) با نام &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CreateOrderCommand&lt;/code&gt;&lt;/li&gt;&lt;li&gt;یک شیء نتیجه (Result object) با نام &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Result&amp;lt;Guid&amp;gt;&lt;/code&gt;&lt;/li&gt;&lt;li&gt;یک کلاس هندلر (Handler class) با نام &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CreateOrderCommandHandler&lt;/code&gt; که رابط &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IRequestHandler&lt;/code&gt; را پیاده‌سازی می‌کند.&lt;/li&gt;&lt;li&gt;یک مرحله ثبت میانجی (Mediator registration step) برای اتصال فرمان و هندلر.&lt;/li&gt;&lt;li&gt;یک Endpoint که وظیفه‌ای جز انتقال درخواست به هندلر ندارد.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;تمام این مراحل فقط برای ذخیره یک یا چند ردیف در پایگاه داده انجام می‌شود. در ادامه، روش انجام همین کار بدون استفاده از MediatR بررسی خواهد شد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;استفاده از Minimal APIs و معماری برش عمودی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در مقابل، پیاده‌سازی دقیقاً همین رفتار با استفاده از معماری برش عمودی (Vertical Slice Architecture) و Minimal APIs به صورت زیر و در قالب یک کلاس Endpoint قابل انجام است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class CreateOrderEndpoint : IEndpoint
+{
+    public void MapEndpoint(IEndpointRouteBuilder endpoints)
+    {
+        endpoints.MapPost(&amp;quot;/orders&amp;quot;, async (CreateOrderRequest request, ApplicationDbContext dbContext) =&amp;gt;
+        {
+            var order = new Order
+            {
+                CustomerId = request.CustomerId,
+                Items = request.Items.Select(i =&amp;gt; new OrderItem
+                {
+                    ProductId = i.ProductId,
+                    Quantity = i.Quantity,
+                    Price = i.Price
+                }).ToList()
+            };
+
+            dbContext.Orders.Add(order);
+            await dbContext.SaveChangesAsync();
+
+            return Results.Created($&amp;quot;/orders/{order.Id}&amp;quot;, order.Id);
+        });
+    }
+}
+
+public record CreateOrderRequest(Guid CustomerId, List&amp;lt;OrderItemRequest&amp;gt; Items);
+public record OrderItemRequest(Guid ProductId, int Quantity, decimal Price);&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;سپس، تنها کاری که باید انجام شود، نگاشت (Map) این ویژگی/Endpoint در فایل &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Program.cs&lt;/code&gt; به این صورت است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;app.AddEndpoint&amp;lt;CreateOrderEndpoint&amp;gt;();&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همانطور که مشاهده می‌شود، در این رویکرد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;نیازی به میانجی (Mediator) نیست.&lt;/li&gt;&lt;li&gt;نیازی به هندلر (Handler) جداگانه نیست.&lt;/li&gt;&lt;li&gt;نیازی به فایل‌های اضافی فقط برای انتقال داده به پایگاه داده نیست.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همه چیز در یک مکان قابل مشاهده است. این امر منجر به تسریع در توسعه و رفع اشکال (Debug) می‌شود و به توسعه‌دهندگان اجازه می‌دهد تا بر روی منطق اصلی تمرکز کرده و از موارد غیرضروری اجتناب کنند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;رفتارهای خط لوله (Pipeline Behaviors) چه می‌شوند؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;طرفداران MediatR اغلب از رابط &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IPipelineBehavior&amp;lt;TRequest, TResponse&amp;gt;&lt;/code&gt; برای اعتبارسنجی (Validation) و ثبت وقایع (Logging) به عنوان یکی از مزایای این کتابخانه یاد می‌کنند. با این حال، برای اعتبارسنجی یک DTO (شیء انتقال داده - Data Transfer Object)، نیازی به یک خط لوله پیچیده نیست و می‌توان این کار را به صورت مستقیم و واضح انجام داد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public record CreateOrderRequest(Guid CustomerId, [NotEmpty] List&amp;lt;OrderItemRequest&amp;gt; Items);
+public record OrderItemRequest(Guid ProductId, [Range(1, 100)] int Quantity, decimal Price);&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رویکرد، تمیز، صریح و قابل تست است و از کلاس‌های رفتار پنهان (Hidden behavior classes)، فیلترهای سراسری جادویی (Magic global filters) و پشته‌های فراخوانی (Stack traces) پیچیده جلوگیری می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;آیا هندلرهای MediatR تست‌پذیرتر نیستند؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این ادعا تنها در صورتی صادق است که تمرکز بر تست کردن موارد اشتباه باشد. هندلرهایی که صرفاً داده‌ها را منتقل می‌کنند، منطق تجاری واقعی ندارند و تست واحد (Unit test) برای آن‌ها مناسب نیست. این نوع رفتارها باید از طریق تست‌های یکپارچگی (Integration test) و با استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;WebApplicationFactory&lt;/code&gt; و بررسی رفتار کامل از طریق لایه HTTP مورد ارزیابی قرار گیرند. اگر منطق تجاری واقعی (مانند محاسبات تخفیف یا تشخیص تقلب) وجود داشته باشد، باید آن را در کلاس‌های جداگانه استخراج کرده و در همانجا تست کرد. برای نوشتن تست‌های خوب، نیازی به انتزاع هندلر (Handler abstraction) نیست، بلکه به مرزهایی نیاز است که واقعاً اهمیت دارند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;MediatR هرگز قرار نبوده است که معماری پیش‌فرض باشد و تنها یک ابزار در میان سایر ابزارها است. در اکثر APIهای دات‌نت امروزی، این ابزار، انتخاب مناسبی نیست. با تجاری شدن این کتابخانه، اکنون زمان آن رسیده است که از خود بپرسید آیا واقعاً به آن نیاز دارید؟ با استفاده از معماری برش عمودی و Minimal APIs، مزایای زیر حاصل می‌شود:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;تعداد فایل‌های کمتر&lt;/li&gt;&lt;li&gt;ساختار تمیزتر&lt;/li&gt;&lt;li&gt;تجربه توسعه روان‌تر&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;توصیه می‌شود از قابلیت‌های پلتفرم دات‌نت استفاده کنید، Endpointهای واضح و متمرکز را به عنوان ویژگی‌ها پیاده‌سازی کنید و از انتزاع‌های غیرضروری موارد ساده اجتناب کنید.&lt;/div&gt;">
+    <meta name="twitter:card" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;جیمی بوگارد (Jimmy Bogard)، خالق کتابخانه محبوب MediatR، اخیراً اعلام کرده است که این کتابخانه به صورت تجاری عرضه خواهد شد. این تغییر، فرصتی مناسب برای توسعه‌دهندگان برنامه‌های ASP.NET Core فراهم می‌آورد تا نیازمندی‌های خود به این کتابخانه را مورد ارزیابی مجدد قرار دهند و در صورت لزوم، به دنبال راهکارهای جایگزین باشند. سال‌هاست که MediatR به عنوان معماری پیش‌فرض برای برنامه‌های جدی ASP.NET Core در نظر گرفته می‌شود و به عنوان یک بلوک ساختمانی اساسی برای الگوهای CQRS (فرمان جداسازی مسئولیت پرس و جو - Command Query Responsibility Segregation)، جداسازی تمیز (Clean Separation) و قابلیت تست‌پذیری (Testability) شناخته می‌شود. با این حال، بررسی کاربرد آن در پروژه‌های واقعی نشان می‌دهد که مزایای آن بیشتر جنبه نظری دارند، در حالی که هزینه‌های مربوط به بویلرپلیت (Boilerplate)، غیرمستقیم‌سازی (Indirection) و زمان توسعه، کاملاً محسوس هستند. خوشبختانه، روش‌های بهتر و ساده‌تری برای ساخت APIها با استفاده از Minimal APIs (حداقل APIها) و معماری برش عمودی (Vertical Slice Architecture) در حال ظهور هستند و به دلایل موجهی محبوبیت پیدا می‌کنند. این رویکرد، برای توسعه‌دهندگانی که به دنبال نوشتن کد واضح، قابل نگهداری و بدون پیچیدگی‌های غیرضروری هستند، ارزش یادگیری دارد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;MediatR چیست و چرا مورد استفاده قرار می‌گیرد؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;MediatR یک کتابخانه متن‌باز (Open-source) پرطرفدار است که الگوی میانجی (Mediator Pattern) را پیاده‌سازی می‌کند. در این الگو، یک درخواست (Command یا Query) به یک میانجی (ISender یا IMediator) ارسال می‌شود که آن را به یک هندلر (Handler) مناسب هدایت می‌کند. هدف از استفاده از MediatR، کمک به موارد زیر است:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;جداسازی APIها از منطق کسب و کار (Decouple APIs from business logic)&lt;/li&gt;&lt;li&gt;بهبود قابلیت تست‌پذیری (Improve testability)&lt;/li&gt;&lt;li&gt;فعال‌سازی منطق‌های برش عرضی (Cross-cutting logic) قابل استفاده مجدد از طریق رفتارهای خط لوله (Pipeline Behaviors)&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;با این حال، یک تصور نادرست در میان بسیاری از توسعه‌دهندگان وجود دارد که MediatR را معادل با CQRS می‌دانند. حقیقت این است که اکثر تیم‌های توسعه‌دهنده، CQRS واقعی را پیاده‌سازی نمی‌کنند و صرفاً خواندن و نوشتن اطلاعات را در کلاس‌های جداگانه انجام می‌دهند که در نهایت به یک پایگاه داده واحد متصل می‌شوند. این رویکرد، CQRS واقعی نیست و تنها یک لایه غیرضروری بدون مزیت واقعی ایجاد می‌کند. برای انجام چنین کاری، نیازی به MediatR نیست و در بسیاری از موارد، نیازی به خود الگوی CQRS نیز وجود ندارد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پیاده‌سازی یک Endpoint سفارش مبتنی بر MediatR&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای روشن شدن موضوع، فرض کنید می‌خواهیم یک Endpoint نوع POST را پیاده‌سازی کنیم که یک سفارش را با استفاده از EF Core (هسته فریم‌ورک موجودیت - Entity Framework Core) در PostgreSQL ذخیره می‌کند. در دنیای MediatR، پیاده‌سازی Endpoint به این صورت خواهد بود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[HttpPost(&amp;quot;/orders&amp;quot;)]
+public async Task&amp;lt;IActionResult&amp;gt; CreateOrder(CreateOrderCommand command, IMediator mediator)
+{
+    var result = await mediator.Send(command);
+    return result.Match(
+        onSuccess: orderId =&amp;gt; CreatedAtAction(nameof(GetOrder), new { id = orderId }, orderId),
+        onFailure: errors =&amp;gt; Problem(errors)
+    );
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;سپس، منطق اصلی در یک کلاس هندلر جداگانه به همراه چند نوع پشتیبانی‌کننده دیگر پیاده‌سازی می‌شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public record CreateOrderCommand(Guid CustomerId, List&amp;lt;OrderItem&amp;gt; Items) : IRequest&amp;lt;Result&amp;lt;Guid&amp;gt;&amp;gt;;
+
+public record OrderItem(Guid ProductId, int Quantity, decimal Price);
+
+public class CreateOrderCommandHandler : IRequestHandler&amp;lt;CreateOrderCommand, Result&amp;lt;Guid&amp;gt;&amp;gt;
+{
+    private readonly ApplicationDbContext _dbContext;
+
+    public CreateOrderCommandHandler(ApplicationDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+
+    public async Task&amp;lt;Result&amp;lt;Guid&amp;gt;&amp;gt; Handle(CreateOrderCommand request, CancellationToken cancellationToken)
+    {
+        var order = new Order
+        {
+            CustomerId = request.CustomerId,
+            Items = request.Items.Select(i =&amp;gt; new OrderItem
+            {
+                ProductId = i.ProductId,
+                Quantity = i.Quantity,
+                Price = i.Price
+            }).ToList()
+        };
+
+        _dbContext.Orders.Add(order);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return Result.Success(order.Id);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همانطور که مشاهده می‌شود، این رویکرد شامل مراحل و عناصر اضافی متعددی است:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;یک شیء فرمان (Command object) با نام &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CreateOrderCommand&lt;/code&gt;&lt;/li&gt;&lt;li&gt;یک شیء نتیجه (Result object) با نام &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Result&amp;lt;Guid&amp;gt;&lt;/code&gt;&lt;/li&gt;&lt;li&gt;یک کلاس هندلر (Handler class) با نام &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CreateOrderCommandHandler&lt;/code&gt; که رابط &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IRequestHandler&lt;/code&gt; را پیاده‌سازی می‌کند.&lt;/li&gt;&lt;li&gt;یک مرحله ثبت میانجی (Mediator registration step) برای اتصال فرمان و هندلر.&lt;/li&gt;&lt;li&gt;یک Endpoint که وظیفه‌ای جز انتقال درخواست به هندلر ندارد.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;تمام این مراحل فقط برای ذخیره یک یا چند ردیف در پایگاه داده انجام می‌شود. در ادامه، روش انجام همین کار بدون استفاده از MediatR بررسی خواهد شد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;استفاده از Minimal APIs و معماری برش عمودی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در مقابل، پیاده‌سازی دقیقاً همین رفتار با استفاده از معماری برش عمودی (Vertical Slice Architecture) و Minimal APIs به صورت زیر و در قالب یک کلاس Endpoint قابل انجام است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class CreateOrderEndpoint : IEndpoint
+{
+    public void MapEndpoint(IEndpointRouteBuilder endpoints)
+    {
+        endpoints.MapPost(&amp;quot;/orders&amp;quot;, async (CreateOrderRequest request, ApplicationDbContext dbContext) =&amp;gt;
+        {
+            var order = new Order
+            {
+                CustomerId = request.CustomerId,
+                Items = request.Items.Select(i =&amp;gt; new OrderItem
+                {
+                    ProductId = i.ProductId,
+                    Quantity = i.Quantity,
+                    Price = i.Price
+                }).ToList()
+            };
+
+            dbContext.Orders.Add(order);
+            await dbContext.SaveChangesAsync();
+
+            return Results.Created($&amp;quot;/orders/{order.Id}&amp;quot;, order.Id);
+        });
+    }
+}
+
+public record CreateOrderRequest(Guid CustomerId, List&amp;lt;OrderItemRequest&amp;gt; Items);
+public record OrderItemRequest(Guid ProductId, int Quantity, decimal Price);&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;سپس، تنها کاری که باید انجام شود، نگاشت (Map) این ویژگی/Endpoint در فایل &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Program.cs&lt;/code&gt; به این صورت است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;app.AddEndpoint&amp;lt;CreateOrderEndpoint&amp;gt;();&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همانطور که مشاهده می‌شود، در این رویکرد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;نیازی به میانجی (Mediator) نیست.&lt;/li&gt;&lt;li&gt;نیازی به هندلر (Handler) جداگانه نیست.&lt;/li&gt;&lt;li&gt;نیازی به فایل‌های اضافی فقط برای انتقال داده به پایگاه داده نیست.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همه چیز در یک مکان قابل مشاهده است. این امر منجر به تسریع در توسعه و رفع اشکال (Debug) می‌شود و به توسعه‌دهندگان اجازه می‌دهد تا بر روی منطق اصلی تمرکز کرده و از موارد غیرضروری اجتناب کنند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;رفتارهای خط لوله (Pipeline Behaviors) چه می‌شوند؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;طرفداران MediatR اغلب از رابط &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IPipelineBehavior&amp;lt;TRequest, TResponse&amp;gt;&lt;/code&gt; برای اعتبارسنجی (Validation) و ثبت وقایع (Logging) به عنوان یکی از مزایای این کتابخانه یاد می‌کنند. با این حال، برای اعتبارسنجی یک DTO (شیء انتقال داده - Data Transfer Object)، نیازی به یک خط لوله پیچیده نیست و می‌توان این کار را به صورت مستقیم و واضح انجام داد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public record CreateOrderRequest(Guid CustomerId, [NotEmpty] List&amp;lt;OrderItemRequest&amp;gt; Items);
+public record OrderItemRequest(Guid ProductId, [Range(1, 100)] int Quantity, decimal Price);&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رویکرد، تمیز، صریح و قابل تست است و از کلاس‌های رفتار پنهان (Hidden behavior classes)، فیلترهای سراسری جادویی (Magic global filters) و پشته‌های فراخوانی (Stack traces) پیچیده جلوگیری می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;آیا هندلرهای MediatR تست‌پذیرتر نیستند؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این ادعا تنها در صورتی صادق است که تمرکز بر تست کردن موارد اشتباه باشد. هندلرهایی که صرفاً داده‌ها را منتقل می‌کنند، منطق تجاری واقعی ندارند و تست واحد (Unit test) برای آن‌ها مناسب نیست. این نوع رفتارها باید از طریق تست‌های یکپارچگی (Integration test) و با استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;WebApplicationFactory&lt;/code&gt; و بررسی رفتار کامل از طریق لایه HTTP مورد ارزیابی قرار گیرند. اگر منطق تجاری واقعی (مانند محاسبات تخفیف یا تشخیص تقلب) وجود داشته باشد، باید آن را در کلاس‌های جداگانه استخراج کرده و در همانجا تست کرد. برای نوشتن تست‌های خوب، نیازی به انتزاع هندلر (Handler abstraction) نیست، بلکه به مرزهایی نیاز است که واقعاً اهمیت دارند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;MediatR هرگز قرار نبوده است که معماری پیش‌فرض باشد و تنها یک ابزار در میان سایر ابزارها است. در اکثر APIهای دات‌نت امروزی، این ابزار، انتخاب مناسبی نیست. با تجاری شدن این کتابخانه، اکنون زمان آن رسیده است که از خود بپرسید آیا واقعاً به آن نیاز دارید؟ با استفاده از معماری برش عمودی و Minimal APIs، مزایای زیر حاصل می‌شود:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;تعداد فایل‌های کمتر&lt;/li&gt;&lt;li&gt;ساختار تمیزتر&lt;/li&gt;&lt;li&gt;تجربه توسعه روان‌تر&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;توصیه می‌شود از قابلیت‌های پلتفرم دات‌نت استفاده کنید، Endpointهای واضح و متمرکز را به عنوان ویژگی‌ها پیاده‌سازی کنید و از انتزاع‌های غیرضروری موارد ساده اجتناب کنید.&lt;/div&gt;">
+    <meta property="article:published_time" content="Sun, 27 Apr 2025 04:42:18 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
     <meta content='IE=edge' http-equiv='X-UA-Compatible'>
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">
-	
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
 	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
-
     <link href="vs.min.css" rel="stylesheet" type="text/css">
-    <script src="highlight.min.js" type="text/javascript"></script>
-	
+    <script src="highlight.min.js" type="text/javascript"></script>	
     <link href="styles.css" rel="stylesheet" type="text/css">	
     <style>
       @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
@@ -42,8 +384,8 @@
         }
      }
     </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
 </head>
-
 <body dir='rtl'>
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
@@ -53,7 +395,7 @@
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۳۶۹۵</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۶۹۷</span></td>
 </tr>
 <tr>
 <td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
@@ -73,7 +415,7 @@
 </tr>
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۲۲</span></td>
 </tr>
 </tbody>
 </table>
@@ -189,8 +531,5 @@ public record OrderItemRequest(Guid ProductId, [Range(1, 100)] int Quantity, dec
 
 <!-- to load custom fonts for printing -->
 <div class="useSamimFD">&nbsp;</div>
-
-<script src="SyntaxHighlighter.js" type="text/javascript"></script>
 </body>
-
 </html>

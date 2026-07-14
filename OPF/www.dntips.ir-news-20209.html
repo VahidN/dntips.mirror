@@ -1,17 +1,299 @@
 <!DOCTYPE html>
 <html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
-
 <head>
-    <title>‫‫اجتناب از ضد الگوی «آلودگی کد» در توسعه‌ی تست‌های واحد</title>
+    <title>‫‫اجتناب از ضد الگوی «آلودگی کد» در توسعه‌ی تست‌های واحد</title>     <meta name="description" content="&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در دنیای توسعه نرم‌افزار، تست واحد (Unit Testing) یکی از ستون‌های اصلی تضمین کیفیت کد است. توسعه‌دهندگان NET. اغلب از تست‌های واحد برای اعتبارسنجی رفتار اجزای کوچک برنامه استفاده می‌کنند. با این حال، گاهی اوقات روش‌های نادرست در نوشتن این تست‌ها می‌تواند به مشکلات جدیدی منجر شود. یکی از این مشکلات، الگوی ضد تست واحد به نام &amp;quot;آلودگی کد&amp;quot; (Code Pollution) است. آلودگی کد زمانی رخ می‌دهد که منطق خاصی فقط برای تسهیل تست در کد اصلی (Production Code) اضافه می‌شود. این کار نه‌تنها پیچیدگی غیرضروری ایجاد می‌کند، بلکه وابستگی بین کد اصلی و تست‌ها را افزایش می‌دهد و نگهداری پروژه را دشوارتر می‌کند. در این مقاله، به بررسی مفهوم آلودگی کد، دلایل وقوع آن، و راهکارهایی برای اجتناب از آن در توسعه NET. می‌پردازیم. هدف این است که توسعه‌دهندگان بتوانند کدهایی تمیزتر، مستقل‌تر و قابل نگهداری‌تر بنویسند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;آلودگی کد چیست و چرا مشکل‌ساز است؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;آلودگی کد به وضعیتی اشاره دارد که در آن، کد اصلی به خاطر نیازهای تست تغییر می‌کند یا با منطق اضافی پر می‌شود. این تغییرات معمولاً شامل اضافه کردن سوئیچ‌ها (Switches)، متدها یا شرط‌هایی است که فقط در محیط تست استفاده می‌شوند. این الگو باعث می‌شود کد اصلی از هدف اصلی خود، یعنی اجرای منطق کسب‌وکار، دور شود و به ابزاری برای پشتیبانی از تست‌ها تبدیل شود.&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;به عنوان مثال، فرض کنید یک کلاس ساده برای لاگ کردن پیام‌ها در NET. داریم:&lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class CustomLogger
+{
+    private readonly bool _isTestingMode;
+    public CustomLogger(bool isTestingMode)
+    {
+        _isTestingMode = isTestingMode;
+    }
+
+    public void Log(string message)
+    {
+        if (_isTestingMode) return;
+        // منطق لاگ کردن پیام در اینجا
+    }
+}
+
+public class ServiceController
+{
+    public void Execute(CustomLogger logger)
+    {
+        logger.Log(&amp;quot;Execute method invoked&amp;quot;);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در این کد، متغیر &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;_isTestingMode&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; و شرط مرتبط با آن فقط برای غیرفعال کردن لاگ در تست‌ها اضافه شده است. این یک نمونه کلاسیک از آلودگی کد است. مشکل اینجاست که این منطق هیچ ارزشی به عملکرد اصلی برنامه اضافه نمی‌کند و تنها برای تست‌ها طراحی شده است. نتیجه؟ کدی که پیچیده‌تر از حد لازم است، وابستگی ناخواسته به محیط تست دارد و در صورت تغییر نیازهای تست، باید بارها بازنویسی شود.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;ریشه‌های آلودگی کد&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;آلودگی کد معمولاً از عدم استفاده صحیح از اصول طراحی نرم‌افزار ناشی می‌شود. یکی از شایع‌ترین دلایل، نادیده گرفتن اصل تزریق وابستگی (Dependency Injection) است. وقتی یک کلاس به‌جای وابستگی به یک abstraction (مانند رابط یا Interface)، مستقیماً به یک پیاده‌سازی خاص وابسته باشد، توسعه‌دهندگان ممکن است برای تست آن، کد اصلی را تغییر دهند. دلیل دیگر، عدم تمایل به بازطراحی کد برای جداسازی نگرانی‌ها (Separation of Concerns) است. در نهایت، فشار زمانی یا عدم آگاهی از روش‌های بهتر نیز می‌تواند به این مشکل دامن بزند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;راهکارهایی برای اجتناب از آلودگی کد&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;برای رفع این مشکل، باید از تکنیک‌هایی استفاده کنیم که کد اصلی را از منطق تست جدا نگه دارند. در ادامه، چند راهکار کلیدی را بررسی می‌کنیم:&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;1. استفاده از رابط‌ها (Interfaces) و تزریق وابستگی&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;به جای افزودن سوئیچ‌های تست در کد اصلی، می‌توانیم از رابط‌ها استفاده کنیم تا وابستگی‌ها را انتزاعی کنیم. برای مثال، کلاس &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;CustomLogger&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; را می‌توان به این شکل بازطراحی کرد:&lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public interface ILogger
+{
+    void Log(string message);
+}
+
+public class RealLogger : ILogger
+{
+    public void Log(string message)
+    {
+        // منطق واقعی لاگ کردن
+    }
+}
+
+public class FakeLogger : ILogger
+{
+    public void Log(string message)
+    {
+        // بدون عملیات، برای تست
+    }
+}
+
+public class ServiceController
+{
+    private readonly ILogger _logger;
+    public ServiceController(ILogger logger)
+    {
+        _logger = logger;
+    }
+
+    public void Execute()
+    {
+        _logger.Log(&amp;quot;Execute method invoked&amp;quot;);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در این حالت، &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;ServiceController&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; به یک رابط (&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;ILogger&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;) وابسته است، نه یک پیاده‌سازی خاص. در محیط واقعی، &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;RealLogger&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; تزریق می‌شود و در تست‌ها، &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;FakeLogger&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; استفاده می‌شود. این روش نه‌تنها آلودگی کد را حذف می‌کند، بلکه انعطاف‌پذیری و قابلیت تست‌پذیری (Testability) را افزایش می‌دهد.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;2. جداسازی منطق تست از کد اصلی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;هرگز نباید کد اصلی را برای تست تغییر داد. اگر نیاز به رفتار خاصی در تست دارید، از ابزارهایی مثل mocking frameworks (مانند Moq در NET.) استفاده کنید. این ابزارها به شما اجازه می‌دهند رفتارهای دلخواه را بدون دستکاری کد اصلی شبیه‌سازی کنید.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;3. رعایت اصول SOLID&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;اصل باز/بسته (Open/Closed Principle) از مجموعه اصول SOLID به ما می‌گوید که باید بتوانیم رفتار یک کلاس را بدون تغییر کد آن گسترش دهیم. استفاده از رابط‌ها و تزریق وابستگی این اصل را محقق می‌کند و نیاز به آلودگی کد را از بین می‌برد.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مزایای اجتناب از آلودگی کد&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;وقتی از آلودگی کد اجتناب می‌کنیم، کد اصلی تمیزتر و مستقل‌تر می‌شود. این کار نگهداری را آسان‌تر می‌کند، زیرا تغییرات در تست‌ها نیازی به بازنویسی کد اصلی ندارند. همچنین، قابلیت تست‌پذیری افزایش می‌یابد و توسعه‌دهندگان می‌توانند با اطمینان بیشتری refactoring انجام دهند. در نهایت، این رویکرد به کاهش باگ‌های ناخواسته ناشی از منطق تست در محیط واقعی کمک می‌کند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;آلودگی کد یک الگوی ضد تست واحد است که می‌تواند کیفیت و نگهداری‌پذیری پروژه‌های NET. را به خطر بیندازد. این مشکل زمانی رخ می‌دهد که منطق تست، به کد اصلی نفوذ کند، مانند افزودن سوئیچ‌ها یا شرط‌های غیرضروری. با استفاده از رابط‌ها، تزریق وابستگی، و ابزارهای مناسب، می‌توان از این الگو اجتناب کرد و کدی تمیز و قابل اعتماد تولید نمود. توسعه‌دهندگان NET. باید به این نکته توجه کنند که هدف تست واحد، اعتبارسنجی رفتار کد است، نه تغییر آن. با رعایت این اصول، نه‌تنها کیفیت کد بهبود می‌یابد، بلکه تجربه توسعه نیز حرفه‌ای‌تر و لذت‌بخش‌تر خواهد شد.&lt;/span&gt;&lt;/div&gt;">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="اجتناب از ضد الگوی «آلودگی کد» در توسعه‌ی تست‌های واحد">
+    <meta itemprop="description" content="&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در دنیای توسعه نرم‌افزار، تست واحد (Unit Testing) یکی از ستون‌های اصلی تضمین کیفیت کد است. توسعه‌دهندگان NET. اغلب از تست‌های واحد برای اعتبارسنجی رفتار اجزای کوچک برنامه استفاده می‌کنند. با این حال، گاهی اوقات روش‌های نادرست در نوشتن این تست‌ها می‌تواند به مشکلات جدیدی منجر شود. یکی از این مشکلات، الگوی ضد تست واحد به نام &amp;quot;آلودگی کد&amp;quot; (Code Pollution) است. آلودگی کد زمانی رخ می‌دهد که منطق خاصی فقط برای تسهیل تست در کد اصلی (Production Code) اضافه می‌شود. این کار نه‌تنها پیچیدگی غیرضروری ایجاد می‌کند، بلکه وابستگی بین کد اصلی و تست‌ها را افزایش می‌دهد و نگهداری پروژه را دشوارتر می‌کند. در این مقاله، به بررسی مفهوم آلودگی کد، دلایل وقوع آن، و راهکارهایی برای اجتناب از آن در توسعه NET. می‌پردازیم. هدف این است که توسعه‌دهندگان بتوانند کدهایی تمیزتر، مستقل‌تر و قابل نگهداری‌تر بنویسند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;آلودگی کد چیست و چرا مشکل‌ساز است؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;آلودگی کد به وضعیتی اشاره دارد که در آن، کد اصلی به خاطر نیازهای تست تغییر می‌کند یا با منطق اضافی پر می‌شود. این تغییرات معمولاً شامل اضافه کردن سوئیچ‌ها (Switches)، متدها یا شرط‌هایی است که فقط در محیط تست استفاده می‌شوند. این الگو باعث می‌شود کد اصلی از هدف اصلی خود، یعنی اجرای منطق کسب‌وکار، دور شود و به ابزاری برای پشتیبانی از تست‌ها تبدیل شود.&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;به عنوان مثال، فرض کنید یک کلاس ساده برای لاگ کردن پیام‌ها در NET. داریم:&lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class CustomLogger
+{
+    private readonly bool _isTestingMode;
+    public CustomLogger(bool isTestingMode)
+    {
+        _isTestingMode = isTestingMode;
+    }
+
+    public void Log(string message)
+    {
+        if (_isTestingMode) return;
+        // منطق لاگ کردن پیام در اینجا
+    }
+}
+
+public class ServiceController
+{
+    public void Execute(CustomLogger logger)
+    {
+        logger.Log(&amp;quot;Execute method invoked&amp;quot;);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در این کد، متغیر &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;_isTestingMode&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; و شرط مرتبط با آن فقط برای غیرفعال کردن لاگ در تست‌ها اضافه شده است. این یک نمونه کلاسیک از آلودگی کد است. مشکل اینجاست که این منطق هیچ ارزشی به عملکرد اصلی برنامه اضافه نمی‌کند و تنها برای تست‌ها طراحی شده است. نتیجه؟ کدی که پیچیده‌تر از حد لازم است، وابستگی ناخواسته به محیط تست دارد و در صورت تغییر نیازهای تست، باید بارها بازنویسی شود.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;ریشه‌های آلودگی کد&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;آلودگی کد معمولاً از عدم استفاده صحیح از اصول طراحی نرم‌افزار ناشی می‌شود. یکی از شایع‌ترین دلایل، نادیده گرفتن اصل تزریق وابستگی (Dependency Injection) است. وقتی یک کلاس به‌جای وابستگی به یک abstraction (مانند رابط یا Interface)، مستقیماً به یک پیاده‌سازی خاص وابسته باشد، توسعه‌دهندگان ممکن است برای تست آن، کد اصلی را تغییر دهند. دلیل دیگر، عدم تمایل به بازطراحی کد برای جداسازی نگرانی‌ها (Separation of Concerns) است. در نهایت، فشار زمانی یا عدم آگاهی از روش‌های بهتر نیز می‌تواند به این مشکل دامن بزند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;راهکارهایی برای اجتناب از آلودگی کد&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;برای رفع این مشکل، باید از تکنیک‌هایی استفاده کنیم که کد اصلی را از منطق تست جدا نگه دارند. در ادامه، چند راهکار کلیدی را بررسی می‌کنیم:&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;1. استفاده از رابط‌ها (Interfaces) و تزریق وابستگی&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;به جای افزودن سوئیچ‌های تست در کد اصلی، می‌توانیم از رابط‌ها استفاده کنیم تا وابستگی‌ها را انتزاعی کنیم. برای مثال، کلاس &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;CustomLogger&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; را می‌توان به این شکل بازطراحی کرد:&lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public interface ILogger
+{
+    void Log(string message);
+}
+
+public class RealLogger : ILogger
+{
+    public void Log(string message)
+    {
+        // منطق واقعی لاگ کردن
+    }
+}
+
+public class FakeLogger : ILogger
+{
+    public void Log(string message)
+    {
+        // بدون عملیات، برای تست
+    }
+}
+
+public class ServiceController
+{
+    private readonly ILogger _logger;
+    public ServiceController(ILogger logger)
+    {
+        _logger = logger;
+    }
+
+    public void Execute()
+    {
+        _logger.Log(&amp;quot;Execute method invoked&amp;quot;);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در این حالت، &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;ServiceController&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; به یک رابط (&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;ILogger&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;) وابسته است، نه یک پیاده‌سازی خاص. در محیط واقعی، &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;RealLogger&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; تزریق می‌شود و در تست‌ها، &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;FakeLogger&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; استفاده می‌شود. این روش نه‌تنها آلودگی کد را حذف می‌کند، بلکه انعطاف‌پذیری و قابلیت تست‌پذیری (Testability) را افزایش می‌دهد.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;2. جداسازی منطق تست از کد اصلی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;هرگز نباید کد اصلی را برای تست تغییر داد. اگر نیاز به رفتار خاصی در تست دارید، از ابزارهایی مثل mocking frameworks (مانند Moq در NET.) استفاده کنید. این ابزارها به شما اجازه می‌دهند رفتارهای دلخواه را بدون دستکاری کد اصلی شبیه‌سازی کنید.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;3. رعایت اصول SOLID&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;اصل باز/بسته (Open/Closed Principle) از مجموعه اصول SOLID به ما می‌گوید که باید بتوانیم رفتار یک کلاس را بدون تغییر کد آن گسترش دهیم. استفاده از رابط‌ها و تزریق وابستگی این اصل را محقق می‌کند و نیاز به آلودگی کد را از بین می‌برد.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مزایای اجتناب از آلودگی کد&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;وقتی از آلودگی کد اجتناب می‌کنیم، کد اصلی تمیزتر و مستقل‌تر می‌شود. این کار نگهداری را آسان‌تر می‌کند، زیرا تغییرات در تست‌ها نیازی به بازنویسی کد اصلی ندارند. همچنین، قابلیت تست‌پذیری افزایش می‌یابد و توسعه‌دهندگان می‌توانند با اطمینان بیشتری refactoring انجام دهند. در نهایت، این رویکرد به کاهش باگ‌های ناخواسته ناشی از منطق تست در محیط واقعی کمک می‌کند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;آلودگی کد یک الگوی ضد تست واحد است که می‌تواند کیفیت و نگهداری‌پذیری پروژه‌های NET. را به خطر بیندازد. این مشکل زمانی رخ می‌دهد که منطق تست، به کد اصلی نفوذ کند، مانند افزودن سوئیچ‌ها یا شرط‌های غیرضروری. با استفاده از رابط‌ها، تزریق وابستگی، و ابزارهای مناسب، می‌توان از این الگو اجتناب کرد و کدی تمیز و قابل اعتماد تولید نمود. توسعه‌دهندگان NET. باید به این نکته توجه کنند که هدف تست واحد، اعتبارسنجی رفتار کد است، نه تغییر آن. با رعایت این اصول، نه‌تنها کیفیت کد بهبود می‌یابد، بلکه تجربه توسعه نیز حرفه‌ای‌تر و لذت‌بخش‌تر خواهد شد.&lt;/span&gt;&lt;/div&gt;">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="اجتناب از ضد الگوی «آلودگی کد» در توسعه‌ی تست‌های واحد">
+    <meta property="og:description" content="&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در دنیای توسعه نرم‌افزار، تست واحد (Unit Testing) یکی از ستون‌های اصلی تضمین کیفیت کد است. توسعه‌دهندگان NET. اغلب از تست‌های واحد برای اعتبارسنجی رفتار اجزای کوچک برنامه استفاده می‌کنند. با این حال، گاهی اوقات روش‌های نادرست در نوشتن این تست‌ها می‌تواند به مشکلات جدیدی منجر شود. یکی از این مشکلات، الگوی ضد تست واحد به نام &amp;quot;آلودگی کد&amp;quot; (Code Pollution) است. آلودگی کد زمانی رخ می‌دهد که منطق خاصی فقط برای تسهیل تست در کد اصلی (Production Code) اضافه می‌شود. این کار نه‌تنها پیچیدگی غیرضروری ایجاد می‌کند، بلکه وابستگی بین کد اصلی و تست‌ها را افزایش می‌دهد و نگهداری پروژه را دشوارتر می‌کند. در این مقاله، به بررسی مفهوم آلودگی کد، دلایل وقوع آن، و راهکارهایی برای اجتناب از آن در توسعه NET. می‌پردازیم. هدف این است که توسعه‌دهندگان بتوانند کدهایی تمیزتر، مستقل‌تر و قابل نگهداری‌تر بنویسند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;آلودگی کد چیست و چرا مشکل‌ساز است؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;آلودگی کد به وضعیتی اشاره دارد که در آن، کد اصلی به خاطر نیازهای تست تغییر می‌کند یا با منطق اضافی پر می‌شود. این تغییرات معمولاً شامل اضافه کردن سوئیچ‌ها (Switches)، متدها یا شرط‌هایی است که فقط در محیط تست استفاده می‌شوند. این الگو باعث می‌شود کد اصلی از هدف اصلی خود، یعنی اجرای منطق کسب‌وکار، دور شود و به ابزاری برای پشتیبانی از تست‌ها تبدیل شود.&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;به عنوان مثال، فرض کنید یک کلاس ساده برای لاگ کردن پیام‌ها در NET. داریم:&lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class CustomLogger
+{
+    private readonly bool _isTestingMode;
+    public CustomLogger(bool isTestingMode)
+    {
+        _isTestingMode = isTestingMode;
+    }
+
+    public void Log(string message)
+    {
+        if (_isTestingMode) return;
+        // منطق لاگ کردن پیام در اینجا
+    }
+}
+
+public class ServiceController
+{
+    public void Execute(CustomLogger logger)
+    {
+        logger.Log(&amp;quot;Execute method invoked&amp;quot;);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در این کد، متغیر &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;_isTestingMode&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; و شرط مرتبط با آن فقط برای غیرفعال کردن لاگ در تست‌ها اضافه شده است. این یک نمونه کلاسیک از آلودگی کد است. مشکل اینجاست که این منطق هیچ ارزشی به عملکرد اصلی برنامه اضافه نمی‌کند و تنها برای تست‌ها طراحی شده است. نتیجه؟ کدی که پیچیده‌تر از حد لازم است، وابستگی ناخواسته به محیط تست دارد و در صورت تغییر نیازهای تست، باید بارها بازنویسی شود.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;ریشه‌های آلودگی کد&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;آلودگی کد معمولاً از عدم استفاده صحیح از اصول طراحی نرم‌افزار ناشی می‌شود. یکی از شایع‌ترین دلایل، نادیده گرفتن اصل تزریق وابستگی (Dependency Injection) است. وقتی یک کلاس به‌جای وابستگی به یک abstraction (مانند رابط یا Interface)، مستقیماً به یک پیاده‌سازی خاص وابسته باشد، توسعه‌دهندگان ممکن است برای تست آن، کد اصلی را تغییر دهند. دلیل دیگر، عدم تمایل به بازطراحی کد برای جداسازی نگرانی‌ها (Separation of Concerns) است. در نهایت، فشار زمانی یا عدم آگاهی از روش‌های بهتر نیز می‌تواند به این مشکل دامن بزند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;راهکارهایی برای اجتناب از آلودگی کد&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;برای رفع این مشکل، باید از تکنیک‌هایی استفاده کنیم که کد اصلی را از منطق تست جدا نگه دارند. در ادامه، چند راهکار کلیدی را بررسی می‌کنیم:&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;1. استفاده از رابط‌ها (Interfaces) و تزریق وابستگی&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;به جای افزودن سوئیچ‌های تست در کد اصلی، می‌توانیم از رابط‌ها استفاده کنیم تا وابستگی‌ها را انتزاعی کنیم. برای مثال، کلاس &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;CustomLogger&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; را می‌توان به این شکل بازطراحی کرد:&lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public interface ILogger
+{
+    void Log(string message);
+}
+
+public class RealLogger : ILogger
+{
+    public void Log(string message)
+    {
+        // منطق واقعی لاگ کردن
+    }
+}
+
+public class FakeLogger : ILogger
+{
+    public void Log(string message)
+    {
+        // بدون عملیات، برای تست
+    }
+}
+
+public class ServiceController
+{
+    private readonly ILogger _logger;
+    public ServiceController(ILogger logger)
+    {
+        _logger = logger;
+    }
+
+    public void Execute()
+    {
+        _logger.Log(&amp;quot;Execute method invoked&amp;quot;);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در این حالت، &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;ServiceController&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; به یک رابط (&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;ILogger&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;) وابسته است، نه یک پیاده‌سازی خاص. در محیط واقعی، &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;RealLogger&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; تزریق می‌شود و در تست‌ها، &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;FakeLogger&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; استفاده می‌شود. این روش نه‌تنها آلودگی کد را حذف می‌کند، بلکه انعطاف‌پذیری و قابلیت تست‌پذیری (Testability) را افزایش می‌دهد.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;2. جداسازی منطق تست از کد اصلی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;هرگز نباید کد اصلی را برای تست تغییر داد. اگر نیاز به رفتار خاصی در تست دارید، از ابزارهایی مثل mocking frameworks (مانند Moq در NET.) استفاده کنید. این ابزارها به شما اجازه می‌دهند رفتارهای دلخواه را بدون دستکاری کد اصلی شبیه‌سازی کنید.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;3. رعایت اصول SOLID&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;اصل باز/بسته (Open/Closed Principle) از مجموعه اصول SOLID به ما می‌گوید که باید بتوانیم رفتار یک کلاس را بدون تغییر کد آن گسترش دهیم. استفاده از رابط‌ها و تزریق وابستگی این اصل را محقق می‌کند و نیاز به آلودگی کد را از بین می‌برد.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مزایای اجتناب از آلودگی کد&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;وقتی از آلودگی کد اجتناب می‌کنیم، کد اصلی تمیزتر و مستقل‌تر می‌شود. این کار نگهداری را آسان‌تر می‌کند، زیرا تغییرات در تست‌ها نیازی به بازنویسی کد اصلی ندارند. همچنین، قابلیت تست‌پذیری افزایش می‌یابد و توسعه‌دهندگان می‌توانند با اطمینان بیشتری refactoring انجام دهند. در نهایت، این رویکرد به کاهش باگ‌های ناخواسته ناشی از منطق تست در محیط واقعی کمک می‌کند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;آلودگی کد یک الگوی ضد تست واحد است که می‌تواند کیفیت و نگهداری‌پذیری پروژه‌های NET. را به خطر بیندازد. این مشکل زمانی رخ می‌دهد که منطق تست، به کد اصلی نفوذ کند، مانند افزودن سوئیچ‌ها یا شرط‌های غیرضروری. با استفاده از رابط‌ها، تزریق وابستگی، و ابزارهای مناسب، می‌توان از این الگو اجتناب کرد و کدی تمیز و قابل اعتماد تولید نمود. توسعه‌دهندگان NET. باید به این نکته توجه کنند که هدف تست واحد، اعتبارسنجی رفتار کد است، نه تغییر آن. با رعایت این اصول، نه‌تنها کیفیت کد بهبود می‌یابد، بلکه تجربه توسعه نیز حرفه‌ای‌تر و لذت‌بخش‌تر خواهد شد.&lt;/span&gt;&lt;/div&gt;">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="اجتناب از ضد الگوی «آلودگی کد» در توسعه‌ی تست‌های واحد">
+    <meta name="twitter:description" content="&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در دنیای توسعه نرم‌افزار، تست واحد (Unit Testing) یکی از ستون‌های اصلی تضمین کیفیت کد است. توسعه‌دهندگان NET. اغلب از تست‌های واحد برای اعتبارسنجی رفتار اجزای کوچک برنامه استفاده می‌کنند. با این حال، گاهی اوقات روش‌های نادرست در نوشتن این تست‌ها می‌تواند به مشکلات جدیدی منجر شود. یکی از این مشکلات، الگوی ضد تست واحد به نام &amp;quot;آلودگی کد&amp;quot; (Code Pollution) است. آلودگی کد زمانی رخ می‌دهد که منطق خاصی فقط برای تسهیل تست در کد اصلی (Production Code) اضافه می‌شود. این کار نه‌تنها پیچیدگی غیرضروری ایجاد می‌کند، بلکه وابستگی بین کد اصلی و تست‌ها را افزایش می‌دهد و نگهداری پروژه را دشوارتر می‌کند. در این مقاله، به بررسی مفهوم آلودگی کد، دلایل وقوع آن، و راهکارهایی برای اجتناب از آن در توسعه NET. می‌پردازیم. هدف این است که توسعه‌دهندگان بتوانند کدهایی تمیزتر، مستقل‌تر و قابل نگهداری‌تر بنویسند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;آلودگی کد چیست و چرا مشکل‌ساز است؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;آلودگی کد به وضعیتی اشاره دارد که در آن، کد اصلی به خاطر نیازهای تست تغییر می‌کند یا با منطق اضافی پر می‌شود. این تغییرات معمولاً شامل اضافه کردن سوئیچ‌ها (Switches)، متدها یا شرط‌هایی است که فقط در محیط تست استفاده می‌شوند. این الگو باعث می‌شود کد اصلی از هدف اصلی خود، یعنی اجرای منطق کسب‌وکار، دور شود و به ابزاری برای پشتیبانی از تست‌ها تبدیل شود.&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;به عنوان مثال، فرض کنید یک کلاس ساده برای لاگ کردن پیام‌ها در NET. داریم:&lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class CustomLogger
+{
+    private readonly bool _isTestingMode;
+    public CustomLogger(bool isTestingMode)
+    {
+        _isTestingMode = isTestingMode;
+    }
+
+    public void Log(string message)
+    {
+        if (_isTestingMode) return;
+        // منطق لاگ کردن پیام در اینجا
+    }
+}
+
+public class ServiceController
+{
+    public void Execute(CustomLogger logger)
+    {
+        logger.Log(&amp;quot;Execute method invoked&amp;quot;);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در این کد، متغیر &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;_isTestingMode&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; و شرط مرتبط با آن فقط برای غیرفعال کردن لاگ در تست‌ها اضافه شده است. این یک نمونه کلاسیک از آلودگی کد است. مشکل اینجاست که این منطق هیچ ارزشی به عملکرد اصلی برنامه اضافه نمی‌کند و تنها برای تست‌ها طراحی شده است. نتیجه؟ کدی که پیچیده‌تر از حد لازم است، وابستگی ناخواسته به محیط تست دارد و در صورت تغییر نیازهای تست، باید بارها بازنویسی شود.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;ریشه‌های آلودگی کد&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;آلودگی کد معمولاً از عدم استفاده صحیح از اصول طراحی نرم‌افزار ناشی می‌شود. یکی از شایع‌ترین دلایل، نادیده گرفتن اصل تزریق وابستگی (Dependency Injection) است. وقتی یک کلاس به‌جای وابستگی به یک abstraction (مانند رابط یا Interface)، مستقیماً به یک پیاده‌سازی خاص وابسته باشد، توسعه‌دهندگان ممکن است برای تست آن، کد اصلی را تغییر دهند. دلیل دیگر، عدم تمایل به بازطراحی کد برای جداسازی نگرانی‌ها (Separation of Concerns) است. در نهایت، فشار زمانی یا عدم آگاهی از روش‌های بهتر نیز می‌تواند به این مشکل دامن بزند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;راهکارهایی برای اجتناب از آلودگی کد&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;برای رفع این مشکل، باید از تکنیک‌هایی استفاده کنیم که کد اصلی را از منطق تست جدا نگه دارند. در ادامه، چند راهکار کلیدی را بررسی می‌کنیم:&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;1. استفاده از رابط‌ها (Interfaces) و تزریق وابستگی&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;به جای افزودن سوئیچ‌های تست در کد اصلی، می‌توانیم از رابط‌ها استفاده کنیم تا وابستگی‌ها را انتزاعی کنیم. برای مثال، کلاس &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;CustomLogger&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; را می‌توان به این شکل بازطراحی کرد:&lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public interface ILogger
+{
+    void Log(string message);
+}
+
+public class RealLogger : ILogger
+{
+    public void Log(string message)
+    {
+        // منطق واقعی لاگ کردن
+    }
+}
+
+public class FakeLogger : ILogger
+{
+    public void Log(string message)
+    {
+        // بدون عملیات، برای تست
+    }
+}
+
+public class ServiceController
+{
+    private readonly ILogger _logger;
+    public ServiceController(ILogger logger)
+    {
+        _logger = logger;
+    }
+
+    public void Execute()
+    {
+        _logger.Log(&amp;quot;Execute method invoked&amp;quot;);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در این حالت، &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;ServiceController&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; به یک رابط (&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;ILogger&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;) وابسته است، نه یک پیاده‌سازی خاص. در محیط واقعی، &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;RealLogger&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; تزریق می‌شود و در تست‌ها، &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;FakeLogger&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; استفاده می‌شود. این روش نه‌تنها آلودگی کد را حذف می‌کند، بلکه انعطاف‌پذیری و قابلیت تست‌پذیری (Testability) را افزایش می‌دهد.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;2. جداسازی منطق تست از کد اصلی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;هرگز نباید کد اصلی را برای تست تغییر داد. اگر نیاز به رفتار خاصی در تست دارید، از ابزارهایی مثل mocking frameworks (مانند Moq در NET.) استفاده کنید. این ابزارها به شما اجازه می‌دهند رفتارهای دلخواه را بدون دستکاری کد اصلی شبیه‌سازی کنید.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;3. رعایت اصول SOLID&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;اصل باز/بسته (Open/Closed Principle) از مجموعه اصول SOLID به ما می‌گوید که باید بتوانیم رفتار یک کلاس را بدون تغییر کد آن گسترش دهیم. استفاده از رابط‌ها و تزریق وابستگی این اصل را محقق می‌کند و نیاز به آلودگی کد را از بین می‌برد.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مزایای اجتناب از آلودگی کد&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;وقتی از آلودگی کد اجتناب می‌کنیم، کد اصلی تمیزتر و مستقل‌تر می‌شود. این کار نگهداری را آسان‌تر می‌کند، زیرا تغییرات در تست‌ها نیازی به بازنویسی کد اصلی ندارند. همچنین، قابلیت تست‌پذیری افزایش می‌یابد و توسعه‌دهندگان می‌توانند با اطمینان بیشتری refactoring انجام دهند. در نهایت، این رویکرد به کاهش باگ‌های ناخواسته ناشی از منطق تست در محیط واقعی کمک می‌کند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;آلودگی کد یک الگوی ضد تست واحد است که می‌تواند کیفیت و نگهداری‌پذیری پروژه‌های NET. را به خطر بیندازد. این مشکل زمانی رخ می‌دهد که منطق تست، به کد اصلی نفوذ کند، مانند افزودن سوئیچ‌ها یا شرط‌های غیرضروری. با استفاده از رابط‌ها، تزریق وابستگی، و ابزارهای مناسب، می‌توان از این الگو اجتناب کرد و کدی تمیز و قابل اعتماد تولید نمود. توسعه‌دهندگان NET. باید به این نکته توجه کنند که هدف تست واحد، اعتبارسنجی رفتار کد است، نه تغییر آن. با رعایت این اصول، نه‌تنها کیفیت کد بهبود می‌یابد، بلکه تجربه توسعه نیز حرفه‌ای‌تر و لذت‌بخش‌تر خواهد شد.&lt;/span&gt;&lt;/div&gt;">
+    <meta name="twitter:card" content="&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در دنیای توسعه نرم‌افزار، تست واحد (Unit Testing) یکی از ستون‌های اصلی تضمین کیفیت کد است. توسعه‌دهندگان NET. اغلب از تست‌های واحد برای اعتبارسنجی رفتار اجزای کوچک برنامه استفاده می‌کنند. با این حال، گاهی اوقات روش‌های نادرست در نوشتن این تست‌ها می‌تواند به مشکلات جدیدی منجر شود. یکی از این مشکلات، الگوی ضد تست واحد به نام &amp;quot;آلودگی کد&amp;quot; (Code Pollution) است. آلودگی کد زمانی رخ می‌دهد که منطق خاصی فقط برای تسهیل تست در کد اصلی (Production Code) اضافه می‌شود. این کار نه‌تنها پیچیدگی غیرضروری ایجاد می‌کند، بلکه وابستگی بین کد اصلی و تست‌ها را افزایش می‌دهد و نگهداری پروژه را دشوارتر می‌کند. در این مقاله، به بررسی مفهوم آلودگی کد، دلایل وقوع آن، و راهکارهایی برای اجتناب از آن در توسعه NET. می‌پردازیم. هدف این است که توسعه‌دهندگان بتوانند کدهایی تمیزتر، مستقل‌تر و قابل نگهداری‌تر بنویسند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;آلودگی کد چیست و چرا مشکل‌ساز است؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;آلودگی کد به وضعیتی اشاره دارد که در آن، کد اصلی به خاطر نیازهای تست تغییر می‌کند یا با منطق اضافی پر می‌شود. این تغییرات معمولاً شامل اضافه کردن سوئیچ‌ها (Switches)، متدها یا شرط‌هایی است که فقط در محیط تست استفاده می‌شوند. این الگو باعث می‌شود کد اصلی از هدف اصلی خود، یعنی اجرای منطق کسب‌وکار، دور شود و به ابزاری برای پشتیبانی از تست‌ها تبدیل شود.&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;به عنوان مثال، فرض کنید یک کلاس ساده برای لاگ کردن پیام‌ها در NET. داریم:&lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class CustomLogger
+{
+    private readonly bool _isTestingMode;
+    public CustomLogger(bool isTestingMode)
+    {
+        _isTestingMode = isTestingMode;
+    }
+
+    public void Log(string message)
+    {
+        if (_isTestingMode) return;
+        // منطق لاگ کردن پیام در اینجا
+    }
+}
+
+public class ServiceController
+{
+    public void Execute(CustomLogger logger)
+    {
+        logger.Log(&amp;quot;Execute method invoked&amp;quot;);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در این کد، متغیر &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;_isTestingMode&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; و شرط مرتبط با آن فقط برای غیرفعال کردن لاگ در تست‌ها اضافه شده است. این یک نمونه کلاسیک از آلودگی کد است. مشکل اینجاست که این منطق هیچ ارزشی به عملکرد اصلی برنامه اضافه نمی‌کند و تنها برای تست‌ها طراحی شده است. نتیجه؟ کدی که پیچیده‌تر از حد لازم است، وابستگی ناخواسته به محیط تست دارد و در صورت تغییر نیازهای تست، باید بارها بازنویسی شود.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;ریشه‌های آلودگی کد&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;آلودگی کد معمولاً از عدم استفاده صحیح از اصول طراحی نرم‌افزار ناشی می‌شود. یکی از شایع‌ترین دلایل، نادیده گرفتن اصل تزریق وابستگی (Dependency Injection) است. وقتی یک کلاس به‌جای وابستگی به یک abstraction (مانند رابط یا Interface)، مستقیماً به یک پیاده‌سازی خاص وابسته باشد، توسعه‌دهندگان ممکن است برای تست آن، کد اصلی را تغییر دهند. دلیل دیگر، عدم تمایل به بازطراحی کد برای جداسازی نگرانی‌ها (Separation of Concerns) است. در نهایت، فشار زمانی یا عدم آگاهی از روش‌های بهتر نیز می‌تواند به این مشکل دامن بزند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;راهکارهایی برای اجتناب از آلودگی کد&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;برای رفع این مشکل، باید از تکنیک‌هایی استفاده کنیم که کد اصلی را از منطق تست جدا نگه دارند. در ادامه، چند راهکار کلیدی را بررسی می‌کنیم:&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;1. استفاده از رابط‌ها (Interfaces) و تزریق وابستگی&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;به جای افزودن سوئیچ‌های تست در کد اصلی، می‌توانیم از رابط‌ها استفاده کنیم تا وابستگی‌ها را انتزاعی کنیم. برای مثال، کلاس &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;CustomLogger&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; را می‌توان به این شکل بازطراحی کرد:&lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public interface ILogger
+{
+    void Log(string message);
+}
+
+public class RealLogger : ILogger
+{
+    public void Log(string message)
+    {
+        // منطق واقعی لاگ کردن
+    }
+}
+
+public class FakeLogger : ILogger
+{
+    public void Log(string message)
+    {
+        // بدون عملیات، برای تست
+    }
+}
+
+public class ServiceController
+{
+    private readonly ILogger _logger;
+    public ServiceController(ILogger logger)
+    {
+        _logger = logger;
+    }
+
+    public void Execute()
+    {
+        _logger.Log(&amp;quot;Execute method invoked&amp;quot;);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در این حالت، &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;ServiceController&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; به یک رابط (&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;ILogger&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;) وابسته است، نه یک پیاده‌سازی خاص. در محیط واقعی، &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;RealLogger&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; تزریق می‌شود و در تست‌ها، &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;FakeLogger&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; استفاده می‌شود. این روش نه‌تنها آلودگی کد را حذف می‌کند، بلکه انعطاف‌پذیری و قابلیت تست‌پذیری (Testability) را افزایش می‌دهد.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;2. جداسازی منطق تست از کد اصلی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;هرگز نباید کد اصلی را برای تست تغییر داد. اگر نیاز به رفتار خاصی در تست دارید، از ابزارهایی مثل mocking frameworks (مانند Moq در NET.) استفاده کنید. این ابزارها به شما اجازه می‌دهند رفتارهای دلخواه را بدون دستکاری کد اصلی شبیه‌سازی کنید.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;3. رعایت اصول SOLID&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;اصل باز/بسته (Open/Closed Principle) از مجموعه اصول SOLID به ما می‌گوید که باید بتوانیم رفتار یک کلاس را بدون تغییر کد آن گسترش دهیم. استفاده از رابط‌ها و تزریق وابستگی این اصل را محقق می‌کند و نیاز به آلودگی کد را از بین می‌برد.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مزایای اجتناب از آلودگی کد&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;وقتی از آلودگی کد اجتناب می‌کنیم، کد اصلی تمیزتر و مستقل‌تر می‌شود. این کار نگهداری را آسان‌تر می‌کند، زیرا تغییرات در تست‌ها نیازی به بازنویسی کد اصلی ندارند. همچنین، قابلیت تست‌پذیری افزایش می‌یابد و توسعه‌دهندگان می‌توانند با اطمینان بیشتری refactoring انجام دهند. در نهایت، این رویکرد به کاهش باگ‌های ناخواسته ناشی از منطق تست در محیط واقعی کمک می‌کند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;آلودگی کد یک الگوی ضد تست واحد است که می‌تواند کیفیت و نگهداری‌پذیری پروژه‌های NET. را به خطر بیندازد. این مشکل زمانی رخ می‌دهد که منطق تست، به کد اصلی نفوذ کند، مانند افزودن سوئیچ‌ها یا شرط‌های غیرضروری. با استفاده از رابط‌ها، تزریق وابستگی، و ابزارهای مناسب، می‌توان از این الگو اجتناب کرد و کدی تمیز و قابل اعتماد تولید نمود. توسعه‌دهندگان NET. باید به این نکته توجه کنند که هدف تست واحد، اعتبارسنجی رفتار کد است، نه تغییر آن. با رعایت این اصول، نه‌تنها کیفیت کد بهبود می‌یابد، بلکه تجربه توسعه نیز حرفه‌ای‌تر و لذت‌بخش‌تر خواهد شد.&lt;/span&gt;&lt;/div&gt;">
+    <meta property="article:published_time" content="Sat, 29 Mar 2025 18:20:12 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
     <meta content='IE=edge' http-equiv='X-UA-Compatible'>
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">
-	
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
 	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
-
     <link href="vs.min.css" rel="stylesheet" type="text/css">
-    <script src="highlight.min.js" type="text/javascript"></script>
-	
+    <script src="highlight.min.js" type="text/javascript"></script>	
     <link href="styles.css" rel="stylesheet" type="text/css">	
     <style>
       @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
@@ -42,8 +324,8 @@
         }
      }
     </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
 </head>
-
 <body dir='rtl'>
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
@@ -53,7 +335,7 @@
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۳۶۹۵</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۶۹۷</span></td>
 </tr>
 <tr>
 <td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
@@ -73,7 +355,7 @@
 </tr>
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۲۲</span></td>
 </tr>
 </tbody>
 </table>
@@ -177,8 +459,5 @@ public class ServiceController
 
 <!-- to load custom fonts for printing -->
 <div class="useSamimFD">&nbsp;</div>
-
-<script src="SyntaxHighlighter.js" type="text/javascript"></script>
 </body>
-
 </html>

@@ -1,17 +1,439 @@
 <!DOCTYPE html>
 <html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
-
 <head>
-    <title>‫‫ولورین: جایگزینی قدرتمند برای MediatR در توسعه نرم‌افزارهای دات‌نت</title>
+    <title>‫‫ولورین: جایگزینی قدرتمند برای MediatR در توسعه نرم‌افزارهای دات‌نت</title>     <meta name="description" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در دنیای توسعه نرم‌افزار با فریم‌ورک دات‌نت (Microsoft .NET)، الگوی مدیاتور (Mediator Pattern) به‌عنوان روشی برای پیاده‌سازی جداسازی مسئولیت‌های فرمان و پرس‌وجو (Command Query Responsibility Segregation یا CQRS) شناخته شده است. این الگو به توسعه‌دهندگان کمک می‌کند تا کدهایی تمیز، قابل نگهداری و مقیاس‌پذیر تولید کنند. کتابخانه MediatR سال‌ها به‌عنوان ابزاری محبوب برای پیاده‌سازی این الگو مورد استفاده قرار گرفته است. اما اخیراً اعلام شده که MediatR به سمت مدل تجاری حرکت می‌کند و برخی از کاربردهای آن نیازمند لایسنس تجاری خواهد بود. این تغییر، توجه توسعه‌دهندگان را به جایگزین‌های قدرتمندی مانند ولورین (&lt;a href=&quot;https://wolverinefx.net/&quot; rel=&quot;noopener noreferrer&quot; target=&quot;_blank&quot;&gt;Wolverine&lt;/a&gt;) جلب کرده است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ولورین یک کتابخانه مدرن و با کارایی بالا در اکوسیستم دات‌نت است که نه‌تنها قابلیت‌های MediatR را پوشش می‌دهد، بلکه ویژگی‌های پیشرفته‌ای مانند پردازش پیام توزیع‌شده، زمان‌بندی، بازآزمایی (Retries) و پشتیبانی از الگوی صندوق خروجی (Outbox) را ارائه می‌دهد. در این مقاله، با بررسی ویژگی‌های ولورین و پیاده‌سازی یک API ساده برای مدیریت کاربران، به شما نشان خواهیم داد که چگونه می‌توانید از این ابزار برای ساخت برنامه‌هایی تمیز و مقیاس‌پذیر استفاده کنید.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چرا ولورین؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ولورین به‌عنوان جایگزینی برای MediatR طراحی شده است، اما قابلیت‌های آن فراتر از یک جایگزین ساده است. این کتابخانه با بهره‌گیری از مولدهای منبع (Source Generators)، عملکرد بهتری نسبت به MediatR ارائه می‌دهد. برخی از ویژگی‌های کلیدی ولورین عبارت‌اند از:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;پیام‌رسانی داخلی و توزیع‌شده:&lt;/strong&gt; پشتیبانی از پیام‌رسانی در حافظه (مشابه MediatR) و همچنین پیام‌رسانی توزیع‌شده با ابزارهایی مانند RabbitMQ، Kafka و Azure Service Bus.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;زمان‌بندی و بازآزمایی:&lt;/strong&gt; امکان زمان‌بندی پیام‌ها برای اجرا در آینده و مدیریت خودکار تلاش مجدد در صورت شکست.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;الگوی صندوق خروجی:&lt;/strong&gt; تضمین تحویل پیام‌ها با ذخیره‌سازی موقت آن‌ها، بدون نیاز به پیاده‌سازی دستی این الگو.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;مدیریت ساگا (Saga) و جریان‌های کاری:&lt;/strong&gt; پشتیبانی از هماهنگی جریان‌های کاری پیچیده و بلندمدت.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;ادغام با APIهای حداقلی (Minimal APIs):&lt;/strong&gt; یکپارچگی ساده با معماری‌های مدرن دات‌نت.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این ویژگی‌ها ولورین را به گزینه‌ای ایده‌آل برای پروژه‌های جدید یا مهاجرت از MediatR تبدیل کرده‌اند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پیاده‌سازی یک API ساده با ولورین&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای درک بهتر نحوه کار با ولورین، یک API ساده برای مدیریت کاربران (CRUD: Create, Read, Update, Delete) پیاده‌سازی می‌کنیم. این مثال نشان می‌دهد که چگونه ولورین می‌تواند کدهایی تمیز، تست‌پذیر و مقیاس‌پذیر تولید کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;گام ۱: تعریف مدل کاربر&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;ابتدا مدل کاربر را تعریف می‌کنیم:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public record User(Guid Id, string Name, string Email);&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای شبیه‌سازی ذخیره‌سازی، یک لیست در حافظه ایجاد می‌کنیم:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static class InMemoryUsers
+{
+    public static readonly List&amp;lt;User&amp;gt; Users = new();
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;گام ۲: تعریف فرمان‌ها و پرس‌وجوها&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;هر عملیات با یک شیء فرمان یا پرس‌وجو تعریف می‌شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public record CreateUser(string Name, string Email);
+public record GetUser(Guid Id);
+public record UpdateUser(Guid Id, string Name, string Email);
+public record DeleteUser(Guid Id);&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این اشیاء به‌عنوان پیام‌هایی عمل می‌کنند که ولورین آن‌ها را به کنترل‌کننده‌های مناسب هدایت می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;گام ۳: پیاده‌سازی کنترل‌کننده‌ها&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ولورین به‌صورت خودکار کلاس‌های کنترل‌کننده را شناسایی کرده و پیام‌ها را بر اساس نوع و نام متد هدایت می‌کند. نیازی به پیاده‌سازی رابط‌های خاص (مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IRequest&lt;/code&gt; در MediatR) نیست.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;کنترل‌کننده ایجاد کاربر:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class CreateUserHandler
+{
+    public User Handle(CreateUser command)
+    {
+        var user = new User(Guid.NewGuid(), command.Name, command.Email);
+        InMemoryUsers.Users.Add(user);
+        return user;
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;کنترل‌کننده دریافت کاربر:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class GetUserHandler
+{
+    public User? Handle(GetUser query)
+    {
+        return InMemoryUsers.Users.FirstOrDefault(u =&amp;gt; u.Id == query.Id);
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;کنترل‌کننده به‌روزرسانی کاربر:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class UpdateUserHandler
+{
+    public User? Handle(UpdateUser command)
+    {
+        var user = InMemoryUsers.Users.FirstOrDefault(u =&amp;gt; u.Id == command.Id);
+        if (user is null) return null;
+
+        var updated = user with { Name = command.Name, Email = command.Email };
+        InMemoryUsers.Users.Remove(user);
+        InMemoryUsers.Users.Add(updated);
+        return updated;
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;کنترل‌کننده حذف کاربر:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class DeleteUserHandler
+{
+    public bool Handle(DeleteUser command)
+    {
+        var user = InMemoryUsers.Users.FirstOrDefault(u =&amp;gt; u.Id == command.Id);
+        if (user is null) return false;
+
+        InMemoryUsers.Users.Remove(user);
+        return true;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;گام ۴: پیکربندی API حداقلی با ولورین&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;ولورین به‌سادگی با APIهای حداقلی دات‌نت ادغام می‌شود. در این مرحله، ولورین را به برنامه اضافه کرده و نقاط پایانی (Endpoints) را تعریف می‌کنیم:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddAuthorization();
+builder.Host.UseWolverine(); // فعال‌سازی ولورین
+
+var app = builder.Build();
+
+app.UseHttpsRedirection();
+app.UseAuthorization();
+
+// ایجاد کاربر
+app.MapPost(&amp;quot;/users&amp;quot;, async (CreateUser request, IMessageBus bus) =&amp;gt;
+{
+    var user = await bus.InvokeAsync&amp;lt;User&amp;gt;(request);
+    return Results.Created($&amp;quot;/users/{user.Id}&amp;quot;, user);
+});
+
+// دریافت کاربر
+app.MapGet(&amp;quot;/users/{id:guid}&amp;quot;, async (Guid id, IMessageBus bus) =&amp;gt;
+{
+    var user = await bus.InvokeAsync&amp;lt;User?&amp;gt;(new GetUser(id));
+    return user is null ? Results.NotFound() : Results.Ok(user);
+});
+
+// به‌روزرسانی کاربر
+app.MapPut(&amp;quot;/users/{id:guid}&amp;quot;, async (Guid id, UpdateUser command, IMessageBus bus) =&amp;gt;
+{
+    if (id != command.Id) return Results.BadRequest();
+
+    var updated = await bus.InvokeAsync&amp;lt;User?&amp;gt;(command);
+    return updated is null ? Results.NotFound() : Results.Ok(updated);
+});
+
+// حذف کاربر
+app.MapDelete(&amp;quot;/users/{id:guid}&amp;quot;, async (Guid id, IMessageBus bus) =&amp;gt;
+{
+    var deleted = await bus.InvokeAsync&amp;lt;bool&amp;gt;(new DeleteUser(id));
+    return deleted ? Results.NoContent() : Results.NotFound();
+});
+
+app.Run();&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در اینجا، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IMessageBus&lt;/code&gt; به‌عنوان واسطی برای ارسال پیام‌ها به ولورین عمل می‌کند. متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;InvokeAsync&lt;/code&gt; پیام را به کنترل‌کننده مناسب ارسال کرده و نتیجه را برمی‌گرداند. این فرآیند به‌صورت زیر انجام می‌شود:&lt;/div&gt;&lt;ol&gt;&lt;li&gt;ولورین پیام (مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CreateUser&lt;/code&gt;) را دریافت می‌کند.&lt;/li&gt;&lt;li&gt;کنترل‌کننده مناسب (مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Handle&lt;/code&gt; در &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CreateUserHandler&lt;/code&gt;) را پیدا می‌کند.&lt;/li&gt;&lt;li&gt;متد را اجرا کرده و نتیجه را بازمی‌گرداند.&lt;/li&gt;&lt;/ol&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مزایای ولورین نسبت به MediatR&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بر اساس اطلاعات موجود و تحلیل‌های انجام‌شده، ولورین ویژگی‌هایی ارائه می‌دهد که آن را از MediatR متمایز می‌کند:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;عملکرد بهتر:&lt;/strong&gt; استفاده از مولدهای منبع به‌جای بازتاب (Reflection) باعث افزایش سرعت اجرا می‌شود.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;پیام‌رسانی پیشرفته:&lt;/strong&gt; پشتیبانی از پیام‌رسانی توزیع‌شده، بر خلاف MediatR که تنها پیام‌رسانی در حافظه را پشتیبانی می‌کند.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;پشتیبانی از قابلیت‌های مدرن:&lt;/strong&gt; امکاناتی مانند زمان‌بندی، بازآزمایی و الگوی صندوق خروجی، نیاز به پیاده‌سازی دستی این قابلیت‌ها را از بین می‌برند.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;سادگی در استفاده: &lt;/strong&gt;عدم نیاز به رابط‌های پیچیده و شناسایی خودکار کنترل‌کننده‌ها.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;احترام به MediatR&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;هرچند ولورین یک جایگزین قدرتمند است، اما باید به ارزش‌های MediatR نیز احترام گذاشت. این کتابخانه سال‌ها به‌صورت رایگان به جامعه دات‌نت خدمت کرده و نسخه‌های موجود آن همچنان متن‌باز باقی خواهند ماند. حرکت به سمت مدل تجاری، به پایداری و ادامه توسعه این ابزار کمک می‌کند. توسعه‌دهندگان می‌توانند بر اساس نیازهای پروژه خود بین MediatR و ولورین انتخاب کنند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ولورین به‌عنوان یک جایگزین مدرن و قدرتمند برای MediatR، ابزارهایی پیشرفته برای پیاده‌سازی الگوی CQRS و مدیریت پیام‌ها در برنامه‌های دات‌نت ارائه می‌دهد. این کتابخانه با ویژگی‌هایی مانند پیام‌رسانی توزیع‌شده، زمان‌بندی، و پشتیبانی از الگوی صندوق خروجی، گزینه‌ای ایده‌آل برای پروژه‌های جدید و معماری‌های مدرن است. پیاده‌سازی مثال API مدیریت کاربران نشان داد که ولورین چگونه می‌تواند کدهایی تمیز، تست‌پذیر و مقیاس‌پذیر تولید کند. اگر در حال بررسی گزینه‌های جایگزین برای MediatR هستید یا می‌خواهید از قابلیت‌های پیشرفته‌تر در پروژه‌های خود بهره ببرید، ولورین ارزش بررسی دقیق را دارد. در عین حال، انتخاب بین این دو ابزار به نیازهای خاص پروژه و ترجیحات تیم توسعه بستگی دارد.&lt;/div&gt;">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="ولورین: جایگزینی قدرتمند برای MediatR در توسعه نرم‌افزارهای دات‌نت">
+    <meta itemprop="description" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در دنیای توسعه نرم‌افزار با فریم‌ورک دات‌نت (Microsoft .NET)، الگوی مدیاتور (Mediator Pattern) به‌عنوان روشی برای پیاده‌سازی جداسازی مسئولیت‌های فرمان و پرس‌وجو (Command Query Responsibility Segregation یا CQRS) شناخته شده است. این الگو به توسعه‌دهندگان کمک می‌کند تا کدهایی تمیز، قابل نگهداری و مقیاس‌پذیر تولید کنند. کتابخانه MediatR سال‌ها به‌عنوان ابزاری محبوب برای پیاده‌سازی این الگو مورد استفاده قرار گرفته است. اما اخیراً اعلام شده که MediatR به سمت مدل تجاری حرکت می‌کند و برخی از کاربردهای آن نیازمند لایسنس تجاری خواهد بود. این تغییر، توجه توسعه‌دهندگان را به جایگزین‌های قدرتمندی مانند ولورین (&lt;a href=&quot;https://wolverinefx.net/&quot; rel=&quot;noopener noreferrer&quot; target=&quot;_blank&quot;&gt;Wolverine&lt;/a&gt;) جلب کرده است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ولورین یک کتابخانه مدرن و با کارایی بالا در اکوسیستم دات‌نت است که نه‌تنها قابلیت‌های MediatR را پوشش می‌دهد، بلکه ویژگی‌های پیشرفته‌ای مانند پردازش پیام توزیع‌شده، زمان‌بندی، بازآزمایی (Retries) و پشتیبانی از الگوی صندوق خروجی (Outbox) را ارائه می‌دهد. در این مقاله، با بررسی ویژگی‌های ولورین و پیاده‌سازی یک API ساده برای مدیریت کاربران، به شما نشان خواهیم داد که چگونه می‌توانید از این ابزار برای ساخت برنامه‌هایی تمیز و مقیاس‌پذیر استفاده کنید.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چرا ولورین؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ولورین به‌عنوان جایگزینی برای MediatR طراحی شده است، اما قابلیت‌های آن فراتر از یک جایگزین ساده است. این کتابخانه با بهره‌گیری از مولدهای منبع (Source Generators)، عملکرد بهتری نسبت به MediatR ارائه می‌دهد. برخی از ویژگی‌های کلیدی ولورین عبارت‌اند از:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;پیام‌رسانی داخلی و توزیع‌شده:&lt;/strong&gt; پشتیبانی از پیام‌رسانی در حافظه (مشابه MediatR) و همچنین پیام‌رسانی توزیع‌شده با ابزارهایی مانند RabbitMQ، Kafka و Azure Service Bus.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;زمان‌بندی و بازآزمایی:&lt;/strong&gt; امکان زمان‌بندی پیام‌ها برای اجرا در آینده و مدیریت خودکار تلاش مجدد در صورت شکست.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;الگوی صندوق خروجی:&lt;/strong&gt; تضمین تحویل پیام‌ها با ذخیره‌سازی موقت آن‌ها، بدون نیاز به پیاده‌سازی دستی این الگو.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;مدیریت ساگا (Saga) و جریان‌های کاری:&lt;/strong&gt; پشتیبانی از هماهنگی جریان‌های کاری پیچیده و بلندمدت.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;ادغام با APIهای حداقلی (Minimal APIs):&lt;/strong&gt; یکپارچگی ساده با معماری‌های مدرن دات‌نت.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این ویژگی‌ها ولورین را به گزینه‌ای ایده‌آل برای پروژه‌های جدید یا مهاجرت از MediatR تبدیل کرده‌اند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پیاده‌سازی یک API ساده با ولورین&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای درک بهتر نحوه کار با ولورین، یک API ساده برای مدیریت کاربران (CRUD: Create, Read, Update, Delete) پیاده‌سازی می‌کنیم. این مثال نشان می‌دهد که چگونه ولورین می‌تواند کدهایی تمیز، تست‌پذیر و مقیاس‌پذیر تولید کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;گام ۱: تعریف مدل کاربر&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;ابتدا مدل کاربر را تعریف می‌کنیم:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public record User(Guid Id, string Name, string Email);&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای شبیه‌سازی ذخیره‌سازی، یک لیست در حافظه ایجاد می‌کنیم:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static class InMemoryUsers
+{
+    public static readonly List&amp;lt;User&amp;gt; Users = new();
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;گام ۲: تعریف فرمان‌ها و پرس‌وجوها&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;هر عملیات با یک شیء فرمان یا پرس‌وجو تعریف می‌شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public record CreateUser(string Name, string Email);
+public record GetUser(Guid Id);
+public record UpdateUser(Guid Id, string Name, string Email);
+public record DeleteUser(Guid Id);&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این اشیاء به‌عنوان پیام‌هایی عمل می‌کنند که ولورین آن‌ها را به کنترل‌کننده‌های مناسب هدایت می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;گام ۳: پیاده‌سازی کنترل‌کننده‌ها&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ولورین به‌صورت خودکار کلاس‌های کنترل‌کننده را شناسایی کرده و پیام‌ها را بر اساس نوع و نام متد هدایت می‌کند. نیازی به پیاده‌سازی رابط‌های خاص (مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IRequest&lt;/code&gt; در MediatR) نیست.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;کنترل‌کننده ایجاد کاربر:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class CreateUserHandler
+{
+    public User Handle(CreateUser command)
+    {
+        var user = new User(Guid.NewGuid(), command.Name, command.Email);
+        InMemoryUsers.Users.Add(user);
+        return user;
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;کنترل‌کننده دریافت کاربر:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class GetUserHandler
+{
+    public User? Handle(GetUser query)
+    {
+        return InMemoryUsers.Users.FirstOrDefault(u =&amp;gt; u.Id == query.Id);
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;کنترل‌کننده به‌روزرسانی کاربر:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class UpdateUserHandler
+{
+    public User? Handle(UpdateUser command)
+    {
+        var user = InMemoryUsers.Users.FirstOrDefault(u =&amp;gt; u.Id == command.Id);
+        if (user is null) return null;
+
+        var updated = user with { Name = command.Name, Email = command.Email };
+        InMemoryUsers.Users.Remove(user);
+        InMemoryUsers.Users.Add(updated);
+        return updated;
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;کنترل‌کننده حذف کاربر:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class DeleteUserHandler
+{
+    public bool Handle(DeleteUser command)
+    {
+        var user = InMemoryUsers.Users.FirstOrDefault(u =&amp;gt; u.Id == command.Id);
+        if (user is null) return false;
+
+        InMemoryUsers.Users.Remove(user);
+        return true;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;گام ۴: پیکربندی API حداقلی با ولورین&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;ولورین به‌سادگی با APIهای حداقلی دات‌نت ادغام می‌شود. در این مرحله، ولورین را به برنامه اضافه کرده و نقاط پایانی (Endpoints) را تعریف می‌کنیم:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddAuthorization();
+builder.Host.UseWolverine(); // فعال‌سازی ولورین
+
+var app = builder.Build();
+
+app.UseHttpsRedirection();
+app.UseAuthorization();
+
+// ایجاد کاربر
+app.MapPost(&amp;quot;/users&amp;quot;, async (CreateUser request, IMessageBus bus) =&amp;gt;
+{
+    var user = await bus.InvokeAsync&amp;lt;User&amp;gt;(request);
+    return Results.Created($&amp;quot;/users/{user.Id}&amp;quot;, user);
+});
+
+// دریافت کاربر
+app.MapGet(&amp;quot;/users/{id:guid}&amp;quot;, async (Guid id, IMessageBus bus) =&amp;gt;
+{
+    var user = await bus.InvokeAsync&amp;lt;User?&amp;gt;(new GetUser(id));
+    return user is null ? Results.NotFound() : Results.Ok(user);
+});
+
+// به‌روزرسانی کاربر
+app.MapPut(&amp;quot;/users/{id:guid}&amp;quot;, async (Guid id, UpdateUser command, IMessageBus bus) =&amp;gt;
+{
+    if (id != command.Id) return Results.BadRequest();
+
+    var updated = await bus.InvokeAsync&amp;lt;User?&amp;gt;(command);
+    return updated is null ? Results.NotFound() : Results.Ok(updated);
+});
+
+// حذف کاربر
+app.MapDelete(&amp;quot;/users/{id:guid}&amp;quot;, async (Guid id, IMessageBus bus) =&amp;gt;
+{
+    var deleted = await bus.InvokeAsync&amp;lt;bool&amp;gt;(new DeleteUser(id));
+    return deleted ? Results.NoContent() : Results.NotFound();
+});
+
+app.Run();&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در اینجا، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IMessageBus&lt;/code&gt; به‌عنوان واسطی برای ارسال پیام‌ها به ولورین عمل می‌کند. متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;InvokeAsync&lt;/code&gt; پیام را به کنترل‌کننده مناسب ارسال کرده و نتیجه را برمی‌گرداند. این فرآیند به‌صورت زیر انجام می‌شود:&lt;/div&gt;&lt;ol&gt;&lt;li&gt;ولورین پیام (مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CreateUser&lt;/code&gt;) را دریافت می‌کند.&lt;/li&gt;&lt;li&gt;کنترل‌کننده مناسب (مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Handle&lt;/code&gt; در &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CreateUserHandler&lt;/code&gt;) را پیدا می‌کند.&lt;/li&gt;&lt;li&gt;متد را اجرا کرده و نتیجه را بازمی‌گرداند.&lt;/li&gt;&lt;/ol&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مزایای ولورین نسبت به MediatR&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بر اساس اطلاعات موجود و تحلیل‌های انجام‌شده، ولورین ویژگی‌هایی ارائه می‌دهد که آن را از MediatR متمایز می‌کند:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;عملکرد بهتر:&lt;/strong&gt; استفاده از مولدهای منبع به‌جای بازتاب (Reflection) باعث افزایش سرعت اجرا می‌شود.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;پیام‌رسانی پیشرفته:&lt;/strong&gt; پشتیبانی از پیام‌رسانی توزیع‌شده، بر خلاف MediatR که تنها پیام‌رسانی در حافظه را پشتیبانی می‌کند.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;پشتیبانی از قابلیت‌های مدرن:&lt;/strong&gt; امکاناتی مانند زمان‌بندی، بازآزمایی و الگوی صندوق خروجی، نیاز به پیاده‌سازی دستی این قابلیت‌ها را از بین می‌برند.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;سادگی در استفاده: &lt;/strong&gt;عدم نیاز به رابط‌های پیچیده و شناسایی خودکار کنترل‌کننده‌ها.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;احترام به MediatR&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;هرچند ولورین یک جایگزین قدرتمند است، اما باید به ارزش‌های MediatR نیز احترام گذاشت. این کتابخانه سال‌ها به‌صورت رایگان به جامعه دات‌نت خدمت کرده و نسخه‌های موجود آن همچنان متن‌باز باقی خواهند ماند. حرکت به سمت مدل تجاری، به پایداری و ادامه توسعه این ابزار کمک می‌کند. توسعه‌دهندگان می‌توانند بر اساس نیازهای پروژه خود بین MediatR و ولورین انتخاب کنند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ولورین به‌عنوان یک جایگزین مدرن و قدرتمند برای MediatR، ابزارهایی پیشرفته برای پیاده‌سازی الگوی CQRS و مدیریت پیام‌ها در برنامه‌های دات‌نت ارائه می‌دهد. این کتابخانه با ویژگی‌هایی مانند پیام‌رسانی توزیع‌شده، زمان‌بندی، و پشتیبانی از الگوی صندوق خروجی، گزینه‌ای ایده‌آل برای پروژه‌های جدید و معماری‌های مدرن است. پیاده‌سازی مثال API مدیریت کاربران نشان داد که ولورین چگونه می‌تواند کدهایی تمیز، تست‌پذیر و مقیاس‌پذیر تولید کند. اگر در حال بررسی گزینه‌های جایگزین برای MediatR هستید یا می‌خواهید از قابلیت‌های پیشرفته‌تر در پروژه‌های خود بهره ببرید، ولورین ارزش بررسی دقیق را دارد. در عین حال، انتخاب بین این دو ابزار به نیازهای خاص پروژه و ترجیحات تیم توسعه بستگی دارد.&lt;/div&gt;">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="ولورین: جایگزینی قدرتمند برای MediatR در توسعه نرم‌افزارهای دات‌نت">
+    <meta property="og:description" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در دنیای توسعه نرم‌افزار با فریم‌ورک دات‌نت (Microsoft .NET)، الگوی مدیاتور (Mediator Pattern) به‌عنوان روشی برای پیاده‌سازی جداسازی مسئولیت‌های فرمان و پرس‌وجو (Command Query Responsibility Segregation یا CQRS) شناخته شده است. این الگو به توسعه‌دهندگان کمک می‌کند تا کدهایی تمیز، قابل نگهداری و مقیاس‌پذیر تولید کنند. کتابخانه MediatR سال‌ها به‌عنوان ابزاری محبوب برای پیاده‌سازی این الگو مورد استفاده قرار گرفته است. اما اخیراً اعلام شده که MediatR به سمت مدل تجاری حرکت می‌کند و برخی از کاربردهای آن نیازمند لایسنس تجاری خواهد بود. این تغییر، توجه توسعه‌دهندگان را به جایگزین‌های قدرتمندی مانند ولورین (&lt;a href=&quot;https://wolverinefx.net/&quot; rel=&quot;noopener noreferrer&quot; target=&quot;_blank&quot;&gt;Wolverine&lt;/a&gt;) جلب کرده است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ولورین یک کتابخانه مدرن و با کارایی بالا در اکوسیستم دات‌نت است که نه‌تنها قابلیت‌های MediatR را پوشش می‌دهد، بلکه ویژگی‌های پیشرفته‌ای مانند پردازش پیام توزیع‌شده، زمان‌بندی، بازآزمایی (Retries) و پشتیبانی از الگوی صندوق خروجی (Outbox) را ارائه می‌دهد. در این مقاله، با بررسی ویژگی‌های ولورین و پیاده‌سازی یک API ساده برای مدیریت کاربران، به شما نشان خواهیم داد که چگونه می‌توانید از این ابزار برای ساخت برنامه‌هایی تمیز و مقیاس‌پذیر استفاده کنید.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چرا ولورین؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ولورین به‌عنوان جایگزینی برای MediatR طراحی شده است، اما قابلیت‌های آن فراتر از یک جایگزین ساده است. این کتابخانه با بهره‌گیری از مولدهای منبع (Source Generators)، عملکرد بهتری نسبت به MediatR ارائه می‌دهد. برخی از ویژگی‌های کلیدی ولورین عبارت‌اند از:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;پیام‌رسانی داخلی و توزیع‌شده:&lt;/strong&gt; پشتیبانی از پیام‌رسانی در حافظه (مشابه MediatR) و همچنین پیام‌رسانی توزیع‌شده با ابزارهایی مانند RabbitMQ، Kafka و Azure Service Bus.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;زمان‌بندی و بازآزمایی:&lt;/strong&gt; امکان زمان‌بندی پیام‌ها برای اجرا در آینده و مدیریت خودکار تلاش مجدد در صورت شکست.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;الگوی صندوق خروجی:&lt;/strong&gt; تضمین تحویل پیام‌ها با ذخیره‌سازی موقت آن‌ها، بدون نیاز به پیاده‌سازی دستی این الگو.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;مدیریت ساگا (Saga) و جریان‌های کاری:&lt;/strong&gt; پشتیبانی از هماهنگی جریان‌های کاری پیچیده و بلندمدت.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;ادغام با APIهای حداقلی (Minimal APIs):&lt;/strong&gt; یکپارچگی ساده با معماری‌های مدرن دات‌نت.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این ویژگی‌ها ولورین را به گزینه‌ای ایده‌آل برای پروژه‌های جدید یا مهاجرت از MediatR تبدیل کرده‌اند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پیاده‌سازی یک API ساده با ولورین&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای درک بهتر نحوه کار با ولورین، یک API ساده برای مدیریت کاربران (CRUD: Create, Read, Update, Delete) پیاده‌سازی می‌کنیم. این مثال نشان می‌دهد که چگونه ولورین می‌تواند کدهایی تمیز، تست‌پذیر و مقیاس‌پذیر تولید کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;گام ۱: تعریف مدل کاربر&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;ابتدا مدل کاربر را تعریف می‌کنیم:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public record User(Guid Id, string Name, string Email);&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای شبیه‌سازی ذخیره‌سازی، یک لیست در حافظه ایجاد می‌کنیم:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static class InMemoryUsers
+{
+    public static readonly List&amp;lt;User&amp;gt; Users = new();
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;گام ۲: تعریف فرمان‌ها و پرس‌وجوها&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;هر عملیات با یک شیء فرمان یا پرس‌وجو تعریف می‌شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public record CreateUser(string Name, string Email);
+public record GetUser(Guid Id);
+public record UpdateUser(Guid Id, string Name, string Email);
+public record DeleteUser(Guid Id);&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این اشیاء به‌عنوان پیام‌هایی عمل می‌کنند که ولورین آن‌ها را به کنترل‌کننده‌های مناسب هدایت می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;گام ۳: پیاده‌سازی کنترل‌کننده‌ها&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ولورین به‌صورت خودکار کلاس‌های کنترل‌کننده را شناسایی کرده و پیام‌ها را بر اساس نوع و نام متد هدایت می‌کند. نیازی به پیاده‌سازی رابط‌های خاص (مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IRequest&lt;/code&gt; در MediatR) نیست.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;کنترل‌کننده ایجاد کاربر:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class CreateUserHandler
+{
+    public User Handle(CreateUser command)
+    {
+        var user = new User(Guid.NewGuid(), command.Name, command.Email);
+        InMemoryUsers.Users.Add(user);
+        return user;
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;کنترل‌کننده دریافت کاربر:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class GetUserHandler
+{
+    public User? Handle(GetUser query)
+    {
+        return InMemoryUsers.Users.FirstOrDefault(u =&amp;gt; u.Id == query.Id);
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;کنترل‌کننده به‌روزرسانی کاربر:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class UpdateUserHandler
+{
+    public User? Handle(UpdateUser command)
+    {
+        var user = InMemoryUsers.Users.FirstOrDefault(u =&amp;gt; u.Id == command.Id);
+        if (user is null) return null;
+
+        var updated = user with { Name = command.Name, Email = command.Email };
+        InMemoryUsers.Users.Remove(user);
+        InMemoryUsers.Users.Add(updated);
+        return updated;
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;کنترل‌کننده حذف کاربر:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class DeleteUserHandler
+{
+    public bool Handle(DeleteUser command)
+    {
+        var user = InMemoryUsers.Users.FirstOrDefault(u =&amp;gt; u.Id == command.Id);
+        if (user is null) return false;
+
+        InMemoryUsers.Users.Remove(user);
+        return true;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;گام ۴: پیکربندی API حداقلی با ولورین&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;ولورین به‌سادگی با APIهای حداقلی دات‌نت ادغام می‌شود. در این مرحله، ولورین را به برنامه اضافه کرده و نقاط پایانی (Endpoints) را تعریف می‌کنیم:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddAuthorization();
+builder.Host.UseWolverine(); // فعال‌سازی ولورین
+
+var app = builder.Build();
+
+app.UseHttpsRedirection();
+app.UseAuthorization();
+
+// ایجاد کاربر
+app.MapPost(&amp;quot;/users&amp;quot;, async (CreateUser request, IMessageBus bus) =&amp;gt;
+{
+    var user = await bus.InvokeAsync&amp;lt;User&amp;gt;(request);
+    return Results.Created($&amp;quot;/users/{user.Id}&amp;quot;, user);
+});
+
+// دریافت کاربر
+app.MapGet(&amp;quot;/users/{id:guid}&amp;quot;, async (Guid id, IMessageBus bus) =&amp;gt;
+{
+    var user = await bus.InvokeAsync&amp;lt;User?&amp;gt;(new GetUser(id));
+    return user is null ? Results.NotFound() : Results.Ok(user);
+});
+
+// به‌روزرسانی کاربر
+app.MapPut(&amp;quot;/users/{id:guid}&amp;quot;, async (Guid id, UpdateUser command, IMessageBus bus) =&amp;gt;
+{
+    if (id != command.Id) return Results.BadRequest();
+
+    var updated = await bus.InvokeAsync&amp;lt;User?&amp;gt;(command);
+    return updated is null ? Results.NotFound() : Results.Ok(updated);
+});
+
+// حذف کاربر
+app.MapDelete(&amp;quot;/users/{id:guid}&amp;quot;, async (Guid id, IMessageBus bus) =&amp;gt;
+{
+    var deleted = await bus.InvokeAsync&amp;lt;bool&amp;gt;(new DeleteUser(id));
+    return deleted ? Results.NoContent() : Results.NotFound();
+});
+
+app.Run();&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در اینجا، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IMessageBus&lt;/code&gt; به‌عنوان واسطی برای ارسال پیام‌ها به ولورین عمل می‌کند. متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;InvokeAsync&lt;/code&gt; پیام را به کنترل‌کننده مناسب ارسال کرده و نتیجه را برمی‌گرداند. این فرآیند به‌صورت زیر انجام می‌شود:&lt;/div&gt;&lt;ol&gt;&lt;li&gt;ولورین پیام (مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CreateUser&lt;/code&gt;) را دریافت می‌کند.&lt;/li&gt;&lt;li&gt;کنترل‌کننده مناسب (مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Handle&lt;/code&gt; در &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CreateUserHandler&lt;/code&gt;) را پیدا می‌کند.&lt;/li&gt;&lt;li&gt;متد را اجرا کرده و نتیجه را بازمی‌گرداند.&lt;/li&gt;&lt;/ol&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مزایای ولورین نسبت به MediatR&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بر اساس اطلاعات موجود و تحلیل‌های انجام‌شده، ولورین ویژگی‌هایی ارائه می‌دهد که آن را از MediatR متمایز می‌کند:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;عملکرد بهتر:&lt;/strong&gt; استفاده از مولدهای منبع به‌جای بازتاب (Reflection) باعث افزایش سرعت اجرا می‌شود.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;پیام‌رسانی پیشرفته:&lt;/strong&gt; پشتیبانی از پیام‌رسانی توزیع‌شده، بر خلاف MediatR که تنها پیام‌رسانی در حافظه را پشتیبانی می‌کند.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;پشتیبانی از قابلیت‌های مدرن:&lt;/strong&gt; امکاناتی مانند زمان‌بندی، بازآزمایی و الگوی صندوق خروجی، نیاز به پیاده‌سازی دستی این قابلیت‌ها را از بین می‌برند.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;سادگی در استفاده: &lt;/strong&gt;عدم نیاز به رابط‌های پیچیده و شناسایی خودکار کنترل‌کننده‌ها.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;احترام به MediatR&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;هرچند ولورین یک جایگزین قدرتمند است، اما باید به ارزش‌های MediatR نیز احترام گذاشت. این کتابخانه سال‌ها به‌صورت رایگان به جامعه دات‌نت خدمت کرده و نسخه‌های موجود آن همچنان متن‌باز باقی خواهند ماند. حرکت به سمت مدل تجاری، به پایداری و ادامه توسعه این ابزار کمک می‌کند. توسعه‌دهندگان می‌توانند بر اساس نیازهای پروژه خود بین MediatR و ولورین انتخاب کنند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ولورین به‌عنوان یک جایگزین مدرن و قدرتمند برای MediatR، ابزارهایی پیشرفته برای پیاده‌سازی الگوی CQRS و مدیریت پیام‌ها در برنامه‌های دات‌نت ارائه می‌دهد. این کتابخانه با ویژگی‌هایی مانند پیام‌رسانی توزیع‌شده، زمان‌بندی، و پشتیبانی از الگوی صندوق خروجی، گزینه‌ای ایده‌آل برای پروژه‌های جدید و معماری‌های مدرن است. پیاده‌سازی مثال API مدیریت کاربران نشان داد که ولورین چگونه می‌تواند کدهایی تمیز، تست‌پذیر و مقیاس‌پذیر تولید کند. اگر در حال بررسی گزینه‌های جایگزین برای MediatR هستید یا می‌خواهید از قابلیت‌های پیشرفته‌تر در پروژه‌های خود بهره ببرید، ولورین ارزش بررسی دقیق را دارد. در عین حال، انتخاب بین این دو ابزار به نیازهای خاص پروژه و ترجیحات تیم توسعه بستگی دارد.&lt;/div&gt;">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="ولورین: جایگزینی قدرتمند برای MediatR در توسعه نرم‌افزارهای دات‌نت">
+    <meta name="twitter:description" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در دنیای توسعه نرم‌افزار با فریم‌ورک دات‌نت (Microsoft .NET)، الگوی مدیاتور (Mediator Pattern) به‌عنوان روشی برای پیاده‌سازی جداسازی مسئولیت‌های فرمان و پرس‌وجو (Command Query Responsibility Segregation یا CQRS) شناخته شده است. این الگو به توسعه‌دهندگان کمک می‌کند تا کدهایی تمیز، قابل نگهداری و مقیاس‌پذیر تولید کنند. کتابخانه MediatR سال‌ها به‌عنوان ابزاری محبوب برای پیاده‌سازی این الگو مورد استفاده قرار گرفته است. اما اخیراً اعلام شده که MediatR به سمت مدل تجاری حرکت می‌کند و برخی از کاربردهای آن نیازمند لایسنس تجاری خواهد بود. این تغییر، توجه توسعه‌دهندگان را به جایگزین‌های قدرتمندی مانند ولورین (&lt;a href=&quot;https://wolverinefx.net/&quot; rel=&quot;noopener noreferrer&quot; target=&quot;_blank&quot;&gt;Wolverine&lt;/a&gt;) جلب کرده است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ولورین یک کتابخانه مدرن و با کارایی بالا در اکوسیستم دات‌نت است که نه‌تنها قابلیت‌های MediatR را پوشش می‌دهد، بلکه ویژگی‌های پیشرفته‌ای مانند پردازش پیام توزیع‌شده، زمان‌بندی، بازآزمایی (Retries) و پشتیبانی از الگوی صندوق خروجی (Outbox) را ارائه می‌دهد. در این مقاله، با بررسی ویژگی‌های ولورین و پیاده‌سازی یک API ساده برای مدیریت کاربران، به شما نشان خواهیم داد که چگونه می‌توانید از این ابزار برای ساخت برنامه‌هایی تمیز و مقیاس‌پذیر استفاده کنید.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چرا ولورین؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ولورین به‌عنوان جایگزینی برای MediatR طراحی شده است، اما قابلیت‌های آن فراتر از یک جایگزین ساده است. این کتابخانه با بهره‌گیری از مولدهای منبع (Source Generators)، عملکرد بهتری نسبت به MediatR ارائه می‌دهد. برخی از ویژگی‌های کلیدی ولورین عبارت‌اند از:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;پیام‌رسانی داخلی و توزیع‌شده:&lt;/strong&gt; پشتیبانی از پیام‌رسانی در حافظه (مشابه MediatR) و همچنین پیام‌رسانی توزیع‌شده با ابزارهایی مانند RabbitMQ، Kafka و Azure Service Bus.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;زمان‌بندی و بازآزمایی:&lt;/strong&gt; امکان زمان‌بندی پیام‌ها برای اجرا در آینده و مدیریت خودکار تلاش مجدد در صورت شکست.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;الگوی صندوق خروجی:&lt;/strong&gt; تضمین تحویل پیام‌ها با ذخیره‌سازی موقت آن‌ها، بدون نیاز به پیاده‌سازی دستی این الگو.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;مدیریت ساگا (Saga) و جریان‌های کاری:&lt;/strong&gt; پشتیبانی از هماهنگی جریان‌های کاری پیچیده و بلندمدت.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;ادغام با APIهای حداقلی (Minimal APIs):&lt;/strong&gt; یکپارچگی ساده با معماری‌های مدرن دات‌نت.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این ویژگی‌ها ولورین را به گزینه‌ای ایده‌آل برای پروژه‌های جدید یا مهاجرت از MediatR تبدیل کرده‌اند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پیاده‌سازی یک API ساده با ولورین&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای درک بهتر نحوه کار با ولورین، یک API ساده برای مدیریت کاربران (CRUD: Create, Read, Update, Delete) پیاده‌سازی می‌کنیم. این مثال نشان می‌دهد که چگونه ولورین می‌تواند کدهایی تمیز، تست‌پذیر و مقیاس‌پذیر تولید کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;گام ۱: تعریف مدل کاربر&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;ابتدا مدل کاربر را تعریف می‌کنیم:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public record User(Guid Id, string Name, string Email);&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای شبیه‌سازی ذخیره‌سازی، یک لیست در حافظه ایجاد می‌کنیم:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static class InMemoryUsers
+{
+    public static readonly List&amp;lt;User&amp;gt; Users = new();
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;گام ۲: تعریف فرمان‌ها و پرس‌وجوها&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;هر عملیات با یک شیء فرمان یا پرس‌وجو تعریف می‌شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public record CreateUser(string Name, string Email);
+public record GetUser(Guid Id);
+public record UpdateUser(Guid Id, string Name, string Email);
+public record DeleteUser(Guid Id);&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این اشیاء به‌عنوان پیام‌هایی عمل می‌کنند که ولورین آن‌ها را به کنترل‌کننده‌های مناسب هدایت می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;گام ۳: پیاده‌سازی کنترل‌کننده‌ها&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ولورین به‌صورت خودکار کلاس‌های کنترل‌کننده را شناسایی کرده و پیام‌ها را بر اساس نوع و نام متد هدایت می‌کند. نیازی به پیاده‌سازی رابط‌های خاص (مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IRequest&lt;/code&gt; در MediatR) نیست.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;کنترل‌کننده ایجاد کاربر:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class CreateUserHandler
+{
+    public User Handle(CreateUser command)
+    {
+        var user = new User(Guid.NewGuid(), command.Name, command.Email);
+        InMemoryUsers.Users.Add(user);
+        return user;
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;کنترل‌کننده دریافت کاربر:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class GetUserHandler
+{
+    public User? Handle(GetUser query)
+    {
+        return InMemoryUsers.Users.FirstOrDefault(u =&amp;gt; u.Id == query.Id);
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;کنترل‌کننده به‌روزرسانی کاربر:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class UpdateUserHandler
+{
+    public User? Handle(UpdateUser command)
+    {
+        var user = InMemoryUsers.Users.FirstOrDefault(u =&amp;gt; u.Id == command.Id);
+        if (user is null) return null;
+
+        var updated = user with { Name = command.Name, Email = command.Email };
+        InMemoryUsers.Users.Remove(user);
+        InMemoryUsers.Users.Add(updated);
+        return updated;
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;کنترل‌کننده حذف کاربر:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class DeleteUserHandler
+{
+    public bool Handle(DeleteUser command)
+    {
+        var user = InMemoryUsers.Users.FirstOrDefault(u =&amp;gt; u.Id == command.Id);
+        if (user is null) return false;
+
+        InMemoryUsers.Users.Remove(user);
+        return true;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;گام ۴: پیکربندی API حداقلی با ولورین&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;ولورین به‌سادگی با APIهای حداقلی دات‌نت ادغام می‌شود. در این مرحله، ولورین را به برنامه اضافه کرده و نقاط پایانی (Endpoints) را تعریف می‌کنیم:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddAuthorization();
+builder.Host.UseWolverine(); // فعال‌سازی ولورین
+
+var app = builder.Build();
+
+app.UseHttpsRedirection();
+app.UseAuthorization();
+
+// ایجاد کاربر
+app.MapPost(&amp;quot;/users&amp;quot;, async (CreateUser request, IMessageBus bus) =&amp;gt;
+{
+    var user = await bus.InvokeAsync&amp;lt;User&amp;gt;(request);
+    return Results.Created($&amp;quot;/users/{user.Id}&amp;quot;, user);
+});
+
+// دریافت کاربر
+app.MapGet(&amp;quot;/users/{id:guid}&amp;quot;, async (Guid id, IMessageBus bus) =&amp;gt;
+{
+    var user = await bus.InvokeAsync&amp;lt;User?&amp;gt;(new GetUser(id));
+    return user is null ? Results.NotFound() : Results.Ok(user);
+});
+
+// به‌روزرسانی کاربر
+app.MapPut(&amp;quot;/users/{id:guid}&amp;quot;, async (Guid id, UpdateUser command, IMessageBus bus) =&amp;gt;
+{
+    if (id != command.Id) return Results.BadRequest();
+
+    var updated = await bus.InvokeAsync&amp;lt;User?&amp;gt;(command);
+    return updated is null ? Results.NotFound() : Results.Ok(updated);
+});
+
+// حذف کاربر
+app.MapDelete(&amp;quot;/users/{id:guid}&amp;quot;, async (Guid id, IMessageBus bus) =&amp;gt;
+{
+    var deleted = await bus.InvokeAsync&amp;lt;bool&amp;gt;(new DeleteUser(id));
+    return deleted ? Results.NoContent() : Results.NotFound();
+});
+
+app.Run();&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در اینجا، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IMessageBus&lt;/code&gt; به‌عنوان واسطی برای ارسال پیام‌ها به ولورین عمل می‌کند. متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;InvokeAsync&lt;/code&gt; پیام را به کنترل‌کننده مناسب ارسال کرده و نتیجه را برمی‌گرداند. این فرآیند به‌صورت زیر انجام می‌شود:&lt;/div&gt;&lt;ol&gt;&lt;li&gt;ولورین پیام (مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CreateUser&lt;/code&gt;) را دریافت می‌کند.&lt;/li&gt;&lt;li&gt;کنترل‌کننده مناسب (مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Handle&lt;/code&gt; در &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CreateUserHandler&lt;/code&gt;) را پیدا می‌کند.&lt;/li&gt;&lt;li&gt;متد را اجرا کرده و نتیجه را بازمی‌گرداند.&lt;/li&gt;&lt;/ol&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مزایای ولورین نسبت به MediatR&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بر اساس اطلاعات موجود و تحلیل‌های انجام‌شده، ولورین ویژگی‌هایی ارائه می‌دهد که آن را از MediatR متمایز می‌کند:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;عملکرد بهتر:&lt;/strong&gt; استفاده از مولدهای منبع به‌جای بازتاب (Reflection) باعث افزایش سرعت اجرا می‌شود.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;پیام‌رسانی پیشرفته:&lt;/strong&gt; پشتیبانی از پیام‌رسانی توزیع‌شده، بر خلاف MediatR که تنها پیام‌رسانی در حافظه را پشتیبانی می‌کند.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;پشتیبانی از قابلیت‌های مدرن:&lt;/strong&gt; امکاناتی مانند زمان‌بندی، بازآزمایی و الگوی صندوق خروجی، نیاز به پیاده‌سازی دستی این قابلیت‌ها را از بین می‌برند.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;سادگی در استفاده: &lt;/strong&gt;عدم نیاز به رابط‌های پیچیده و شناسایی خودکار کنترل‌کننده‌ها.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;احترام به MediatR&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;هرچند ولورین یک جایگزین قدرتمند است، اما باید به ارزش‌های MediatR نیز احترام گذاشت. این کتابخانه سال‌ها به‌صورت رایگان به جامعه دات‌نت خدمت کرده و نسخه‌های موجود آن همچنان متن‌باز باقی خواهند ماند. حرکت به سمت مدل تجاری، به پایداری و ادامه توسعه این ابزار کمک می‌کند. توسعه‌دهندگان می‌توانند بر اساس نیازهای پروژه خود بین MediatR و ولورین انتخاب کنند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ولورین به‌عنوان یک جایگزین مدرن و قدرتمند برای MediatR، ابزارهایی پیشرفته برای پیاده‌سازی الگوی CQRS و مدیریت پیام‌ها در برنامه‌های دات‌نت ارائه می‌دهد. این کتابخانه با ویژگی‌هایی مانند پیام‌رسانی توزیع‌شده، زمان‌بندی، و پشتیبانی از الگوی صندوق خروجی، گزینه‌ای ایده‌آل برای پروژه‌های جدید و معماری‌های مدرن است. پیاده‌سازی مثال API مدیریت کاربران نشان داد که ولورین چگونه می‌تواند کدهایی تمیز، تست‌پذیر و مقیاس‌پذیر تولید کند. اگر در حال بررسی گزینه‌های جایگزین برای MediatR هستید یا می‌خواهید از قابلیت‌های پیشرفته‌تر در پروژه‌های خود بهره ببرید، ولورین ارزش بررسی دقیق را دارد. در عین حال، انتخاب بین این دو ابزار به نیازهای خاص پروژه و ترجیحات تیم توسعه بستگی دارد.&lt;/div&gt;">
+    <meta name="twitter:card" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در دنیای توسعه نرم‌افزار با فریم‌ورک دات‌نت (Microsoft .NET)، الگوی مدیاتور (Mediator Pattern) به‌عنوان روشی برای پیاده‌سازی جداسازی مسئولیت‌های فرمان و پرس‌وجو (Command Query Responsibility Segregation یا CQRS) شناخته شده است. این الگو به توسعه‌دهندگان کمک می‌کند تا کدهایی تمیز، قابل نگهداری و مقیاس‌پذیر تولید کنند. کتابخانه MediatR سال‌ها به‌عنوان ابزاری محبوب برای پیاده‌سازی این الگو مورد استفاده قرار گرفته است. اما اخیراً اعلام شده که MediatR به سمت مدل تجاری حرکت می‌کند و برخی از کاربردهای آن نیازمند لایسنس تجاری خواهد بود. این تغییر، توجه توسعه‌دهندگان را به جایگزین‌های قدرتمندی مانند ولورین (&lt;a href=&quot;https://wolverinefx.net/&quot; rel=&quot;noopener noreferrer&quot; target=&quot;_blank&quot;&gt;Wolverine&lt;/a&gt;) جلب کرده است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ولورین یک کتابخانه مدرن و با کارایی بالا در اکوسیستم دات‌نت است که نه‌تنها قابلیت‌های MediatR را پوشش می‌دهد، بلکه ویژگی‌های پیشرفته‌ای مانند پردازش پیام توزیع‌شده، زمان‌بندی، بازآزمایی (Retries) و پشتیبانی از الگوی صندوق خروجی (Outbox) را ارائه می‌دهد. در این مقاله، با بررسی ویژگی‌های ولورین و پیاده‌سازی یک API ساده برای مدیریت کاربران، به شما نشان خواهیم داد که چگونه می‌توانید از این ابزار برای ساخت برنامه‌هایی تمیز و مقیاس‌پذیر استفاده کنید.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چرا ولورین؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ولورین به‌عنوان جایگزینی برای MediatR طراحی شده است، اما قابلیت‌های آن فراتر از یک جایگزین ساده است. این کتابخانه با بهره‌گیری از مولدهای منبع (Source Generators)، عملکرد بهتری نسبت به MediatR ارائه می‌دهد. برخی از ویژگی‌های کلیدی ولورین عبارت‌اند از:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;پیام‌رسانی داخلی و توزیع‌شده:&lt;/strong&gt; پشتیبانی از پیام‌رسانی در حافظه (مشابه MediatR) و همچنین پیام‌رسانی توزیع‌شده با ابزارهایی مانند RabbitMQ، Kafka و Azure Service Bus.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;زمان‌بندی و بازآزمایی:&lt;/strong&gt; امکان زمان‌بندی پیام‌ها برای اجرا در آینده و مدیریت خودکار تلاش مجدد در صورت شکست.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;الگوی صندوق خروجی:&lt;/strong&gt; تضمین تحویل پیام‌ها با ذخیره‌سازی موقت آن‌ها، بدون نیاز به پیاده‌سازی دستی این الگو.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;مدیریت ساگا (Saga) و جریان‌های کاری:&lt;/strong&gt; پشتیبانی از هماهنگی جریان‌های کاری پیچیده و بلندمدت.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;ادغام با APIهای حداقلی (Minimal APIs):&lt;/strong&gt; یکپارچگی ساده با معماری‌های مدرن دات‌نت.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این ویژگی‌ها ولورین را به گزینه‌ای ایده‌آل برای پروژه‌های جدید یا مهاجرت از MediatR تبدیل کرده‌اند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پیاده‌سازی یک API ساده با ولورین&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای درک بهتر نحوه کار با ولورین، یک API ساده برای مدیریت کاربران (CRUD: Create, Read, Update, Delete) پیاده‌سازی می‌کنیم. این مثال نشان می‌دهد که چگونه ولورین می‌تواند کدهایی تمیز، تست‌پذیر و مقیاس‌پذیر تولید کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;گام ۱: تعریف مدل کاربر&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;ابتدا مدل کاربر را تعریف می‌کنیم:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public record User(Guid Id, string Name, string Email);&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای شبیه‌سازی ذخیره‌سازی، یک لیست در حافظه ایجاد می‌کنیم:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static class InMemoryUsers
+{
+    public static readonly List&amp;lt;User&amp;gt; Users = new();
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;گام ۲: تعریف فرمان‌ها و پرس‌وجوها&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;هر عملیات با یک شیء فرمان یا پرس‌وجو تعریف می‌شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public record CreateUser(string Name, string Email);
+public record GetUser(Guid Id);
+public record UpdateUser(Guid Id, string Name, string Email);
+public record DeleteUser(Guid Id);&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این اشیاء به‌عنوان پیام‌هایی عمل می‌کنند که ولورین آن‌ها را به کنترل‌کننده‌های مناسب هدایت می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;گام ۳: پیاده‌سازی کنترل‌کننده‌ها&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ولورین به‌صورت خودکار کلاس‌های کنترل‌کننده را شناسایی کرده و پیام‌ها را بر اساس نوع و نام متد هدایت می‌کند. نیازی به پیاده‌سازی رابط‌های خاص (مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IRequest&lt;/code&gt; در MediatR) نیست.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;کنترل‌کننده ایجاد کاربر:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class CreateUserHandler
+{
+    public User Handle(CreateUser command)
+    {
+        var user = new User(Guid.NewGuid(), command.Name, command.Email);
+        InMemoryUsers.Users.Add(user);
+        return user;
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;کنترل‌کننده دریافت کاربر:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class GetUserHandler
+{
+    public User? Handle(GetUser query)
+    {
+        return InMemoryUsers.Users.FirstOrDefault(u =&amp;gt; u.Id == query.Id);
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;کنترل‌کننده به‌روزرسانی کاربر:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class UpdateUserHandler
+{
+    public User? Handle(UpdateUser command)
+    {
+        var user = InMemoryUsers.Users.FirstOrDefault(u =&amp;gt; u.Id == command.Id);
+        if (user is null) return null;
+
+        var updated = user with { Name = command.Name, Email = command.Email };
+        InMemoryUsers.Users.Remove(user);
+        InMemoryUsers.Users.Add(updated);
+        return updated;
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;کنترل‌کننده حذف کاربر:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class DeleteUserHandler
+{
+    public bool Handle(DeleteUser command)
+    {
+        var user = InMemoryUsers.Users.FirstOrDefault(u =&amp;gt; u.Id == command.Id);
+        if (user is null) return false;
+
+        InMemoryUsers.Users.Remove(user);
+        return true;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;گام ۴: پیکربندی API حداقلی با ولورین&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;ولورین به‌سادگی با APIهای حداقلی دات‌نت ادغام می‌شود. در این مرحله، ولورین را به برنامه اضافه کرده و نقاط پایانی (Endpoints) را تعریف می‌کنیم:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddAuthorization();
+builder.Host.UseWolverine(); // فعال‌سازی ولورین
+
+var app = builder.Build();
+
+app.UseHttpsRedirection();
+app.UseAuthorization();
+
+// ایجاد کاربر
+app.MapPost(&amp;quot;/users&amp;quot;, async (CreateUser request, IMessageBus bus) =&amp;gt;
+{
+    var user = await bus.InvokeAsync&amp;lt;User&amp;gt;(request);
+    return Results.Created($&amp;quot;/users/{user.Id}&amp;quot;, user);
+});
+
+// دریافت کاربر
+app.MapGet(&amp;quot;/users/{id:guid}&amp;quot;, async (Guid id, IMessageBus bus) =&amp;gt;
+{
+    var user = await bus.InvokeAsync&amp;lt;User?&amp;gt;(new GetUser(id));
+    return user is null ? Results.NotFound() : Results.Ok(user);
+});
+
+// به‌روزرسانی کاربر
+app.MapPut(&amp;quot;/users/{id:guid}&amp;quot;, async (Guid id, UpdateUser command, IMessageBus bus) =&amp;gt;
+{
+    if (id != command.Id) return Results.BadRequest();
+
+    var updated = await bus.InvokeAsync&amp;lt;User?&amp;gt;(command);
+    return updated is null ? Results.NotFound() : Results.Ok(updated);
+});
+
+// حذف کاربر
+app.MapDelete(&amp;quot;/users/{id:guid}&amp;quot;, async (Guid id, IMessageBus bus) =&amp;gt;
+{
+    var deleted = await bus.InvokeAsync&amp;lt;bool&amp;gt;(new DeleteUser(id));
+    return deleted ? Results.NoContent() : Results.NotFound();
+});
+
+app.Run();&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در اینجا، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IMessageBus&lt;/code&gt; به‌عنوان واسطی برای ارسال پیام‌ها به ولورین عمل می‌کند. متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;InvokeAsync&lt;/code&gt; پیام را به کنترل‌کننده مناسب ارسال کرده و نتیجه را برمی‌گرداند. این فرآیند به‌صورت زیر انجام می‌شود:&lt;/div&gt;&lt;ol&gt;&lt;li&gt;ولورین پیام (مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CreateUser&lt;/code&gt;) را دریافت می‌کند.&lt;/li&gt;&lt;li&gt;کنترل‌کننده مناسب (مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Handle&lt;/code&gt; در &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CreateUserHandler&lt;/code&gt;) را پیدا می‌کند.&lt;/li&gt;&lt;li&gt;متد را اجرا کرده و نتیجه را بازمی‌گرداند.&lt;/li&gt;&lt;/ol&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مزایای ولورین نسبت به MediatR&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بر اساس اطلاعات موجود و تحلیل‌های انجام‌شده، ولورین ویژگی‌هایی ارائه می‌دهد که آن را از MediatR متمایز می‌کند:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;عملکرد بهتر:&lt;/strong&gt; استفاده از مولدهای منبع به‌جای بازتاب (Reflection) باعث افزایش سرعت اجرا می‌شود.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;پیام‌رسانی پیشرفته:&lt;/strong&gt; پشتیبانی از پیام‌رسانی توزیع‌شده، بر خلاف MediatR که تنها پیام‌رسانی در حافظه را پشتیبانی می‌کند.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;پشتیبانی از قابلیت‌های مدرن:&lt;/strong&gt; امکاناتی مانند زمان‌بندی، بازآزمایی و الگوی صندوق خروجی، نیاز به پیاده‌سازی دستی این قابلیت‌ها را از بین می‌برند.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;سادگی در استفاده: &lt;/strong&gt;عدم نیاز به رابط‌های پیچیده و شناسایی خودکار کنترل‌کننده‌ها.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;احترام به MediatR&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;هرچند ولورین یک جایگزین قدرتمند است، اما باید به ارزش‌های MediatR نیز احترام گذاشت. این کتابخانه سال‌ها به‌صورت رایگان به جامعه دات‌نت خدمت کرده و نسخه‌های موجود آن همچنان متن‌باز باقی خواهند ماند. حرکت به سمت مدل تجاری، به پایداری و ادامه توسعه این ابزار کمک می‌کند. توسعه‌دهندگان می‌توانند بر اساس نیازهای پروژه خود بین MediatR و ولورین انتخاب کنند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ولورین به‌عنوان یک جایگزین مدرن و قدرتمند برای MediatR، ابزارهایی پیشرفته برای پیاده‌سازی الگوی CQRS و مدیریت پیام‌ها در برنامه‌های دات‌نت ارائه می‌دهد. این کتابخانه با ویژگی‌هایی مانند پیام‌رسانی توزیع‌شده، زمان‌بندی، و پشتیبانی از الگوی صندوق خروجی، گزینه‌ای ایده‌آل برای پروژه‌های جدید و معماری‌های مدرن است. پیاده‌سازی مثال API مدیریت کاربران نشان داد که ولورین چگونه می‌تواند کدهایی تمیز، تست‌پذیر و مقیاس‌پذیر تولید کند. اگر در حال بررسی گزینه‌های جایگزین برای MediatR هستید یا می‌خواهید از قابلیت‌های پیشرفته‌تر در پروژه‌های خود بهره ببرید، ولورین ارزش بررسی دقیق را دارد. در عین حال، انتخاب بین این دو ابزار به نیازهای خاص پروژه و ترجیحات تیم توسعه بستگی دارد.&lt;/div&gt;">
+    <meta property="article:published_time" content="Fri, 18 Apr 2025 05:10:32 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
     <meta content='IE=edge' http-equiv='X-UA-Compatible'>
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">
-	
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
 	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
-
     <link href="vs.min.css" rel="stylesheet" type="text/css">
-    <script src="highlight.min.js" type="text/javascript"></script>
-	
+    <script src="highlight.min.js" type="text/javascript"></script>	
     <link href="styles.css" rel="stylesheet" type="text/css">	
     <style>
       @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
@@ -42,8 +464,8 @@
         }
      }
     </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
 </head>
-
 <body dir='rtl'>
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
@@ -53,7 +475,7 @@
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۳۶۹۵</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۶۹۷</span></td>
 </tr>
 <tr>
 <td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
@@ -73,7 +495,7 @@
 </tr>
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۲۲</span></td>
 </tr>
 </tbody>
 </table>
@@ -205,8 +627,5 @@ app.Run();</pre><div class="ql-direction-rtl" dir="rtl" style="text-align: right
 
 <!-- to load custom fonts for printing -->
 <div class="useSamimFD">&nbsp;</div>
-
-<script src="SyntaxHighlighter.js" type="text/javascript"></script>
 </body>
-
 </html>

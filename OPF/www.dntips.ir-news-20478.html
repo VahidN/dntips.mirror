@@ -1,17 +1,1164 @@
 <!DOCTYPE html>
 <html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
-
 <head>
-    <title>‫‫درک توسعه مبتنی بر استثناء (Exception-Driven Development): یک ضدالگو در برنامه‌نویسی</title>
+    <title>‫‫درک توسعه مبتنی بر استثناء (Exception-Driven Development): یک ضدالگو در برنامه‌نویسی</title>     <meta name="description" content="&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;تلاش برای نوشتن کدی تمیز، قابل نگهداری و با کارایی بالا همواره از اهداف اصلی برنامه‌نویسان بوده است. با این حال، گاهی استفاده نادرست از برخی سازوکارهای زبان برنامه‌نویسی می‌تواند منجر به بروز ضدالگوهایی (Anti-Patterns) شود که کیفیت کد را به شدت تحت تأثیر قرار می‌دهند. یکی از این ضدالگوهای رایج، «توسعه مبتنی بر استثناء» (Exception-Driven Development یا EDD) است. این رویکرد، استثناها (Exceptions) را از حالت هشدارهای نادر به چراغ‌های راهنمایی روزمره تبدیل می‌کند که منجر به کندی کد، پیچیدگی منطق و دور شدن از نرم‌افزاری پاک و قابل نگهداری می‌شود.  در این مقاله، به بررسی عمیق این ضدالگو، دلایل مضر بودن آن و ارائه راهکارهای بهتر با تمرکز بر توسعه‌دهندگان .NET خواهیم پرداخت.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;توسعه مبتنی بر استثناء (Exception-Driven Development) چیست؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;توسعه مبتنی بر استثناء (EDD) یک رویکرد برنامه‌نویسی است که در آن از استثناها برای کنترل جریان عادی برنامه استفاده می‌شود، به جای آنکه برای شرایط واقعاً استثنایی و غیرمنتظره رزرو شوند.  در این پارادایم، استثناها به یک ساختار کنترلی شبیه به دستورات &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;if&lt;/code&gt; یا حلقه‌ها تبدیل می‌شوند، نه اینکه به عنوان شبکه‌های ایمنی برای شرایط واقعاً استثنایی عمل کنند که به ندرت باید رخ دهند.  ویژگی اصلی EDD، طراحی عامدانه کدی است که انتظار دارد استثناها در طول عملیات عادی پرتاب شوند.  به جای بررسی پیش‌شرط‌ها یا استفاده از متدهای تخصصی برای تعیین موفقیت یک عملیات، توسعه‌دهندگان با این رویکرد به سادگی عملیات را انجام داده و هرگونه استثناء ناشی از آن را دریافت (catch) می‌کنند. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پیشینه تاریخی استثناها&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مکانیسم‌های استثناء در زبان‌های برنامه‌نویسی برای مدیریت شرایط غیرمنتظره و استثنایی معرفی شدند که به ندرت در طول اجرای عادی برنامه رخ می‌دهند. زبان‌هایی مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;C++&lt;/code&gt; و بعدها #Java، C و سایرین، مدیریت استثناء را برای جداسازی کد مدیریت خطا از منطق اصلی برنامه پیاده‌سازی کردند تا کد واضح‌تر و قابل نگهداری‌تر شود.  با این حال، همانند بسیاری از ویژگی‌های برنامه‌نویسی، استثناها به روش‌هایی مورد استفاده قرار گرفتند که طراحان آن‌ها در نظر نداشتند.  برخی توسعه‌دهندگان شروع به استفاده از استثناها برای جریان کنترل عادی کردند که منجر به چیزی شد که اکنون به عنوان توسعه مبتنی بر استثناء می‌شناسیم. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چرا توسعه مبتنی بر استثناء مضر تلقی می‌شود؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;EDD به دلایل قانع‌کننده‌ای که بر کیفیت کد، عملکرد و قابلیت نگهداری تأثیر می‌گذارند، به طور گسترده یک عمل نامناسب در نظر گرفته می‌شود. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پیامدهای عملکردی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;استثناها برای شرایط استثنایی طراحی شده‌اند و بنابراین پیاده‌سازی آن‌ها اطلاعات تشخیصی را بر عملکرد اولویت می‌دهد.  هنگامی که یک استثناء پرتاب می‌شود، سیستم زمان اجرا (runtime system) باید چندین عملیات پرهزینه انجام دهد: گرفتن پشته فراخوانی فعلی (call stack)، جستجو برای یک کنترل‌کننده استثناء (exception handler) مناسب، باز کردن پشته فراخوانی (unwind the call stack) و انتقال کنترل به کنترل‌کننده.  این فرآیند به طور قابل توجهی گران‌تر از مکانیسم‌های جریان کنترل عادی است. در C#، پرتاب یک استثناء می‌تواند صدها یا حتی هزاران بار کندتر از استفاده از منطق شرطی باشد. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;کاهش خوانایی کد&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;کدی که برای جریان کنترل به استثناها متکی است، معمولاً خواندن و درک آن دشوارتر است.  جریان واقعی اجرا مبهم می‌شود و توسعه‌دهندگان را ملزم می‌کند تا به جای دنبال کردن یک روایت خطی و واضح، مسیرهای بالقوه استثناء را به صورت ذهنی ردیابی کنند. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پیچیدگی اشکال‌زدایی (Debugging)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;هنگامی که استثناها به طور مکرر به عنوان بخشی از عملیات عادی پرتاب می‌شوند، تشخیص بین استثناهای مورد انتظار و آنهایی که واقعاً مشکل‌ساز هستند، دشوار می‌شود.  این امر می‌تواند تلاش‌های اشکال‌زدایی را به طور قابل توجهی پیچیده کند، زیرا ابزارها و لاگ‌ها با &amp;quot;نویز&amp;quot; ناشی از استثناهای مورد انتظار پر می‌شوند. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پنهان کردن خطاهای منطقی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;توسعه مبتنی بر استثناء می‌تواند با تلقی خطاهای منطقی به عنوان جریان عادی برنامه، آن‌ها را پنهان کند.  این کار مرز بین شرایط مورد انتظار و باگ‌های واقعی را محو می‌کند و شناسایی و رفع مشکلات واقعی در کد را دشوارتر می‌سازد. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چالش‌های تست‌نویسی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;کدی که برای جریان کنترل به استثناها متکی است، معمولاً تست‌نویسی آن دشوارتر است.  تست‌های واحد (Unit tests) باید استثناهای مورد انتظار را در نظر بگیرند که طراحی تست را پیچیده کرده و می‌تواند معیارهای پوشش کد (code coverage) را کم‌معناتر کند. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;شناسایی توسعه مبتنی بر استثناء&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;توسعه مبتنی بر استثناء را می‌توان با چندین نشانه در کد شناسایی کرد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;استفاده مکرر از بلوک‌های &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;try-catch&lt;/code&gt; برای عملیات روتین.&lt;/li&gt;&lt;li&gt;بلوک‌های &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;catch&lt;/code&gt; خالی یا بلوک‌هایی که استثناها را بدون مدیریت معنادار می‌بلعند (swallow exceptions).&lt;/li&gt;&lt;li&gt;استفاده از استثناها برای اعتبارسنجی یا شرایط خطای مورد انتظار.&lt;/li&gt;&lt;li&gt;جریان کنترلی که به پرتاب شدن استثناهای خاص بستگی دارد.&lt;/li&gt;&lt;li&gt;متدها یا APIهایی که برای پرتاب استثناها به عنوان بخشی از عملیات عادی خود طراحی شده‌اند.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ابزارهایی مانند تحلیل‌گرهای کد ایستا (Static code analyzers) مانند SonarQube و ReSharper می‌توانند برخی از الگوهای استفاده نادرست از استثناء را شناسایی کنند.  همچنین، پروفایلرهای عملکرد (Performance profilers) مانند dotTrace یا Visual Studio Profiler می‌توانند مشخص کنند که استثناها در کجا به طور مکرر در طول عملیات عادی پرتاب می‌شوند.  بازبینی کد (Code reviews) منظم توسط همکاران با تأکید بر مدیریت استثناء نیز می‌تواند به شناسایی EDD کمک کند. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ضدالگوهای رایج EDD در C#&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بیایید برخی از الگوهای رایج که در آن‌ها توسعه‌دهندگان به طور سهوی یا عمدی از EDD در کد C# استفاده می‌کنند را بررسی کنیم.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ضدالگو ۱: استفاده از استثناها برای اعتبارسنجی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یکی از رایج‌ترین نمونه‌های EDD استفاده از استثناها برای اعتبارسنجی ورودی است.  به عنوان مثال، در کد زیر، به جای بررسی صریح اینکه آیا &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;username&lt;/code&gt; تهی (null) است، کد به پرتاب شدن &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;NullReferenceException&lt;/code&gt; هنگام دسترسی به خاصیت &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Length&lt;/code&gt; متکی است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public void ProcessUser(string username)
+{
+    try
+    {
+        // Directly try to process without validation
+        if (username.Length &amp;lt; 3) // Potential NullReferenceException if username is null
+        {
+            Console.WriteLine(&amp;quot;Username too short&amp;quot;);
+        }
+        // Further processing...
+    }
+    catch (NullReferenceException)
+    {
+        Console.WriteLine(&amp;quot;Username cannot be null&amp;quot;);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رویکرد درک کد را دشوارتر و ناکارآمدتر می‌کند. یک رویکرد بهتر، بررسی صریح پیش‌شرط‌ها است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public void ProcessUser(string username)
+{
+    if (username == null)
+    {
+        Console.WriteLine(&amp;quot;Username cannot be null&amp;quot;);
+        return;
+    }
+    
+    if (username.Length &amp;lt; 3)
+    {
+        Console.WriteLine(&amp;quot;Username too short&amp;quot;);
+    }
+    // Further processing...
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ضدالگو ۲: عملیات فایل بدون بررسی‌های اولیه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;سناریوی رایج دیگر، انجام عملیات فایل بدون بررسی اولیه وجود فایل است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public string ReadFileContents(string filePath)
+{
+    try
+    {
+        return File.ReadAllText(filePath); // Potential FileNotFoundException
+    }
+    catch (FileNotFoundException)
+    {
+        return &amp;quot;File not found&amp;quot;;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;کد فوق به استثناء برای تعیین وجود فایل متکی است. رویکرد مستقیم‌تر به شکل زیر است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public string ReadFileContents(string filePath)
+{
+    if (!File.Exists(filePath))
+    {
+        return &amp;quot;File not found&amp;quot;;
+    }
+    
+    return File.ReadAllText(filePath);
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;با این حال، شایان ذکر است که حتی این نسخه بهبود یافته نیز دارای یک وضعیت رقابتی (race condition) بین بررسی و عملیات خواندن است. یک راه‌حل واقعاً مقاوم، استثناء بالقوه‌ای را که ممکن است در صورت حذف فایل بین بررسی و خواندن رخ دهد، مدیریت می‌کند.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ضدالگو ۳: جستجو در دیکشنری (Dictionary Lookups)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;استفاده از استثناها برای جستجو در دیکشنری نیز یک الگوی رایج است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public string GetValue(Dictionary&amp;lt;string, string&amp;gt; dictionary, string key)
+{
+    try
+    {
+        return dictionary[key]; // Potential KeyNotFoundException
+    }
+    catch (KeyNotFoundException)
+    {
+        return &amp;quot;Key not found&amp;quot;;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;دیکشنری‌های C# یک متد خاص برای جلوگیری از این رویکرد مبتنی بر استثناء ارائه می‌دهند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public string GetValue(Dictionary&amp;lt;string, string&amp;gt; dictionary, string key)
+{
+    if (dictionary.TryGetValue(key, out string value))
+    {
+        return value;
+    }
+    return &amp;quot;Key not found&amp;quot;;
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ضدالگو ۴: تبدیل نوع (Type Conversions)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;تبدیل نوع مبتنی بر استثناء نیز رایج است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public int ConvertToInt(string input)
+{
+    try
+    {
+        return int.Parse(input); // Potential FormatException
+    }
+    catch (FormatException)
+    {
+        return 0; // Default value on failure
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یک رویکرد کارآمدتر از الگوی TryParse استفاده می‌کند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public int ConvertToInt(string input)
+{
+    if (int.TryParse(input, out int result))
+    {
+        return result;
+    }
+    return 0; // Default value on failure
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چه زمانی استفاده از استثناها مناسب است؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مهم است که بین EDD و استفاده صحیح از استثناها تمایز قائل شویم.  استثناها هنگامی که به درستی استفاده شوند، ابزاری ارزشمند باقی می‌مانند. آن‌ها برای شرایط واقعاً استثنایی که نباید در طول اجرای عادی برنامه رخ دهند، مناسب هستند، مانند: خرابی شبکه، مشکلات اتصال به پایگاه داده، مشکلات مجوز سیستم فایل، کمبود حافظه و خطاهای برنامه‌نویسی که نشان‌دهنده باگ هستند (مانند اندیس خارج از محدوده آرایه). &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یک تمایز کلیدی بین موارد استثنایی و خرابی‌های مورد انتظار وجود دارد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;خرابی مورد انتظار (Expected failure):&lt;/strong&gt; شرایطی که معمولاً در طول عملیات عادی رخ می‌دهد، مانند وارد کردن داده نامعتبر توسط کاربر یا عدم وجود یک فایل. &lt;/li&gt;&lt;li&gt;&lt;strong&gt;شرایط استثنایی (Exceptional condition):&lt;/strong&gt; یک وضعیت نادر یا غیرمنتظره که نشان می‌دهد مشکلی جدی رخ داده است. &lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;گاهی اوقات شما مجبور به کار با APIهایی هستید که به عنوان بخشی از عملیات عادی خود استثناء پرتاب می‌کنند.  در این موارد، گرفتن این استثناها مناسب است، اگرچه ممکن است بخواهید چنین APIهایی را در APIهای خود که از شیوه‌های بهتری پیروی می‌کنند، بپوشانید.  همچنین، هنگامی که کد مشتری (client code) قرارداد یک متد را نقض می‌کند (مانند ارسال &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;null&lt;/code&gt; زمانی که متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;null&lt;/code&gt; را نمی‌پذیرد)، پرتاب یک استثناء مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ArgumentNullException&lt;/code&gt; مناسب است. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;به عنوان مثال، در کد زیر، اعتبارسنجی اولیه انجام می‌شود و سپس عملیات نوشتن فایل در یک بلوک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;try-catch&lt;/code&gt; قرار می‌گیرد، زیرا این عملیات همچنان ممکن است به دلایل استثنایی (مانند پر بودن دیسک یا مشکلات مجوز) با شکست مواجه شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public void SaveDocument(Document document, string path)
+{
+    if (document == null)
+        throw new ArgumentNullException(nameof(document)); // Contract violation
+    if (string.IsNullOrEmpty(path))
+        throw new ArgumentException(&amp;quot;Path cannot be empty&amp;quot;, nameof(path)); // Contract violation
+
+    // Normal validation completed, now we can proceed
+    try
+    {
+        // This could still fail for exceptional reasons (disk full, permissions)
+        File.WriteAllText(path, document.Content);
+    }
+    catch (IOException ex)
+    {
+        // Handle truly exceptional condition
+        LogError($&amp;quot;Failed to save document: {ex.Message}&amp;quot;);
+        throw new DocumentSaveException(&amp;quot;Could not save the document&amp;quot;, ex);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;جایگزین‌های بهتر برای توسعه مبتنی بر استثناء&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;چندین الگوی طراحی و تکنیک برنامه‌نویسی، جایگزین‌های بهتری برای EDD ارائه می‌دهند. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الگوی TryPattern در C#&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;C# الگوی &amp;quot;Try&amp;quot; را رایج کرده است که روشی واضح و کارآمد برای مدیریت عملیاتی که ممکن است با شکست مواجه شوند، ارائه می‌دهد.  این الگو پتانسیل شکست را در امضای متد صریح می‌کند و از سربار عملکردی استثناها جلوگیری می‌کند. &lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// Example of a TryPattern method signature
+public bool TryGetUserDetails(string userId, out UserDetails details)
+{
+    // Implementation that returns true for success, false for failure
+    // and populates &amp;#39;details&amp;#39; when successful
+    details = null; // Placeholder for actual implementation
+    // ... logic to get user details ...
+    if (/* condition for success */ true) {
+        // details = ...;
+        return true;
+    }
+    return false;
+}
+
+// Usage:
+if (TryGetUserDetails(&amp;quot;user123&amp;quot;, out var userDetails))
+{
+    // Use userDetails
+}
+else
+{
+    // Handle failure case
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الگوی Result&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;الگوی Result (نتیجه) روشی ساختاریافته برای بازگرداندن یا یک مقدار موفقیت‌آمیز یا اطلاعات خطا ارائه می‌دهد. &lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class Result&amp;lt;T&amp;gt;
+{
+    public bool IsSuccess { get; }
+    public T Value { get; }
+    public string Error { get; }
+    
+    private Result(bool isSuccess, T value, string error)
+    {
+        IsSuccess = isSuccess; Value = value; Error = error;
+    }
+    
+    public static Result&amp;lt;T&amp;gt; Success(T value) =&amp;gt; new Result&amp;lt;T&amp;gt;(true, value, null);
+    public static Result&amp;lt;T&amp;gt; Failure(string error) =&amp;gt; new Result&amp;lt;T&amp;gt;(false, default, error);
+}
+
+// Usage example:
+public Result&amp;lt;User&amp;gt; GetUser(string id) // Assuming User class and _repository exist
+{
+    if (string.IsNullOrEmpty(id))
+    {
+        return Result&amp;lt;User&amp;gt;.Failure(&amp;quot;ID cannot be empty&amp;quot;);
+    }
+    // User user = _repository.FindById(id); // Placeholder
+    User user = null; // Placeholder for actual repository call
+    if (user == null)
+    {
+        return Result&amp;lt;User&amp;gt;.Failure(&amp;quot;User not found&amp;quot;);
+    }
+    return Result&amp;lt;User&amp;gt;.Success(user);
+}
+
+// Client code:
+// var result = GetUser(&amp;quot;123&amp;quot;);
+// if (result.IsSuccess)
+// {
+//     Console.WriteLine($&amp;quot;Found user: {result.Value.Name}&amp;quot;);
+// }
+// else
+// {
+//     Console.WriteLine($&amp;quot;Error: {result.Error}&amp;quot;);
+// }&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;انواع Option/Maybe&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;انواع Option یا Maybe به صراحت امکان عدم وجود یک مقدار را نشان می‌دهند.  (این انواع معمولاً از طریق کتابخانه‌های شخص ثالث یا پیاده‌سازی سفارشی در دسترس هستند.)&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;گارد کلازها (Guard Clauses)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;گارد کلازها بازگشت‌های زودهنگام برای شرایط نامعتبر ارائه می‌دهند، کد را خواناتر کرده و نیاز به شرطی‌های تودرتو را از بین می‌برند. &lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public void ProcessOrder(Order order) // Assuming Order class exists
+{
+    // Guard clauses
+    if (order == null)
+        throw new ArgumentNullException(nameof(order)); // Appropriate exception for contract violation
+    // if (order.Items.Count == 0) // Assuming Items property exists
+    //     return; 
+    // if (!order.IsValid) // Assuming IsValid property exists
+    //     return;
+    // Main processing logic follows
+    // ...
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;بازسازی (Refactoring) کد مبتنی بر استثناء&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بیایید بررسی کنیم که چگونه کد مبتنی بر استثناء را برای پیروی از شیوه‌های بهتر بازسازی کنیم. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مثال ۱: بازسازی منطق اعتبارسنجی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;قبل:&lt;/strong&gt; کد از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;decimal.Parse&lt;/code&gt; در یک بلوک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;try-catch&lt;/code&gt; برای تبدیل رشته به &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;decimal&lt;/code&gt; استفاده می‌کند و در صورت بروز &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;FormatException&lt;/code&gt; مقدار ۰ را بازمی‌گرداند. &lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public decimal CalculateTax(string incomeText)
+{
+    try
+    {
+        decimal income = decimal.Parse(incomeText);
+        return income * 0.2m;
+    }
+    catch (FormatException)
+    {
+        return 0;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بعد: کد از decimal.TryParse برای تبدیل امن استفاده می‌کند و در صورت موفقیت، محاسبه را انجام می‌دهد.&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public decimal CalculateTax(string incomeText)
+{
+    if (decimal.TryParse(incomeText, out decimal income))
+    {
+        return income * 0.2m;
+    }
+    return 0;
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مثال ۲: بازسازی دسترسی به منابع&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;قبل:&lt;/strong&gt; کد سعی می‌کند مشتری را از مخزن (repository) دریافت کند و در صورت بروز &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CustomerNotFoundException&lt;/code&gt;، یک مشتری پیش‌فرض با نام &amp;quot;Unknown&amp;quot; بازمی‌گرداند. &lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// Assuming _customerRepository and Customer class exist
+public Customer GetCustomer(int id)
+{
+    try
+    {
+        return _customerRepository.Get(id); // Potential CustomerNotFoundException
+    }
+    catch (CustomerNotFoundException)
+    {
+        return new Customer { Name = &amp;quot;Unknown&amp;quot; };
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بعد (با بررسی وجود): ابتدا بررسی می‌شود که آیا مشتری وجود دارد و سپس اقدام به دریافت آن می‌شود.&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// Assuming _customerRepository.Exists(id) and _customerRepository.Get(id) methods exist
+public Customer GetCustomer(int id)
+{
+    if (_customerRepository.Exists(id))
+    {
+        return _customerRepository.Get(id);
+    }
+    return new Customer { Name = &amp;quot;Unknown&amp;quot; };
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بعد (با استفاده از الگوی Result): این رویکرد اطلاعات دقیق‌تری در مورد موفقیت یا شکست عملیات ارائه می‌دهد و همچنین می‌تواند خطاهای غیرمنتظره دیگر را نیز مدیریت کند.&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// Assuming Result&amp;lt;T&amp;gt;, Customer class, and _customerRepository exist
+public Result&amp;lt;Customer&amp;gt; GetCustomer(int id)
+{
+    if (!_customerRepository.Exists(id)) // Assumes Exists method
+    {
+        return Result&amp;lt;Customer&amp;gt;.Failure($&amp;quot;Customer with id {id} not found&amp;quot;);
+    }
+    
+    try
+    {
+        var customer = _customerRepository.Get(id); // Assumes Get method
+        return Result&amp;lt;Customer&amp;gt;.Success(customer);
+    }
+    catch (Exception ex) // Catching broader exceptions for unexpected issues during retrieval
+    {
+        // Log the exception (e.g., LogError(ex.Message);)
+        return Result&amp;lt;Customer&amp;gt;.Failure($&amp;quot;Error retrieving customer: {ex.Message}&amp;quot;);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;تأثیر توسعه مبتنی بر استثناء بر کیفیت نرم‌افزار&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;استفاده از EDD چندین تأثیر منفی بر کیفیت کلی نرم‌افزار دارد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;کاهش قابلیت نگهداری (Maintainability):&lt;/strong&gt; درک و نگهداری کدی که از استثناها برای جریان کنترل استفاده می‌کند، دشوارتر است.  توسعه‌دهندگان جدید ممکن است در دنبال کردن مسیر اجرا دچار مشکل شوند. &lt;/li&gt;&lt;li&gt;&lt;strong&gt;کاهش عملکرد (Performance):&lt;/strong&gt; همانطور که قبلاً ذکر شد، استثناها به طور قابل توجهی گران‌تر از جریان کنترل عادی هستند و می‌توانند منجر به کندی محسوس در برنامه‌های حساس به عملکرد شوند. &lt;/li&gt;&lt;li&gt;&lt;strong&gt;ابهام در قصد (Obscured Intent):&lt;/strong&gt; کد مبتنی بر استثناء اغلب قصد اصلی توسعه‌دهنده را پنهان می‌کند. &lt;/li&gt;&lt;li&gt;&lt;strong&gt;کد شکننده (Brittle Code):&lt;/strong&gt; EDD اغلب منجر به کدی شکننده می‌شود که با تغییر پیاده‌سازی‌های زیربنایی به روش‌های غیرمنتظره‌ای می‌شکند.  برای مثال، اگر یک API دیگر یک استثناء خاص را پرتاب نکند، کدی که به گرفتن آن استثناء متکی است، نادرست رفتار خواهد کرد. &lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;توسعه مبتنی بر استثناء نشان‌دهنده استفاده نادرست از مکانیسم‌های مدیریت استثناء است که منجر به کدی می‌شود که خواندن، نگهداری و اشکال‌زدایی آن دشوارتر است.  در حالی که استثناها یک ویژگی قدرتمند زبان‌های برنامه‌نویسی مدرن هستند، باید برای شرایط واقعاً استثنایی رزرو شوند نه اینکه به عنوان یک مکانیسم جریان کنترل روتین مورد استفاده قرار گیرند.  با درک مشکلات EDD و اتخاذ الگوهای جایگزین مانند گارد کلازها، الگوی TryPattern یا انواع Result، توسعه‌دهندگان می‌توانند کدی مقاوم‌تر، قابل نگهداری‌تر و کارآمدتر ایجاد کنند.  بازسازی کد مبتنی بر استثناء موجود ممکن است نیازمند تلاش باشد، اما مزایای آن از نظر کیفیت کد، عملکرد و قابلیت نگهداری ارزش این تلاش را دارد.  به یاد داشته باشید که استثناها ابزارهایی هستند که برای شرایط استثنایی طراحی شده‌اند.  هنگامی که به طور مناسب استفاده شوند، به جداسازی منطق مدیریت خطا از جریان اصلی برنامه کمک می‌کنند.  با این حال، هنگامی که بیش از حد یا به اشتباه استفاده شوند، می‌توانند به ضدالگوی توسعه مبتنی بر استثناء با تمام مشکلات مرتبط با آن منجر شوند. &lt;/div&gt;">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="درک توسعه مبتنی بر استثناء (Exception-Driven Development): یک ضدالگو در برنامه‌نویسی">
+    <meta itemprop="description" content="&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;تلاش برای نوشتن کدی تمیز، قابل نگهداری و با کارایی بالا همواره از اهداف اصلی برنامه‌نویسان بوده است. با این حال، گاهی استفاده نادرست از برخی سازوکارهای زبان برنامه‌نویسی می‌تواند منجر به بروز ضدالگوهایی (Anti-Patterns) شود که کیفیت کد را به شدت تحت تأثیر قرار می‌دهند. یکی از این ضدالگوهای رایج، «توسعه مبتنی بر استثناء» (Exception-Driven Development یا EDD) است. این رویکرد، استثناها (Exceptions) را از حالت هشدارهای نادر به چراغ‌های راهنمایی روزمره تبدیل می‌کند که منجر به کندی کد، پیچیدگی منطق و دور شدن از نرم‌افزاری پاک و قابل نگهداری می‌شود.  در این مقاله، به بررسی عمیق این ضدالگو، دلایل مضر بودن آن و ارائه راهکارهای بهتر با تمرکز بر توسعه‌دهندگان .NET خواهیم پرداخت.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;توسعه مبتنی بر استثناء (Exception-Driven Development) چیست؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;توسعه مبتنی بر استثناء (EDD) یک رویکرد برنامه‌نویسی است که در آن از استثناها برای کنترل جریان عادی برنامه استفاده می‌شود، به جای آنکه برای شرایط واقعاً استثنایی و غیرمنتظره رزرو شوند.  در این پارادایم، استثناها به یک ساختار کنترلی شبیه به دستورات &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;if&lt;/code&gt; یا حلقه‌ها تبدیل می‌شوند، نه اینکه به عنوان شبکه‌های ایمنی برای شرایط واقعاً استثنایی عمل کنند که به ندرت باید رخ دهند.  ویژگی اصلی EDD، طراحی عامدانه کدی است که انتظار دارد استثناها در طول عملیات عادی پرتاب شوند.  به جای بررسی پیش‌شرط‌ها یا استفاده از متدهای تخصصی برای تعیین موفقیت یک عملیات، توسعه‌دهندگان با این رویکرد به سادگی عملیات را انجام داده و هرگونه استثناء ناشی از آن را دریافت (catch) می‌کنند. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پیشینه تاریخی استثناها&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مکانیسم‌های استثناء در زبان‌های برنامه‌نویسی برای مدیریت شرایط غیرمنتظره و استثنایی معرفی شدند که به ندرت در طول اجرای عادی برنامه رخ می‌دهند. زبان‌هایی مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;C++&lt;/code&gt; و بعدها #Java، C و سایرین، مدیریت استثناء را برای جداسازی کد مدیریت خطا از منطق اصلی برنامه پیاده‌سازی کردند تا کد واضح‌تر و قابل نگهداری‌تر شود.  با این حال، همانند بسیاری از ویژگی‌های برنامه‌نویسی، استثناها به روش‌هایی مورد استفاده قرار گرفتند که طراحان آن‌ها در نظر نداشتند.  برخی توسعه‌دهندگان شروع به استفاده از استثناها برای جریان کنترل عادی کردند که منجر به چیزی شد که اکنون به عنوان توسعه مبتنی بر استثناء می‌شناسیم. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چرا توسعه مبتنی بر استثناء مضر تلقی می‌شود؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;EDD به دلایل قانع‌کننده‌ای که بر کیفیت کد، عملکرد و قابلیت نگهداری تأثیر می‌گذارند، به طور گسترده یک عمل نامناسب در نظر گرفته می‌شود. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پیامدهای عملکردی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;استثناها برای شرایط استثنایی طراحی شده‌اند و بنابراین پیاده‌سازی آن‌ها اطلاعات تشخیصی را بر عملکرد اولویت می‌دهد.  هنگامی که یک استثناء پرتاب می‌شود، سیستم زمان اجرا (runtime system) باید چندین عملیات پرهزینه انجام دهد: گرفتن پشته فراخوانی فعلی (call stack)، جستجو برای یک کنترل‌کننده استثناء (exception handler) مناسب، باز کردن پشته فراخوانی (unwind the call stack) و انتقال کنترل به کنترل‌کننده.  این فرآیند به طور قابل توجهی گران‌تر از مکانیسم‌های جریان کنترل عادی است. در C#، پرتاب یک استثناء می‌تواند صدها یا حتی هزاران بار کندتر از استفاده از منطق شرطی باشد. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;کاهش خوانایی کد&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;کدی که برای جریان کنترل به استثناها متکی است، معمولاً خواندن و درک آن دشوارتر است.  جریان واقعی اجرا مبهم می‌شود و توسعه‌دهندگان را ملزم می‌کند تا به جای دنبال کردن یک روایت خطی و واضح، مسیرهای بالقوه استثناء را به صورت ذهنی ردیابی کنند. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پیچیدگی اشکال‌زدایی (Debugging)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;هنگامی که استثناها به طور مکرر به عنوان بخشی از عملیات عادی پرتاب می‌شوند، تشخیص بین استثناهای مورد انتظار و آنهایی که واقعاً مشکل‌ساز هستند، دشوار می‌شود.  این امر می‌تواند تلاش‌های اشکال‌زدایی را به طور قابل توجهی پیچیده کند، زیرا ابزارها و لاگ‌ها با &amp;quot;نویز&amp;quot; ناشی از استثناهای مورد انتظار پر می‌شوند. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پنهان کردن خطاهای منطقی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;توسعه مبتنی بر استثناء می‌تواند با تلقی خطاهای منطقی به عنوان جریان عادی برنامه، آن‌ها را پنهان کند.  این کار مرز بین شرایط مورد انتظار و باگ‌های واقعی را محو می‌کند و شناسایی و رفع مشکلات واقعی در کد را دشوارتر می‌سازد. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چالش‌های تست‌نویسی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;کدی که برای جریان کنترل به استثناها متکی است، معمولاً تست‌نویسی آن دشوارتر است.  تست‌های واحد (Unit tests) باید استثناهای مورد انتظار را در نظر بگیرند که طراحی تست را پیچیده کرده و می‌تواند معیارهای پوشش کد (code coverage) را کم‌معناتر کند. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;شناسایی توسعه مبتنی بر استثناء&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;توسعه مبتنی بر استثناء را می‌توان با چندین نشانه در کد شناسایی کرد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;استفاده مکرر از بلوک‌های &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;try-catch&lt;/code&gt; برای عملیات روتین.&lt;/li&gt;&lt;li&gt;بلوک‌های &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;catch&lt;/code&gt; خالی یا بلوک‌هایی که استثناها را بدون مدیریت معنادار می‌بلعند (swallow exceptions).&lt;/li&gt;&lt;li&gt;استفاده از استثناها برای اعتبارسنجی یا شرایط خطای مورد انتظار.&lt;/li&gt;&lt;li&gt;جریان کنترلی که به پرتاب شدن استثناهای خاص بستگی دارد.&lt;/li&gt;&lt;li&gt;متدها یا APIهایی که برای پرتاب استثناها به عنوان بخشی از عملیات عادی خود طراحی شده‌اند.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ابزارهایی مانند تحلیل‌گرهای کد ایستا (Static code analyzers) مانند SonarQube و ReSharper می‌توانند برخی از الگوهای استفاده نادرست از استثناء را شناسایی کنند.  همچنین، پروفایلرهای عملکرد (Performance profilers) مانند dotTrace یا Visual Studio Profiler می‌توانند مشخص کنند که استثناها در کجا به طور مکرر در طول عملیات عادی پرتاب می‌شوند.  بازبینی کد (Code reviews) منظم توسط همکاران با تأکید بر مدیریت استثناء نیز می‌تواند به شناسایی EDD کمک کند. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ضدالگوهای رایج EDD در C#&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بیایید برخی از الگوهای رایج که در آن‌ها توسعه‌دهندگان به طور سهوی یا عمدی از EDD در کد C# استفاده می‌کنند را بررسی کنیم.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ضدالگو ۱: استفاده از استثناها برای اعتبارسنجی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یکی از رایج‌ترین نمونه‌های EDD استفاده از استثناها برای اعتبارسنجی ورودی است.  به عنوان مثال، در کد زیر، به جای بررسی صریح اینکه آیا &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;username&lt;/code&gt; تهی (null) است، کد به پرتاب شدن &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;NullReferenceException&lt;/code&gt; هنگام دسترسی به خاصیت &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Length&lt;/code&gt; متکی است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public void ProcessUser(string username)
+{
+    try
+    {
+        // Directly try to process without validation
+        if (username.Length &amp;lt; 3) // Potential NullReferenceException if username is null
+        {
+            Console.WriteLine(&amp;quot;Username too short&amp;quot;);
+        }
+        // Further processing...
+    }
+    catch (NullReferenceException)
+    {
+        Console.WriteLine(&amp;quot;Username cannot be null&amp;quot;);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رویکرد درک کد را دشوارتر و ناکارآمدتر می‌کند. یک رویکرد بهتر، بررسی صریح پیش‌شرط‌ها است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public void ProcessUser(string username)
+{
+    if (username == null)
+    {
+        Console.WriteLine(&amp;quot;Username cannot be null&amp;quot;);
+        return;
+    }
+    
+    if (username.Length &amp;lt; 3)
+    {
+        Console.WriteLine(&amp;quot;Username too short&amp;quot;);
+    }
+    // Further processing...
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ضدالگو ۲: عملیات فایل بدون بررسی‌های اولیه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;سناریوی رایج دیگر، انجام عملیات فایل بدون بررسی اولیه وجود فایل است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public string ReadFileContents(string filePath)
+{
+    try
+    {
+        return File.ReadAllText(filePath); // Potential FileNotFoundException
+    }
+    catch (FileNotFoundException)
+    {
+        return &amp;quot;File not found&amp;quot;;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;کد فوق به استثناء برای تعیین وجود فایل متکی است. رویکرد مستقیم‌تر به شکل زیر است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public string ReadFileContents(string filePath)
+{
+    if (!File.Exists(filePath))
+    {
+        return &amp;quot;File not found&amp;quot;;
+    }
+    
+    return File.ReadAllText(filePath);
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;با این حال، شایان ذکر است که حتی این نسخه بهبود یافته نیز دارای یک وضعیت رقابتی (race condition) بین بررسی و عملیات خواندن است. یک راه‌حل واقعاً مقاوم، استثناء بالقوه‌ای را که ممکن است در صورت حذف فایل بین بررسی و خواندن رخ دهد، مدیریت می‌کند.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ضدالگو ۳: جستجو در دیکشنری (Dictionary Lookups)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;استفاده از استثناها برای جستجو در دیکشنری نیز یک الگوی رایج است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public string GetValue(Dictionary&amp;lt;string, string&amp;gt; dictionary, string key)
+{
+    try
+    {
+        return dictionary[key]; // Potential KeyNotFoundException
+    }
+    catch (KeyNotFoundException)
+    {
+        return &amp;quot;Key not found&amp;quot;;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;دیکشنری‌های C# یک متد خاص برای جلوگیری از این رویکرد مبتنی بر استثناء ارائه می‌دهند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public string GetValue(Dictionary&amp;lt;string, string&amp;gt; dictionary, string key)
+{
+    if (dictionary.TryGetValue(key, out string value))
+    {
+        return value;
+    }
+    return &amp;quot;Key not found&amp;quot;;
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ضدالگو ۴: تبدیل نوع (Type Conversions)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;تبدیل نوع مبتنی بر استثناء نیز رایج است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public int ConvertToInt(string input)
+{
+    try
+    {
+        return int.Parse(input); // Potential FormatException
+    }
+    catch (FormatException)
+    {
+        return 0; // Default value on failure
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یک رویکرد کارآمدتر از الگوی TryParse استفاده می‌کند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public int ConvertToInt(string input)
+{
+    if (int.TryParse(input, out int result))
+    {
+        return result;
+    }
+    return 0; // Default value on failure
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چه زمانی استفاده از استثناها مناسب است؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مهم است که بین EDD و استفاده صحیح از استثناها تمایز قائل شویم.  استثناها هنگامی که به درستی استفاده شوند، ابزاری ارزشمند باقی می‌مانند. آن‌ها برای شرایط واقعاً استثنایی که نباید در طول اجرای عادی برنامه رخ دهند، مناسب هستند، مانند: خرابی شبکه، مشکلات اتصال به پایگاه داده، مشکلات مجوز سیستم فایل، کمبود حافظه و خطاهای برنامه‌نویسی که نشان‌دهنده باگ هستند (مانند اندیس خارج از محدوده آرایه). &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یک تمایز کلیدی بین موارد استثنایی و خرابی‌های مورد انتظار وجود دارد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;خرابی مورد انتظار (Expected failure):&lt;/strong&gt; شرایطی که معمولاً در طول عملیات عادی رخ می‌دهد، مانند وارد کردن داده نامعتبر توسط کاربر یا عدم وجود یک فایل. &lt;/li&gt;&lt;li&gt;&lt;strong&gt;شرایط استثنایی (Exceptional condition):&lt;/strong&gt; یک وضعیت نادر یا غیرمنتظره که نشان می‌دهد مشکلی جدی رخ داده است. &lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;گاهی اوقات شما مجبور به کار با APIهایی هستید که به عنوان بخشی از عملیات عادی خود استثناء پرتاب می‌کنند.  در این موارد، گرفتن این استثناها مناسب است، اگرچه ممکن است بخواهید چنین APIهایی را در APIهای خود که از شیوه‌های بهتری پیروی می‌کنند، بپوشانید.  همچنین، هنگامی که کد مشتری (client code) قرارداد یک متد را نقض می‌کند (مانند ارسال &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;null&lt;/code&gt; زمانی که متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;null&lt;/code&gt; را نمی‌پذیرد)، پرتاب یک استثناء مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ArgumentNullException&lt;/code&gt; مناسب است. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;به عنوان مثال، در کد زیر، اعتبارسنجی اولیه انجام می‌شود و سپس عملیات نوشتن فایل در یک بلوک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;try-catch&lt;/code&gt; قرار می‌گیرد، زیرا این عملیات همچنان ممکن است به دلایل استثنایی (مانند پر بودن دیسک یا مشکلات مجوز) با شکست مواجه شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public void SaveDocument(Document document, string path)
+{
+    if (document == null)
+        throw new ArgumentNullException(nameof(document)); // Contract violation
+    if (string.IsNullOrEmpty(path))
+        throw new ArgumentException(&amp;quot;Path cannot be empty&amp;quot;, nameof(path)); // Contract violation
+
+    // Normal validation completed, now we can proceed
+    try
+    {
+        // This could still fail for exceptional reasons (disk full, permissions)
+        File.WriteAllText(path, document.Content);
+    }
+    catch (IOException ex)
+    {
+        // Handle truly exceptional condition
+        LogError($&amp;quot;Failed to save document: {ex.Message}&amp;quot;);
+        throw new DocumentSaveException(&amp;quot;Could not save the document&amp;quot;, ex);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;جایگزین‌های بهتر برای توسعه مبتنی بر استثناء&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;چندین الگوی طراحی و تکنیک برنامه‌نویسی، جایگزین‌های بهتری برای EDD ارائه می‌دهند. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الگوی TryPattern در C#&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;C# الگوی &amp;quot;Try&amp;quot; را رایج کرده است که روشی واضح و کارآمد برای مدیریت عملیاتی که ممکن است با شکست مواجه شوند، ارائه می‌دهد.  این الگو پتانسیل شکست را در امضای متد صریح می‌کند و از سربار عملکردی استثناها جلوگیری می‌کند. &lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// Example of a TryPattern method signature
+public bool TryGetUserDetails(string userId, out UserDetails details)
+{
+    // Implementation that returns true for success, false for failure
+    // and populates &amp;#39;details&amp;#39; when successful
+    details = null; // Placeholder for actual implementation
+    // ... logic to get user details ...
+    if (/* condition for success */ true) {
+        // details = ...;
+        return true;
+    }
+    return false;
+}
+
+// Usage:
+if (TryGetUserDetails(&amp;quot;user123&amp;quot;, out var userDetails))
+{
+    // Use userDetails
+}
+else
+{
+    // Handle failure case
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الگوی Result&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;الگوی Result (نتیجه) روشی ساختاریافته برای بازگرداندن یا یک مقدار موفقیت‌آمیز یا اطلاعات خطا ارائه می‌دهد. &lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class Result&amp;lt;T&amp;gt;
+{
+    public bool IsSuccess { get; }
+    public T Value { get; }
+    public string Error { get; }
+    
+    private Result(bool isSuccess, T value, string error)
+    {
+        IsSuccess = isSuccess; Value = value; Error = error;
+    }
+    
+    public static Result&amp;lt;T&amp;gt; Success(T value) =&amp;gt; new Result&amp;lt;T&amp;gt;(true, value, null);
+    public static Result&amp;lt;T&amp;gt; Failure(string error) =&amp;gt; new Result&amp;lt;T&amp;gt;(false, default, error);
+}
+
+// Usage example:
+public Result&amp;lt;User&amp;gt; GetUser(string id) // Assuming User class and _repository exist
+{
+    if (string.IsNullOrEmpty(id))
+    {
+        return Result&amp;lt;User&amp;gt;.Failure(&amp;quot;ID cannot be empty&amp;quot;);
+    }
+    // User user = _repository.FindById(id); // Placeholder
+    User user = null; // Placeholder for actual repository call
+    if (user == null)
+    {
+        return Result&amp;lt;User&amp;gt;.Failure(&amp;quot;User not found&amp;quot;);
+    }
+    return Result&amp;lt;User&amp;gt;.Success(user);
+}
+
+// Client code:
+// var result = GetUser(&amp;quot;123&amp;quot;);
+// if (result.IsSuccess)
+// {
+//     Console.WriteLine($&amp;quot;Found user: {result.Value.Name}&amp;quot;);
+// }
+// else
+// {
+//     Console.WriteLine($&amp;quot;Error: {result.Error}&amp;quot;);
+// }&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;انواع Option/Maybe&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;انواع Option یا Maybe به صراحت امکان عدم وجود یک مقدار را نشان می‌دهند.  (این انواع معمولاً از طریق کتابخانه‌های شخص ثالث یا پیاده‌سازی سفارشی در دسترس هستند.)&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;گارد کلازها (Guard Clauses)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;گارد کلازها بازگشت‌های زودهنگام برای شرایط نامعتبر ارائه می‌دهند، کد را خواناتر کرده و نیاز به شرطی‌های تودرتو را از بین می‌برند. &lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public void ProcessOrder(Order order) // Assuming Order class exists
+{
+    // Guard clauses
+    if (order == null)
+        throw new ArgumentNullException(nameof(order)); // Appropriate exception for contract violation
+    // if (order.Items.Count == 0) // Assuming Items property exists
+    //     return; 
+    // if (!order.IsValid) // Assuming IsValid property exists
+    //     return;
+    // Main processing logic follows
+    // ...
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;بازسازی (Refactoring) کد مبتنی بر استثناء&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بیایید بررسی کنیم که چگونه کد مبتنی بر استثناء را برای پیروی از شیوه‌های بهتر بازسازی کنیم. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مثال ۱: بازسازی منطق اعتبارسنجی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;قبل:&lt;/strong&gt; کد از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;decimal.Parse&lt;/code&gt; در یک بلوک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;try-catch&lt;/code&gt; برای تبدیل رشته به &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;decimal&lt;/code&gt; استفاده می‌کند و در صورت بروز &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;FormatException&lt;/code&gt; مقدار ۰ را بازمی‌گرداند. &lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public decimal CalculateTax(string incomeText)
+{
+    try
+    {
+        decimal income = decimal.Parse(incomeText);
+        return income * 0.2m;
+    }
+    catch (FormatException)
+    {
+        return 0;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بعد: کد از decimal.TryParse برای تبدیل امن استفاده می‌کند و در صورت موفقیت، محاسبه را انجام می‌دهد.&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public decimal CalculateTax(string incomeText)
+{
+    if (decimal.TryParse(incomeText, out decimal income))
+    {
+        return income * 0.2m;
+    }
+    return 0;
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مثال ۲: بازسازی دسترسی به منابع&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;قبل:&lt;/strong&gt; کد سعی می‌کند مشتری را از مخزن (repository) دریافت کند و در صورت بروز &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CustomerNotFoundException&lt;/code&gt;، یک مشتری پیش‌فرض با نام &amp;quot;Unknown&amp;quot; بازمی‌گرداند. &lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// Assuming _customerRepository and Customer class exist
+public Customer GetCustomer(int id)
+{
+    try
+    {
+        return _customerRepository.Get(id); // Potential CustomerNotFoundException
+    }
+    catch (CustomerNotFoundException)
+    {
+        return new Customer { Name = &amp;quot;Unknown&amp;quot; };
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بعد (با بررسی وجود): ابتدا بررسی می‌شود که آیا مشتری وجود دارد و سپس اقدام به دریافت آن می‌شود.&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// Assuming _customerRepository.Exists(id) and _customerRepository.Get(id) methods exist
+public Customer GetCustomer(int id)
+{
+    if (_customerRepository.Exists(id))
+    {
+        return _customerRepository.Get(id);
+    }
+    return new Customer { Name = &amp;quot;Unknown&amp;quot; };
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بعد (با استفاده از الگوی Result): این رویکرد اطلاعات دقیق‌تری در مورد موفقیت یا شکست عملیات ارائه می‌دهد و همچنین می‌تواند خطاهای غیرمنتظره دیگر را نیز مدیریت کند.&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// Assuming Result&amp;lt;T&amp;gt;, Customer class, and _customerRepository exist
+public Result&amp;lt;Customer&amp;gt; GetCustomer(int id)
+{
+    if (!_customerRepository.Exists(id)) // Assumes Exists method
+    {
+        return Result&amp;lt;Customer&amp;gt;.Failure($&amp;quot;Customer with id {id} not found&amp;quot;);
+    }
+    
+    try
+    {
+        var customer = _customerRepository.Get(id); // Assumes Get method
+        return Result&amp;lt;Customer&amp;gt;.Success(customer);
+    }
+    catch (Exception ex) // Catching broader exceptions for unexpected issues during retrieval
+    {
+        // Log the exception (e.g., LogError(ex.Message);)
+        return Result&amp;lt;Customer&amp;gt;.Failure($&amp;quot;Error retrieving customer: {ex.Message}&amp;quot;);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;تأثیر توسعه مبتنی بر استثناء بر کیفیت نرم‌افزار&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;استفاده از EDD چندین تأثیر منفی بر کیفیت کلی نرم‌افزار دارد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;کاهش قابلیت نگهداری (Maintainability):&lt;/strong&gt; درک و نگهداری کدی که از استثناها برای جریان کنترل استفاده می‌کند، دشوارتر است.  توسعه‌دهندگان جدید ممکن است در دنبال کردن مسیر اجرا دچار مشکل شوند. &lt;/li&gt;&lt;li&gt;&lt;strong&gt;کاهش عملکرد (Performance):&lt;/strong&gt; همانطور که قبلاً ذکر شد، استثناها به طور قابل توجهی گران‌تر از جریان کنترل عادی هستند و می‌توانند منجر به کندی محسوس در برنامه‌های حساس به عملکرد شوند. &lt;/li&gt;&lt;li&gt;&lt;strong&gt;ابهام در قصد (Obscured Intent):&lt;/strong&gt; کد مبتنی بر استثناء اغلب قصد اصلی توسعه‌دهنده را پنهان می‌کند. &lt;/li&gt;&lt;li&gt;&lt;strong&gt;کد شکننده (Brittle Code):&lt;/strong&gt; EDD اغلب منجر به کدی شکننده می‌شود که با تغییر پیاده‌سازی‌های زیربنایی به روش‌های غیرمنتظره‌ای می‌شکند.  برای مثال، اگر یک API دیگر یک استثناء خاص را پرتاب نکند، کدی که به گرفتن آن استثناء متکی است، نادرست رفتار خواهد کرد. &lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;توسعه مبتنی بر استثناء نشان‌دهنده استفاده نادرست از مکانیسم‌های مدیریت استثناء است که منجر به کدی می‌شود که خواندن، نگهداری و اشکال‌زدایی آن دشوارتر است.  در حالی که استثناها یک ویژگی قدرتمند زبان‌های برنامه‌نویسی مدرن هستند، باید برای شرایط واقعاً استثنایی رزرو شوند نه اینکه به عنوان یک مکانیسم جریان کنترل روتین مورد استفاده قرار گیرند.  با درک مشکلات EDD و اتخاذ الگوهای جایگزین مانند گارد کلازها، الگوی TryPattern یا انواع Result، توسعه‌دهندگان می‌توانند کدی مقاوم‌تر، قابل نگهداری‌تر و کارآمدتر ایجاد کنند.  بازسازی کد مبتنی بر استثناء موجود ممکن است نیازمند تلاش باشد، اما مزایای آن از نظر کیفیت کد، عملکرد و قابلیت نگهداری ارزش این تلاش را دارد.  به یاد داشته باشید که استثناها ابزارهایی هستند که برای شرایط استثنایی طراحی شده‌اند.  هنگامی که به طور مناسب استفاده شوند، به جداسازی منطق مدیریت خطا از جریان اصلی برنامه کمک می‌کنند.  با این حال، هنگامی که بیش از حد یا به اشتباه استفاده شوند، می‌توانند به ضدالگوی توسعه مبتنی بر استثناء با تمام مشکلات مرتبط با آن منجر شوند. &lt;/div&gt;">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="درک توسعه مبتنی بر استثناء (Exception-Driven Development): یک ضدالگو در برنامه‌نویسی">
+    <meta property="og:description" content="&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;تلاش برای نوشتن کدی تمیز، قابل نگهداری و با کارایی بالا همواره از اهداف اصلی برنامه‌نویسان بوده است. با این حال، گاهی استفاده نادرست از برخی سازوکارهای زبان برنامه‌نویسی می‌تواند منجر به بروز ضدالگوهایی (Anti-Patterns) شود که کیفیت کد را به شدت تحت تأثیر قرار می‌دهند. یکی از این ضدالگوهای رایج، «توسعه مبتنی بر استثناء» (Exception-Driven Development یا EDD) است. این رویکرد، استثناها (Exceptions) را از حالت هشدارهای نادر به چراغ‌های راهنمایی روزمره تبدیل می‌کند که منجر به کندی کد، پیچیدگی منطق و دور شدن از نرم‌افزاری پاک و قابل نگهداری می‌شود.  در این مقاله، به بررسی عمیق این ضدالگو، دلایل مضر بودن آن و ارائه راهکارهای بهتر با تمرکز بر توسعه‌دهندگان .NET خواهیم پرداخت.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;توسعه مبتنی بر استثناء (Exception-Driven Development) چیست؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;توسعه مبتنی بر استثناء (EDD) یک رویکرد برنامه‌نویسی است که در آن از استثناها برای کنترل جریان عادی برنامه استفاده می‌شود، به جای آنکه برای شرایط واقعاً استثنایی و غیرمنتظره رزرو شوند.  در این پارادایم، استثناها به یک ساختار کنترلی شبیه به دستورات &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;if&lt;/code&gt; یا حلقه‌ها تبدیل می‌شوند، نه اینکه به عنوان شبکه‌های ایمنی برای شرایط واقعاً استثنایی عمل کنند که به ندرت باید رخ دهند.  ویژگی اصلی EDD، طراحی عامدانه کدی است که انتظار دارد استثناها در طول عملیات عادی پرتاب شوند.  به جای بررسی پیش‌شرط‌ها یا استفاده از متدهای تخصصی برای تعیین موفقیت یک عملیات، توسعه‌دهندگان با این رویکرد به سادگی عملیات را انجام داده و هرگونه استثناء ناشی از آن را دریافت (catch) می‌کنند. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پیشینه تاریخی استثناها&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مکانیسم‌های استثناء در زبان‌های برنامه‌نویسی برای مدیریت شرایط غیرمنتظره و استثنایی معرفی شدند که به ندرت در طول اجرای عادی برنامه رخ می‌دهند. زبان‌هایی مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;C++&lt;/code&gt; و بعدها #Java، C و سایرین، مدیریت استثناء را برای جداسازی کد مدیریت خطا از منطق اصلی برنامه پیاده‌سازی کردند تا کد واضح‌تر و قابل نگهداری‌تر شود.  با این حال، همانند بسیاری از ویژگی‌های برنامه‌نویسی، استثناها به روش‌هایی مورد استفاده قرار گرفتند که طراحان آن‌ها در نظر نداشتند.  برخی توسعه‌دهندگان شروع به استفاده از استثناها برای جریان کنترل عادی کردند که منجر به چیزی شد که اکنون به عنوان توسعه مبتنی بر استثناء می‌شناسیم. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چرا توسعه مبتنی بر استثناء مضر تلقی می‌شود؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;EDD به دلایل قانع‌کننده‌ای که بر کیفیت کد، عملکرد و قابلیت نگهداری تأثیر می‌گذارند، به طور گسترده یک عمل نامناسب در نظر گرفته می‌شود. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پیامدهای عملکردی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;استثناها برای شرایط استثنایی طراحی شده‌اند و بنابراین پیاده‌سازی آن‌ها اطلاعات تشخیصی را بر عملکرد اولویت می‌دهد.  هنگامی که یک استثناء پرتاب می‌شود، سیستم زمان اجرا (runtime system) باید چندین عملیات پرهزینه انجام دهد: گرفتن پشته فراخوانی فعلی (call stack)، جستجو برای یک کنترل‌کننده استثناء (exception handler) مناسب، باز کردن پشته فراخوانی (unwind the call stack) و انتقال کنترل به کنترل‌کننده.  این فرآیند به طور قابل توجهی گران‌تر از مکانیسم‌های جریان کنترل عادی است. در C#، پرتاب یک استثناء می‌تواند صدها یا حتی هزاران بار کندتر از استفاده از منطق شرطی باشد. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;کاهش خوانایی کد&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;کدی که برای جریان کنترل به استثناها متکی است، معمولاً خواندن و درک آن دشوارتر است.  جریان واقعی اجرا مبهم می‌شود و توسعه‌دهندگان را ملزم می‌کند تا به جای دنبال کردن یک روایت خطی و واضح، مسیرهای بالقوه استثناء را به صورت ذهنی ردیابی کنند. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پیچیدگی اشکال‌زدایی (Debugging)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;هنگامی که استثناها به طور مکرر به عنوان بخشی از عملیات عادی پرتاب می‌شوند، تشخیص بین استثناهای مورد انتظار و آنهایی که واقعاً مشکل‌ساز هستند، دشوار می‌شود.  این امر می‌تواند تلاش‌های اشکال‌زدایی را به طور قابل توجهی پیچیده کند، زیرا ابزارها و لاگ‌ها با &amp;quot;نویز&amp;quot; ناشی از استثناهای مورد انتظار پر می‌شوند. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پنهان کردن خطاهای منطقی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;توسعه مبتنی بر استثناء می‌تواند با تلقی خطاهای منطقی به عنوان جریان عادی برنامه، آن‌ها را پنهان کند.  این کار مرز بین شرایط مورد انتظار و باگ‌های واقعی را محو می‌کند و شناسایی و رفع مشکلات واقعی در کد را دشوارتر می‌سازد. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چالش‌های تست‌نویسی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;کدی که برای جریان کنترل به استثناها متکی است، معمولاً تست‌نویسی آن دشوارتر است.  تست‌های واحد (Unit tests) باید استثناهای مورد انتظار را در نظر بگیرند که طراحی تست را پیچیده کرده و می‌تواند معیارهای پوشش کد (code coverage) را کم‌معناتر کند. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;شناسایی توسعه مبتنی بر استثناء&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;توسعه مبتنی بر استثناء را می‌توان با چندین نشانه در کد شناسایی کرد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;استفاده مکرر از بلوک‌های &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;try-catch&lt;/code&gt; برای عملیات روتین.&lt;/li&gt;&lt;li&gt;بلوک‌های &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;catch&lt;/code&gt; خالی یا بلوک‌هایی که استثناها را بدون مدیریت معنادار می‌بلعند (swallow exceptions).&lt;/li&gt;&lt;li&gt;استفاده از استثناها برای اعتبارسنجی یا شرایط خطای مورد انتظار.&lt;/li&gt;&lt;li&gt;جریان کنترلی که به پرتاب شدن استثناهای خاص بستگی دارد.&lt;/li&gt;&lt;li&gt;متدها یا APIهایی که برای پرتاب استثناها به عنوان بخشی از عملیات عادی خود طراحی شده‌اند.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ابزارهایی مانند تحلیل‌گرهای کد ایستا (Static code analyzers) مانند SonarQube و ReSharper می‌توانند برخی از الگوهای استفاده نادرست از استثناء را شناسایی کنند.  همچنین، پروفایلرهای عملکرد (Performance profilers) مانند dotTrace یا Visual Studio Profiler می‌توانند مشخص کنند که استثناها در کجا به طور مکرر در طول عملیات عادی پرتاب می‌شوند.  بازبینی کد (Code reviews) منظم توسط همکاران با تأکید بر مدیریت استثناء نیز می‌تواند به شناسایی EDD کمک کند. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ضدالگوهای رایج EDD در C#&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بیایید برخی از الگوهای رایج که در آن‌ها توسعه‌دهندگان به طور سهوی یا عمدی از EDD در کد C# استفاده می‌کنند را بررسی کنیم.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ضدالگو ۱: استفاده از استثناها برای اعتبارسنجی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یکی از رایج‌ترین نمونه‌های EDD استفاده از استثناها برای اعتبارسنجی ورودی است.  به عنوان مثال، در کد زیر، به جای بررسی صریح اینکه آیا &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;username&lt;/code&gt; تهی (null) است، کد به پرتاب شدن &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;NullReferenceException&lt;/code&gt; هنگام دسترسی به خاصیت &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Length&lt;/code&gt; متکی است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public void ProcessUser(string username)
+{
+    try
+    {
+        // Directly try to process without validation
+        if (username.Length &amp;lt; 3) // Potential NullReferenceException if username is null
+        {
+            Console.WriteLine(&amp;quot;Username too short&amp;quot;);
+        }
+        // Further processing...
+    }
+    catch (NullReferenceException)
+    {
+        Console.WriteLine(&amp;quot;Username cannot be null&amp;quot;);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رویکرد درک کد را دشوارتر و ناکارآمدتر می‌کند. یک رویکرد بهتر، بررسی صریح پیش‌شرط‌ها است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public void ProcessUser(string username)
+{
+    if (username == null)
+    {
+        Console.WriteLine(&amp;quot;Username cannot be null&amp;quot;);
+        return;
+    }
+    
+    if (username.Length &amp;lt; 3)
+    {
+        Console.WriteLine(&amp;quot;Username too short&amp;quot;);
+    }
+    // Further processing...
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ضدالگو ۲: عملیات فایل بدون بررسی‌های اولیه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;سناریوی رایج دیگر، انجام عملیات فایل بدون بررسی اولیه وجود فایل است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public string ReadFileContents(string filePath)
+{
+    try
+    {
+        return File.ReadAllText(filePath); // Potential FileNotFoundException
+    }
+    catch (FileNotFoundException)
+    {
+        return &amp;quot;File not found&amp;quot;;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;کد فوق به استثناء برای تعیین وجود فایل متکی است. رویکرد مستقیم‌تر به شکل زیر است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public string ReadFileContents(string filePath)
+{
+    if (!File.Exists(filePath))
+    {
+        return &amp;quot;File not found&amp;quot;;
+    }
+    
+    return File.ReadAllText(filePath);
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;با این حال، شایان ذکر است که حتی این نسخه بهبود یافته نیز دارای یک وضعیت رقابتی (race condition) بین بررسی و عملیات خواندن است. یک راه‌حل واقعاً مقاوم، استثناء بالقوه‌ای را که ممکن است در صورت حذف فایل بین بررسی و خواندن رخ دهد، مدیریت می‌کند.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ضدالگو ۳: جستجو در دیکشنری (Dictionary Lookups)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;استفاده از استثناها برای جستجو در دیکشنری نیز یک الگوی رایج است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public string GetValue(Dictionary&amp;lt;string, string&amp;gt; dictionary, string key)
+{
+    try
+    {
+        return dictionary[key]; // Potential KeyNotFoundException
+    }
+    catch (KeyNotFoundException)
+    {
+        return &amp;quot;Key not found&amp;quot;;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;دیکشنری‌های C# یک متد خاص برای جلوگیری از این رویکرد مبتنی بر استثناء ارائه می‌دهند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public string GetValue(Dictionary&amp;lt;string, string&amp;gt; dictionary, string key)
+{
+    if (dictionary.TryGetValue(key, out string value))
+    {
+        return value;
+    }
+    return &amp;quot;Key not found&amp;quot;;
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ضدالگو ۴: تبدیل نوع (Type Conversions)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;تبدیل نوع مبتنی بر استثناء نیز رایج است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public int ConvertToInt(string input)
+{
+    try
+    {
+        return int.Parse(input); // Potential FormatException
+    }
+    catch (FormatException)
+    {
+        return 0; // Default value on failure
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یک رویکرد کارآمدتر از الگوی TryParse استفاده می‌کند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public int ConvertToInt(string input)
+{
+    if (int.TryParse(input, out int result))
+    {
+        return result;
+    }
+    return 0; // Default value on failure
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چه زمانی استفاده از استثناها مناسب است؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مهم است که بین EDD و استفاده صحیح از استثناها تمایز قائل شویم.  استثناها هنگامی که به درستی استفاده شوند، ابزاری ارزشمند باقی می‌مانند. آن‌ها برای شرایط واقعاً استثنایی که نباید در طول اجرای عادی برنامه رخ دهند، مناسب هستند، مانند: خرابی شبکه، مشکلات اتصال به پایگاه داده، مشکلات مجوز سیستم فایل، کمبود حافظه و خطاهای برنامه‌نویسی که نشان‌دهنده باگ هستند (مانند اندیس خارج از محدوده آرایه). &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یک تمایز کلیدی بین موارد استثنایی و خرابی‌های مورد انتظار وجود دارد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;خرابی مورد انتظار (Expected failure):&lt;/strong&gt; شرایطی که معمولاً در طول عملیات عادی رخ می‌دهد، مانند وارد کردن داده نامعتبر توسط کاربر یا عدم وجود یک فایل. &lt;/li&gt;&lt;li&gt;&lt;strong&gt;شرایط استثنایی (Exceptional condition):&lt;/strong&gt; یک وضعیت نادر یا غیرمنتظره که نشان می‌دهد مشکلی جدی رخ داده است. &lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;گاهی اوقات شما مجبور به کار با APIهایی هستید که به عنوان بخشی از عملیات عادی خود استثناء پرتاب می‌کنند.  در این موارد، گرفتن این استثناها مناسب است، اگرچه ممکن است بخواهید چنین APIهایی را در APIهای خود که از شیوه‌های بهتری پیروی می‌کنند، بپوشانید.  همچنین، هنگامی که کد مشتری (client code) قرارداد یک متد را نقض می‌کند (مانند ارسال &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;null&lt;/code&gt; زمانی که متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;null&lt;/code&gt; را نمی‌پذیرد)، پرتاب یک استثناء مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ArgumentNullException&lt;/code&gt; مناسب است. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;به عنوان مثال، در کد زیر، اعتبارسنجی اولیه انجام می‌شود و سپس عملیات نوشتن فایل در یک بلوک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;try-catch&lt;/code&gt; قرار می‌گیرد، زیرا این عملیات همچنان ممکن است به دلایل استثنایی (مانند پر بودن دیسک یا مشکلات مجوز) با شکست مواجه شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public void SaveDocument(Document document, string path)
+{
+    if (document == null)
+        throw new ArgumentNullException(nameof(document)); // Contract violation
+    if (string.IsNullOrEmpty(path))
+        throw new ArgumentException(&amp;quot;Path cannot be empty&amp;quot;, nameof(path)); // Contract violation
+
+    // Normal validation completed, now we can proceed
+    try
+    {
+        // This could still fail for exceptional reasons (disk full, permissions)
+        File.WriteAllText(path, document.Content);
+    }
+    catch (IOException ex)
+    {
+        // Handle truly exceptional condition
+        LogError($&amp;quot;Failed to save document: {ex.Message}&amp;quot;);
+        throw new DocumentSaveException(&amp;quot;Could not save the document&amp;quot;, ex);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;جایگزین‌های بهتر برای توسعه مبتنی بر استثناء&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;چندین الگوی طراحی و تکنیک برنامه‌نویسی، جایگزین‌های بهتری برای EDD ارائه می‌دهند. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الگوی TryPattern در C#&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;C# الگوی &amp;quot;Try&amp;quot; را رایج کرده است که روشی واضح و کارآمد برای مدیریت عملیاتی که ممکن است با شکست مواجه شوند، ارائه می‌دهد.  این الگو پتانسیل شکست را در امضای متد صریح می‌کند و از سربار عملکردی استثناها جلوگیری می‌کند. &lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// Example of a TryPattern method signature
+public bool TryGetUserDetails(string userId, out UserDetails details)
+{
+    // Implementation that returns true for success, false for failure
+    // and populates &amp;#39;details&amp;#39; when successful
+    details = null; // Placeholder for actual implementation
+    // ... logic to get user details ...
+    if (/* condition for success */ true) {
+        // details = ...;
+        return true;
+    }
+    return false;
+}
+
+// Usage:
+if (TryGetUserDetails(&amp;quot;user123&amp;quot;, out var userDetails))
+{
+    // Use userDetails
+}
+else
+{
+    // Handle failure case
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الگوی Result&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;الگوی Result (نتیجه) روشی ساختاریافته برای بازگرداندن یا یک مقدار موفقیت‌آمیز یا اطلاعات خطا ارائه می‌دهد. &lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class Result&amp;lt;T&amp;gt;
+{
+    public bool IsSuccess { get; }
+    public T Value { get; }
+    public string Error { get; }
+    
+    private Result(bool isSuccess, T value, string error)
+    {
+        IsSuccess = isSuccess; Value = value; Error = error;
+    }
+    
+    public static Result&amp;lt;T&amp;gt; Success(T value) =&amp;gt; new Result&amp;lt;T&amp;gt;(true, value, null);
+    public static Result&amp;lt;T&amp;gt; Failure(string error) =&amp;gt; new Result&amp;lt;T&amp;gt;(false, default, error);
+}
+
+// Usage example:
+public Result&amp;lt;User&amp;gt; GetUser(string id) // Assuming User class and _repository exist
+{
+    if (string.IsNullOrEmpty(id))
+    {
+        return Result&amp;lt;User&amp;gt;.Failure(&amp;quot;ID cannot be empty&amp;quot;);
+    }
+    // User user = _repository.FindById(id); // Placeholder
+    User user = null; // Placeholder for actual repository call
+    if (user == null)
+    {
+        return Result&amp;lt;User&amp;gt;.Failure(&amp;quot;User not found&amp;quot;);
+    }
+    return Result&amp;lt;User&amp;gt;.Success(user);
+}
+
+// Client code:
+// var result = GetUser(&amp;quot;123&amp;quot;);
+// if (result.IsSuccess)
+// {
+//     Console.WriteLine($&amp;quot;Found user: {result.Value.Name}&amp;quot;);
+// }
+// else
+// {
+//     Console.WriteLine($&amp;quot;Error: {result.Error}&amp;quot;);
+// }&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;انواع Option/Maybe&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;انواع Option یا Maybe به صراحت امکان عدم وجود یک مقدار را نشان می‌دهند.  (این انواع معمولاً از طریق کتابخانه‌های شخص ثالث یا پیاده‌سازی سفارشی در دسترس هستند.)&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;گارد کلازها (Guard Clauses)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;گارد کلازها بازگشت‌های زودهنگام برای شرایط نامعتبر ارائه می‌دهند، کد را خواناتر کرده و نیاز به شرطی‌های تودرتو را از بین می‌برند. &lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public void ProcessOrder(Order order) // Assuming Order class exists
+{
+    // Guard clauses
+    if (order == null)
+        throw new ArgumentNullException(nameof(order)); // Appropriate exception for contract violation
+    // if (order.Items.Count == 0) // Assuming Items property exists
+    //     return; 
+    // if (!order.IsValid) // Assuming IsValid property exists
+    //     return;
+    // Main processing logic follows
+    // ...
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;بازسازی (Refactoring) کد مبتنی بر استثناء&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بیایید بررسی کنیم که چگونه کد مبتنی بر استثناء را برای پیروی از شیوه‌های بهتر بازسازی کنیم. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مثال ۱: بازسازی منطق اعتبارسنجی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;قبل:&lt;/strong&gt; کد از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;decimal.Parse&lt;/code&gt; در یک بلوک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;try-catch&lt;/code&gt; برای تبدیل رشته به &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;decimal&lt;/code&gt; استفاده می‌کند و در صورت بروز &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;FormatException&lt;/code&gt; مقدار ۰ را بازمی‌گرداند. &lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public decimal CalculateTax(string incomeText)
+{
+    try
+    {
+        decimal income = decimal.Parse(incomeText);
+        return income * 0.2m;
+    }
+    catch (FormatException)
+    {
+        return 0;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بعد: کد از decimal.TryParse برای تبدیل امن استفاده می‌کند و در صورت موفقیت، محاسبه را انجام می‌دهد.&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public decimal CalculateTax(string incomeText)
+{
+    if (decimal.TryParse(incomeText, out decimal income))
+    {
+        return income * 0.2m;
+    }
+    return 0;
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مثال ۲: بازسازی دسترسی به منابع&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;قبل:&lt;/strong&gt; کد سعی می‌کند مشتری را از مخزن (repository) دریافت کند و در صورت بروز &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CustomerNotFoundException&lt;/code&gt;، یک مشتری پیش‌فرض با نام &amp;quot;Unknown&amp;quot; بازمی‌گرداند. &lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// Assuming _customerRepository and Customer class exist
+public Customer GetCustomer(int id)
+{
+    try
+    {
+        return _customerRepository.Get(id); // Potential CustomerNotFoundException
+    }
+    catch (CustomerNotFoundException)
+    {
+        return new Customer { Name = &amp;quot;Unknown&amp;quot; };
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بعد (با بررسی وجود): ابتدا بررسی می‌شود که آیا مشتری وجود دارد و سپس اقدام به دریافت آن می‌شود.&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// Assuming _customerRepository.Exists(id) and _customerRepository.Get(id) methods exist
+public Customer GetCustomer(int id)
+{
+    if (_customerRepository.Exists(id))
+    {
+        return _customerRepository.Get(id);
+    }
+    return new Customer { Name = &amp;quot;Unknown&amp;quot; };
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بعد (با استفاده از الگوی Result): این رویکرد اطلاعات دقیق‌تری در مورد موفقیت یا شکست عملیات ارائه می‌دهد و همچنین می‌تواند خطاهای غیرمنتظره دیگر را نیز مدیریت کند.&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// Assuming Result&amp;lt;T&amp;gt;, Customer class, and _customerRepository exist
+public Result&amp;lt;Customer&amp;gt; GetCustomer(int id)
+{
+    if (!_customerRepository.Exists(id)) // Assumes Exists method
+    {
+        return Result&amp;lt;Customer&amp;gt;.Failure($&amp;quot;Customer with id {id} not found&amp;quot;);
+    }
+    
+    try
+    {
+        var customer = _customerRepository.Get(id); // Assumes Get method
+        return Result&amp;lt;Customer&amp;gt;.Success(customer);
+    }
+    catch (Exception ex) // Catching broader exceptions for unexpected issues during retrieval
+    {
+        // Log the exception (e.g., LogError(ex.Message);)
+        return Result&amp;lt;Customer&amp;gt;.Failure($&amp;quot;Error retrieving customer: {ex.Message}&amp;quot;);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;تأثیر توسعه مبتنی بر استثناء بر کیفیت نرم‌افزار&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;استفاده از EDD چندین تأثیر منفی بر کیفیت کلی نرم‌افزار دارد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;کاهش قابلیت نگهداری (Maintainability):&lt;/strong&gt; درک و نگهداری کدی که از استثناها برای جریان کنترل استفاده می‌کند، دشوارتر است.  توسعه‌دهندگان جدید ممکن است در دنبال کردن مسیر اجرا دچار مشکل شوند. &lt;/li&gt;&lt;li&gt;&lt;strong&gt;کاهش عملکرد (Performance):&lt;/strong&gt; همانطور که قبلاً ذکر شد، استثناها به طور قابل توجهی گران‌تر از جریان کنترل عادی هستند و می‌توانند منجر به کندی محسوس در برنامه‌های حساس به عملکرد شوند. &lt;/li&gt;&lt;li&gt;&lt;strong&gt;ابهام در قصد (Obscured Intent):&lt;/strong&gt; کد مبتنی بر استثناء اغلب قصد اصلی توسعه‌دهنده را پنهان می‌کند. &lt;/li&gt;&lt;li&gt;&lt;strong&gt;کد شکننده (Brittle Code):&lt;/strong&gt; EDD اغلب منجر به کدی شکننده می‌شود که با تغییر پیاده‌سازی‌های زیربنایی به روش‌های غیرمنتظره‌ای می‌شکند.  برای مثال، اگر یک API دیگر یک استثناء خاص را پرتاب نکند، کدی که به گرفتن آن استثناء متکی است، نادرست رفتار خواهد کرد. &lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;توسعه مبتنی بر استثناء نشان‌دهنده استفاده نادرست از مکانیسم‌های مدیریت استثناء است که منجر به کدی می‌شود که خواندن، نگهداری و اشکال‌زدایی آن دشوارتر است.  در حالی که استثناها یک ویژگی قدرتمند زبان‌های برنامه‌نویسی مدرن هستند، باید برای شرایط واقعاً استثنایی رزرو شوند نه اینکه به عنوان یک مکانیسم جریان کنترل روتین مورد استفاده قرار گیرند.  با درک مشکلات EDD و اتخاذ الگوهای جایگزین مانند گارد کلازها، الگوی TryPattern یا انواع Result، توسعه‌دهندگان می‌توانند کدی مقاوم‌تر، قابل نگهداری‌تر و کارآمدتر ایجاد کنند.  بازسازی کد مبتنی بر استثناء موجود ممکن است نیازمند تلاش باشد، اما مزایای آن از نظر کیفیت کد، عملکرد و قابلیت نگهداری ارزش این تلاش را دارد.  به یاد داشته باشید که استثناها ابزارهایی هستند که برای شرایط استثنایی طراحی شده‌اند.  هنگامی که به طور مناسب استفاده شوند، به جداسازی منطق مدیریت خطا از جریان اصلی برنامه کمک می‌کنند.  با این حال، هنگامی که بیش از حد یا به اشتباه استفاده شوند، می‌توانند به ضدالگوی توسعه مبتنی بر استثناء با تمام مشکلات مرتبط با آن منجر شوند. &lt;/div&gt;">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="درک توسعه مبتنی بر استثناء (Exception-Driven Development): یک ضدالگو در برنامه‌نویسی">
+    <meta name="twitter:description" content="&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;تلاش برای نوشتن کدی تمیز، قابل نگهداری و با کارایی بالا همواره از اهداف اصلی برنامه‌نویسان بوده است. با این حال، گاهی استفاده نادرست از برخی سازوکارهای زبان برنامه‌نویسی می‌تواند منجر به بروز ضدالگوهایی (Anti-Patterns) شود که کیفیت کد را به شدت تحت تأثیر قرار می‌دهند. یکی از این ضدالگوهای رایج، «توسعه مبتنی بر استثناء» (Exception-Driven Development یا EDD) است. این رویکرد، استثناها (Exceptions) را از حالت هشدارهای نادر به چراغ‌های راهنمایی روزمره تبدیل می‌کند که منجر به کندی کد، پیچیدگی منطق و دور شدن از نرم‌افزاری پاک و قابل نگهداری می‌شود.  در این مقاله، به بررسی عمیق این ضدالگو، دلایل مضر بودن آن و ارائه راهکارهای بهتر با تمرکز بر توسعه‌دهندگان .NET خواهیم پرداخت.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;توسعه مبتنی بر استثناء (Exception-Driven Development) چیست؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;توسعه مبتنی بر استثناء (EDD) یک رویکرد برنامه‌نویسی است که در آن از استثناها برای کنترل جریان عادی برنامه استفاده می‌شود، به جای آنکه برای شرایط واقعاً استثنایی و غیرمنتظره رزرو شوند.  در این پارادایم، استثناها به یک ساختار کنترلی شبیه به دستورات &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;if&lt;/code&gt; یا حلقه‌ها تبدیل می‌شوند، نه اینکه به عنوان شبکه‌های ایمنی برای شرایط واقعاً استثنایی عمل کنند که به ندرت باید رخ دهند.  ویژگی اصلی EDD، طراحی عامدانه کدی است که انتظار دارد استثناها در طول عملیات عادی پرتاب شوند.  به جای بررسی پیش‌شرط‌ها یا استفاده از متدهای تخصصی برای تعیین موفقیت یک عملیات، توسعه‌دهندگان با این رویکرد به سادگی عملیات را انجام داده و هرگونه استثناء ناشی از آن را دریافت (catch) می‌کنند. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پیشینه تاریخی استثناها&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مکانیسم‌های استثناء در زبان‌های برنامه‌نویسی برای مدیریت شرایط غیرمنتظره و استثنایی معرفی شدند که به ندرت در طول اجرای عادی برنامه رخ می‌دهند. زبان‌هایی مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;C++&lt;/code&gt; و بعدها #Java، C و سایرین، مدیریت استثناء را برای جداسازی کد مدیریت خطا از منطق اصلی برنامه پیاده‌سازی کردند تا کد واضح‌تر و قابل نگهداری‌تر شود.  با این حال، همانند بسیاری از ویژگی‌های برنامه‌نویسی، استثناها به روش‌هایی مورد استفاده قرار گرفتند که طراحان آن‌ها در نظر نداشتند.  برخی توسعه‌دهندگان شروع به استفاده از استثناها برای جریان کنترل عادی کردند که منجر به چیزی شد که اکنون به عنوان توسعه مبتنی بر استثناء می‌شناسیم. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چرا توسعه مبتنی بر استثناء مضر تلقی می‌شود؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;EDD به دلایل قانع‌کننده‌ای که بر کیفیت کد، عملکرد و قابلیت نگهداری تأثیر می‌گذارند، به طور گسترده یک عمل نامناسب در نظر گرفته می‌شود. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پیامدهای عملکردی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;استثناها برای شرایط استثنایی طراحی شده‌اند و بنابراین پیاده‌سازی آن‌ها اطلاعات تشخیصی را بر عملکرد اولویت می‌دهد.  هنگامی که یک استثناء پرتاب می‌شود، سیستم زمان اجرا (runtime system) باید چندین عملیات پرهزینه انجام دهد: گرفتن پشته فراخوانی فعلی (call stack)، جستجو برای یک کنترل‌کننده استثناء (exception handler) مناسب، باز کردن پشته فراخوانی (unwind the call stack) و انتقال کنترل به کنترل‌کننده.  این فرآیند به طور قابل توجهی گران‌تر از مکانیسم‌های جریان کنترل عادی است. در C#، پرتاب یک استثناء می‌تواند صدها یا حتی هزاران بار کندتر از استفاده از منطق شرطی باشد. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;کاهش خوانایی کد&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;کدی که برای جریان کنترل به استثناها متکی است، معمولاً خواندن و درک آن دشوارتر است.  جریان واقعی اجرا مبهم می‌شود و توسعه‌دهندگان را ملزم می‌کند تا به جای دنبال کردن یک روایت خطی و واضح، مسیرهای بالقوه استثناء را به صورت ذهنی ردیابی کنند. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پیچیدگی اشکال‌زدایی (Debugging)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;هنگامی که استثناها به طور مکرر به عنوان بخشی از عملیات عادی پرتاب می‌شوند، تشخیص بین استثناهای مورد انتظار و آنهایی که واقعاً مشکل‌ساز هستند، دشوار می‌شود.  این امر می‌تواند تلاش‌های اشکال‌زدایی را به طور قابل توجهی پیچیده کند، زیرا ابزارها و لاگ‌ها با &amp;quot;نویز&amp;quot; ناشی از استثناهای مورد انتظار پر می‌شوند. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پنهان کردن خطاهای منطقی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;توسعه مبتنی بر استثناء می‌تواند با تلقی خطاهای منطقی به عنوان جریان عادی برنامه، آن‌ها را پنهان کند.  این کار مرز بین شرایط مورد انتظار و باگ‌های واقعی را محو می‌کند و شناسایی و رفع مشکلات واقعی در کد را دشوارتر می‌سازد. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چالش‌های تست‌نویسی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;کدی که برای جریان کنترل به استثناها متکی است، معمولاً تست‌نویسی آن دشوارتر است.  تست‌های واحد (Unit tests) باید استثناهای مورد انتظار را در نظر بگیرند که طراحی تست را پیچیده کرده و می‌تواند معیارهای پوشش کد (code coverage) را کم‌معناتر کند. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;شناسایی توسعه مبتنی بر استثناء&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;توسعه مبتنی بر استثناء را می‌توان با چندین نشانه در کد شناسایی کرد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;استفاده مکرر از بلوک‌های &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;try-catch&lt;/code&gt; برای عملیات روتین.&lt;/li&gt;&lt;li&gt;بلوک‌های &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;catch&lt;/code&gt; خالی یا بلوک‌هایی که استثناها را بدون مدیریت معنادار می‌بلعند (swallow exceptions).&lt;/li&gt;&lt;li&gt;استفاده از استثناها برای اعتبارسنجی یا شرایط خطای مورد انتظار.&lt;/li&gt;&lt;li&gt;جریان کنترلی که به پرتاب شدن استثناهای خاص بستگی دارد.&lt;/li&gt;&lt;li&gt;متدها یا APIهایی که برای پرتاب استثناها به عنوان بخشی از عملیات عادی خود طراحی شده‌اند.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ابزارهایی مانند تحلیل‌گرهای کد ایستا (Static code analyzers) مانند SonarQube و ReSharper می‌توانند برخی از الگوهای استفاده نادرست از استثناء را شناسایی کنند.  همچنین، پروفایلرهای عملکرد (Performance profilers) مانند dotTrace یا Visual Studio Profiler می‌توانند مشخص کنند که استثناها در کجا به طور مکرر در طول عملیات عادی پرتاب می‌شوند.  بازبینی کد (Code reviews) منظم توسط همکاران با تأکید بر مدیریت استثناء نیز می‌تواند به شناسایی EDD کمک کند. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ضدالگوهای رایج EDD در C#&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بیایید برخی از الگوهای رایج که در آن‌ها توسعه‌دهندگان به طور سهوی یا عمدی از EDD در کد C# استفاده می‌کنند را بررسی کنیم.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ضدالگو ۱: استفاده از استثناها برای اعتبارسنجی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یکی از رایج‌ترین نمونه‌های EDD استفاده از استثناها برای اعتبارسنجی ورودی است.  به عنوان مثال، در کد زیر، به جای بررسی صریح اینکه آیا &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;username&lt;/code&gt; تهی (null) است، کد به پرتاب شدن &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;NullReferenceException&lt;/code&gt; هنگام دسترسی به خاصیت &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Length&lt;/code&gt; متکی است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public void ProcessUser(string username)
+{
+    try
+    {
+        // Directly try to process without validation
+        if (username.Length &amp;lt; 3) // Potential NullReferenceException if username is null
+        {
+            Console.WriteLine(&amp;quot;Username too short&amp;quot;);
+        }
+        // Further processing...
+    }
+    catch (NullReferenceException)
+    {
+        Console.WriteLine(&amp;quot;Username cannot be null&amp;quot;);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رویکرد درک کد را دشوارتر و ناکارآمدتر می‌کند. یک رویکرد بهتر، بررسی صریح پیش‌شرط‌ها است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public void ProcessUser(string username)
+{
+    if (username == null)
+    {
+        Console.WriteLine(&amp;quot;Username cannot be null&amp;quot;);
+        return;
+    }
+    
+    if (username.Length &amp;lt; 3)
+    {
+        Console.WriteLine(&amp;quot;Username too short&amp;quot;);
+    }
+    // Further processing...
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ضدالگو ۲: عملیات فایل بدون بررسی‌های اولیه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;سناریوی رایج دیگر، انجام عملیات فایل بدون بررسی اولیه وجود فایل است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public string ReadFileContents(string filePath)
+{
+    try
+    {
+        return File.ReadAllText(filePath); // Potential FileNotFoundException
+    }
+    catch (FileNotFoundException)
+    {
+        return &amp;quot;File not found&amp;quot;;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;کد فوق به استثناء برای تعیین وجود فایل متکی است. رویکرد مستقیم‌تر به شکل زیر است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public string ReadFileContents(string filePath)
+{
+    if (!File.Exists(filePath))
+    {
+        return &amp;quot;File not found&amp;quot;;
+    }
+    
+    return File.ReadAllText(filePath);
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;با این حال، شایان ذکر است که حتی این نسخه بهبود یافته نیز دارای یک وضعیت رقابتی (race condition) بین بررسی و عملیات خواندن است. یک راه‌حل واقعاً مقاوم، استثناء بالقوه‌ای را که ممکن است در صورت حذف فایل بین بررسی و خواندن رخ دهد، مدیریت می‌کند.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ضدالگو ۳: جستجو در دیکشنری (Dictionary Lookups)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;استفاده از استثناها برای جستجو در دیکشنری نیز یک الگوی رایج است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public string GetValue(Dictionary&amp;lt;string, string&amp;gt; dictionary, string key)
+{
+    try
+    {
+        return dictionary[key]; // Potential KeyNotFoundException
+    }
+    catch (KeyNotFoundException)
+    {
+        return &amp;quot;Key not found&amp;quot;;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;دیکشنری‌های C# یک متد خاص برای جلوگیری از این رویکرد مبتنی بر استثناء ارائه می‌دهند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public string GetValue(Dictionary&amp;lt;string, string&amp;gt; dictionary, string key)
+{
+    if (dictionary.TryGetValue(key, out string value))
+    {
+        return value;
+    }
+    return &amp;quot;Key not found&amp;quot;;
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ضدالگو ۴: تبدیل نوع (Type Conversions)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;تبدیل نوع مبتنی بر استثناء نیز رایج است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public int ConvertToInt(string input)
+{
+    try
+    {
+        return int.Parse(input); // Potential FormatException
+    }
+    catch (FormatException)
+    {
+        return 0; // Default value on failure
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یک رویکرد کارآمدتر از الگوی TryParse استفاده می‌کند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public int ConvertToInt(string input)
+{
+    if (int.TryParse(input, out int result))
+    {
+        return result;
+    }
+    return 0; // Default value on failure
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چه زمانی استفاده از استثناها مناسب است؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مهم است که بین EDD و استفاده صحیح از استثناها تمایز قائل شویم.  استثناها هنگامی که به درستی استفاده شوند، ابزاری ارزشمند باقی می‌مانند. آن‌ها برای شرایط واقعاً استثنایی که نباید در طول اجرای عادی برنامه رخ دهند، مناسب هستند، مانند: خرابی شبکه، مشکلات اتصال به پایگاه داده، مشکلات مجوز سیستم فایل، کمبود حافظه و خطاهای برنامه‌نویسی که نشان‌دهنده باگ هستند (مانند اندیس خارج از محدوده آرایه). &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یک تمایز کلیدی بین موارد استثنایی و خرابی‌های مورد انتظار وجود دارد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;خرابی مورد انتظار (Expected failure):&lt;/strong&gt; شرایطی که معمولاً در طول عملیات عادی رخ می‌دهد، مانند وارد کردن داده نامعتبر توسط کاربر یا عدم وجود یک فایل. &lt;/li&gt;&lt;li&gt;&lt;strong&gt;شرایط استثنایی (Exceptional condition):&lt;/strong&gt; یک وضعیت نادر یا غیرمنتظره که نشان می‌دهد مشکلی جدی رخ داده است. &lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;گاهی اوقات شما مجبور به کار با APIهایی هستید که به عنوان بخشی از عملیات عادی خود استثناء پرتاب می‌کنند.  در این موارد، گرفتن این استثناها مناسب است، اگرچه ممکن است بخواهید چنین APIهایی را در APIهای خود که از شیوه‌های بهتری پیروی می‌کنند، بپوشانید.  همچنین، هنگامی که کد مشتری (client code) قرارداد یک متد را نقض می‌کند (مانند ارسال &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;null&lt;/code&gt; زمانی که متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;null&lt;/code&gt; را نمی‌پذیرد)، پرتاب یک استثناء مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ArgumentNullException&lt;/code&gt; مناسب است. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;به عنوان مثال، در کد زیر، اعتبارسنجی اولیه انجام می‌شود و سپس عملیات نوشتن فایل در یک بلوک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;try-catch&lt;/code&gt; قرار می‌گیرد، زیرا این عملیات همچنان ممکن است به دلایل استثنایی (مانند پر بودن دیسک یا مشکلات مجوز) با شکست مواجه شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public void SaveDocument(Document document, string path)
+{
+    if (document == null)
+        throw new ArgumentNullException(nameof(document)); // Contract violation
+    if (string.IsNullOrEmpty(path))
+        throw new ArgumentException(&amp;quot;Path cannot be empty&amp;quot;, nameof(path)); // Contract violation
+
+    // Normal validation completed, now we can proceed
+    try
+    {
+        // This could still fail for exceptional reasons (disk full, permissions)
+        File.WriteAllText(path, document.Content);
+    }
+    catch (IOException ex)
+    {
+        // Handle truly exceptional condition
+        LogError($&amp;quot;Failed to save document: {ex.Message}&amp;quot;);
+        throw new DocumentSaveException(&amp;quot;Could not save the document&amp;quot;, ex);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;جایگزین‌های بهتر برای توسعه مبتنی بر استثناء&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;چندین الگوی طراحی و تکنیک برنامه‌نویسی، جایگزین‌های بهتری برای EDD ارائه می‌دهند. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الگوی TryPattern در C#&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;C# الگوی &amp;quot;Try&amp;quot; را رایج کرده است که روشی واضح و کارآمد برای مدیریت عملیاتی که ممکن است با شکست مواجه شوند، ارائه می‌دهد.  این الگو پتانسیل شکست را در امضای متد صریح می‌کند و از سربار عملکردی استثناها جلوگیری می‌کند. &lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// Example of a TryPattern method signature
+public bool TryGetUserDetails(string userId, out UserDetails details)
+{
+    // Implementation that returns true for success, false for failure
+    // and populates &amp;#39;details&amp;#39; when successful
+    details = null; // Placeholder for actual implementation
+    // ... logic to get user details ...
+    if (/* condition for success */ true) {
+        // details = ...;
+        return true;
+    }
+    return false;
+}
+
+// Usage:
+if (TryGetUserDetails(&amp;quot;user123&amp;quot;, out var userDetails))
+{
+    // Use userDetails
+}
+else
+{
+    // Handle failure case
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الگوی Result&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;الگوی Result (نتیجه) روشی ساختاریافته برای بازگرداندن یا یک مقدار موفقیت‌آمیز یا اطلاعات خطا ارائه می‌دهد. &lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class Result&amp;lt;T&amp;gt;
+{
+    public bool IsSuccess { get; }
+    public T Value { get; }
+    public string Error { get; }
+    
+    private Result(bool isSuccess, T value, string error)
+    {
+        IsSuccess = isSuccess; Value = value; Error = error;
+    }
+    
+    public static Result&amp;lt;T&amp;gt; Success(T value) =&amp;gt; new Result&amp;lt;T&amp;gt;(true, value, null);
+    public static Result&amp;lt;T&amp;gt; Failure(string error) =&amp;gt; new Result&amp;lt;T&amp;gt;(false, default, error);
+}
+
+// Usage example:
+public Result&amp;lt;User&amp;gt; GetUser(string id) // Assuming User class and _repository exist
+{
+    if (string.IsNullOrEmpty(id))
+    {
+        return Result&amp;lt;User&amp;gt;.Failure(&amp;quot;ID cannot be empty&amp;quot;);
+    }
+    // User user = _repository.FindById(id); // Placeholder
+    User user = null; // Placeholder for actual repository call
+    if (user == null)
+    {
+        return Result&amp;lt;User&amp;gt;.Failure(&amp;quot;User not found&amp;quot;);
+    }
+    return Result&amp;lt;User&amp;gt;.Success(user);
+}
+
+// Client code:
+// var result = GetUser(&amp;quot;123&amp;quot;);
+// if (result.IsSuccess)
+// {
+//     Console.WriteLine($&amp;quot;Found user: {result.Value.Name}&amp;quot;);
+// }
+// else
+// {
+//     Console.WriteLine($&amp;quot;Error: {result.Error}&amp;quot;);
+// }&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;انواع Option/Maybe&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;انواع Option یا Maybe به صراحت امکان عدم وجود یک مقدار را نشان می‌دهند.  (این انواع معمولاً از طریق کتابخانه‌های شخص ثالث یا پیاده‌سازی سفارشی در دسترس هستند.)&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;گارد کلازها (Guard Clauses)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;گارد کلازها بازگشت‌های زودهنگام برای شرایط نامعتبر ارائه می‌دهند، کد را خواناتر کرده و نیاز به شرطی‌های تودرتو را از بین می‌برند. &lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public void ProcessOrder(Order order) // Assuming Order class exists
+{
+    // Guard clauses
+    if (order == null)
+        throw new ArgumentNullException(nameof(order)); // Appropriate exception for contract violation
+    // if (order.Items.Count == 0) // Assuming Items property exists
+    //     return; 
+    // if (!order.IsValid) // Assuming IsValid property exists
+    //     return;
+    // Main processing logic follows
+    // ...
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;بازسازی (Refactoring) کد مبتنی بر استثناء&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بیایید بررسی کنیم که چگونه کد مبتنی بر استثناء را برای پیروی از شیوه‌های بهتر بازسازی کنیم. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مثال ۱: بازسازی منطق اعتبارسنجی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;قبل:&lt;/strong&gt; کد از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;decimal.Parse&lt;/code&gt; در یک بلوک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;try-catch&lt;/code&gt; برای تبدیل رشته به &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;decimal&lt;/code&gt; استفاده می‌کند و در صورت بروز &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;FormatException&lt;/code&gt; مقدار ۰ را بازمی‌گرداند. &lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public decimal CalculateTax(string incomeText)
+{
+    try
+    {
+        decimal income = decimal.Parse(incomeText);
+        return income * 0.2m;
+    }
+    catch (FormatException)
+    {
+        return 0;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بعد: کد از decimal.TryParse برای تبدیل امن استفاده می‌کند و در صورت موفقیت، محاسبه را انجام می‌دهد.&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public decimal CalculateTax(string incomeText)
+{
+    if (decimal.TryParse(incomeText, out decimal income))
+    {
+        return income * 0.2m;
+    }
+    return 0;
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مثال ۲: بازسازی دسترسی به منابع&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;قبل:&lt;/strong&gt; کد سعی می‌کند مشتری را از مخزن (repository) دریافت کند و در صورت بروز &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CustomerNotFoundException&lt;/code&gt;، یک مشتری پیش‌فرض با نام &amp;quot;Unknown&amp;quot; بازمی‌گرداند. &lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// Assuming _customerRepository and Customer class exist
+public Customer GetCustomer(int id)
+{
+    try
+    {
+        return _customerRepository.Get(id); // Potential CustomerNotFoundException
+    }
+    catch (CustomerNotFoundException)
+    {
+        return new Customer { Name = &amp;quot;Unknown&amp;quot; };
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بعد (با بررسی وجود): ابتدا بررسی می‌شود که آیا مشتری وجود دارد و سپس اقدام به دریافت آن می‌شود.&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// Assuming _customerRepository.Exists(id) and _customerRepository.Get(id) methods exist
+public Customer GetCustomer(int id)
+{
+    if (_customerRepository.Exists(id))
+    {
+        return _customerRepository.Get(id);
+    }
+    return new Customer { Name = &amp;quot;Unknown&amp;quot; };
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بعد (با استفاده از الگوی Result): این رویکرد اطلاعات دقیق‌تری در مورد موفقیت یا شکست عملیات ارائه می‌دهد و همچنین می‌تواند خطاهای غیرمنتظره دیگر را نیز مدیریت کند.&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// Assuming Result&amp;lt;T&amp;gt;, Customer class, and _customerRepository exist
+public Result&amp;lt;Customer&amp;gt; GetCustomer(int id)
+{
+    if (!_customerRepository.Exists(id)) // Assumes Exists method
+    {
+        return Result&amp;lt;Customer&amp;gt;.Failure($&amp;quot;Customer with id {id} not found&amp;quot;);
+    }
+    
+    try
+    {
+        var customer = _customerRepository.Get(id); // Assumes Get method
+        return Result&amp;lt;Customer&amp;gt;.Success(customer);
+    }
+    catch (Exception ex) // Catching broader exceptions for unexpected issues during retrieval
+    {
+        // Log the exception (e.g., LogError(ex.Message);)
+        return Result&amp;lt;Customer&amp;gt;.Failure($&amp;quot;Error retrieving customer: {ex.Message}&amp;quot;);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;تأثیر توسعه مبتنی بر استثناء بر کیفیت نرم‌افزار&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;استفاده از EDD چندین تأثیر منفی بر کیفیت کلی نرم‌افزار دارد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;کاهش قابلیت نگهداری (Maintainability):&lt;/strong&gt; درک و نگهداری کدی که از استثناها برای جریان کنترل استفاده می‌کند، دشوارتر است.  توسعه‌دهندگان جدید ممکن است در دنبال کردن مسیر اجرا دچار مشکل شوند. &lt;/li&gt;&lt;li&gt;&lt;strong&gt;کاهش عملکرد (Performance):&lt;/strong&gt; همانطور که قبلاً ذکر شد، استثناها به طور قابل توجهی گران‌تر از جریان کنترل عادی هستند و می‌توانند منجر به کندی محسوس در برنامه‌های حساس به عملکرد شوند. &lt;/li&gt;&lt;li&gt;&lt;strong&gt;ابهام در قصد (Obscured Intent):&lt;/strong&gt; کد مبتنی بر استثناء اغلب قصد اصلی توسعه‌دهنده را پنهان می‌کند. &lt;/li&gt;&lt;li&gt;&lt;strong&gt;کد شکننده (Brittle Code):&lt;/strong&gt; EDD اغلب منجر به کدی شکننده می‌شود که با تغییر پیاده‌سازی‌های زیربنایی به روش‌های غیرمنتظره‌ای می‌شکند.  برای مثال، اگر یک API دیگر یک استثناء خاص را پرتاب نکند، کدی که به گرفتن آن استثناء متکی است، نادرست رفتار خواهد کرد. &lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;توسعه مبتنی بر استثناء نشان‌دهنده استفاده نادرست از مکانیسم‌های مدیریت استثناء است که منجر به کدی می‌شود که خواندن، نگهداری و اشکال‌زدایی آن دشوارتر است.  در حالی که استثناها یک ویژگی قدرتمند زبان‌های برنامه‌نویسی مدرن هستند، باید برای شرایط واقعاً استثنایی رزرو شوند نه اینکه به عنوان یک مکانیسم جریان کنترل روتین مورد استفاده قرار گیرند.  با درک مشکلات EDD و اتخاذ الگوهای جایگزین مانند گارد کلازها، الگوی TryPattern یا انواع Result، توسعه‌دهندگان می‌توانند کدی مقاوم‌تر، قابل نگهداری‌تر و کارآمدتر ایجاد کنند.  بازسازی کد مبتنی بر استثناء موجود ممکن است نیازمند تلاش باشد، اما مزایای آن از نظر کیفیت کد، عملکرد و قابلیت نگهداری ارزش این تلاش را دارد.  به یاد داشته باشید که استثناها ابزارهایی هستند که برای شرایط استثنایی طراحی شده‌اند.  هنگامی که به طور مناسب استفاده شوند، به جداسازی منطق مدیریت خطا از جریان اصلی برنامه کمک می‌کنند.  با این حال، هنگامی که بیش از حد یا به اشتباه استفاده شوند، می‌توانند به ضدالگوی توسعه مبتنی بر استثناء با تمام مشکلات مرتبط با آن منجر شوند. &lt;/div&gt;">
+    <meta name="twitter:card" content="&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;تلاش برای نوشتن کدی تمیز، قابل نگهداری و با کارایی بالا همواره از اهداف اصلی برنامه‌نویسان بوده است. با این حال، گاهی استفاده نادرست از برخی سازوکارهای زبان برنامه‌نویسی می‌تواند منجر به بروز ضدالگوهایی (Anti-Patterns) شود که کیفیت کد را به شدت تحت تأثیر قرار می‌دهند. یکی از این ضدالگوهای رایج، «توسعه مبتنی بر استثناء» (Exception-Driven Development یا EDD) است. این رویکرد، استثناها (Exceptions) را از حالت هشدارهای نادر به چراغ‌های راهنمایی روزمره تبدیل می‌کند که منجر به کندی کد، پیچیدگی منطق و دور شدن از نرم‌افزاری پاک و قابل نگهداری می‌شود.  در این مقاله، به بررسی عمیق این ضدالگو، دلایل مضر بودن آن و ارائه راهکارهای بهتر با تمرکز بر توسعه‌دهندگان .NET خواهیم پرداخت.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;توسعه مبتنی بر استثناء (Exception-Driven Development) چیست؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;توسعه مبتنی بر استثناء (EDD) یک رویکرد برنامه‌نویسی است که در آن از استثناها برای کنترل جریان عادی برنامه استفاده می‌شود، به جای آنکه برای شرایط واقعاً استثنایی و غیرمنتظره رزرو شوند.  در این پارادایم، استثناها به یک ساختار کنترلی شبیه به دستورات &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;if&lt;/code&gt; یا حلقه‌ها تبدیل می‌شوند، نه اینکه به عنوان شبکه‌های ایمنی برای شرایط واقعاً استثنایی عمل کنند که به ندرت باید رخ دهند.  ویژگی اصلی EDD، طراحی عامدانه کدی است که انتظار دارد استثناها در طول عملیات عادی پرتاب شوند.  به جای بررسی پیش‌شرط‌ها یا استفاده از متدهای تخصصی برای تعیین موفقیت یک عملیات، توسعه‌دهندگان با این رویکرد به سادگی عملیات را انجام داده و هرگونه استثناء ناشی از آن را دریافت (catch) می‌کنند. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پیشینه تاریخی استثناها&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مکانیسم‌های استثناء در زبان‌های برنامه‌نویسی برای مدیریت شرایط غیرمنتظره و استثنایی معرفی شدند که به ندرت در طول اجرای عادی برنامه رخ می‌دهند. زبان‌هایی مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;C++&lt;/code&gt; و بعدها #Java، C و سایرین، مدیریت استثناء را برای جداسازی کد مدیریت خطا از منطق اصلی برنامه پیاده‌سازی کردند تا کد واضح‌تر و قابل نگهداری‌تر شود.  با این حال، همانند بسیاری از ویژگی‌های برنامه‌نویسی، استثناها به روش‌هایی مورد استفاده قرار گرفتند که طراحان آن‌ها در نظر نداشتند.  برخی توسعه‌دهندگان شروع به استفاده از استثناها برای جریان کنترل عادی کردند که منجر به چیزی شد که اکنون به عنوان توسعه مبتنی بر استثناء می‌شناسیم. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چرا توسعه مبتنی بر استثناء مضر تلقی می‌شود؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;EDD به دلایل قانع‌کننده‌ای که بر کیفیت کد، عملکرد و قابلیت نگهداری تأثیر می‌گذارند، به طور گسترده یک عمل نامناسب در نظر گرفته می‌شود. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پیامدهای عملکردی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;استثناها برای شرایط استثنایی طراحی شده‌اند و بنابراین پیاده‌سازی آن‌ها اطلاعات تشخیصی را بر عملکرد اولویت می‌دهد.  هنگامی که یک استثناء پرتاب می‌شود، سیستم زمان اجرا (runtime system) باید چندین عملیات پرهزینه انجام دهد: گرفتن پشته فراخوانی فعلی (call stack)، جستجو برای یک کنترل‌کننده استثناء (exception handler) مناسب، باز کردن پشته فراخوانی (unwind the call stack) و انتقال کنترل به کنترل‌کننده.  این فرآیند به طور قابل توجهی گران‌تر از مکانیسم‌های جریان کنترل عادی است. در C#، پرتاب یک استثناء می‌تواند صدها یا حتی هزاران بار کندتر از استفاده از منطق شرطی باشد. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;کاهش خوانایی کد&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;کدی که برای جریان کنترل به استثناها متکی است، معمولاً خواندن و درک آن دشوارتر است.  جریان واقعی اجرا مبهم می‌شود و توسعه‌دهندگان را ملزم می‌کند تا به جای دنبال کردن یک روایت خطی و واضح، مسیرهای بالقوه استثناء را به صورت ذهنی ردیابی کنند. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پیچیدگی اشکال‌زدایی (Debugging)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;هنگامی که استثناها به طور مکرر به عنوان بخشی از عملیات عادی پرتاب می‌شوند، تشخیص بین استثناهای مورد انتظار و آنهایی که واقعاً مشکل‌ساز هستند، دشوار می‌شود.  این امر می‌تواند تلاش‌های اشکال‌زدایی را به طور قابل توجهی پیچیده کند، زیرا ابزارها و لاگ‌ها با &amp;quot;نویز&amp;quot; ناشی از استثناهای مورد انتظار پر می‌شوند. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پنهان کردن خطاهای منطقی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;توسعه مبتنی بر استثناء می‌تواند با تلقی خطاهای منطقی به عنوان جریان عادی برنامه، آن‌ها را پنهان کند.  این کار مرز بین شرایط مورد انتظار و باگ‌های واقعی را محو می‌کند و شناسایی و رفع مشکلات واقعی در کد را دشوارتر می‌سازد. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چالش‌های تست‌نویسی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;کدی که برای جریان کنترل به استثناها متکی است، معمولاً تست‌نویسی آن دشوارتر است.  تست‌های واحد (Unit tests) باید استثناهای مورد انتظار را در نظر بگیرند که طراحی تست را پیچیده کرده و می‌تواند معیارهای پوشش کد (code coverage) را کم‌معناتر کند. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;شناسایی توسعه مبتنی بر استثناء&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;توسعه مبتنی بر استثناء را می‌توان با چندین نشانه در کد شناسایی کرد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;استفاده مکرر از بلوک‌های &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;try-catch&lt;/code&gt; برای عملیات روتین.&lt;/li&gt;&lt;li&gt;بلوک‌های &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;catch&lt;/code&gt; خالی یا بلوک‌هایی که استثناها را بدون مدیریت معنادار می‌بلعند (swallow exceptions).&lt;/li&gt;&lt;li&gt;استفاده از استثناها برای اعتبارسنجی یا شرایط خطای مورد انتظار.&lt;/li&gt;&lt;li&gt;جریان کنترلی که به پرتاب شدن استثناهای خاص بستگی دارد.&lt;/li&gt;&lt;li&gt;متدها یا APIهایی که برای پرتاب استثناها به عنوان بخشی از عملیات عادی خود طراحی شده‌اند.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ابزارهایی مانند تحلیل‌گرهای کد ایستا (Static code analyzers) مانند SonarQube و ReSharper می‌توانند برخی از الگوهای استفاده نادرست از استثناء را شناسایی کنند.  همچنین، پروفایلرهای عملکرد (Performance profilers) مانند dotTrace یا Visual Studio Profiler می‌توانند مشخص کنند که استثناها در کجا به طور مکرر در طول عملیات عادی پرتاب می‌شوند.  بازبینی کد (Code reviews) منظم توسط همکاران با تأکید بر مدیریت استثناء نیز می‌تواند به شناسایی EDD کمک کند. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ضدالگوهای رایج EDD در C#&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بیایید برخی از الگوهای رایج که در آن‌ها توسعه‌دهندگان به طور سهوی یا عمدی از EDD در کد C# استفاده می‌کنند را بررسی کنیم.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ضدالگو ۱: استفاده از استثناها برای اعتبارسنجی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یکی از رایج‌ترین نمونه‌های EDD استفاده از استثناها برای اعتبارسنجی ورودی است.  به عنوان مثال، در کد زیر، به جای بررسی صریح اینکه آیا &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;username&lt;/code&gt; تهی (null) است، کد به پرتاب شدن &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;NullReferenceException&lt;/code&gt; هنگام دسترسی به خاصیت &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Length&lt;/code&gt; متکی است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public void ProcessUser(string username)
+{
+    try
+    {
+        // Directly try to process without validation
+        if (username.Length &amp;lt; 3) // Potential NullReferenceException if username is null
+        {
+            Console.WriteLine(&amp;quot;Username too short&amp;quot;);
+        }
+        // Further processing...
+    }
+    catch (NullReferenceException)
+    {
+        Console.WriteLine(&amp;quot;Username cannot be null&amp;quot;);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رویکرد درک کد را دشوارتر و ناکارآمدتر می‌کند. یک رویکرد بهتر، بررسی صریح پیش‌شرط‌ها است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public void ProcessUser(string username)
+{
+    if (username == null)
+    {
+        Console.WriteLine(&amp;quot;Username cannot be null&amp;quot;);
+        return;
+    }
+    
+    if (username.Length &amp;lt; 3)
+    {
+        Console.WriteLine(&amp;quot;Username too short&amp;quot;);
+    }
+    // Further processing...
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ضدالگو ۲: عملیات فایل بدون بررسی‌های اولیه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;سناریوی رایج دیگر، انجام عملیات فایل بدون بررسی اولیه وجود فایل است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public string ReadFileContents(string filePath)
+{
+    try
+    {
+        return File.ReadAllText(filePath); // Potential FileNotFoundException
+    }
+    catch (FileNotFoundException)
+    {
+        return &amp;quot;File not found&amp;quot;;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;کد فوق به استثناء برای تعیین وجود فایل متکی است. رویکرد مستقیم‌تر به شکل زیر است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public string ReadFileContents(string filePath)
+{
+    if (!File.Exists(filePath))
+    {
+        return &amp;quot;File not found&amp;quot;;
+    }
+    
+    return File.ReadAllText(filePath);
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;با این حال، شایان ذکر است که حتی این نسخه بهبود یافته نیز دارای یک وضعیت رقابتی (race condition) بین بررسی و عملیات خواندن است. یک راه‌حل واقعاً مقاوم، استثناء بالقوه‌ای را که ممکن است در صورت حذف فایل بین بررسی و خواندن رخ دهد، مدیریت می‌کند.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ضدالگو ۳: جستجو در دیکشنری (Dictionary Lookups)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;استفاده از استثناها برای جستجو در دیکشنری نیز یک الگوی رایج است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public string GetValue(Dictionary&amp;lt;string, string&amp;gt; dictionary, string key)
+{
+    try
+    {
+        return dictionary[key]; // Potential KeyNotFoundException
+    }
+    catch (KeyNotFoundException)
+    {
+        return &amp;quot;Key not found&amp;quot;;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;دیکشنری‌های C# یک متد خاص برای جلوگیری از این رویکرد مبتنی بر استثناء ارائه می‌دهند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public string GetValue(Dictionary&amp;lt;string, string&amp;gt; dictionary, string key)
+{
+    if (dictionary.TryGetValue(key, out string value))
+    {
+        return value;
+    }
+    return &amp;quot;Key not found&amp;quot;;
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ضدالگو ۴: تبدیل نوع (Type Conversions)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;تبدیل نوع مبتنی بر استثناء نیز رایج است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public int ConvertToInt(string input)
+{
+    try
+    {
+        return int.Parse(input); // Potential FormatException
+    }
+    catch (FormatException)
+    {
+        return 0; // Default value on failure
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یک رویکرد کارآمدتر از الگوی TryParse استفاده می‌کند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public int ConvertToInt(string input)
+{
+    if (int.TryParse(input, out int result))
+    {
+        return result;
+    }
+    return 0; // Default value on failure
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چه زمانی استفاده از استثناها مناسب است؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مهم است که بین EDD و استفاده صحیح از استثناها تمایز قائل شویم.  استثناها هنگامی که به درستی استفاده شوند، ابزاری ارزشمند باقی می‌مانند. آن‌ها برای شرایط واقعاً استثنایی که نباید در طول اجرای عادی برنامه رخ دهند، مناسب هستند، مانند: خرابی شبکه، مشکلات اتصال به پایگاه داده، مشکلات مجوز سیستم فایل، کمبود حافظه و خطاهای برنامه‌نویسی که نشان‌دهنده باگ هستند (مانند اندیس خارج از محدوده آرایه). &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یک تمایز کلیدی بین موارد استثنایی و خرابی‌های مورد انتظار وجود دارد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;خرابی مورد انتظار (Expected failure):&lt;/strong&gt; شرایطی که معمولاً در طول عملیات عادی رخ می‌دهد، مانند وارد کردن داده نامعتبر توسط کاربر یا عدم وجود یک فایل. &lt;/li&gt;&lt;li&gt;&lt;strong&gt;شرایط استثنایی (Exceptional condition):&lt;/strong&gt; یک وضعیت نادر یا غیرمنتظره که نشان می‌دهد مشکلی جدی رخ داده است. &lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;گاهی اوقات شما مجبور به کار با APIهایی هستید که به عنوان بخشی از عملیات عادی خود استثناء پرتاب می‌کنند.  در این موارد، گرفتن این استثناها مناسب است، اگرچه ممکن است بخواهید چنین APIهایی را در APIهای خود که از شیوه‌های بهتری پیروی می‌کنند، بپوشانید.  همچنین، هنگامی که کد مشتری (client code) قرارداد یک متد را نقض می‌کند (مانند ارسال &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;null&lt;/code&gt; زمانی که متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;null&lt;/code&gt; را نمی‌پذیرد)، پرتاب یک استثناء مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ArgumentNullException&lt;/code&gt; مناسب است. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;به عنوان مثال، در کد زیر، اعتبارسنجی اولیه انجام می‌شود و سپس عملیات نوشتن فایل در یک بلوک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;try-catch&lt;/code&gt; قرار می‌گیرد، زیرا این عملیات همچنان ممکن است به دلایل استثنایی (مانند پر بودن دیسک یا مشکلات مجوز) با شکست مواجه شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public void SaveDocument(Document document, string path)
+{
+    if (document == null)
+        throw new ArgumentNullException(nameof(document)); // Contract violation
+    if (string.IsNullOrEmpty(path))
+        throw new ArgumentException(&amp;quot;Path cannot be empty&amp;quot;, nameof(path)); // Contract violation
+
+    // Normal validation completed, now we can proceed
+    try
+    {
+        // This could still fail for exceptional reasons (disk full, permissions)
+        File.WriteAllText(path, document.Content);
+    }
+    catch (IOException ex)
+    {
+        // Handle truly exceptional condition
+        LogError($&amp;quot;Failed to save document: {ex.Message}&amp;quot;);
+        throw new DocumentSaveException(&amp;quot;Could not save the document&amp;quot;, ex);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;جایگزین‌های بهتر برای توسعه مبتنی بر استثناء&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;چندین الگوی طراحی و تکنیک برنامه‌نویسی، جایگزین‌های بهتری برای EDD ارائه می‌دهند. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الگوی TryPattern در C#&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;C# الگوی &amp;quot;Try&amp;quot; را رایج کرده است که روشی واضح و کارآمد برای مدیریت عملیاتی که ممکن است با شکست مواجه شوند، ارائه می‌دهد.  این الگو پتانسیل شکست را در امضای متد صریح می‌کند و از سربار عملکردی استثناها جلوگیری می‌کند. &lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// Example of a TryPattern method signature
+public bool TryGetUserDetails(string userId, out UserDetails details)
+{
+    // Implementation that returns true for success, false for failure
+    // and populates &amp;#39;details&amp;#39; when successful
+    details = null; // Placeholder for actual implementation
+    // ... logic to get user details ...
+    if (/* condition for success */ true) {
+        // details = ...;
+        return true;
+    }
+    return false;
+}
+
+// Usage:
+if (TryGetUserDetails(&amp;quot;user123&amp;quot;, out var userDetails))
+{
+    // Use userDetails
+}
+else
+{
+    // Handle failure case
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الگوی Result&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;الگوی Result (نتیجه) روشی ساختاریافته برای بازگرداندن یا یک مقدار موفقیت‌آمیز یا اطلاعات خطا ارائه می‌دهد. &lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class Result&amp;lt;T&amp;gt;
+{
+    public bool IsSuccess { get; }
+    public T Value { get; }
+    public string Error { get; }
+    
+    private Result(bool isSuccess, T value, string error)
+    {
+        IsSuccess = isSuccess; Value = value; Error = error;
+    }
+    
+    public static Result&amp;lt;T&amp;gt; Success(T value) =&amp;gt; new Result&amp;lt;T&amp;gt;(true, value, null);
+    public static Result&amp;lt;T&amp;gt; Failure(string error) =&amp;gt; new Result&amp;lt;T&amp;gt;(false, default, error);
+}
+
+// Usage example:
+public Result&amp;lt;User&amp;gt; GetUser(string id) // Assuming User class and _repository exist
+{
+    if (string.IsNullOrEmpty(id))
+    {
+        return Result&amp;lt;User&amp;gt;.Failure(&amp;quot;ID cannot be empty&amp;quot;);
+    }
+    // User user = _repository.FindById(id); // Placeholder
+    User user = null; // Placeholder for actual repository call
+    if (user == null)
+    {
+        return Result&amp;lt;User&amp;gt;.Failure(&amp;quot;User not found&amp;quot;);
+    }
+    return Result&amp;lt;User&amp;gt;.Success(user);
+}
+
+// Client code:
+// var result = GetUser(&amp;quot;123&amp;quot;);
+// if (result.IsSuccess)
+// {
+//     Console.WriteLine($&amp;quot;Found user: {result.Value.Name}&amp;quot;);
+// }
+// else
+// {
+//     Console.WriteLine($&amp;quot;Error: {result.Error}&amp;quot;);
+// }&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;انواع Option/Maybe&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;انواع Option یا Maybe به صراحت امکان عدم وجود یک مقدار را نشان می‌دهند.  (این انواع معمولاً از طریق کتابخانه‌های شخص ثالث یا پیاده‌سازی سفارشی در دسترس هستند.)&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;گارد کلازها (Guard Clauses)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;گارد کلازها بازگشت‌های زودهنگام برای شرایط نامعتبر ارائه می‌دهند، کد را خواناتر کرده و نیاز به شرطی‌های تودرتو را از بین می‌برند. &lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public void ProcessOrder(Order order) // Assuming Order class exists
+{
+    // Guard clauses
+    if (order == null)
+        throw new ArgumentNullException(nameof(order)); // Appropriate exception for contract violation
+    // if (order.Items.Count == 0) // Assuming Items property exists
+    //     return; 
+    // if (!order.IsValid) // Assuming IsValid property exists
+    //     return;
+    // Main processing logic follows
+    // ...
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;بازسازی (Refactoring) کد مبتنی بر استثناء&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بیایید بررسی کنیم که چگونه کد مبتنی بر استثناء را برای پیروی از شیوه‌های بهتر بازسازی کنیم. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مثال ۱: بازسازی منطق اعتبارسنجی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;قبل:&lt;/strong&gt; کد از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;decimal.Parse&lt;/code&gt; در یک بلوک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;try-catch&lt;/code&gt; برای تبدیل رشته به &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;decimal&lt;/code&gt; استفاده می‌کند و در صورت بروز &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;FormatException&lt;/code&gt; مقدار ۰ را بازمی‌گرداند. &lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public decimal CalculateTax(string incomeText)
+{
+    try
+    {
+        decimal income = decimal.Parse(incomeText);
+        return income * 0.2m;
+    }
+    catch (FormatException)
+    {
+        return 0;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بعد: کد از decimal.TryParse برای تبدیل امن استفاده می‌کند و در صورت موفقیت، محاسبه را انجام می‌دهد.&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public decimal CalculateTax(string incomeText)
+{
+    if (decimal.TryParse(incomeText, out decimal income))
+    {
+        return income * 0.2m;
+    }
+    return 0;
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مثال ۲: بازسازی دسترسی به منابع&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;قبل:&lt;/strong&gt; کد سعی می‌کند مشتری را از مخزن (repository) دریافت کند و در صورت بروز &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CustomerNotFoundException&lt;/code&gt;، یک مشتری پیش‌فرض با نام &amp;quot;Unknown&amp;quot; بازمی‌گرداند. &lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// Assuming _customerRepository and Customer class exist
+public Customer GetCustomer(int id)
+{
+    try
+    {
+        return _customerRepository.Get(id); // Potential CustomerNotFoundException
+    }
+    catch (CustomerNotFoundException)
+    {
+        return new Customer { Name = &amp;quot;Unknown&amp;quot; };
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بعد (با بررسی وجود): ابتدا بررسی می‌شود که آیا مشتری وجود دارد و سپس اقدام به دریافت آن می‌شود.&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// Assuming _customerRepository.Exists(id) and _customerRepository.Get(id) methods exist
+public Customer GetCustomer(int id)
+{
+    if (_customerRepository.Exists(id))
+    {
+        return _customerRepository.Get(id);
+    }
+    return new Customer { Name = &amp;quot;Unknown&amp;quot; };
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بعد (با استفاده از الگوی Result): این رویکرد اطلاعات دقیق‌تری در مورد موفقیت یا شکست عملیات ارائه می‌دهد و همچنین می‌تواند خطاهای غیرمنتظره دیگر را نیز مدیریت کند.&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// Assuming Result&amp;lt;T&amp;gt;, Customer class, and _customerRepository exist
+public Result&amp;lt;Customer&amp;gt; GetCustomer(int id)
+{
+    if (!_customerRepository.Exists(id)) // Assumes Exists method
+    {
+        return Result&amp;lt;Customer&amp;gt;.Failure($&amp;quot;Customer with id {id} not found&amp;quot;);
+    }
+    
+    try
+    {
+        var customer = _customerRepository.Get(id); // Assumes Get method
+        return Result&amp;lt;Customer&amp;gt;.Success(customer);
+    }
+    catch (Exception ex) // Catching broader exceptions for unexpected issues during retrieval
+    {
+        // Log the exception (e.g., LogError(ex.Message);)
+        return Result&amp;lt;Customer&amp;gt;.Failure($&amp;quot;Error retrieving customer: {ex.Message}&amp;quot;);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;تأثیر توسعه مبتنی بر استثناء بر کیفیت نرم‌افزار&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;استفاده از EDD چندین تأثیر منفی بر کیفیت کلی نرم‌افزار دارد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;کاهش قابلیت نگهداری (Maintainability):&lt;/strong&gt; درک و نگهداری کدی که از استثناها برای جریان کنترل استفاده می‌کند، دشوارتر است.  توسعه‌دهندگان جدید ممکن است در دنبال کردن مسیر اجرا دچار مشکل شوند. &lt;/li&gt;&lt;li&gt;&lt;strong&gt;کاهش عملکرد (Performance):&lt;/strong&gt; همانطور که قبلاً ذکر شد، استثناها به طور قابل توجهی گران‌تر از جریان کنترل عادی هستند و می‌توانند منجر به کندی محسوس در برنامه‌های حساس به عملکرد شوند. &lt;/li&gt;&lt;li&gt;&lt;strong&gt;ابهام در قصد (Obscured Intent):&lt;/strong&gt; کد مبتنی بر استثناء اغلب قصد اصلی توسعه‌دهنده را پنهان می‌کند. &lt;/li&gt;&lt;li&gt;&lt;strong&gt;کد شکننده (Brittle Code):&lt;/strong&gt; EDD اغلب منجر به کدی شکننده می‌شود که با تغییر پیاده‌سازی‌های زیربنایی به روش‌های غیرمنتظره‌ای می‌شکند.  برای مثال، اگر یک API دیگر یک استثناء خاص را پرتاب نکند، کدی که به گرفتن آن استثناء متکی است، نادرست رفتار خواهد کرد. &lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;توسعه مبتنی بر استثناء نشان‌دهنده استفاده نادرست از مکانیسم‌های مدیریت استثناء است که منجر به کدی می‌شود که خواندن، نگهداری و اشکال‌زدایی آن دشوارتر است.  در حالی که استثناها یک ویژگی قدرتمند زبان‌های برنامه‌نویسی مدرن هستند، باید برای شرایط واقعاً استثنایی رزرو شوند نه اینکه به عنوان یک مکانیسم جریان کنترل روتین مورد استفاده قرار گیرند.  با درک مشکلات EDD و اتخاذ الگوهای جایگزین مانند گارد کلازها، الگوی TryPattern یا انواع Result، توسعه‌دهندگان می‌توانند کدی مقاوم‌تر، قابل نگهداری‌تر و کارآمدتر ایجاد کنند.  بازسازی کد مبتنی بر استثناء موجود ممکن است نیازمند تلاش باشد، اما مزایای آن از نظر کیفیت کد، عملکرد و قابلیت نگهداری ارزش این تلاش را دارد.  به یاد داشته باشید که استثناها ابزارهایی هستند که برای شرایط استثنایی طراحی شده‌اند.  هنگامی که به طور مناسب استفاده شوند، به جداسازی منطق مدیریت خطا از جریان اصلی برنامه کمک می‌کنند.  با این حال، هنگامی که بیش از حد یا به اشتباه استفاده شوند، می‌توانند به ضدالگوی توسعه مبتنی بر استثناء با تمام مشکلات مرتبط با آن منجر شوند. &lt;/div&gt;">
+    <meta property="article:published_time" content="Fri, 30 May 2025 07:43:16 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
     <meta content='IE=edge' http-equiv='X-UA-Compatible'>
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">
-	
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
 	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
-
     <link href="vs.min.css" rel="stylesheet" type="text/css">
-    <script src="highlight.min.js" type="text/javascript"></script>
-	
+    <script src="highlight.min.js" type="text/javascript"></script>	
     <link href="styles.css" rel="stylesheet" type="text/css">	
     <style>
       @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
@@ -42,8 +1189,8 @@
         }
      }
     </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
 </head>
-
 <body dir='rtl'>
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
@@ -53,7 +1200,7 @@
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۳۶۹۵</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۶۹۷</span></td>
 </tr>
 <tr>
 <td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
@@ -73,7 +1220,7 @@
 </tr>
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۲۲</span></td>
 </tr>
 </tbody>
 </table>
@@ -350,8 +1497,5 @@ public Result&lt;Customer&gt; GetCustomer(int id)
 
 <!-- to load custom fonts for printing -->
 <div class="useSamimFD">&nbsp;</div>
-
-<script src="SyntaxHighlighter.js" type="text/javascript"></script>
 </body>
-
 </html>

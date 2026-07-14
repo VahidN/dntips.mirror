@@ -1,17 +1,434 @@
 <!DOCTYPE html>
 <html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
-
 <head>
-    <title>‫‫استفاده روزمره از GitHub Copilot در توسعه نرم‌افزار با چارچوب NET.</title>
+    <title>‫‫استفاده روزمره از GitHub Copilot در توسعه نرم‌افزار با چارچوب NET.</title>     <meta name="description" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در دنیای توسعه نرم‌افزار، ابزارهای هوش مصنوعی مانند GitHub Copilot به‌سرعت در حال تبدیل شدن به بخشی جدایی‌ناپذیر از جریان کاری (Workflow) توسعه‌دهندگان هستند. این ابزار فراتر از یک تکمیل‌کننده کد (Code Completion Tool) عمل کرده و با قابلیت‌های پیشرفته خود، امکان خودکارسازی وظایف تکراری، بهبود کیفیت کد و افزایش بهره‌وری را فراهم می‌کند. برای توسعه‌دهندگان چارچوب .NET، که با پروژه‌های پیچیده و استانداردهای بالای کدنویسی سروکار دارند، استفاده بهینه از Copilot می‌تواند تحولی چشمگیر در فرآیند توسعه ایجاد کند. این مقاله با تمرکز بر چهار راهکار کلیدی برای سفارشی‌سازی Copilot، به شما نشان می‌دهد که چگونه این ابزار می‌تواند به یک دستیار هوشمند و هماهنگ با نیازهای تیم توسعه .NET تبدیل شود. این راهکارها شامل خودکارسازی پیام‌های Commit، بازبینی کد مبتنی بر هوش مصنوعی، تولید تست‌های هماهنگ با چارچوب‌های تست .NET و ایجاد استانداردهای تیمی از طریق فایل‌های راهنما هستند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;1. خودکارسازی پیام‌های Commit با استانداردهای Conventional Commits&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یکی از چالش‌های رایج در پروژه‌های توسعه نرم‌افزار، نگارش پیام‌های Commit دقیق و منسجم است که تغییرات کد را به‌خوبی توصیف کنند. این موضوع به‌ویژه در پروژه‌های .NET، که اغلب شامل چندین توسعه‌دهنده و ادغام مداوم (Continuous Integration) هستند، اهمیت بیشتری دارد. GitHub Copilot می‌تواند با تحلیل تغییرات آماده‌شده (Staged Changes) و تولید پیام‌های Commit مبتنی بر استاندارد Conventional Commits، این فرآیند را خودکار کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نحوه تنظیم&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای فعال‌سازی این قابلیت، می‌توانید فایل تنظیمات .vscode/settings.json را به‌صورت زیر پیکربندی کنید:&lt;/div&gt;&lt;pre data-language=&quot;json&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;quot;github.copilot.chat.commitMessageGeneration.instructions&amp;quot;: [
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Write concise Conventional Commits messages. Include a type (feat, fix, docs, etc.), optional scope, and a brief summary. Wrap body at 72 characters.&amp;quot;
+  },
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Start with JIRA ticket ID if applicable, e.g., &amp;#39;PROJ-123: feat(auth): implemented login&amp;#39;&amp;quot;
+  },
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Use past tense for all descriptions (e.g., &amp;#39;added&amp;#39;, &amp;#39;fixed&amp;#39;, &amp;#39;updated&amp;#39;)&amp;quot;
+  },
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;For multiple changes, use bullet points with hyphens in the commit body&amp;quot;
+  }
+]&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;با این تنظیمات، هنگام اجرای دستور Copilot: Generate Commit Message در VS Code، خروجی‌ای مانند زیر تولید می‌شود:&lt;/div&gt;&lt;pre data-language=&quot;markdown&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PROJ-456: feat(auth): implemented OAuth2 refresh token mechanism
+
+- Added automatic token refresh to prevent session timeouts
+- Updated authentication service to handle refresh failures
+- Fixed edge case with expired tokens in offline mode&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مزایا برای توسعه‌دهندگان .NET&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این پیام‌های منسجم نه‌تنها تاریخچه پروژه را خواناتر می‌کنند، بلکه فرآیند تولید Changelog و بازبینی کد را نیز تسهیل می‌کنند. در پروژه‌های .NET، که ممکن است شامل ماژول‌های پیچیده‌ای مانند ASP.NET Core یا Entity Framework باشند، داشتن پیام‌های استاندارد به هماهنگی تیم و ردیابی تغییرات کمک شایانی می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;2. بازبینی کد مبتنی بر هوش مصنوعی پیش از Commit&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بازبینی کد (Code Review) یکی از مراحل حیاتی در توسعه نرم‌افزار است که به شناسایی باگ‌ها، مشکلات امنیتی و بهبود کیفیت کد کمک می‌کند. Copilot می‌تواند این فرآیند را با بازبینی خودکار کد پیش از ارسال به مرحله بازبینی رسمی، بهبود بخشد. این قابلیت به‌ویژه برای توسعه‌دهندگان .NET، که با استانداردهای سخت‌گیرانه‌ای مانند C# Coding Conventions کار می‌کنند، بسیار ارزشمند است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نحوه تنظیم&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای فعال‌سازی بازبینی کد، تنظیمات زیر را به .vscode/settings.json اضافه کنید:&lt;/div&gt;&lt;pre data-language=&quot;json&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;quot;github.copilot.chat.reviewSelection.instructions&amp;quot;: [
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Review the selected code for correctness, readability, security, and best practices.&amp;quot;
+  },
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Check for proper error handling and edge cases.&amp;quot;
+  },
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Identify potential performance bottlenecks.&amp;quot;
+  },
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Suggest ways to improve variable naming and code clarity.&amp;quot;
+  },
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Ensure code follows .NET coding standards and team conventions.&amp;quot;
+  }
+]&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;کاربرد در عمل&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;هنگام کار روی یک متد پیچیده در ASP.NET Core یا یک سرویس gRPC، می‌توانید کد را انتخاب کرده، کلیک راست کنید و گزینه Copilot: Review Selected Code را اجرا کنید. Copilot مسائلی مانند موارد زیر را شناسایی می‌کند:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;فقدان بررسی‌های Null که ممکن است به خطاهای زمان اجرا منجر شوند.&lt;/li&gt;&lt;li&gt;مشکلات عملکردی در کوئری‌های Entity Framework.&lt;/li&gt;&lt;li&gt;نقض استانداردهای نام‌گذاری #C.&lt;/li&gt;&lt;li&gt;آسیب‌پذیری‌های امنیتی، مانند عدم اعتبارسنجی ورودی‌ها.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این بازبینی خودکار، تعداد خطاهای ارسالی به بازبینی رسمی را کاهش داده و زمان تیم را برای بحث‌های معماری آزاد می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-ltr&quot; dir=&quot;ltr&quot; style=&quot;text-align: left;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;3. تولید تست‌های هماهنگ با چارچوب‌های تست .NET&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;تست‌نویسی یکی از زمان‌برترین بخش‌های توسعه نرم‌افزار است، به‌ویژه در پروژه‌های .NET که از چارچوب‌هایی مانند MSTest، NUnit یا xUnit استفاده می‌کنند. Copilot می‌تواند با تولید خودکار تست‌های هماهنگ با استانداردهای تیمی، این فرآیند را تسریع کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نحوه تنظیم&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;تنظیمات زیر را برای تولید تست‌های مناسب .NET اعمال کنید:&lt;/div&gt;&lt;pre data-language=&quot;json&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;quot;github.copilot.chat.testGeneration.instructions&amp;quot;: [
+  { &amp;quot;text&amp;quot;: &amp;quot;Use xUnit for testing .NET Core applications&amp;quot; },
+  { &amp;quot;text&amp;quot;: &amp;quot;Follow test naming pattern: &amp;#39;describe&amp;#39; for class/method, &amp;#39;it/test&amp;#39; for specific behavior&amp;quot; },
+  { &amp;quot;text&amp;quot;: &amp;quot;Include happy path, edge cases, and error handling tests&amp;quot; },
+  { &amp;quot;text&amp;quot;: &amp;quot;Use Moq for mocking dependencies in service tests&amp;quot; },
+  { &amp;quot;text&amp;quot;: &amp;quot;Follow AAA (Arrange-Act-Assert) pattern in all tests&amp;quot; }
+]&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مثال خروجی&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای یک سرویس ASP.NET Core، Copilot ممکن است تستی مانند زیر تولید کند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class AuthServiceTests
+{
+    [Fact]
+    public void Login_ValidCredentials_ReturnsToken()
+    {
+        // Arrange
+        var mockRepo = new Mock&amp;lt;IUserRepository&amp;gt;();
+        mockRepo.Setup(repo =&amp;gt; repo.GetUser(It.IsAny&amp;lt;string&amp;gt;())).Returns(new User());
+        var service = new AuthService(mockRepo.Object);
+
+        // Act
+        var result = service.Login(&amp;quot;user&amp;quot;, &amp;quot;password&amp;quot;);
+
+        // Assert
+        Assert.NotNull(result.Token);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;تأثیر بر بهره‌وری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این قابلیت زمان تولید تست‌های اولیه را به‌شدت کاهش می‌دهد و به توسعه‌دهندگان اجازه می‌دهد تا روی تست‌های پیچیده‌تر یا بهینه‌سازی منطق برنامه تمرکز کنند. هماهنگی تست‌ها با چارچوب‌هایی مانند xUnit و الگوهای استاندارد مانند AAA، کیفیت و یکپارچگی تست‌ها را تضمین می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;4. ایجاد استانداردهای تیمی با فایل راهنما&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یکی از چالش‌های تیم‌های توسعه، حفظ یکپارچگی در سبک کدنویسی و رویه‌های توسعه است. Copilot با استفاده از یک فایل راهنمای مرکزی مانند .github/copilot-instructions.md، می‌تواند استانداردهای تیمی را به‌صورت خودکار اعمال کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نحوه ایجاد فایل راهنما&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;فایل زیر را در مسیر .github/copilot-instructions.md ایجاد کنید:&lt;/div&gt;&lt;pre data-language=&quot;markdown&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;# استانداردهای کدنویسی تیم
+
+## سبک کدنویسی
+- استفاده از camelCase برای متغیرها و متدها
+- استفاده از PascalCase برای کلاس‌ها و اینترفیس‌ها
+- محدودیت طول خط به 100 کاراکتر
+- استفاده از ساختارهای async/await در متدهای غیرهمزمان
+
+## مستندسازی
+- استفاده از XML Documentation برای متدهای عمومی
+- توضیح پارامترها و مقادیر بازگشتی
+
+## تست‌نویسی
+- استفاده از xUnit برای تست‌های .NET
+- نام‌گذاری فایل‌های تست با پسوند .Tests.cs
+- استفاده از Moq برای Mocking
+
+## جریان کاری Git
+- استفاده از استاندارد Conventional Commits
+- افزودن شناسه JIRA در پیام‌های Commit&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ارجاع به فایل راهنما&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;این فایل را در تنظیمات Copilot ارجاع دهید:&lt;/div&gt;&lt;pre data-language=&quot;json&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;quot;github.copilot.chat.commitMessageGeneration.instructions&amp;quot;: [
+  { &amp;quot;file&amp;quot;: &amp;quot;.github/copilot-instructions.md#جریان کاری Git&amp;quot; },
+  { &amp;quot;text&amp;quot;: &amp;quot;Follow team standards for commit messages&amp;quot; }
+],
+&amp;quot;github.copilot.chat.testGeneration.instructions&amp;quot;: [
+  { &amp;quot;file&amp;quot;: &amp;quot;.github/copilot-instructions.md#تست‌نویسی&amp;quot; },
+  { &amp;quot;text&amp;quot;: &amp;quot;Generate tests according to team conventions&amp;quot; }
+]&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مزایا&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این فایل به‌عنوان مرجع مرکزی، اطمینان می‌دهد که همه توسعه‌دهندگان، از جمله اعضای جدید، از استانداردهای یکسانی پیروی می‌کنند. این امر در پروژه‌های .NET، که ممکن است شامل معماری‌های پیچیده‌ای مانند Microservices باشند، به کاهش ناسازگاری‌ها و تسریع فرآیند یادگیری کمک می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;GitHub Copilot با قابلیت‌های پیشرفته خود، فراتر از یک ابزار تکمیل کد عمل کرده و به یک دستیار هوشمند برای توسعه‌دهندگان .NET تبدیل شده است. با خودکارسازی پیام‌های Commit، بازبینی کد پیش از ارسال، تولید تست‌های هماهنگ با چارچوب‌های تست .NET و ایجاد استانداردهای تیمی، این ابزار می‌تواند بهره‌وری تیم را افزایش داده و کیفیت کد را بهبود بخشد. پیاده‌سازی این راهکارها نیازمند تنظیمات ساده‌ای است که با نیازهای خاص پروژه‌های .NET هماهنگ می‌شوند. با سرمایه‌گذاری در سفارشی‌سازی Copilot، توسعه‌دهندگان می‌توانند زمان بیشتری را به حل مسائل پیچیده اختصاص دهند و همکاری تیمی را تقویت کنند.&lt;/div&gt;">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="استفاده روزمره از GitHub Copilot در توسعه نرم‌افزار با چارچوب NET.">
+    <meta itemprop="description" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در دنیای توسعه نرم‌افزار، ابزارهای هوش مصنوعی مانند GitHub Copilot به‌سرعت در حال تبدیل شدن به بخشی جدایی‌ناپذیر از جریان کاری (Workflow) توسعه‌دهندگان هستند. این ابزار فراتر از یک تکمیل‌کننده کد (Code Completion Tool) عمل کرده و با قابلیت‌های پیشرفته خود، امکان خودکارسازی وظایف تکراری، بهبود کیفیت کد و افزایش بهره‌وری را فراهم می‌کند. برای توسعه‌دهندگان چارچوب .NET، که با پروژه‌های پیچیده و استانداردهای بالای کدنویسی سروکار دارند، استفاده بهینه از Copilot می‌تواند تحولی چشمگیر در فرآیند توسعه ایجاد کند. این مقاله با تمرکز بر چهار راهکار کلیدی برای سفارشی‌سازی Copilot، به شما نشان می‌دهد که چگونه این ابزار می‌تواند به یک دستیار هوشمند و هماهنگ با نیازهای تیم توسعه .NET تبدیل شود. این راهکارها شامل خودکارسازی پیام‌های Commit، بازبینی کد مبتنی بر هوش مصنوعی، تولید تست‌های هماهنگ با چارچوب‌های تست .NET و ایجاد استانداردهای تیمی از طریق فایل‌های راهنما هستند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;1. خودکارسازی پیام‌های Commit با استانداردهای Conventional Commits&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یکی از چالش‌های رایج در پروژه‌های توسعه نرم‌افزار، نگارش پیام‌های Commit دقیق و منسجم است که تغییرات کد را به‌خوبی توصیف کنند. این موضوع به‌ویژه در پروژه‌های .NET، که اغلب شامل چندین توسعه‌دهنده و ادغام مداوم (Continuous Integration) هستند، اهمیت بیشتری دارد. GitHub Copilot می‌تواند با تحلیل تغییرات آماده‌شده (Staged Changes) و تولید پیام‌های Commit مبتنی بر استاندارد Conventional Commits، این فرآیند را خودکار کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نحوه تنظیم&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای فعال‌سازی این قابلیت، می‌توانید فایل تنظیمات .vscode/settings.json را به‌صورت زیر پیکربندی کنید:&lt;/div&gt;&lt;pre data-language=&quot;json&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;quot;github.copilot.chat.commitMessageGeneration.instructions&amp;quot;: [
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Write concise Conventional Commits messages. Include a type (feat, fix, docs, etc.), optional scope, and a brief summary. Wrap body at 72 characters.&amp;quot;
+  },
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Start with JIRA ticket ID if applicable, e.g., &amp;#39;PROJ-123: feat(auth): implemented login&amp;#39;&amp;quot;
+  },
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Use past tense for all descriptions (e.g., &amp;#39;added&amp;#39;, &amp;#39;fixed&amp;#39;, &amp;#39;updated&amp;#39;)&amp;quot;
+  },
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;For multiple changes, use bullet points with hyphens in the commit body&amp;quot;
+  }
+]&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;با این تنظیمات، هنگام اجرای دستور Copilot: Generate Commit Message در VS Code، خروجی‌ای مانند زیر تولید می‌شود:&lt;/div&gt;&lt;pre data-language=&quot;markdown&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PROJ-456: feat(auth): implemented OAuth2 refresh token mechanism
+
+- Added automatic token refresh to prevent session timeouts
+- Updated authentication service to handle refresh failures
+- Fixed edge case with expired tokens in offline mode&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مزایا برای توسعه‌دهندگان .NET&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این پیام‌های منسجم نه‌تنها تاریخچه پروژه را خواناتر می‌کنند، بلکه فرآیند تولید Changelog و بازبینی کد را نیز تسهیل می‌کنند. در پروژه‌های .NET، که ممکن است شامل ماژول‌های پیچیده‌ای مانند ASP.NET Core یا Entity Framework باشند، داشتن پیام‌های استاندارد به هماهنگی تیم و ردیابی تغییرات کمک شایانی می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;2. بازبینی کد مبتنی بر هوش مصنوعی پیش از Commit&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بازبینی کد (Code Review) یکی از مراحل حیاتی در توسعه نرم‌افزار است که به شناسایی باگ‌ها، مشکلات امنیتی و بهبود کیفیت کد کمک می‌کند. Copilot می‌تواند این فرآیند را با بازبینی خودکار کد پیش از ارسال به مرحله بازبینی رسمی، بهبود بخشد. این قابلیت به‌ویژه برای توسعه‌دهندگان .NET، که با استانداردهای سخت‌گیرانه‌ای مانند C# Coding Conventions کار می‌کنند، بسیار ارزشمند است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نحوه تنظیم&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای فعال‌سازی بازبینی کد، تنظیمات زیر را به .vscode/settings.json اضافه کنید:&lt;/div&gt;&lt;pre data-language=&quot;json&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;quot;github.copilot.chat.reviewSelection.instructions&amp;quot;: [
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Review the selected code for correctness, readability, security, and best practices.&amp;quot;
+  },
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Check for proper error handling and edge cases.&amp;quot;
+  },
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Identify potential performance bottlenecks.&amp;quot;
+  },
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Suggest ways to improve variable naming and code clarity.&amp;quot;
+  },
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Ensure code follows .NET coding standards and team conventions.&amp;quot;
+  }
+]&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;کاربرد در عمل&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;هنگام کار روی یک متد پیچیده در ASP.NET Core یا یک سرویس gRPC، می‌توانید کد را انتخاب کرده، کلیک راست کنید و گزینه Copilot: Review Selected Code را اجرا کنید. Copilot مسائلی مانند موارد زیر را شناسایی می‌کند:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;فقدان بررسی‌های Null که ممکن است به خطاهای زمان اجرا منجر شوند.&lt;/li&gt;&lt;li&gt;مشکلات عملکردی در کوئری‌های Entity Framework.&lt;/li&gt;&lt;li&gt;نقض استانداردهای نام‌گذاری #C.&lt;/li&gt;&lt;li&gt;آسیب‌پذیری‌های امنیتی، مانند عدم اعتبارسنجی ورودی‌ها.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این بازبینی خودکار، تعداد خطاهای ارسالی به بازبینی رسمی را کاهش داده و زمان تیم را برای بحث‌های معماری آزاد می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-ltr&quot; dir=&quot;ltr&quot; style=&quot;text-align: left;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;3. تولید تست‌های هماهنگ با چارچوب‌های تست .NET&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;تست‌نویسی یکی از زمان‌برترین بخش‌های توسعه نرم‌افزار است، به‌ویژه در پروژه‌های .NET که از چارچوب‌هایی مانند MSTest، NUnit یا xUnit استفاده می‌کنند. Copilot می‌تواند با تولید خودکار تست‌های هماهنگ با استانداردهای تیمی، این فرآیند را تسریع کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نحوه تنظیم&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;تنظیمات زیر را برای تولید تست‌های مناسب .NET اعمال کنید:&lt;/div&gt;&lt;pre data-language=&quot;json&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;quot;github.copilot.chat.testGeneration.instructions&amp;quot;: [
+  { &amp;quot;text&amp;quot;: &amp;quot;Use xUnit for testing .NET Core applications&amp;quot; },
+  { &amp;quot;text&amp;quot;: &amp;quot;Follow test naming pattern: &amp;#39;describe&amp;#39; for class/method, &amp;#39;it/test&amp;#39; for specific behavior&amp;quot; },
+  { &amp;quot;text&amp;quot;: &amp;quot;Include happy path, edge cases, and error handling tests&amp;quot; },
+  { &amp;quot;text&amp;quot;: &amp;quot;Use Moq for mocking dependencies in service tests&amp;quot; },
+  { &amp;quot;text&amp;quot;: &amp;quot;Follow AAA (Arrange-Act-Assert) pattern in all tests&amp;quot; }
+]&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مثال خروجی&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای یک سرویس ASP.NET Core، Copilot ممکن است تستی مانند زیر تولید کند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class AuthServiceTests
+{
+    [Fact]
+    public void Login_ValidCredentials_ReturnsToken()
+    {
+        // Arrange
+        var mockRepo = new Mock&amp;lt;IUserRepository&amp;gt;();
+        mockRepo.Setup(repo =&amp;gt; repo.GetUser(It.IsAny&amp;lt;string&amp;gt;())).Returns(new User());
+        var service = new AuthService(mockRepo.Object);
+
+        // Act
+        var result = service.Login(&amp;quot;user&amp;quot;, &amp;quot;password&amp;quot;);
+
+        // Assert
+        Assert.NotNull(result.Token);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;تأثیر بر بهره‌وری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این قابلیت زمان تولید تست‌های اولیه را به‌شدت کاهش می‌دهد و به توسعه‌دهندگان اجازه می‌دهد تا روی تست‌های پیچیده‌تر یا بهینه‌سازی منطق برنامه تمرکز کنند. هماهنگی تست‌ها با چارچوب‌هایی مانند xUnit و الگوهای استاندارد مانند AAA، کیفیت و یکپارچگی تست‌ها را تضمین می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;4. ایجاد استانداردهای تیمی با فایل راهنما&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یکی از چالش‌های تیم‌های توسعه، حفظ یکپارچگی در سبک کدنویسی و رویه‌های توسعه است. Copilot با استفاده از یک فایل راهنمای مرکزی مانند .github/copilot-instructions.md، می‌تواند استانداردهای تیمی را به‌صورت خودکار اعمال کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نحوه ایجاد فایل راهنما&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;فایل زیر را در مسیر .github/copilot-instructions.md ایجاد کنید:&lt;/div&gt;&lt;pre data-language=&quot;markdown&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;# استانداردهای کدنویسی تیم
+
+## سبک کدنویسی
+- استفاده از camelCase برای متغیرها و متدها
+- استفاده از PascalCase برای کلاس‌ها و اینترفیس‌ها
+- محدودیت طول خط به 100 کاراکتر
+- استفاده از ساختارهای async/await در متدهای غیرهمزمان
+
+## مستندسازی
+- استفاده از XML Documentation برای متدهای عمومی
+- توضیح پارامترها و مقادیر بازگشتی
+
+## تست‌نویسی
+- استفاده از xUnit برای تست‌های .NET
+- نام‌گذاری فایل‌های تست با پسوند .Tests.cs
+- استفاده از Moq برای Mocking
+
+## جریان کاری Git
+- استفاده از استاندارد Conventional Commits
+- افزودن شناسه JIRA در پیام‌های Commit&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ارجاع به فایل راهنما&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;این فایل را در تنظیمات Copilot ارجاع دهید:&lt;/div&gt;&lt;pre data-language=&quot;json&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;quot;github.copilot.chat.commitMessageGeneration.instructions&amp;quot;: [
+  { &amp;quot;file&amp;quot;: &amp;quot;.github/copilot-instructions.md#جریان کاری Git&amp;quot; },
+  { &amp;quot;text&amp;quot;: &amp;quot;Follow team standards for commit messages&amp;quot; }
+],
+&amp;quot;github.copilot.chat.testGeneration.instructions&amp;quot;: [
+  { &amp;quot;file&amp;quot;: &amp;quot;.github/copilot-instructions.md#تست‌نویسی&amp;quot; },
+  { &amp;quot;text&amp;quot;: &amp;quot;Generate tests according to team conventions&amp;quot; }
+]&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مزایا&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این فایل به‌عنوان مرجع مرکزی، اطمینان می‌دهد که همه توسعه‌دهندگان، از جمله اعضای جدید، از استانداردهای یکسانی پیروی می‌کنند. این امر در پروژه‌های .NET، که ممکن است شامل معماری‌های پیچیده‌ای مانند Microservices باشند، به کاهش ناسازگاری‌ها و تسریع فرآیند یادگیری کمک می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;GitHub Copilot با قابلیت‌های پیشرفته خود، فراتر از یک ابزار تکمیل کد عمل کرده و به یک دستیار هوشمند برای توسعه‌دهندگان .NET تبدیل شده است. با خودکارسازی پیام‌های Commit، بازبینی کد پیش از ارسال، تولید تست‌های هماهنگ با چارچوب‌های تست .NET و ایجاد استانداردهای تیمی، این ابزار می‌تواند بهره‌وری تیم را افزایش داده و کیفیت کد را بهبود بخشد. پیاده‌سازی این راهکارها نیازمند تنظیمات ساده‌ای است که با نیازهای خاص پروژه‌های .NET هماهنگ می‌شوند. با سرمایه‌گذاری در سفارشی‌سازی Copilot، توسعه‌دهندگان می‌توانند زمان بیشتری را به حل مسائل پیچیده اختصاص دهند و همکاری تیمی را تقویت کنند.&lt;/div&gt;">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="استفاده روزمره از GitHub Copilot در توسعه نرم‌افزار با چارچوب NET.">
+    <meta property="og:description" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در دنیای توسعه نرم‌افزار، ابزارهای هوش مصنوعی مانند GitHub Copilot به‌سرعت در حال تبدیل شدن به بخشی جدایی‌ناپذیر از جریان کاری (Workflow) توسعه‌دهندگان هستند. این ابزار فراتر از یک تکمیل‌کننده کد (Code Completion Tool) عمل کرده و با قابلیت‌های پیشرفته خود، امکان خودکارسازی وظایف تکراری، بهبود کیفیت کد و افزایش بهره‌وری را فراهم می‌کند. برای توسعه‌دهندگان چارچوب .NET، که با پروژه‌های پیچیده و استانداردهای بالای کدنویسی سروکار دارند، استفاده بهینه از Copilot می‌تواند تحولی چشمگیر در فرآیند توسعه ایجاد کند. این مقاله با تمرکز بر چهار راهکار کلیدی برای سفارشی‌سازی Copilot، به شما نشان می‌دهد که چگونه این ابزار می‌تواند به یک دستیار هوشمند و هماهنگ با نیازهای تیم توسعه .NET تبدیل شود. این راهکارها شامل خودکارسازی پیام‌های Commit، بازبینی کد مبتنی بر هوش مصنوعی، تولید تست‌های هماهنگ با چارچوب‌های تست .NET و ایجاد استانداردهای تیمی از طریق فایل‌های راهنما هستند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;1. خودکارسازی پیام‌های Commit با استانداردهای Conventional Commits&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یکی از چالش‌های رایج در پروژه‌های توسعه نرم‌افزار، نگارش پیام‌های Commit دقیق و منسجم است که تغییرات کد را به‌خوبی توصیف کنند. این موضوع به‌ویژه در پروژه‌های .NET، که اغلب شامل چندین توسعه‌دهنده و ادغام مداوم (Continuous Integration) هستند، اهمیت بیشتری دارد. GitHub Copilot می‌تواند با تحلیل تغییرات آماده‌شده (Staged Changes) و تولید پیام‌های Commit مبتنی بر استاندارد Conventional Commits، این فرآیند را خودکار کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نحوه تنظیم&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای فعال‌سازی این قابلیت، می‌توانید فایل تنظیمات .vscode/settings.json را به‌صورت زیر پیکربندی کنید:&lt;/div&gt;&lt;pre data-language=&quot;json&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;quot;github.copilot.chat.commitMessageGeneration.instructions&amp;quot;: [
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Write concise Conventional Commits messages. Include a type (feat, fix, docs, etc.), optional scope, and a brief summary. Wrap body at 72 characters.&amp;quot;
+  },
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Start with JIRA ticket ID if applicable, e.g., &amp;#39;PROJ-123: feat(auth): implemented login&amp;#39;&amp;quot;
+  },
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Use past tense for all descriptions (e.g., &amp;#39;added&amp;#39;, &amp;#39;fixed&amp;#39;, &amp;#39;updated&amp;#39;)&amp;quot;
+  },
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;For multiple changes, use bullet points with hyphens in the commit body&amp;quot;
+  }
+]&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;با این تنظیمات، هنگام اجرای دستور Copilot: Generate Commit Message در VS Code، خروجی‌ای مانند زیر تولید می‌شود:&lt;/div&gt;&lt;pre data-language=&quot;markdown&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PROJ-456: feat(auth): implemented OAuth2 refresh token mechanism
+
+- Added automatic token refresh to prevent session timeouts
+- Updated authentication service to handle refresh failures
+- Fixed edge case with expired tokens in offline mode&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مزایا برای توسعه‌دهندگان .NET&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این پیام‌های منسجم نه‌تنها تاریخچه پروژه را خواناتر می‌کنند، بلکه فرآیند تولید Changelog و بازبینی کد را نیز تسهیل می‌کنند. در پروژه‌های .NET، که ممکن است شامل ماژول‌های پیچیده‌ای مانند ASP.NET Core یا Entity Framework باشند، داشتن پیام‌های استاندارد به هماهنگی تیم و ردیابی تغییرات کمک شایانی می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;2. بازبینی کد مبتنی بر هوش مصنوعی پیش از Commit&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بازبینی کد (Code Review) یکی از مراحل حیاتی در توسعه نرم‌افزار است که به شناسایی باگ‌ها، مشکلات امنیتی و بهبود کیفیت کد کمک می‌کند. Copilot می‌تواند این فرآیند را با بازبینی خودکار کد پیش از ارسال به مرحله بازبینی رسمی، بهبود بخشد. این قابلیت به‌ویژه برای توسعه‌دهندگان .NET، که با استانداردهای سخت‌گیرانه‌ای مانند C# Coding Conventions کار می‌کنند، بسیار ارزشمند است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نحوه تنظیم&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای فعال‌سازی بازبینی کد، تنظیمات زیر را به .vscode/settings.json اضافه کنید:&lt;/div&gt;&lt;pre data-language=&quot;json&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;quot;github.copilot.chat.reviewSelection.instructions&amp;quot;: [
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Review the selected code for correctness, readability, security, and best practices.&amp;quot;
+  },
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Check for proper error handling and edge cases.&amp;quot;
+  },
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Identify potential performance bottlenecks.&amp;quot;
+  },
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Suggest ways to improve variable naming and code clarity.&amp;quot;
+  },
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Ensure code follows .NET coding standards and team conventions.&amp;quot;
+  }
+]&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;کاربرد در عمل&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;هنگام کار روی یک متد پیچیده در ASP.NET Core یا یک سرویس gRPC، می‌توانید کد را انتخاب کرده، کلیک راست کنید و گزینه Copilot: Review Selected Code را اجرا کنید. Copilot مسائلی مانند موارد زیر را شناسایی می‌کند:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;فقدان بررسی‌های Null که ممکن است به خطاهای زمان اجرا منجر شوند.&lt;/li&gt;&lt;li&gt;مشکلات عملکردی در کوئری‌های Entity Framework.&lt;/li&gt;&lt;li&gt;نقض استانداردهای نام‌گذاری #C.&lt;/li&gt;&lt;li&gt;آسیب‌پذیری‌های امنیتی، مانند عدم اعتبارسنجی ورودی‌ها.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این بازبینی خودکار، تعداد خطاهای ارسالی به بازبینی رسمی را کاهش داده و زمان تیم را برای بحث‌های معماری آزاد می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-ltr&quot; dir=&quot;ltr&quot; style=&quot;text-align: left;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;3. تولید تست‌های هماهنگ با چارچوب‌های تست .NET&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;تست‌نویسی یکی از زمان‌برترین بخش‌های توسعه نرم‌افزار است، به‌ویژه در پروژه‌های .NET که از چارچوب‌هایی مانند MSTest، NUnit یا xUnit استفاده می‌کنند. Copilot می‌تواند با تولید خودکار تست‌های هماهنگ با استانداردهای تیمی، این فرآیند را تسریع کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نحوه تنظیم&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;تنظیمات زیر را برای تولید تست‌های مناسب .NET اعمال کنید:&lt;/div&gt;&lt;pre data-language=&quot;json&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;quot;github.copilot.chat.testGeneration.instructions&amp;quot;: [
+  { &amp;quot;text&amp;quot;: &amp;quot;Use xUnit for testing .NET Core applications&amp;quot; },
+  { &amp;quot;text&amp;quot;: &amp;quot;Follow test naming pattern: &amp;#39;describe&amp;#39; for class/method, &amp;#39;it/test&amp;#39; for specific behavior&amp;quot; },
+  { &amp;quot;text&amp;quot;: &amp;quot;Include happy path, edge cases, and error handling tests&amp;quot; },
+  { &amp;quot;text&amp;quot;: &amp;quot;Use Moq for mocking dependencies in service tests&amp;quot; },
+  { &amp;quot;text&amp;quot;: &amp;quot;Follow AAA (Arrange-Act-Assert) pattern in all tests&amp;quot; }
+]&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مثال خروجی&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای یک سرویس ASP.NET Core، Copilot ممکن است تستی مانند زیر تولید کند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class AuthServiceTests
+{
+    [Fact]
+    public void Login_ValidCredentials_ReturnsToken()
+    {
+        // Arrange
+        var mockRepo = new Mock&amp;lt;IUserRepository&amp;gt;();
+        mockRepo.Setup(repo =&amp;gt; repo.GetUser(It.IsAny&amp;lt;string&amp;gt;())).Returns(new User());
+        var service = new AuthService(mockRepo.Object);
+
+        // Act
+        var result = service.Login(&amp;quot;user&amp;quot;, &amp;quot;password&amp;quot;);
+
+        // Assert
+        Assert.NotNull(result.Token);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;تأثیر بر بهره‌وری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این قابلیت زمان تولید تست‌های اولیه را به‌شدت کاهش می‌دهد و به توسعه‌دهندگان اجازه می‌دهد تا روی تست‌های پیچیده‌تر یا بهینه‌سازی منطق برنامه تمرکز کنند. هماهنگی تست‌ها با چارچوب‌هایی مانند xUnit و الگوهای استاندارد مانند AAA، کیفیت و یکپارچگی تست‌ها را تضمین می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;4. ایجاد استانداردهای تیمی با فایل راهنما&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یکی از چالش‌های تیم‌های توسعه، حفظ یکپارچگی در سبک کدنویسی و رویه‌های توسعه است. Copilot با استفاده از یک فایل راهنمای مرکزی مانند .github/copilot-instructions.md، می‌تواند استانداردهای تیمی را به‌صورت خودکار اعمال کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نحوه ایجاد فایل راهنما&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;فایل زیر را در مسیر .github/copilot-instructions.md ایجاد کنید:&lt;/div&gt;&lt;pre data-language=&quot;markdown&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;# استانداردهای کدنویسی تیم
+
+## سبک کدنویسی
+- استفاده از camelCase برای متغیرها و متدها
+- استفاده از PascalCase برای کلاس‌ها و اینترفیس‌ها
+- محدودیت طول خط به 100 کاراکتر
+- استفاده از ساختارهای async/await در متدهای غیرهمزمان
+
+## مستندسازی
+- استفاده از XML Documentation برای متدهای عمومی
+- توضیح پارامترها و مقادیر بازگشتی
+
+## تست‌نویسی
+- استفاده از xUnit برای تست‌های .NET
+- نام‌گذاری فایل‌های تست با پسوند .Tests.cs
+- استفاده از Moq برای Mocking
+
+## جریان کاری Git
+- استفاده از استاندارد Conventional Commits
+- افزودن شناسه JIRA در پیام‌های Commit&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ارجاع به فایل راهنما&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;این فایل را در تنظیمات Copilot ارجاع دهید:&lt;/div&gt;&lt;pre data-language=&quot;json&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;quot;github.copilot.chat.commitMessageGeneration.instructions&amp;quot;: [
+  { &amp;quot;file&amp;quot;: &amp;quot;.github/copilot-instructions.md#جریان کاری Git&amp;quot; },
+  { &amp;quot;text&amp;quot;: &amp;quot;Follow team standards for commit messages&amp;quot; }
+],
+&amp;quot;github.copilot.chat.testGeneration.instructions&amp;quot;: [
+  { &amp;quot;file&amp;quot;: &amp;quot;.github/copilot-instructions.md#تست‌نویسی&amp;quot; },
+  { &amp;quot;text&amp;quot;: &amp;quot;Generate tests according to team conventions&amp;quot; }
+]&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مزایا&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این فایل به‌عنوان مرجع مرکزی، اطمینان می‌دهد که همه توسعه‌دهندگان، از جمله اعضای جدید، از استانداردهای یکسانی پیروی می‌کنند. این امر در پروژه‌های .NET، که ممکن است شامل معماری‌های پیچیده‌ای مانند Microservices باشند، به کاهش ناسازگاری‌ها و تسریع فرآیند یادگیری کمک می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;GitHub Copilot با قابلیت‌های پیشرفته خود، فراتر از یک ابزار تکمیل کد عمل کرده و به یک دستیار هوشمند برای توسعه‌دهندگان .NET تبدیل شده است. با خودکارسازی پیام‌های Commit، بازبینی کد پیش از ارسال، تولید تست‌های هماهنگ با چارچوب‌های تست .NET و ایجاد استانداردهای تیمی، این ابزار می‌تواند بهره‌وری تیم را افزایش داده و کیفیت کد را بهبود بخشد. پیاده‌سازی این راهکارها نیازمند تنظیمات ساده‌ای است که با نیازهای خاص پروژه‌های .NET هماهنگ می‌شوند. با سرمایه‌گذاری در سفارشی‌سازی Copilot، توسعه‌دهندگان می‌توانند زمان بیشتری را به حل مسائل پیچیده اختصاص دهند و همکاری تیمی را تقویت کنند.&lt;/div&gt;">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="استفاده روزمره از GitHub Copilot در توسعه نرم‌افزار با چارچوب NET.">
+    <meta name="twitter:description" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در دنیای توسعه نرم‌افزار، ابزارهای هوش مصنوعی مانند GitHub Copilot به‌سرعت در حال تبدیل شدن به بخشی جدایی‌ناپذیر از جریان کاری (Workflow) توسعه‌دهندگان هستند. این ابزار فراتر از یک تکمیل‌کننده کد (Code Completion Tool) عمل کرده و با قابلیت‌های پیشرفته خود، امکان خودکارسازی وظایف تکراری، بهبود کیفیت کد و افزایش بهره‌وری را فراهم می‌کند. برای توسعه‌دهندگان چارچوب .NET، که با پروژه‌های پیچیده و استانداردهای بالای کدنویسی سروکار دارند، استفاده بهینه از Copilot می‌تواند تحولی چشمگیر در فرآیند توسعه ایجاد کند. این مقاله با تمرکز بر چهار راهکار کلیدی برای سفارشی‌سازی Copilot، به شما نشان می‌دهد که چگونه این ابزار می‌تواند به یک دستیار هوشمند و هماهنگ با نیازهای تیم توسعه .NET تبدیل شود. این راهکارها شامل خودکارسازی پیام‌های Commit، بازبینی کد مبتنی بر هوش مصنوعی، تولید تست‌های هماهنگ با چارچوب‌های تست .NET و ایجاد استانداردهای تیمی از طریق فایل‌های راهنما هستند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;1. خودکارسازی پیام‌های Commit با استانداردهای Conventional Commits&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یکی از چالش‌های رایج در پروژه‌های توسعه نرم‌افزار، نگارش پیام‌های Commit دقیق و منسجم است که تغییرات کد را به‌خوبی توصیف کنند. این موضوع به‌ویژه در پروژه‌های .NET، که اغلب شامل چندین توسعه‌دهنده و ادغام مداوم (Continuous Integration) هستند، اهمیت بیشتری دارد. GitHub Copilot می‌تواند با تحلیل تغییرات آماده‌شده (Staged Changes) و تولید پیام‌های Commit مبتنی بر استاندارد Conventional Commits، این فرآیند را خودکار کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نحوه تنظیم&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای فعال‌سازی این قابلیت، می‌توانید فایل تنظیمات .vscode/settings.json را به‌صورت زیر پیکربندی کنید:&lt;/div&gt;&lt;pre data-language=&quot;json&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;quot;github.copilot.chat.commitMessageGeneration.instructions&amp;quot;: [
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Write concise Conventional Commits messages. Include a type (feat, fix, docs, etc.), optional scope, and a brief summary. Wrap body at 72 characters.&amp;quot;
+  },
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Start with JIRA ticket ID if applicable, e.g., &amp;#39;PROJ-123: feat(auth): implemented login&amp;#39;&amp;quot;
+  },
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Use past tense for all descriptions (e.g., &amp;#39;added&amp;#39;, &amp;#39;fixed&amp;#39;, &amp;#39;updated&amp;#39;)&amp;quot;
+  },
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;For multiple changes, use bullet points with hyphens in the commit body&amp;quot;
+  }
+]&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;با این تنظیمات، هنگام اجرای دستور Copilot: Generate Commit Message در VS Code، خروجی‌ای مانند زیر تولید می‌شود:&lt;/div&gt;&lt;pre data-language=&quot;markdown&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PROJ-456: feat(auth): implemented OAuth2 refresh token mechanism
+
+- Added automatic token refresh to prevent session timeouts
+- Updated authentication service to handle refresh failures
+- Fixed edge case with expired tokens in offline mode&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مزایا برای توسعه‌دهندگان .NET&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این پیام‌های منسجم نه‌تنها تاریخچه پروژه را خواناتر می‌کنند، بلکه فرآیند تولید Changelog و بازبینی کد را نیز تسهیل می‌کنند. در پروژه‌های .NET، که ممکن است شامل ماژول‌های پیچیده‌ای مانند ASP.NET Core یا Entity Framework باشند، داشتن پیام‌های استاندارد به هماهنگی تیم و ردیابی تغییرات کمک شایانی می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;2. بازبینی کد مبتنی بر هوش مصنوعی پیش از Commit&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بازبینی کد (Code Review) یکی از مراحل حیاتی در توسعه نرم‌افزار است که به شناسایی باگ‌ها، مشکلات امنیتی و بهبود کیفیت کد کمک می‌کند. Copilot می‌تواند این فرآیند را با بازبینی خودکار کد پیش از ارسال به مرحله بازبینی رسمی، بهبود بخشد. این قابلیت به‌ویژه برای توسعه‌دهندگان .NET، که با استانداردهای سخت‌گیرانه‌ای مانند C# Coding Conventions کار می‌کنند، بسیار ارزشمند است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نحوه تنظیم&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای فعال‌سازی بازبینی کد، تنظیمات زیر را به .vscode/settings.json اضافه کنید:&lt;/div&gt;&lt;pre data-language=&quot;json&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;quot;github.copilot.chat.reviewSelection.instructions&amp;quot;: [
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Review the selected code for correctness, readability, security, and best practices.&amp;quot;
+  },
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Check for proper error handling and edge cases.&amp;quot;
+  },
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Identify potential performance bottlenecks.&amp;quot;
+  },
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Suggest ways to improve variable naming and code clarity.&amp;quot;
+  },
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Ensure code follows .NET coding standards and team conventions.&amp;quot;
+  }
+]&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;کاربرد در عمل&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;هنگام کار روی یک متد پیچیده در ASP.NET Core یا یک سرویس gRPC، می‌توانید کد را انتخاب کرده، کلیک راست کنید و گزینه Copilot: Review Selected Code را اجرا کنید. Copilot مسائلی مانند موارد زیر را شناسایی می‌کند:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;فقدان بررسی‌های Null که ممکن است به خطاهای زمان اجرا منجر شوند.&lt;/li&gt;&lt;li&gt;مشکلات عملکردی در کوئری‌های Entity Framework.&lt;/li&gt;&lt;li&gt;نقض استانداردهای نام‌گذاری #C.&lt;/li&gt;&lt;li&gt;آسیب‌پذیری‌های امنیتی، مانند عدم اعتبارسنجی ورودی‌ها.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این بازبینی خودکار، تعداد خطاهای ارسالی به بازبینی رسمی را کاهش داده و زمان تیم را برای بحث‌های معماری آزاد می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-ltr&quot; dir=&quot;ltr&quot; style=&quot;text-align: left;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;3. تولید تست‌های هماهنگ با چارچوب‌های تست .NET&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;تست‌نویسی یکی از زمان‌برترین بخش‌های توسعه نرم‌افزار است، به‌ویژه در پروژه‌های .NET که از چارچوب‌هایی مانند MSTest، NUnit یا xUnit استفاده می‌کنند. Copilot می‌تواند با تولید خودکار تست‌های هماهنگ با استانداردهای تیمی، این فرآیند را تسریع کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نحوه تنظیم&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;تنظیمات زیر را برای تولید تست‌های مناسب .NET اعمال کنید:&lt;/div&gt;&lt;pre data-language=&quot;json&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;quot;github.copilot.chat.testGeneration.instructions&amp;quot;: [
+  { &amp;quot;text&amp;quot;: &amp;quot;Use xUnit for testing .NET Core applications&amp;quot; },
+  { &amp;quot;text&amp;quot;: &amp;quot;Follow test naming pattern: &amp;#39;describe&amp;#39; for class/method, &amp;#39;it/test&amp;#39; for specific behavior&amp;quot; },
+  { &amp;quot;text&amp;quot;: &amp;quot;Include happy path, edge cases, and error handling tests&amp;quot; },
+  { &amp;quot;text&amp;quot;: &amp;quot;Use Moq for mocking dependencies in service tests&amp;quot; },
+  { &amp;quot;text&amp;quot;: &amp;quot;Follow AAA (Arrange-Act-Assert) pattern in all tests&amp;quot; }
+]&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مثال خروجی&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای یک سرویس ASP.NET Core، Copilot ممکن است تستی مانند زیر تولید کند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class AuthServiceTests
+{
+    [Fact]
+    public void Login_ValidCredentials_ReturnsToken()
+    {
+        // Arrange
+        var mockRepo = new Mock&amp;lt;IUserRepository&amp;gt;();
+        mockRepo.Setup(repo =&amp;gt; repo.GetUser(It.IsAny&amp;lt;string&amp;gt;())).Returns(new User());
+        var service = new AuthService(mockRepo.Object);
+
+        // Act
+        var result = service.Login(&amp;quot;user&amp;quot;, &amp;quot;password&amp;quot;);
+
+        // Assert
+        Assert.NotNull(result.Token);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;تأثیر بر بهره‌وری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این قابلیت زمان تولید تست‌های اولیه را به‌شدت کاهش می‌دهد و به توسعه‌دهندگان اجازه می‌دهد تا روی تست‌های پیچیده‌تر یا بهینه‌سازی منطق برنامه تمرکز کنند. هماهنگی تست‌ها با چارچوب‌هایی مانند xUnit و الگوهای استاندارد مانند AAA، کیفیت و یکپارچگی تست‌ها را تضمین می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;4. ایجاد استانداردهای تیمی با فایل راهنما&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یکی از چالش‌های تیم‌های توسعه، حفظ یکپارچگی در سبک کدنویسی و رویه‌های توسعه است. Copilot با استفاده از یک فایل راهنمای مرکزی مانند .github/copilot-instructions.md، می‌تواند استانداردهای تیمی را به‌صورت خودکار اعمال کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نحوه ایجاد فایل راهنما&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;فایل زیر را در مسیر .github/copilot-instructions.md ایجاد کنید:&lt;/div&gt;&lt;pre data-language=&quot;markdown&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;# استانداردهای کدنویسی تیم
+
+## سبک کدنویسی
+- استفاده از camelCase برای متغیرها و متدها
+- استفاده از PascalCase برای کلاس‌ها و اینترفیس‌ها
+- محدودیت طول خط به 100 کاراکتر
+- استفاده از ساختارهای async/await در متدهای غیرهمزمان
+
+## مستندسازی
+- استفاده از XML Documentation برای متدهای عمومی
+- توضیح پارامترها و مقادیر بازگشتی
+
+## تست‌نویسی
+- استفاده از xUnit برای تست‌های .NET
+- نام‌گذاری فایل‌های تست با پسوند .Tests.cs
+- استفاده از Moq برای Mocking
+
+## جریان کاری Git
+- استفاده از استاندارد Conventional Commits
+- افزودن شناسه JIRA در پیام‌های Commit&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ارجاع به فایل راهنما&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;این فایل را در تنظیمات Copilot ارجاع دهید:&lt;/div&gt;&lt;pre data-language=&quot;json&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;quot;github.copilot.chat.commitMessageGeneration.instructions&amp;quot;: [
+  { &amp;quot;file&amp;quot;: &amp;quot;.github/copilot-instructions.md#جریان کاری Git&amp;quot; },
+  { &amp;quot;text&amp;quot;: &amp;quot;Follow team standards for commit messages&amp;quot; }
+],
+&amp;quot;github.copilot.chat.testGeneration.instructions&amp;quot;: [
+  { &amp;quot;file&amp;quot;: &amp;quot;.github/copilot-instructions.md#تست‌نویسی&amp;quot; },
+  { &amp;quot;text&amp;quot;: &amp;quot;Generate tests according to team conventions&amp;quot; }
+]&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مزایا&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این فایل به‌عنوان مرجع مرکزی، اطمینان می‌دهد که همه توسعه‌دهندگان، از جمله اعضای جدید، از استانداردهای یکسانی پیروی می‌کنند. این امر در پروژه‌های .NET، که ممکن است شامل معماری‌های پیچیده‌ای مانند Microservices باشند، به کاهش ناسازگاری‌ها و تسریع فرآیند یادگیری کمک می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;GitHub Copilot با قابلیت‌های پیشرفته خود، فراتر از یک ابزار تکمیل کد عمل کرده و به یک دستیار هوشمند برای توسعه‌دهندگان .NET تبدیل شده است. با خودکارسازی پیام‌های Commit، بازبینی کد پیش از ارسال، تولید تست‌های هماهنگ با چارچوب‌های تست .NET و ایجاد استانداردهای تیمی، این ابزار می‌تواند بهره‌وری تیم را افزایش داده و کیفیت کد را بهبود بخشد. پیاده‌سازی این راهکارها نیازمند تنظیمات ساده‌ای است که با نیازهای خاص پروژه‌های .NET هماهنگ می‌شوند. با سرمایه‌گذاری در سفارشی‌سازی Copilot، توسعه‌دهندگان می‌توانند زمان بیشتری را به حل مسائل پیچیده اختصاص دهند و همکاری تیمی را تقویت کنند.&lt;/div&gt;">
+    <meta name="twitter:card" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در دنیای توسعه نرم‌افزار، ابزارهای هوش مصنوعی مانند GitHub Copilot به‌سرعت در حال تبدیل شدن به بخشی جدایی‌ناپذیر از جریان کاری (Workflow) توسعه‌دهندگان هستند. این ابزار فراتر از یک تکمیل‌کننده کد (Code Completion Tool) عمل کرده و با قابلیت‌های پیشرفته خود، امکان خودکارسازی وظایف تکراری، بهبود کیفیت کد و افزایش بهره‌وری را فراهم می‌کند. برای توسعه‌دهندگان چارچوب .NET، که با پروژه‌های پیچیده و استانداردهای بالای کدنویسی سروکار دارند، استفاده بهینه از Copilot می‌تواند تحولی چشمگیر در فرآیند توسعه ایجاد کند. این مقاله با تمرکز بر چهار راهکار کلیدی برای سفارشی‌سازی Copilot، به شما نشان می‌دهد که چگونه این ابزار می‌تواند به یک دستیار هوشمند و هماهنگ با نیازهای تیم توسعه .NET تبدیل شود. این راهکارها شامل خودکارسازی پیام‌های Commit، بازبینی کد مبتنی بر هوش مصنوعی، تولید تست‌های هماهنگ با چارچوب‌های تست .NET و ایجاد استانداردهای تیمی از طریق فایل‌های راهنما هستند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;1. خودکارسازی پیام‌های Commit با استانداردهای Conventional Commits&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یکی از چالش‌های رایج در پروژه‌های توسعه نرم‌افزار، نگارش پیام‌های Commit دقیق و منسجم است که تغییرات کد را به‌خوبی توصیف کنند. این موضوع به‌ویژه در پروژه‌های .NET، که اغلب شامل چندین توسعه‌دهنده و ادغام مداوم (Continuous Integration) هستند، اهمیت بیشتری دارد. GitHub Copilot می‌تواند با تحلیل تغییرات آماده‌شده (Staged Changes) و تولید پیام‌های Commit مبتنی بر استاندارد Conventional Commits، این فرآیند را خودکار کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نحوه تنظیم&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای فعال‌سازی این قابلیت، می‌توانید فایل تنظیمات .vscode/settings.json را به‌صورت زیر پیکربندی کنید:&lt;/div&gt;&lt;pre data-language=&quot;json&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;quot;github.copilot.chat.commitMessageGeneration.instructions&amp;quot;: [
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Write concise Conventional Commits messages. Include a type (feat, fix, docs, etc.), optional scope, and a brief summary. Wrap body at 72 characters.&amp;quot;
+  },
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Start with JIRA ticket ID if applicable, e.g., &amp;#39;PROJ-123: feat(auth): implemented login&amp;#39;&amp;quot;
+  },
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Use past tense for all descriptions (e.g., &amp;#39;added&amp;#39;, &amp;#39;fixed&amp;#39;, &amp;#39;updated&amp;#39;)&amp;quot;
+  },
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;For multiple changes, use bullet points with hyphens in the commit body&amp;quot;
+  }
+]&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;با این تنظیمات، هنگام اجرای دستور Copilot: Generate Commit Message در VS Code، خروجی‌ای مانند زیر تولید می‌شود:&lt;/div&gt;&lt;pre data-language=&quot;markdown&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PROJ-456: feat(auth): implemented OAuth2 refresh token mechanism
+
+- Added automatic token refresh to prevent session timeouts
+- Updated authentication service to handle refresh failures
+- Fixed edge case with expired tokens in offline mode&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مزایا برای توسعه‌دهندگان .NET&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این پیام‌های منسجم نه‌تنها تاریخچه پروژه را خواناتر می‌کنند، بلکه فرآیند تولید Changelog و بازبینی کد را نیز تسهیل می‌کنند. در پروژه‌های .NET، که ممکن است شامل ماژول‌های پیچیده‌ای مانند ASP.NET Core یا Entity Framework باشند، داشتن پیام‌های استاندارد به هماهنگی تیم و ردیابی تغییرات کمک شایانی می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;2. بازبینی کد مبتنی بر هوش مصنوعی پیش از Commit&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بازبینی کد (Code Review) یکی از مراحل حیاتی در توسعه نرم‌افزار است که به شناسایی باگ‌ها، مشکلات امنیتی و بهبود کیفیت کد کمک می‌کند. Copilot می‌تواند این فرآیند را با بازبینی خودکار کد پیش از ارسال به مرحله بازبینی رسمی، بهبود بخشد. این قابلیت به‌ویژه برای توسعه‌دهندگان .NET، که با استانداردهای سخت‌گیرانه‌ای مانند C# Coding Conventions کار می‌کنند، بسیار ارزشمند است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نحوه تنظیم&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای فعال‌سازی بازبینی کد، تنظیمات زیر را به .vscode/settings.json اضافه کنید:&lt;/div&gt;&lt;pre data-language=&quot;json&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;quot;github.copilot.chat.reviewSelection.instructions&amp;quot;: [
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Review the selected code for correctness, readability, security, and best practices.&amp;quot;
+  },
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Check for proper error handling and edge cases.&amp;quot;
+  },
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Identify potential performance bottlenecks.&amp;quot;
+  },
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Suggest ways to improve variable naming and code clarity.&amp;quot;
+  },
+  {
+    &amp;quot;text&amp;quot;: &amp;quot;Ensure code follows .NET coding standards and team conventions.&amp;quot;
+  }
+]&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;کاربرد در عمل&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;هنگام کار روی یک متد پیچیده در ASP.NET Core یا یک سرویس gRPC، می‌توانید کد را انتخاب کرده، کلیک راست کنید و گزینه Copilot: Review Selected Code را اجرا کنید. Copilot مسائلی مانند موارد زیر را شناسایی می‌کند:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;فقدان بررسی‌های Null که ممکن است به خطاهای زمان اجرا منجر شوند.&lt;/li&gt;&lt;li&gt;مشکلات عملکردی در کوئری‌های Entity Framework.&lt;/li&gt;&lt;li&gt;نقض استانداردهای نام‌گذاری #C.&lt;/li&gt;&lt;li&gt;آسیب‌پذیری‌های امنیتی، مانند عدم اعتبارسنجی ورودی‌ها.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این بازبینی خودکار، تعداد خطاهای ارسالی به بازبینی رسمی را کاهش داده و زمان تیم را برای بحث‌های معماری آزاد می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-ltr&quot; dir=&quot;ltr&quot; style=&quot;text-align: left;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;3. تولید تست‌های هماهنگ با چارچوب‌های تست .NET&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;تست‌نویسی یکی از زمان‌برترین بخش‌های توسعه نرم‌افزار است، به‌ویژه در پروژه‌های .NET که از چارچوب‌هایی مانند MSTest، NUnit یا xUnit استفاده می‌کنند. Copilot می‌تواند با تولید خودکار تست‌های هماهنگ با استانداردهای تیمی، این فرآیند را تسریع کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نحوه تنظیم&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;تنظیمات زیر را برای تولید تست‌های مناسب .NET اعمال کنید:&lt;/div&gt;&lt;pre data-language=&quot;json&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;quot;github.copilot.chat.testGeneration.instructions&amp;quot;: [
+  { &amp;quot;text&amp;quot;: &amp;quot;Use xUnit for testing .NET Core applications&amp;quot; },
+  { &amp;quot;text&amp;quot;: &amp;quot;Follow test naming pattern: &amp;#39;describe&amp;#39; for class/method, &amp;#39;it/test&amp;#39; for specific behavior&amp;quot; },
+  { &amp;quot;text&amp;quot;: &amp;quot;Include happy path, edge cases, and error handling tests&amp;quot; },
+  { &amp;quot;text&amp;quot;: &amp;quot;Use Moq for mocking dependencies in service tests&amp;quot; },
+  { &amp;quot;text&amp;quot;: &amp;quot;Follow AAA (Arrange-Act-Assert) pattern in all tests&amp;quot; }
+]&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مثال خروجی&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای یک سرویس ASP.NET Core، Copilot ممکن است تستی مانند زیر تولید کند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class AuthServiceTests
+{
+    [Fact]
+    public void Login_ValidCredentials_ReturnsToken()
+    {
+        // Arrange
+        var mockRepo = new Mock&amp;lt;IUserRepository&amp;gt;();
+        mockRepo.Setup(repo =&amp;gt; repo.GetUser(It.IsAny&amp;lt;string&amp;gt;())).Returns(new User());
+        var service = new AuthService(mockRepo.Object);
+
+        // Act
+        var result = service.Login(&amp;quot;user&amp;quot;, &amp;quot;password&amp;quot;);
+
+        // Assert
+        Assert.NotNull(result.Token);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;تأثیر بر بهره‌وری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این قابلیت زمان تولید تست‌های اولیه را به‌شدت کاهش می‌دهد و به توسعه‌دهندگان اجازه می‌دهد تا روی تست‌های پیچیده‌تر یا بهینه‌سازی منطق برنامه تمرکز کنند. هماهنگی تست‌ها با چارچوب‌هایی مانند xUnit و الگوهای استاندارد مانند AAA، کیفیت و یکپارچگی تست‌ها را تضمین می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;4. ایجاد استانداردهای تیمی با فایل راهنما&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یکی از چالش‌های تیم‌های توسعه، حفظ یکپارچگی در سبک کدنویسی و رویه‌های توسعه است. Copilot با استفاده از یک فایل راهنمای مرکزی مانند .github/copilot-instructions.md، می‌تواند استانداردهای تیمی را به‌صورت خودکار اعمال کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نحوه ایجاد فایل راهنما&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;فایل زیر را در مسیر .github/copilot-instructions.md ایجاد کنید:&lt;/div&gt;&lt;pre data-language=&quot;markdown&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;# استانداردهای کدنویسی تیم
+
+## سبک کدنویسی
+- استفاده از camelCase برای متغیرها و متدها
+- استفاده از PascalCase برای کلاس‌ها و اینترفیس‌ها
+- محدودیت طول خط به 100 کاراکتر
+- استفاده از ساختارهای async/await در متدهای غیرهمزمان
+
+## مستندسازی
+- استفاده از XML Documentation برای متدهای عمومی
+- توضیح پارامترها و مقادیر بازگشتی
+
+## تست‌نویسی
+- استفاده از xUnit برای تست‌های .NET
+- نام‌گذاری فایل‌های تست با پسوند .Tests.cs
+- استفاده از Moq برای Mocking
+
+## جریان کاری Git
+- استفاده از استاندارد Conventional Commits
+- افزودن شناسه JIRA در پیام‌های Commit&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ارجاع به فایل راهنما&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;این فایل را در تنظیمات Copilot ارجاع دهید:&lt;/div&gt;&lt;pre data-language=&quot;json&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;quot;github.copilot.chat.commitMessageGeneration.instructions&amp;quot;: [
+  { &amp;quot;file&amp;quot;: &amp;quot;.github/copilot-instructions.md#جریان کاری Git&amp;quot; },
+  { &amp;quot;text&amp;quot;: &amp;quot;Follow team standards for commit messages&amp;quot; }
+],
+&amp;quot;github.copilot.chat.testGeneration.instructions&amp;quot;: [
+  { &amp;quot;file&amp;quot;: &amp;quot;.github/copilot-instructions.md#تست‌نویسی&amp;quot; },
+  { &amp;quot;text&amp;quot;: &amp;quot;Generate tests according to team conventions&amp;quot; }
+]&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مزایا&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این فایل به‌عنوان مرجع مرکزی، اطمینان می‌دهد که همه توسعه‌دهندگان، از جمله اعضای جدید، از استانداردهای یکسانی پیروی می‌کنند. این امر در پروژه‌های .NET، که ممکن است شامل معماری‌های پیچیده‌ای مانند Microservices باشند، به کاهش ناسازگاری‌ها و تسریع فرآیند یادگیری کمک می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;GitHub Copilot با قابلیت‌های پیشرفته خود، فراتر از یک ابزار تکمیل کد عمل کرده و به یک دستیار هوشمند برای توسعه‌دهندگان .NET تبدیل شده است. با خودکارسازی پیام‌های Commit، بازبینی کد پیش از ارسال، تولید تست‌های هماهنگ با چارچوب‌های تست .NET و ایجاد استانداردهای تیمی، این ابزار می‌تواند بهره‌وری تیم را افزایش داده و کیفیت کد را بهبود بخشد. پیاده‌سازی این راهکارها نیازمند تنظیمات ساده‌ای است که با نیازهای خاص پروژه‌های .NET هماهنگ می‌شوند. با سرمایه‌گذاری در سفارشی‌سازی Copilot، توسعه‌دهندگان می‌توانند زمان بیشتری را به حل مسائل پیچیده اختصاص دهند و همکاری تیمی را تقویت کنند.&lt;/div&gt;">
+    <meta property="article:published_time" content="Mon, 21 Apr 2025 03:00:11 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
     <meta content='IE=edge' http-equiv='X-UA-Compatible'>
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">
-	
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
 	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
-
     <link href="vs.min.css" rel="stylesheet" type="text/css">
-    <script src="highlight.min.js" type="text/javascript"></script>
-	
+    <script src="highlight.min.js" type="text/javascript"></script>	
     <link href="styles.css" rel="stylesheet" type="text/css">	
     <style>
       @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
@@ -42,8 +459,8 @@
         }
      }
     </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
 </head>
-
 <body dir='rtl'>
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
@@ -53,7 +470,7 @@
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۳۶۹۵</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۶۹۷</span></td>
 </tr>
 <tr>
 <td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
@@ -73,7 +490,7 @@
 </tr>
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۲۲</span></td>
 </tr>
 </tbody>
 </table>
@@ -204,8 +621,5 @@
 
 <!-- to load custom fonts for printing -->
 <div class="useSamimFD">&nbsp;</div>
-
-<script src="SyntaxHighlighter.js" type="text/javascript"></script>
 </body>
-
 </html>

@@ -1,17 +1,429 @@
 <!DOCTYPE html>
 <html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
-
 <head>
-    <title>‫‫رمزنگاری پساکوانتومی و امن‌تر در .NET 10</title>
+    <title>‫‫رمزنگاری پساکوانتومی و امن‌تر در .NET 10</title>     <meta name="description" content="&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;سال ۲۰۲۵ است و دیگر نمی‌توان امنیت را به تعویق انداخت. در دنیای هوش مصنوعی، کلیدهای API، بردارهای embedding، پرامپت‌های حساس و داده‌های کاربران همه روزه در معرض خطر هستند. خوشبختانه .NET 10 با اضافه کردن اولین الگوریتم‌های استاندارد پساکوانتومی (Post-Quantum Cryptography) مستقیماً در BCL، ابزارهای قدرتمندی در اختیار ما قرار داده است.&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;در این مقاله به صورت عملی و بدون پیچیدگی‌های غیرضروری یاد می‌گیریم که چطور از دو ابزار اصلی جدید استفاده کنیم:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;ML-DSA (قبلاً Dilithium): امضای دیجیتال مقاوم در برابر کامپیوترهای کوانتومی&lt;/li&gt;&lt;li&gt;AES-GCM: رمزنگاری احراز هویت‌شده (Authenticated Encryption) که همچنان بهترین انتخاب برای حفاظت از اسرار است&lt;/li&gt;&lt;/ul&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;هدف این است که در پایان مقاله بتوانید کلیدهای OpenAI، embeddingهای حساس و هر داده محرمانه دیگری را به شکل امن و آینده‌نگرانه ذخیره و استفاده کنید.&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;۱. امضای پساکوانتومی با ML-DSA&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چرا باید نگران کوانتوم باشیم؟&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;الگوریتم شُور (Shor’s algorithm) روی کامپیوتر کوانتومی می‌تواند RSA و ECDSA را در چند دقیقه بشکند. حمله «Harvest Now, Decrypt Later» یعنی دشمن امروز داده‌های امضاشده شما را جمع‌آوری می‌کند و سال‌ها بعد آن‌ها را می‌شکند. پس اگر داده‌ای دارید که باید ۱۰ سال دیگر هم معتبر باشد، همین امروز باید به ML-DSA مهاجرت کنید.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;استفاده بسیار ساده از ML-DSA در .NET 10&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;using System.Security.Cryptography;
+using System.Text;
+
+// بررسی پشتیبانی پلتفرم
+if (!MLDsa.IsSupported)
+    throw new PlatformNotSupportedException(&amp;quot;ML-DSA در این سیستم پشتیبانی نمی‌شود&amp;quot;);
+
+// تولید جفت‌کلید ML-DSA-65 (تقریباً معادل امنیت ۱۹۲ بیت)
+using var mlDsa = MLDsa.GenerateKey(MLDsaAlgorithm.MLDsa65);
+
+// صادرات کلید عمومی (برای به‌اشتراک‌گذاری)
+byte[] publicKey = mlDsa.ExportSubjectPublicKeyInfo();
+Console.WriteLine($&amp;quot;اندازه کلید عمومی: {publicKey.Length} بایت&amp;quot;);
+
+// متن دلخواه برای امضا
+string message = &amp;quot;این یک پیام بسیار مهم است که باید تا سال ۲۰۴۰ معتبر بماند.&amp;quot;;
+byte[] data = Encoding.UTF8.GetBytes(message);
+
+// امضا کردن
+byte[] signature = mlDsa.SignData(data);
+Console.WriteLine($&amp;quot;اندازه امضا: {signature.Length} بایت (~3.3 KB برای ML-DSA-65)&amp;quot;);
+
+// ——— مرحله تأیید ———
+using var verifier = MLDsa.ImportSubjectPublicKeyInfo(publicKey);
+
+bool valid = verifier.VerifyData(data, signature);
+Console.WriteLine($&amp;quot;امضا معتبر است؟ {valid}&amp;quot;); // True
+
+// تست دستکاری
+data[0] ^= 1; // یک بیت را عوض می‌کنیم
+bool tampered = verifier.VerifyData(data, signature);
+Console.WriteLine($&amp;quot;امضا پس از دستکاری معتبر است؟ {tampered}&amp;quot;); // False&lt;/pre&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong&gt;نکات مهم عملی&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;اندازه امضا بزرگ است (۲٫۴ تا ۴٫۶ کیلوبایت بسته به سطح امنیتی). این «مالیات کوانتومی» است و باید در طراحی پروتکل در نظر گرفته شود.&lt;/li&gt;&lt;li&gt;API دقیقاً مشابه RSA و ECDsa است: مهاجرت بسیار ساده است.&lt;/li&gt;&lt;li&gt;سه سطح امنیتی داریم: MLDsa44 (۱۲۸ بیت)، MLDsa65 (۱۹۲ بیت، توصیه‌شده)، MLDsa87 (۲۵۶ بیت).&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;۲. رمزنگاری احراز هویت‌شده با AES-GCM&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;برای حفاظت از کلیدهای API، توکن‌ها و embeddingها هیچ چیز بهتر و ساده‌تر از AES-GCM نیست. این الگوریتم هم محرمانگی و هم یکپارچگی (integrity) را تضمین می‌کند.&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;using System.Security.Cryptography;
+using System.Text;
+
+// کلید اصلی (در دنیای واقعی از Key Vault یا HSM بگیرید)
+byte[] masterKey = RandomNumberGenerator.GetBytes(32); // 256 بیت
+
+string secret = &amp;quot;sk-proj-SuperSecretOpenAIKey1234567890&amp;quot;;
+byte[] plaintext = Encoding.UTF8.GetBytes(secret);
+
+// ——— رمزنگاری ———
+byte[] nonce = RandomNumberGenerator.GetBytes(12);     // هر بار باید یکتا باشد!
+byte[] ciphertext = new byte[plaintext.Length];
+byte[] tag = new byte[16]; // تگ احراز هویت
+
+using var aes = new AesGcm(masterKey);
+aes.Encrypt(nonce, plaintext, ciphertext, tag);
+
+// ذخیره‌سازی: nonce + ciphertext + tag را کنار هم نگه دارید
+byte[] stored = nonce.Concat(ciphertext).Concat(tag).ToArray();
+
+// ——— رمزگشایی ———
+static string Decrypt(byte[] masterKey, byte[] storedData)
+{
+    var nonce = storedData.AsSpan(0, 12);
+    var tag = storedData.AsSpan(storedData.Length - 16);
+    var ciphertext = storedData.AsSpan(12, storedData.Length - 28);
+
+    using var aes = new AesGcm(masterKey);
+    byte[] recovered = new byte[ciphertext.Length];
+
+    aes.Decrypt(nonce, ciphertext, tag, recovered);
+    return Encoding.UTF8.GetString(recovered);
+}
+
+// استفاده
+string apiKey = Decrypt(masterKey, stored);
+Console.WriteLine(apiKey); // کلید اصلی برمی‌گردد
+
+// تست دستکاری → به طور خودکار خطا می‌دهد
+ciphertext[0] ^= 1;
+try { Decrypt(masterKey, stored); }
+catch (CryptographicException) { Console.WriteLine(&amp;quot;دستکاری تشخیص داده شد!&amp;quot;); }&lt;/pre&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong&gt;نکات طلایی&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;هرگز nonce را تکرار نکنید (۱۲ بایت تصادفی کافی است).&lt;/li&gt;&lt;li&gt;کلید اصلی (masterKey) را هرگز در کد سخت نکنید. از Azure Key Vault، AWS Secrets Manager یا فایل رمز شده با دسترسی 600 استفاده کنید.&lt;/li&gt;&lt;li&gt;پس از استفاده از کلید، آرایه بایت را با Array.Clear پاک کنید (برای stringها نمی‌شود پاک کرد، پس بهتر است تا حد امکان با byte[] کار کنید).&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;۳. کاربردهای واقعی در پروژه‌های هوش مصنوعی&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الف. حفاظت از کلیدهای OpenAI و مدل‌های دیگر&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// بارگذاری کلید رمز شده از دیسک
+byte[] encryptedKey = File.ReadAllBytes(&amp;quot;.openai/key.enc&amp;quot;);
+string apiKey = Decrypt(masterKey, encryptedKey);
+
+// استفاده موقت
+OpenAiClient client = new(apiKey);
+// ... استفاده ...
+// پاک کردن از حافظه
+Array.Clear(Encoding.UTF8.GetBytes(apiKey), 0, apiKey.Length);&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ب. حفاظت از بردارهای embedding (در صورت لزوم)&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;توجه: رمزنگاری embeddingها باعث می‌شود جستجوی شباهت (k-NN) مستقیماً ممکن نباشد. دو راه حل عملی وجود دارد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;embeddingها را در دیتابیس امن (شبکه خصوصی + RBAC + دیسک رمز شده) به صورت plaintext نگه دارید؛ راهکار اکثر شرکت‌ها در ۲۰۲۵.&lt;/li&gt;&lt;li&gt;فقط در زمان ذخیره‌سازی طولانی‌مدت (بک‌آپ سرد) آن‌ها را با AES-GCM رمز کنید.&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چک‌لیست امنیتی سریع قبل از استقرار&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;آیا از ML-DSA یا حداقل RSA-3072+ برای امضاهای بلندمدت استفاده می‌کنید؟&lt;/li&gt;&lt;li&gt;آیا همه اسرار (API Key، Connection String و غیره) با AES-256-GCM رمز شده‌اند؟&lt;/li&gt;&lt;li&gt;آیا nonceها یکتا و تصادفی هستند؟&lt;/li&gt;&lt;li&gt;آیا کلیدهای اصلی از Key Vault یا HSM بارگذاری می‌شوند؟&lt;/li&gt;&lt;li&gt;آیا ورودی کاربر قبل از ارسال به LLM اعتبارسنجی می‌شود؟ (حداقل فیلتر کلمات کلیدی مثل &amp;quot;ignore previous instructions&amp;quot;)&lt;/li&gt;&lt;li&gt;آیا هیچ وقت کلید یا داده حساسی لاگ نمی‌شود؟&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;.NET 10 با آوردن ML-DSA و ML-KEM مستقیماً در BCL، یکی از ساده‌ترین و امن‌ترین پلتفرم‌ها برای ساخت برنامه‌های پساکوانتومی شده است. دیگر نیازی به کتابخانه‌های خارجی یا پیچیدگی‌های زیاد نیست. امنیت دیگر یک «ویژگی اضافه» نیست؛ پایه و اساس هر برنامه هوش مصنوعی موفق است.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;از امروز شروع کنید: یک کلید ML-DSA بسازید، کلیدهای API خود را با AES-GCM رمز کنید و خیالتان راحت باشد که حتی اگر کامپیوترهای کوانتومی ۱۰ سال دیگر آمدند، داده‌های شما همچنان امن خواهند ماند.&lt;/div&gt;">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="رمزنگاری پساکوانتومی و امن‌تر در .NET 10">
+    <meta itemprop="description" content="&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;سال ۲۰۲۵ است و دیگر نمی‌توان امنیت را به تعویق انداخت. در دنیای هوش مصنوعی، کلیدهای API، بردارهای embedding، پرامپت‌های حساس و داده‌های کاربران همه روزه در معرض خطر هستند. خوشبختانه .NET 10 با اضافه کردن اولین الگوریتم‌های استاندارد پساکوانتومی (Post-Quantum Cryptography) مستقیماً در BCL، ابزارهای قدرتمندی در اختیار ما قرار داده است.&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;در این مقاله به صورت عملی و بدون پیچیدگی‌های غیرضروری یاد می‌گیریم که چطور از دو ابزار اصلی جدید استفاده کنیم:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;ML-DSA (قبلاً Dilithium): امضای دیجیتال مقاوم در برابر کامپیوترهای کوانتومی&lt;/li&gt;&lt;li&gt;AES-GCM: رمزنگاری احراز هویت‌شده (Authenticated Encryption) که همچنان بهترین انتخاب برای حفاظت از اسرار است&lt;/li&gt;&lt;/ul&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;هدف این است که در پایان مقاله بتوانید کلیدهای OpenAI، embeddingهای حساس و هر داده محرمانه دیگری را به شکل امن و آینده‌نگرانه ذخیره و استفاده کنید.&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;۱. امضای پساکوانتومی با ML-DSA&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چرا باید نگران کوانتوم باشیم؟&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;الگوریتم شُور (Shor’s algorithm) روی کامپیوتر کوانتومی می‌تواند RSA و ECDSA را در چند دقیقه بشکند. حمله «Harvest Now, Decrypt Later» یعنی دشمن امروز داده‌های امضاشده شما را جمع‌آوری می‌کند و سال‌ها بعد آن‌ها را می‌شکند. پس اگر داده‌ای دارید که باید ۱۰ سال دیگر هم معتبر باشد، همین امروز باید به ML-DSA مهاجرت کنید.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;استفاده بسیار ساده از ML-DSA در .NET 10&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;using System.Security.Cryptography;
+using System.Text;
+
+// بررسی پشتیبانی پلتفرم
+if (!MLDsa.IsSupported)
+    throw new PlatformNotSupportedException(&amp;quot;ML-DSA در این سیستم پشتیبانی نمی‌شود&amp;quot;);
+
+// تولید جفت‌کلید ML-DSA-65 (تقریباً معادل امنیت ۱۹۲ بیت)
+using var mlDsa = MLDsa.GenerateKey(MLDsaAlgorithm.MLDsa65);
+
+// صادرات کلید عمومی (برای به‌اشتراک‌گذاری)
+byte[] publicKey = mlDsa.ExportSubjectPublicKeyInfo();
+Console.WriteLine($&amp;quot;اندازه کلید عمومی: {publicKey.Length} بایت&amp;quot;);
+
+// متن دلخواه برای امضا
+string message = &amp;quot;این یک پیام بسیار مهم است که باید تا سال ۲۰۴۰ معتبر بماند.&amp;quot;;
+byte[] data = Encoding.UTF8.GetBytes(message);
+
+// امضا کردن
+byte[] signature = mlDsa.SignData(data);
+Console.WriteLine($&amp;quot;اندازه امضا: {signature.Length} بایت (~3.3 KB برای ML-DSA-65)&amp;quot;);
+
+// ——— مرحله تأیید ———
+using var verifier = MLDsa.ImportSubjectPublicKeyInfo(publicKey);
+
+bool valid = verifier.VerifyData(data, signature);
+Console.WriteLine($&amp;quot;امضا معتبر است؟ {valid}&amp;quot;); // True
+
+// تست دستکاری
+data[0] ^= 1; // یک بیت را عوض می‌کنیم
+bool tampered = verifier.VerifyData(data, signature);
+Console.WriteLine($&amp;quot;امضا پس از دستکاری معتبر است؟ {tampered}&amp;quot;); // False&lt;/pre&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong&gt;نکات مهم عملی&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;اندازه امضا بزرگ است (۲٫۴ تا ۴٫۶ کیلوبایت بسته به سطح امنیتی). این «مالیات کوانتومی» است و باید در طراحی پروتکل در نظر گرفته شود.&lt;/li&gt;&lt;li&gt;API دقیقاً مشابه RSA و ECDsa است: مهاجرت بسیار ساده است.&lt;/li&gt;&lt;li&gt;سه سطح امنیتی داریم: MLDsa44 (۱۲۸ بیت)، MLDsa65 (۱۹۲ بیت، توصیه‌شده)، MLDsa87 (۲۵۶ بیت).&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;۲. رمزنگاری احراز هویت‌شده با AES-GCM&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;برای حفاظت از کلیدهای API، توکن‌ها و embeddingها هیچ چیز بهتر و ساده‌تر از AES-GCM نیست. این الگوریتم هم محرمانگی و هم یکپارچگی (integrity) را تضمین می‌کند.&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;using System.Security.Cryptography;
+using System.Text;
+
+// کلید اصلی (در دنیای واقعی از Key Vault یا HSM بگیرید)
+byte[] masterKey = RandomNumberGenerator.GetBytes(32); // 256 بیت
+
+string secret = &amp;quot;sk-proj-SuperSecretOpenAIKey1234567890&amp;quot;;
+byte[] plaintext = Encoding.UTF8.GetBytes(secret);
+
+// ——— رمزنگاری ———
+byte[] nonce = RandomNumberGenerator.GetBytes(12);     // هر بار باید یکتا باشد!
+byte[] ciphertext = new byte[plaintext.Length];
+byte[] tag = new byte[16]; // تگ احراز هویت
+
+using var aes = new AesGcm(masterKey);
+aes.Encrypt(nonce, plaintext, ciphertext, tag);
+
+// ذخیره‌سازی: nonce + ciphertext + tag را کنار هم نگه دارید
+byte[] stored = nonce.Concat(ciphertext).Concat(tag).ToArray();
+
+// ——— رمزگشایی ———
+static string Decrypt(byte[] masterKey, byte[] storedData)
+{
+    var nonce = storedData.AsSpan(0, 12);
+    var tag = storedData.AsSpan(storedData.Length - 16);
+    var ciphertext = storedData.AsSpan(12, storedData.Length - 28);
+
+    using var aes = new AesGcm(masterKey);
+    byte[] recovered = new byte[ciphertext.Length];
+
+    aes.Decrypt(nonce, ciphertext, tag, recovered);
+    return Encoding.UTF8.GetString(recovered);
+}
+
+// استفاده
+string apiKey = Decrypt(masterKey, stored);
+Console.WriteLine(apiKey); // کلید اصلی برمی‌گردد
+
+// تست دستکاری → به طور خودکار خطا می‌دهد
+ciphertext[0] ^= 1;
+try { Decrypt(masterKey, stored); }
+catch (CryptographicException) { Console.WriteLine(&amp;quot;دستکاری تشخیص داده شد!&amp;quot;); }&lt;/pre&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong&gt;نکات طلایی&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;هرگز nonce را تکرار نکنید (۱۲ بایت تصادفی کافی است).&lt;/li&gt;&lt;li&gt;کلید اصلی (masterKey) را هرگز در کد سخت نکنید. از Azure Key Vault، AWS Secrets Manager یا فایل رمز شده با دسترسی 600 استفاده کنید.&lt;/li&gt;&lt;li&gt;پس از استفاده از کلید، آرایه بایت را با Array.Clear پاک کنید (برای stringها نمی‌شود پاک کرد، پس بهتر است تا حد امکان با byte[] کار کنید).&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;۳. کاربردهای واقعی در پروژه‌های هوش مصنوعی&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الف. حفاظت از کلیدهای OpenAI و مدل‌های دیگر&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// بارگذاری کلید رمز شده از دیسک
+byte[] encryptedKey = File.ReadAllBytes(&amp;quot;.openai/key.enc&amp;quot;);
+string apiKey = Decrypt(masterKey, encryptedKey);
+
+// استفاده موقت
+OpenAiClient client = new(apiKey);
+// ... استفاده ...
+// پاک کردن از حافظه
+Array.Clear(Encoding.UTF8.GetBytes(apiKey), 0, apiKey.Length);&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ب. حفاظت از بردارهای embedding (در صورت لزوم)&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;توجه: رمزنگاری embeddingها باعث می‌شود جستجوی شباهت (k-NN) مستقیماً ممکن نباشد. دو راه حل عملی وجود دارد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;embeddingها را در دیتابیس امن (شبکه خصوصی + RBAC + دیسک رمز شده) به صورت plaintext نگه دارید؛ راهکار اکثر شرکت‌ها در ۲۰۲۵.&lt;/li&gt;&lt;li&gt;فقط در زمان ذخیره‌سازی طولانی‌مدت (بک‌آپ سرد) آن‌ها را با AES-GCM رمز کنید.&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چک‌لیست امنیتی سریع قبل از استقرار&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;آیا از ML-DSA یا حداقل RSA-3072+ برای امضاهای بلندمدت استفاده می‌کنید؟&lt;/li&gt;&lt;li&gt;آیا همه اسرار (API Key، Connection String و غیره) با AES-256-GCM رمز شده‌اند؟&lt;/li&gt;&lt;li&gt;آیا nonceها یکتا و تصادفی هستند؟&lt;/li&gt;&lt;li&gt;آیا کلیدهای اصلی از Key Vault یا HSM بارگذاری می‌شوند؟&lt;/li&gt;&lt;li&gt;آیا ورودی کاربر قبل از ارسال به LLM اعتبارسنجی می‌شود؟ (حداقل فیلتر کلمات کلیدی مثل &amp;quot;ignore previous instructions&amp;quot;)&lt;/li&gt;&lt;li&gt;آیا هیچ وقت کلید یا داده حساسی لاگ نمی‌شود؟&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;.NET 10 با آوردن ML-DSA و ML-KEM مستقیماً در BCL، یکی از ساده‌ترین و امن‌ترین پلتفرم‌ها برای ساخت برنامه‌های پساکوانتومی شده است. دیگر نیازی به کتابخانه‌های خارجی یا پیچیدگی‌های زیاد نیست. امنیت دیگر یک «ویژگی اضافه» نیست؛ پایه و اساس هر برنامه هوش مصنوعی موفق است.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;از امروز شروع کنید: یک کلید ML-DSA بسازید، کلیدهای API خود را با AES-GCM رمز کنید و خیالتان راحت باشد که حتی اگر کامپیوترهای کوانتومی ۱۰ سال دیگر آمدند، داده‌های شما همچنان امن خواهند ماند.&lt;/div&gt;">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="رمزنگاری پساکوانتومی و امن‌تر در .NET 10">
+    <meta property="og:description" content="&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;سال ۲۰۲۵ است و دیگر نمی‌توان امنیت را به تعویق انداخت. در دنیای هوش مصنوعی، کلیدهای API، بردارهای embedding، پرامپت‌های حساس و داده‌های کاربران همه روزه در معرض خطر هستند. خوشبختانه .NET 10 با اضافه کردن اولین الگوریتم‌های استاندارد پساکوانتومی (Post-Quantum Cryptography) مستقیماً در BCL، ابزارهای قدرتمندی در اختیار ما قرار داده است.&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;در این مقاله به صورت عملی و بدون پیچیدگی‌های غیرضروری یاد می‌گیریم که چطور از دو ابزار اصلی جدید استفاده کنیم:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;ML-DSA (قبلاً Dilithium): امضای دیجیتال مقاوم در برابر کامپیوترهای کوانتومی&lt;/li&gt;&lt;li&gt;AES-GCM: رمزنگاری احراز هویت‌شده (Authenticated Encryption) که همچنان بهترین انتخاب برای حفاظت از اسرار است&lt;/li&gt;&lt;/ul&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;هدف این است که در پایان مقاله بتوانید کلیدهای OpenAI، embeddingهای حساس و هر داده محرمانه دیگری را به شکل امن و آینده‌نگرانه ذخیره و استفاده کنید.&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;۱. امضای پساکوانتومی با ML-DSA&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چرا باید نگران کوانتوم باشیم؟&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;الگوریتم شُور (Shor’s algorithm) روی کامپیوتر کوانتومی می‌تواند RSA و ECDSA را در چند دقیقه بشکند. حمله «Harvest Now, Decrypt Later» یعنی دشمن امروز داده‌های امضاشده شما را جمع‌آوری می‌کند و سال‌ها بعد آن‌ها را می‌شکند. پس اگر داده‌ای دارید که باید ۱۰ سال دیگر هم معتبر باشد، همین امروز باید به ML-DSA مهاجرت کنید.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;استفاده بسیار ساده از ML-DSA در .NET 10&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;using System.Security.Cryptography;
+using System.Text;
+
+// بررسی پشتیبانی پلتفرم
+if (!MLDsa.IsSupported)
+    throw new PlatformNotSupportedException(&amp;quot;ML-DSA در این سیستم پشتیبانی نمی‌شود&amp;quot;);
+
+// تولید جفت‌کلید ML-DSA-65 (تقریباً معادل امنیت ۱۹۲ بیت)
+using var mlDsa = MLDsa.GenerateKey(MLDsaAlgorithm.MLDsa65);
+
+// صادرات کلید عمومی (برای به‌اشتراک‌گذاری)
+byte[] publicKey = mlDsa.ExportSubjectPublicKeyInfo();
+Console.WriteLine($&amp;quot;اندازه کلید عمومی: {publicKey.Length} بایت&amp;quot;);
+
+// متن دلخواه برای امضا
+string message = &amp;quot;این یک پیام بسیار مهم است که باید تا سال ۲۰۴۰ معتبر بماند.&amp;quot;;
+byte[] data = Encoding.UTF8.GetBytes(message);
+
+// امضا کردن
+byte[] signature = mlDsa.SignData(data);
+Console.WriteLine($&amp;quot;اندازه امضا: {signature.Length} بایت (~3.3 KB برای ML-DSA-65)&amp;quot;);
+
+// ——— مرحله تأیید ———
+using var verifier = MLDsa.ImportSubjectPublicKeyInfo(publicKey);
+
+bool valid = verifier.VerifyData(data, signature);
+Console.WriteLine($&amp;quot;امضا معتبر است؟ {valid}&amp;quot;); // True
+
+// تست دستکاری
+data[0] ^= 1; // یک بیت را عوض می‌کنیم
+bool tampered = verifier.VerifyData(data, signature);
+Console.WriteLine($&amp;quot;امضا پس از دستکاری معتبر است؟ {tampered}&amp;quot;); // False&lt;/pre&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong&gt;نکات مهم عملی&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;اندازه امضا بزرگ است (۲٫۴ تا ۴٫۶ کیلوبایت بسته به سطح امنیتی). این «مالیات کوانتومی» است و باید در طراحی پروتکل در نظر گرفته شود.&lt;/li&gt;&lt;li&gt;API دقیقاً مشابه RSA و ECDsa است: مهاجرت بسیار ساده است.&lt;/li&gt;&lt;li&gt;سه سطح امنیتی داریم: MLDsa44 (۱۲۸ بیت)، MLDsa65 (۱۹۲ بیت، توصیه‌شده)، MLDsa87 (۲۵۶ بیت).&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;۲. رمزنگاری احراز هویت‌شده با AES-GCM&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;برای حفاظت از کلیدهای API، توکن‌ها و embeddingها هیچ چیز بهتر و ساده‌تر از AES-GCM نیست. این الگوریتم هم محرمانگی و هم یکپارچگی (integrity) را تضمین می‌کند.&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;using System.Security.Cryptography;
+using System.Text;
+
+// کلید اصلی (در دنیای واقعی از Key Vault یا HSM بگیرید)
+byte[] masterKey = RandomNumberGenerator.GetBytes(32); // 256 بیت
+
+string secret = &amp;quot;sk-proj-SuperSecretOpenAIKey1234567890&amp;quot;;
+byte[] plaintext = Encoding.UTF8.GetBytes(secret);
+
+// ——— رمزنگاری ———
+byte[] nonce = RandomNumberGenerator.GetBytes(12);     // هر بار باید یکتا باشد!
+byte[] ciphertext = new byte[plaintext.Length];
+byte[] tag = new byte[16]; // تگ احراز هویت
+
+using var aes = new AesGcm(masterKey);
+aes.Encrypt(nonce, plaintext, ciphertext, tag);
+
+// ذخیره‌سازی: nonce + ciphertext + tag را کنار هم نگه دارید
+byte[] stored = nonce.Concat(ciphertext).Concat(tag).ToArray();
+
+// ——— رمزگشایی ———
+static string Decrypt(byte[] masterKey, byte[] storedData)
+{
+    var nonce = storedData.AsSpan(0, 12);
+    var tag = storedData.AsSpan(storedData.Length - 16);
+    var ciphertext = storedData.AsSpan(12, storedData.Length - 28);
+
+    using var aes = new AesGcm(masterKey);
+    byte[] recovered = new byte[ciphertext.Length];
+
+    aes.Decrypt(nonce, ciphertext, tag, recovered);
+    return Encoding.UTF8.GetString(recovered);
+}
+
+// استفاده
+string apiKey = Decrypt(masterKey, stored);
+Console.WriteLine(apiKey); // کلید اصلی برمی‌گردد
+
+// تست دستکاری → به طور خودکار خطا می‌دهد
+ciphertext[0] ^= 1;
+try { Decrypt(masterKey, stored); }
+catch (CryptographicException) { Console.WriteLine(&amp;quot;دستکاری تشخیص داده شد!&amp;quot;); }&lt;/pre&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong&gt;نکات طلایی&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;هرگز nonce را تکرار نکنید (۱۲ بایت تصادفی کافی است).&lt;/li&gt;&lt;li&gt;کلید اصلی (masterKey) را هرگز در کد سخت نکنید. از Azure Key Vault، AWS Secrets Manager یا فایل رمز شده با دسترسی 600 استفاده کنید.&lt;/li&gt;&lt;li&gt;پس از استفاده از کلید، آرایه بایت را با Array.Clear پاک کنید (برای stringها نمی‌شود پاک کرد، پس بهتر است تا حد امکان با byte[] کار کنید).&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;۳. کاربردهای واقعی در پروژه‌های هوش مصنوعی&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الف. حفاظت از کلیدهای OpenAI و مدل‌های دیگر&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// بارگذاری کلید رمز شده از دیسک
+byte[] encryptedKey = File.ReadAllBytes(&amp;quot;.openai/key.enc&amp;quot;);
+string apiKey = Decrypt(masterKey, encryptedKey);
+
+// استفاده موقت
+OpenAiClient client = new(apiKey);
+// ... استفاده ...
+// پاک کردن از حافظه
+Array.Clear(Encoding.UTF8.GetBytes(apiKey), 0, apiKey.Length);&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ب. حفاظت از بردارهای embedding (در صورت لزوم)&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;توجه: رمزنگاری embeddingها باعث می‌شود جستجوی شباهت (k-NN) مستقیماً ممکن نباشد. دو راه حل عملی وجود دارد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;embeddingها را در دیتابیس امن (شبکه خصوصی + RBAC + دیسک رمز شده) به صورت plaintext نگه دارید؛ راهکار اکثر شرکت‌ها در ۲۰۲۵.&lt;/li&gt;&lt;li&gt;فقط در زمان ذخیره‌سازی طولانی‌مدت (بک‌آپ سرد) آن‌ها را با AES-GCM رمز کنید.&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چک‌لیست امنیتی سریع قبل از استقرار&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;آیا از ML-DSA یا حداقل RSA-3072+ برای امضاهای بلندمدت استفاده می‌کنید؟&lt;/li&gt;&lt;li&gt;آیا همه اسرار (API Key، Connection String و غیره) با AES-256-GCM رمز شده‌اند؟&lt;/li&gt;&lt;li&gt;آیا nonceها یکتا و تصادفی هستند؟&lt;/li&gt;&lt;li&gt;آیا کلیدهای اصلی از Key Vault یا HSM بارگذاری می‌شوند؟&lt;/li&gt;&lt;li&gt;آیا ورودی کاربر قبل از ارسال به LLM اعتبارسنجی می‌شود؟ (حداقل فیلتر کلمات کلیدی مثل &amp;quot;ignore previous instructions&amp;quot;)&lt;/li&gt;&lt;li&gt;آیا هیچ وقت کلید یا داده حساسی لاگ نمی‌شود؟&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;.NET 10 با آوردن ML-DSA و ML-KEM مستقیماً در BCL، یکی از ساده‌ترین و امن‌ترین پلتفرم‌ها برای ساخت برنامه‌های پساکوانتومی شده است. دیگر نیازی به کتابخانه‌های خارجی یا پیچیدگی‌های زیاد نیست. امنیت دیگر یک «ویژگی اضافه» نیست؛ پایه و اساس هر برنامه هوش مصنوعی موفق است.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;از امروز شروع کنید: یک کلید ML-DSA بسازید، کلیدهای API خود را با AES-GCM رمز کنید و خیالتان راحت باشد که حتی اگر کامپیوترهای کوانتومی ۱۰ سال دیگر آمدند، داده‌های شما همچنان امن خواهند ماند.&lt;/div&gt;">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="رمزنگاری پساکوانتومی و امن‌تر در .NET 10">
+    <meta name="twitter:description" content="&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;سال ۲۰۲۵ است و دیگر نمی‌توان امنیت را به تعویق انداخت. در دنیای هوش مصنوعی، کلیدهای API، بردارهای embedding، پرامپت‌های حساس و داده‌های کاربران همه روزه در معرض خطر هستند. خوشبختانه .NET 10 با اضافه کردن اولین الگوریتم‌های استاندارد پساکوانتومی (Post-Quantum Cryptography) مستقیماً در BCL، ابزارهای قدرتمندی در اختیار ما قرار داده است.&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;در این مقاله به صورت عملی و بدون پیچیدگی‌های غیرضروری یاد می‌گیریم که چطور از دو ابزار اصلی جدید استفاده کنیم:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;ML-DSA (قبلاً Dilithium): امضای دیجیتال مقاوم در برابر کامپیوترهای کوانتومی&lt;/li&gt;&lt;li&gt;AES-GCM: رمزنگاری احراز هویت‌شده (Authenticated Encryption) که همچنان بهترین انتخاب برای حفاظت از اسرار است&lt;/li&gt;&lt;/ul&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;هدف این است که در پایان مقاله بتوانید کلیدهای OpenAI، embeddingهای حساس و هر داده محرمانه دیگری را به شکل امن و آینده‌نگرانه ذخیره و استفاده کنید.&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;۱. امضای پساکوانتومی با ML-DSA&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چرا باید نگران کوانتوم باشیم؟&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;الگوریتم شُور (Shor’s algorithm) روی کامپیوتر کوانتومی می‌تواند RSA و ECDSA را در چند دقیقه بشکند. حمله «Harvest Now, Decrypt Later» یعنی دشمن امروز داده‌های امضاشده شما را جمع‌آوری می‌کند و سال‌ها بعد آن‌ها را می‌شکند. پس اگر داده‌ای دارید که باید ۱۰ سال دیگر هم معتبر باشد، همین امروز باید به ML-DSA مهاجرت کنید.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;استفاده بسیار ساده از ML-DSA در .NET 10&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;using System.Security.Cryptography;
+using System.Text;
+
+// بررسی پشتیبانی پلتفرم
+if (!MLDsa.IsSupported)
+    throw new PlatformNotSupportedException(&amp;quot;ML-DSA در این سیستم پشتیبانی نمی‌شود&amp;quot;);
+
+// تولید جفت‌کلید ML-DSA-65 (تقریباً معادل امنیت ۱۹۲ بیت)
+using var mlDsa = MLDsa.GenerateKey(MLDsaAlgorithm.MLDsa65);
+
+// صادرات کلید عمومی (برای به‌اشتراک‌گذاری)
+byte[] publicKey = mlDsa.ExportSubjectPublicKeyInfo();
+Console.WriteLine($&amp;quot;اندازه کلید عمومی: {publicKey.Length} بایت&amp;quot;);
+
+// متن دلخواه برای امضا
+string message = &amp;quot;این یک پیام بسیار مهم است که باید تا سال ۲۰۴۰ معتبر بماند.&amp;quot;;
+byte[] data = Encoding.UTF8.GetBytes(message);
+
+// امضا کردن
+byte[] signature = mlDsa.SignData(data);
+Console.WriteLine($&amp;quot;اندازه امضا: {signature.Length} بایت (~3.3 KB برای ML-DSA-65)&amp;quot;);
+
+// ——— مرحله تأیید ———
+using var verifier = MLDsa.ImportSubjectPublicKeyInfo(publicKey);
+
+bool valid = verifier.VerifyData(data, signature);
+Console.WriteLine($&amp;quot;امضا معتبر است؟ {valid}&amp;quot;); // True
+
+// تست دستکاری
+data[0] ^= 1; // یک بیت را عوض می‌کنیم
+bool tampered = verifier.VerifyData(data, signature);
+Console.WriteLine($&amp;quot;امضا پس از دستکاری معتبر است؟ {tampered}&amp;quot;); // False&lt;/pre&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong&gt;نکات مهم عملی&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;اندازه امضا بزرگ است (۲٫۴ تا ۴٫۶ کیلوبایت بسته به سطح امنیتی). این «مالیات کوانتومی» است و باید در طراحی پروتکل در نظر گرفته شود.&lt;/li&gt;&lt;li&gt;API دقیقاً مشابه RSA و ECDsa است: مهاجرت بسیار ساده است.&lt;/li&gt;&lt;li&gt;سه سطح امنیتی داریم: MLDsa44 (۱۲۸ بیت)، MLDsa65 (۱۹۲ بیت، توصیه‌شده)، MLDsa87 (۲۵۶ بیت).&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;۲. رمزنگاری احراز هویت‌شده با AES-GCM&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;برای حفاظت از کلیدهای API، توکن‌ها و embeddingها هیچ چیز بهتر و ساده‌تر از AES-GCM نیست. این الگوریتم هم محرمانگی و هم یکپارچگی (integrity) را تضمین می‌کند.&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;using System.Security.Cryptography;
+using System.Text;
+
+// کلید اصلی (در دنیای واقعی از Key Vault یا HSM بگیرید)
+byte[] masterKey = RandomNumberGenerator.GetBytes(32); // 256 بیت
+
+string secret = &amp;quot;sk-proj-SuperSecretOpenAIKey1234567890&amp;quot;;
+byte[] plaintext = Encoding.UTF8.GetBytes(secret);
+
+// ——— رمزنگاری ———
+byte[] nonce = RandomNumberGenerator.GetBytes(12);     // هر بار باید یکتا باشد!
+byte[] ciphertext = new byte[plaintext.Length];
+byte[] tag = new byte[16]; // تگ احراز هویت
+
+using var aes = new AesGcm(masterKey);
+aes.Encrypt(nonce, plaintext, ciphertext, tag);
+
+// ذخیره‌سازی: nonce + ciphertext + tag را کنار هم نگه دارید
+byte[] stored = nonce.Concat(ciphertext).Concat(tag).ToArray();
+
+// ——— رمزگشایی ———
+static string Decrypt(byte[] masterKey, byte[] storedData)
+{
+    var nonce = storedData.AsSpan(0, 12);
+    var tag = storedData.AsSpan(storedData.Length - 16);
+    var ciphertext = storedData.AsSpan(12, storedData.Length - 28);
+
+    using var aes = new AesGcm(masterKey);
+    byte[] recovered = new byte[ciphertext.Length];
+
+    aes.Decrypt(nonce, ciphertext, tag, recovered);
+    return Encoding.UTF8.GetString(recovered);
+}
+
+// استفاده
+string apiKey = Decrypt(masterKey, stored);
+Console.WriteLine(apiKey); // کلید اصلی برمی‌گردد
+
+// تست دستکاری → به طور خودکار خطا می‌دهد
+ciphertext[0] ^= 1;
+try { Decrypt(masterKey, stored); }
+catch (CryptographicException) { Console.WriteLine(&amp;quot;دستکاری تشخیص داده شد!&amp;quot;); }&lt;/pre&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong&gt;نکات طلایی&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;هرگز nonce را تکرار نکنید (۱۲ بایت تصادفی کافی است).&lt;/li&gt;&lt;li&gt;کلید اصلی (masterKey) را هرگز در کد سخت نکنید. از Azure Key Vault، AWS Secrets Manager یا فایل رمز شده با دسترسی 600 استفاده کنید.&lt;/li&gt;&lt;li&gt;پس از استفاده از کلید، آرایه بایت را با Array.Clear پاک کنید (برای stringها نمی‌شود پاک کرد، پس بهتر است تا حد امکان با byte[] کار کنید).&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;۳. کاربردهای واقعی در پروژه‌های هوش مصنوعی&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الف. حفاظت از کلیدهای OpenAI و مدل‌های دیگر&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// بارگذاری کلید رمز شده از دیسک
+byte[] encryptedKey = File.ReadAllBytes(&amp;quot;.openai/key.enc&amp;quot;);
+string apiKey = Decrypt(masterKey, encryptedKey);
+
+// استفاده موقت
+OpenAiClient client = new(apiKey);
+// ... استفاده ...
+// پاک کردن از حافظه
+Array.Clear(Encoding.UTF8.GetBytes(apiKey), 0, apiKey.Length);&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ب. حفاظت از بردارهای embedding (در صورت لزوم)&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;توجه: رمزنگاری embeddingها باعث می‌شود جستجوی شباهت (k-NN) مستقیماً ممکن نباشد. دو راه حل عملی وجود دارد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;embeddingها را در دیتابیس امن (شبکه خصوصی + RBAC + دیسک رمز شده) به صورت plaintext نگه دارید؛ راهکار اکثر شرکت‌ها در ۲۰۲۵.&lt;/li&gt;&lt;li&gt;فقط در زمان ذخیره‌سازی طولانی‌مدت (بک‌آپ سرد) آن‌ها را با AES-GCM رمز کنید.&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چک‌لیست امنیتی سریع قبل از استقرار&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;آیا از ML-DSA یا حداقل RSA-3072+ برای امضاهای بلندمدت استفاده می‌کنید؟&lt;/li&gt;&lt;li&gt;آیا همه اسرار (API Key، Connection String و غیره) با AES-256-GCM رمز شده‌اند؟&lt;/li&gt;&lt;li&gt;آیا nonceها یکتا و تصادفی هستند؟&lt;/li&gt;&lt;li&gt;آیا کلیدهای اصلی از Key Vault یا HSM بارگذاری می‌شوند؟&lt;/li&gt;&lt;li&gt;آیا ورودی کاربر قبل از ارسال به LLM اعتبارسنجی می‌شود؟ (حداقل فیلتر کلمات کلیدی مثل &amp;quot;ignore previous instructions&amp;quot;)&lt;/li&gt;&lt;li&gt;آیا هیچ وقت کلید یا داده حساسی لاگ نمی‌شود؟&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;.NET 10 با آوردن ML-DSA و ML-KEM مستقیماً در BCL، یکی از ساده‌ترین و امن‌ترین پلتفرم‌ها برای ساخت برنامه‌های پساکوانتومی شده است. دیگر نیازی به کتابخانه‌های خارجی یا پیچیدگی‌های زیاد نیست. امنیت دیگر یک «ویژگی اضافه» نیست؛ پایه و اساس هر برنامه هوش مصنوعی موفق است.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;از امروز شروع کنید: یک کلید ML-DSA بسازید، کلیدهای API خود را با AES-GCM رمز کنید و خیالتان راحت باشد که حتی اگر کامپیوترهای کوانتومی ۱۰ سال دیگر آمدند، داده‌های شما همچنان امن خواهند ماند.&lt;/div&gt;">
+    <meta name="twitter:card" content="&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;سال ۲۰۲۵ است و دیگر نمی‌توان امنیت را به تعویق انداخت. در دنیای هوش مصنوعی، کلیدهای API، بردارهای embedding، پرامپت‌های حساس و داده‌های کاربران همه روزه در معرض خطر هستند. خوشبختانه .NET 10 با اضافه کردن اولین الگوریتم‌های استاندارد پساکوانتومی (Post-Quantum Cryptography) مستقیماً در BCL، ابزارهای قدرتمندی در اختیار ما قرار داده است.&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;در این مقاله به صورت عملی و بدون پیچیدگی‌های غیرضروری یاد می‌گیریم که چطور از دو ابزار اصلی جدید استفاده کنیم:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;ML-DSA (قبلاً Dilithium): امضای دیجیتال مقاوم در برابر کامپیوترهای کوانتومی&lt;/li&gt;&lt;li&gt;AES-GCM: رمزنگاری احراز هویت‌شده (Authenticated Encryption) که همچنان بهترین انتخاب برای حفاظت از اسرار است&lt;/li&gt;&lt;/ul&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;هدف این است که در پایان مقاله بتوانید کلیدهای OpenAI، embeddingهای حساس و هر داده محرمانه دیگری را به شکل امن و آینده‌نگرانه ذخیره و استفاده کنید.&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;۱. امضای پساکوانتومی با ML-DSA&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چرا باید نگران کوانتوم باشیم؟&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;الگوریتم شُور (Shor’s algorithm) روی کامپیوتر کوانتومی می‌تواند RSA و ECDSA را در چند دقیقه بشکند. حمله «Harvest Now, Decrypt Later» یعنی دشمن امروز داده‌های امضاشده شما را جمع‌آوری می‌کند و سال‌ها بعد آن‌ها را می‌شکند. پس اگر داده‌ای دارید که باید ۱۰ سال دیگر هم معتبر باشد، همین امروز باید به ML-DSA مهاجرت کنید.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;استفاده بسیار ساده از ML-DSA در .NET 10&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;using System.Security.Cryptography;
+using System.Text;
+
+// بررسی پشتیبانی پلتفرم
+if (!MLDsa.IsSupported)
+    throw new PlatformNotSupportedException(&amp;quot;ML-DSA در این سیستم پشتیبانی نمی‌شود&amp;quot;);
+
+// تولید جفت‌کلید ML-DSA-65 (تقریباً معادل امنیت ۱۹۲ بیت)
+using var mlDsa = MLDsa.GenerateKey(MLDsaAlgorithm.MLDsa65);
+
+// صادرات کلید عمومی (برای به‌اشتراک‌گذاری)
+byte[] publicKey = mlDsa.ExportSubjectPublicKeyInfo();
+Console.WriteLine($&amp;quot;اندازه کلید عمومی: {publicKey.Length} بایت&amp;quot;);
+
+// متن دلخواه برای امضا
+string message = &amp;quot;این یک پیام بسیار مهم است که باید تا سال ۲۰۴۰ معتبر بماند.&amp;quot;;
+byte[] data = Encoding.UTF8.GetBytes(message);
+
+// امضا کردن
+byte[] signature = mlDsa.SignData(data);
+Console.WriteLine($&amp;quot;اندازه امضا: {signature.Length} بایت (~3.3 KB برای ML-DSA-65)&amp;quot;);
+
+// ——— مرحله تأیید ———
+using var verifier = MLDsa.ImportSubjectPublicKeyInfo(publicKey);
+
+bool valid = verifier.VerifyData(data, signature);
+Console.WriteLine($&amp;quot;امضا معتبر است؟ {valid}&amp;quot;); // True
+
+// تست دستکاری
+data[0] ^= 1; // یک بیت را عوض می‌کنیم
+bool tampered = verifier.VerifyData(data, signature);
+Console.WriteLine($&amp;quot;امضا پس از دستکاری معتبر است؟ {tampered}&amp;quot;); // False&lt;/pre&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong&gt;نکات مهم عملی&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;اندازه امضا بزرگ است (۲٫۴ تا ۴٫۶ کیلوبایت بسته به سطح امنیتی). این «مالیات کوانتومی» است و باید در طراحی پروتکل در نظر گرفته شود.&lt;/li&gt;&lt;li&gt;API دقیقاً مشابه RSA و ECDsa است: مهاجرت بسیار ساده است.&lt;/li&gt;&lt;li&gt;سه سطح امنیتی داریم: MLDsa44 (۱۲۸ بیت)، MLDsa65 (۱۹۲ بیت، توصیه‌شده)، MLDsa87 (۲۵۶ بیت).&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;۲. رمزنگاری احراز هویت‌شده با AES-GCM&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;برای حفاظت از کلیدهای API، توکن‌ها و embeddingها هیچ چیز بهتر و ساده‌تر از AES-GCM نیست. این الگوریتم هم محرمانگی و هم یکپارچگی (integrity) را تضمین می‌کند.&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;using System.Security.Cryptography;
+using System.Text;
+
+// کلید اصلی (در دنیای واقعی از Key Vault یا HSM بگیرید)
+byte[] masterKey = RandomNumberGenerator.GetBytes(32); // 256 بیت
+
+string secret = &amp;quot;sk-proj-SuperSecretOpenAIKey1234567890&amp;quot;;
+byte[] plaintext = Encoding.UTF8.GetBytes(secret);
+
+// ——— رمزنگاری ———
+byte[] nonce = RandomNumberGenerator.GetBytes(12);     // هر بار باید یکتا باشد!
+byte[] ciphertext = new byte[plaintext.Length];
+byte[] tag = new byte[16]; // تگ احراز هویت
+
+using var aes = new AesGcm(masterKey);
+aes.Encrypt(nonce, plaintext, ciphertext, tag);
+
+// ذخیره‌سازی: nonce + ciphertext + tag را کنار هم نگه دارید
+byte[] stored = nonce.Concat(ciphertext).Concat(tag).ToArray();
+
+// ——— رمزگشایی ———
+static string Decrypt(byte[] masterKey, byte[] storedData)
+{
+    var nonce = storedData.AsSpan(0, 12);
+    var tag = storedData.AsSpan(storedData.Length - 16);
+    var ciphertext = storedData.AsSpan(12, storedData.Length - 28);
+
+    using var aes = new AesGcm(masterKey);
+    byte[] recovered = new byte[ciphertext.Length];
+
+    aes.Decrypt(nonce, ciphertext, tag, recovered);
+    return Encoding.UTF8.GetString(recovered);
+}
+
+// استفاده
+string apiKey = Decrypt(masterKey, stored);
+Console.WriteLine(apiKey); // کلید اصلی برمی‌گردد
+
+// تست دستکاری → به طور خودکار خطا می‌دهد
+ciphertext[0] ^= 1;
+try { Decrypt(masterKey, stored); }
+catch (CryptographicException) { Console.WriteLine(&amp;quot;دستکاری تشخیص داده شد!&amp;quot;); }&lt;/pre&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong&gt;نکات طلایی&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;هرگز nonce را تکرار نکنید (۱۲ بایت تصادفی کافی است).&lt;/li&gt;&lt;li&gt;کلید اصلی (masterKey) را هرگز در کد سخت نکنید. از Azure Key Vault، AWS Secrets Manager یا فایل رمز شده با دسترسی 600 استفاده کنید.&lt;/li&gt;&lt;li&gt;پس از استفاده از کلید، آرایه بایت را با Array.Clear پاک کنید (برای stringها نمی‌شود پاک کرد، پس بهتر است تا حد امکان با byte[] کار کنید).&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;۳. کاربردهای واقعی در پروژه‌های هوش مصنوعی&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الف. حفاظت از کلیدهای OpenAI و مدل‌های دیگر&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// بارگذاری کلید رمز شده از دیسک
+byte[] encryptedKey = File.ReadAllBytes(&amp;quot;.openai/key.enc&amp;quot;);
+string apiKey = Decrypt(masterKey, encryptedKey);
+
+// استفاده موقت
+OpenAiClient client = new(apiKey);
+// ... استفاده ...
+// پاک کردن از حافظه
+Array.Clear(Encoding.UTF8.GetBytes(apiKey), 0, apiKey.Length);&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;ب. حفاظت از بردارهای embedding (در صورت لزوم)&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;توجه: رمزنگاری embeddingها باعث می‌شود جستجوی شباهت (k-NN) مستقیماً ممکن نباشد. دو راه حل عملی وجود دارد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;embeddingها را در دیتابیس امن (شبکه خصوصی + RBAC + دیسک رمز شده) به صورت plaintext نگه دارید؛ راهکار اکثر شرکت‌ها در ۲۰۲۵.&lt;/li&gt;&lt;li&gt;فقط در زمان ذخیره‌سازی طولانی‌مدت (بک‌آپ سرد) آن‌ها را با AES-GCM رمز کنید.&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چک‌لیست امنیتی سریع قبل از استقرار&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;آیا از ML-DSA یا حداقل RSA-3072+ برای امضاهای بلندمدت استفاده می‌کنید؟&lt;/li&gt;&lt;li&gt;آیا همه اسرار (API Key، Connection String و غیره) با AES-256-GCM رمز شده‌اند؟&lt;/li&gt;&lt;li&gt;آیا nonceها یکتا و تصادفی هستند؟&lt;/li&gt;&lt;li&gt;آیا کلیدهای اصلی از Key Vault یا HSM بارگذاری می‌شوند؟&lt;/li&gt;&lt;li&gt;آیا ورودی کاربر قبل از ارسال به LLM اعتبارسنجی می‌شود؟ (حداقل فیلتر کلمات کلیدی مثل &amp;quot;ignore previous instructions&amp;quot;)&lt;/li&gt;&lt;li&gt;آیا هیچ وقت کلید یا داده حساسی لاگ نمی‌شود؟&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;.NET 10 با آوردن ML-DSA و ML-KEM مستقیماً در BCL، یکی از ساده‌ترین و امن‌ترین پلتفرم‌ها برای ساخت برنامه‌های پساکوانتومی شده است. دیگر نیازی به کتابخانه‌های خارجی یا پیچیدگی‌های زیاد نیست. امنیت دیگر یک «ویژگی اضافه» نیست؛ پایه و اساس هر برنامه هوش مصنوعی موفق است.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;از امروز شروع کنید: یک کلید ML-DSA بسازید، کلیدهای API خود را با AES-GCM رمز کنید و خیالتان راحت باشد که حتی اگر کامپیوترهای کوانتومی ۱۰ سال دیگر آمدند، داده‌های شما همچنان امن خواهند ماند.&lt;/div&gt;">
+    <meta property="article:published_time" content="Tue, 02 Dec 2025 05:48:41 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
     <meta content='IE=edge' http-equiv='X-UA-Compatible'>
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">
-	
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
 	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
-
     <link href="vs.min.css" rel="stylesheet" type="text/css">
-    <script src="highlight.min.js" type="text/javascript"></script>
-	
+    <script src="highlight.min.js" type="text/javascript"></script>	
     <link href="styles.css" rel="stylesheet" type="text/css">	
     <style>
       @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
@@ -42,8 +454,8 @@
         }
      }
     </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
 </head>
-
 <body dir='rtl'>
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
@@ -53,7 +465,7 @@
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۳۶۹۵</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۶۹۷</span></td>
 </tr>
 <tr>
 <td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
@@ -73,7 +485,7 @@
 </tr>
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۲۲</span></td>
 </tr>
 </tbody>
 </table>
@@ -203,8 +615,5 @@ Array.Clear(Encoding.UTF8.GetBytes(apiKey), 0, apiKey.Length);</pre><div dir="rt
 
 <!-- to load custom fonts for printing -->
 <div class="useSamimFD">&nbsp;</div>
-
-<script src="SyntaxHighlighter.js" type="text/javascript"></script>
 </body>
-
 </html>

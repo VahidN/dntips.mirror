@@ -1,17 +1,69 @@
 <!DOCTYPE html>
 <html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
-
 <head>
-    <title>‫‫شروع کار با Microsoft Agent Framework: ساخت چت‌بات پشتیبانی با C#</title>
+    <title>‫‫شروع کار با Microsoft Agent Framework: ساخت چت‌بات پشتیبانی با C#</title>     <meta name="description" content="مایکروسافت سال‌هاست که روی ابزارهایی برای ساخت برنامه‌های کاربردی با هوش مصنوعی سرمایه‌گذاری می‌کند. ابتدا Semantic Kernel و سپس AutoGen معرفی شدند و اکنون هر دو در Microsoft Agent Framework (MAF) ادغام شده‌اند. MAF بهترین ویژگی‌های هر دو را ترکیب می‌کند – پایداری و ویژگی‌های سازمانی Semantic Kernel با انتزاع‌های ساده برای Agentهای چند مرحله‌ای AutoGen – و قابلیت‌های جدیدی مانند گردش‌کارهای مبتنی بر گراف و یک سیستم مدیریت حالت قوی را اضافه می‌کند.
+
+در زمان نگارش این مقاله، MAF در حالت پیش‌نمایش عمومی (public preview) قرار دارد و با مجوز MIT برای .NET و Python در دسترس است. این فریم‌ورک حول دو مفهوم اصلی می‌چرخد: Agentها و Workflows. Agentها سیستم‌هایی هستند که از یک مدل زبانی بزرگ (LLM) برای پردازش ورودی‌ها، تصمیم‌گیری، فراخوانی ابزارها و تولید پاسخ استفاده می‌کنند. Workflows دنباله‌ای از مراحل تعریف‌شده هستند که در یک گراف به هم متصل شده‌اند.
+
+در این مقاله، مفاهیم اساسی فریم‌ورک را یاد خواهیم گرفت و یک API با &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ASP.NET Core&lt;/code&gt; ایجاد می‌کنیم که یک چت‌بات پشتیبانی فنی را در معرض دید قرار می‌دهد. این چت‌بات قادر خواهد بود به سؤالات بر اساس مستندات Markdown داخلی پاسخ دهد و در عین حال، زمینه مکالمه را بین پیام‌ها حفظ کند. کد کامل این پروژه در &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GitHub&lt;/code&gt; در دسترس است.
+
+MAF بر اساس دو مفهوم کلیدی به نام‌های Agent و Workflow بنا شده است. Agentها از LLM برای پردازش ورودی‌ها و تصمیم‌گیری استفاده می‌کنند، در حالی که Workflowها توالی مراحل تعریف‌شده‌ای هستند. نکته مهم این است که اگر می‌توان یک تابع برای انجام یک کار نوشت، بهتر است از Agent استفاده نشود.
+
+پنج مفهوم کلیدی در MAF وجود دارد: ایجاد اولین Agent با استفاده از یک کلاینت چت (مانند Azure OpenAI)، تعریف Tools با استفاده از ویژگی &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[Description]&lt;/code&gt; و &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;AIFunctionFactory.Create()&lt;/code&gt;، مدیریت مکالمات چند مرحله‌ای با استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;AgentSession&lt;/code&gt;، مدیریت حافظه و پایداری با سریال‌سازی &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;AgentSession&lt;/code&gt; به &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;JsonElement&lt;/code&gt;.">
+    <meta name="author" content="راویAI">
+    <meta itemprop="name" content="شروع کار با Microsoft Agent Framework: ساخت چت‌بات پشتیبانی با C#">
+    <meta itemprop="description" content="مایکروسافت سال‌هاست که روی ابزارهایی برای ساخت برنامه‌های کاربردی با هوش مصنوعی سرمایه‌گذاری می‌کند. ابتدا Semantic Kernel و سپس AutoGen معرفی شدند و اکنون هر دو در Microsoft Agent Framework (MAF) ادغام شده‌اند. MAF بهترین ویژگی‌های هر دو را ترکیب می‌کند – پایداری و ویژگی‌های سازمانی Semantic Kernel با انتزاع‌های ساده برای Agentهای چند مرحله‌ای AutoGen – و قابلیت‌های جدیدی مانند گردش‌کارهای مبتنی بر گراف و یک سیستم مدیریت حالت قوی را اضافه می‌کند.
+
+در زمان نگارش این مقاله، MAF در حالت پیش‌نمایش عمومی (public preview) قرار دارد و با مجوز MIT برای .NET و Python در دسترس است. این فریم‌ورک حول دو مفهوم اصلی می‌چرخد: Agentها و Workflows. Agentها سیستم‌هایی هستند که از یک مدل زبانی بزرگ (LLM) برای پردازش ورودی‌ها، تصمیم‌گیری، فراخوانی ابزارها و تولید پاسخ استفاده می‌کنند. Workflows دنباله‌ای از مراحل تعریف‌شده هستند که در یک گراف به هم متصل شده‌اند.
+
+در این مقاله، مفاهیم اساسی فریم‌ورک را یاد خواهیم گرفت و یک API با &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ASP.NET Core&lt;/code&gt; ایجاد می‌کنیم که یک چت‌بات پشتیبانی فنی را در معرض دید قرار می‌دهد. این چت‌بات قادر خواهد بود به سؤالات بر اساس مستندات Markdown داخلی پاسخ دهد و در عین حال، زمینه مکالمه را بین پیام‌ها حفظ کند. کد کامل این پروژه در &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GitHub&lt;/code&gt; در دسترس است.
+
+MAF بر اساس دو مفهوم کلیدی به نام‌های Agent و Workflow بنا شده است. Agentها از LLM برای پردازش ورودی‌ها و تصمیم‌گیری استفاده می‌کنند، در حالی که Workflowها توالی مراحل تعریف‌شده‌ای هستند. نکته مهم این است که اگر می‌توان یک تابع برای انجام یک کار نوشت، بهتر است از Agent استفاده نشود.
+
+پنج مفهوم کلیدی در MAF وجود دارد: ایجاد اولین Agent با استفاده از یک کلاینت چت (مانند Azure OpenAI)، تعریف Tools با استفاده از ویژگی &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[Description]&lt;/code&gt; و &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;AIFunctionFactory.Create()&lt;/code&gt;، مدیریت مکالمات چند مرحله‌ای با استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;AgentSession&lt;/code&gt;، مدیریت حافظه و پایداری با سریال‌سازی &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;AgentSession&lt;/code&gt; به &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;JsonElement&lt;/code&gt;.">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="شروع کار با Microsoft Agent Framework: ساخت چت‌بات پشتیبانی با C#">
+    <meta property="og:description" content="مایکروسافت سال‌هاست که روی ابزارهایی برای ساخت برنامه‌های کاربردی با هوش مصنوعی سرمایه‌گذاری می‌کند. ابتدا Semantic Kernel و سپس AutoGen معرفی شدند و اکنون هر دو در Microsoft Agent Framework (MAF) ادغام شده‌اند. MAF بهترین ویژگی‌های هر دو را ترکیب می‌کند – پایداری و ویژگی‌های سازمانی Semantic Kernel با انتزاع‌های ساده برای Agentهای چند مرحله‌ای AutoGen – و قابلیت‌های جدیدی مانند گردش‌کارهای مبتنی بر گراف و یک سیستم مدیریت حالت قوی را اضافه می‌کند.
+
+در زمان نگارش این مقاله، MAF در حالت پیش‌نمایش عمومی (public preview) قرار دارد و با مجوز MIT برای .NET و Python در دسترس است. این فریم‌ورک حول دو مفهوم اصلی می‌چرخد: Agentها و Workflows. Agentها سیستم‌هایی هستند که از یک مدل زبانی بزرگ (LLM) برای پردازش ورودی‌ها، تصمیم‌گیری، فراخوانی ابزارها و تولید پاسخ استفاده می‌کنند. Workflows دنباله‌ای از مراحل تعریف‌شده هستند که در یک گراف به هم متصل شده‌اند.
+
+در این مقاله، مفاهیم اساسی فریم‌ورک را یاد خواهیم گرفت و یک API با &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ASP.NET Core&lt;/code&gt; ایجاد می‌کنیم که یک چت‌بات پشتیبانی فنی را در معرض دید قرار می‌دهد. این چت‌بات قادر خواهد بود به سؤالات بر اساس مستندات Markdown داخلی پاسخ دهد و در عین حال، زمینه مکالمه را بین پیام‌ها حفظ کند. کد کامل این پروژه در &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GitHub&lt;/code&gt; در دسترس است.
+
+MAF بر اساس دو مفهوم کلیدی به نام‌های Agent و Workflow بنا شده است. Agentها از LLM برای پردازش ورودی‌ها و تصمیم‌گیری استفاده می‌کنند، در حالی که Workflowها توالی مراحل تعریف‌شده‌ای هستند. نکته مهم این است که اگر می‌توان یک تابع برای انجام یک کار نوشت، بهتر است از Agent استفاده نشود.
+
+پنج مفهوم کلیدی در MAF وجود دارد: ایجاد اولین Agent با استفاده از یک کلاینت چت (مانند Azure OpenAI)، تعریف Tools با استفاده از ویژگی &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[Description]&lt;/code&gt; و &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;AIFunctionFactory.Create()&lt;/code&gt;، مدیریت مکالمات چند مرحله‌ای با استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;AgentSession&lt;/code&gt;، مدیریت حافظه و پایداری با سریال‌سازی &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;AgentSession&lt;/code&gt; به &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;JsonElement&lt;/code&gt;.">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="شروع کار با Microsoft Agent Framework: ساخت چت‌بات پشتیبانی با C#">
+    <meta name="twitter:description" content="مایکروسافت سال‌هاست که روی ابزارهایی برای ساخت برنامه‌های کاربردی با هوش مصنوعی سرمایه‌گذاری می‌کند. ابتدا Semantic Kernel و سپس AutoGen معرفی شدند و اکنون هر دو در Microsoft Agent Framework (MAF) ادغام شده‌اند. MAF بهترین ویژگی‌های هر دو را ترکیب می‌کند – پایداری و ویژگی‌های سازمانی Semantic Kernel با انتزاع‌های ساده برای Agentهای چند مرحله‌ای AutoGen – و قابلیت‌های جدیدی مانند گردش‌کارهای مبتنی بر گراف و یک سیستم مدیریت حالت قوی را اضافه می‌کند.
+
+در زمان نگارش این مقاله، MAF در حالت پیش‌نمایش عمومی (public preview) قرار دارد و با مجوز MIT برای .NET و Python در دسترس است. این فریم‌ورک حول دو مفهوم اصلی می‌چرخد: Agentها و Workflows. Agentها سیستم‌هایی هستند که از یک مدل زبانی بزرگ (LLM) برای پردازش ورودی‌ها، تصمیم‌گیری، فراخوانی ابزارها و تولید پاسخ استفاده می‌کنند. Workflows دنباله‌ای از مراحل تعریف‌شده هستند که در یک گراف به هم متصل شده‌اند.
+
+در این مقاله، مفاهیم اساسی فریم‌ورک را یاد خواهیم گرفت و یک API با &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ASP.NET Core&lt;/code&gt; ایجاد می‌کنیم که یک چت‌بات پشتیبانی فنی را در معرض دید قرار می‌دهد. این چت‌بات قادر خواهد بود به سؤالات بر اساس مستندات Markdown داخلی پاسخ دهد و در عین حال، زمینه مکالمه را بین پیام‌ها حفظ کند. کد کامل این پروژه در &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GitHub&lt;/code&gt; در دسترس است.
+
+MAF بر اساس دو مفهوم کلیدی به نام‌های Agent و Workflow بنا شده است. Agentها از LLM برای پردازش ورودی‌ها و تصمیم‌گیری استفاده می‌کنند، در حالی که Workflowها توالی مراحل تعریف‌شده‌ای هستند. نکته مهم این است که اگر می‌توان یک تابع برای انجام یک کار نوشت، بهتر است از Agent استفاده نشود.
+
+پنج مفهوم کلیدی در MAF وجود دارد: ایجاد اولین Agent با استفاده از یک کلاینت چت (مانند Azure OpenAI)، تعریف Tools با استفاده از ویژگی &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[Description]&lt;/code&gt; و &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;AIFunctionFactory.Create()&lt;/code&gt;، مدیریت مکالمات چند مرحله‌ای با استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;AgentSession&lt;/code&gt;، مدیریت حافظه و پایداری با سریال‌سازی &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;AgentSession&lt;/code&gt; به &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;JsonElement&lt;/code&gt;.">
+    <meta name="twitter:card" content="مایکروسافت سال‌هاست که روی ابزارهایی برای ساخت برنامه‌های کاربردی با هوش مصنوعی سرمایه‌گذاری می‌کند. ابتدا Semantic Kernel و سپس AutoGen معرفی شدند و اکنون هر دو در Microsoft Agent Framework (MAF) ادغام شده‌اند. MAF بهترین ویژگی‌های هر دو را ترکیب می‌کند – پایداری و ویژگی‌های سازمانی Semantic Kernel با انتزاع‌های ساده برای Agentهای چند مرحله‌ای AutoGen – و قابلیت‌های جدیدی مانند گردش‌کارهای مبتنی بر گراف و یک سیستم مدیریت حالت قوی را اضافه می‌کند.
+
+در زمان نگارش این مقاله، MAF در حالت پیش‌نمایش عمومی (public preview) قرار دارد و با مجوز MIT برای .NET و Python در دسترس است. این فریم‌ورک حول دو مفهوم اصلی می‌چرخد: Agentها و Workflows. Agentها سیستم‌هایی هستند که از یک مدل زبانی بزرگ (LLM) برای پردازش ورودی‌ها، تصمیم‌گیری، فراخوانی ابزارها و تولید پاسخ استفاده می‌کنند. Workflows دنباله‌ای از مراحل تعریف‌شده هستند که در یک گراف به هم متصل شده‌اند.
+
+در این مقاله، مفاهیم اساسی فریم‌ورک را یاد خواهیم گرفت و یک API با &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ASP.NET Core&lt;/code&gt; ایجاد می‌کنیم که یک چت‌بات پشتیبانی فنی را در معرض دید قرار می‌دهد. این چت‌بات قادر خواهد بود به سؤالات بر اساس مستندات Markdown داخلی پاسخ دهد و در عین حال، زمینه مکالمه را بین پیام‌ها حفظ کند. کد کامل این پروژه در &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GitHub&lt;/code&gt; در دسترس است.
+
+MAF بر اساس دو مفهوم کلیدی به نام‌های Agent و Workflow بنا شده است. Agentها از LLM برای پردازش ورودی‌ها و تصمیم‌گیری استفاده می‌کنند، در حالی که Workflowها توالی مراحل تعریف‌شده‌ای هستند. نکته مهم این است که اگر می‌توان یک تابع برای انجام یک کار نوشت، بهتر است از Agent استفاده نشود.
+
+پنج مفهوم کلیدی در MAF وجود دارد: ایجاد اولین Agent با استفاده از یک کلاینت چت (مانند Azure OpenAI)، تعریف Tools با استفاده از ویژگی &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[Description]&lt;/code&gt; و &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;AIFunctionFactory.Create()&lt;/code&gt;، مدیریت مکالمات چند مرحله‌ای با استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;AgentSession&lt;/code&gt;، مدیریت حافظه و پایداری با سریال‌سازی &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;AgentSession&lt;/code&gt; به &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;JsonElement&lt;/code&gt;.">
+    <meta property="article:published_time" content="Tue, 24 Feb 2026 07:14:35 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
     <meta content='IE=edge' http-equiv='X-UA-Compatible'>
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">
-	
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
 	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
-
     <link href="vs.min.css" rel="stylesheet" type="text/css">
-    <script src="highlight.min.js" type="text/javascript"></script>
-	
+    <script src="highlight.min.js" type="text/javascript"></script>	
     <link href="styles.css" rel="stylesheet" type="text/css">	
     <style>
       @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
@@ -42,8 +94,8 @@
         }
      }
     </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
 </head>
-
 <body dir='rtl'>
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
@@ -53,7 +105,7 @@
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۳۶۹۵</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۶۹۷</span></td>
 </tr>
 <tr>
 <td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
@@ -73,7 +125,7 @@
 </tr>
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۲۲</span></td>
 </tr>
 </tbody>
 </table>
@@ -131,8 +183,5 @@ MAF بر اساس دو مفهوم کلیدی به نام‌های Agent و Workf
 
 <!-- to load custom fonts for printing -->
 <div class="useSamimFD">&nbsp;</div>
-
-<script src="SyntaxHighlighter.js" type="text/javascript"></script>
 </body>
-
 </html>

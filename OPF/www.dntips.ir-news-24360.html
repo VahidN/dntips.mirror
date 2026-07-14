@@ -1,17 +1,69 @@
 <!DOCTYPE html>
 <html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
-
 <head>
-    <title>‫‫مقایسه سرعت دسترسی به آرایه در مقابل دستور switch برای جستجو</title>
+    <title>‫‫مقایسه سرعت دسترسی به آرایه در مقابل دستور switch برای جستجو</title>     <meta name="description" content="در یک بررسی عملکردی، مقایسه ای بین دسترسی به عناصر یک آرایه و استفاده از دستور &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;switch&lt;/code&gt; برای جستجو انجام شد. هدف این بررسی، تعیین سریع‌ترین روش برای تبدیل اعداد (اندیس‌های صفر مبنا) به رشته‌های از پیش تعریف شده بود.
+
+نتایج نشان داد که در اکثر موارد، دستور &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;switch&lt;/code&gt; به طور مداوم سریع‌تر از دسترسی مستقیم به آرایه عمل می‌کند، به جز در یک مورد خاص که تفاوت قابل توجهی مشاهده نشد. این برتری احتمالا به دلیل بهینه‌سازی‌های پیش‌بینی شاخه (branch prediction) در کامپایلر و سخت‌افزار است.
+
+با این حال، تفاوت سرعت در این سناریو بسیار ناچیز است (زیر یک نانوثانیه) و در عمل، تأثیر قابل توجهی بر عملکرد کلی برنامه نخواهد داشت. بنابراین، انتخاب بین این دو روش بیشتر به سلیقه و خوانایی کد بستگی دارد.
+
+در صورتی که نیاز به جستجو در اندیس‌های خارج از محدوده آرایه باشد، استفاده از دستور &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;switch&lt;/code&gt; با یک حالت پیش‌فرض (&lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;_&lt;/code&gt;) می‌تواند از بروز خطا جلوگیری کند. در این حالت، تابع &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ToString&lt;/code&gt; برای اندیس‌های نامعتبر فراخوانی می‌شود که هزینه عملکردی بیشتری دارد.
+
+در نهایت، توصیه می‌شود که توسعه‌دهندگان &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;.NET&lt;/code&gt; با توجه به نیازهای خاص پروژه و ترجیحات شخصی خود، روش مناسب را انتخاب کنند. هر دو روش از نظر عملکردی قابل قبول هستند و تفاوت قابل توجهی بین آن‌ها وجود ندارد.">
+    <meta name="author" content="راویAI">
+    <meta itemprop="name" content="مقایسه سرعت دسترسی به آرایه در مقابل دستور switch برای جستجو">
+    <meta itemprop="description" content="در یک بررسی عملکردی، مقایسه ای بین دسترسی به عناصر یک آرایه و استفاده از دستور &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;switch&lt;/code&gt; برای جستجو انجام شد. هدف این بررسی، تعیین سریع‌ترین روش برای تبدیل اعداد (اندیس‌های صفر مبنا) به رشته‌های از پیش تعریف شده بود.
+
+نتایج نشان داد که در اکثر موارد، دستور &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;switch&lt;/code&gt; به طور مداوم سریع‌تر از دسترسی مستقیم به آرایه عمل می‌کند، به جز در یک مورد خاص که تفاوت قابل توجهی مشاهده نشد. این برتری احتمالا به دلیل بهینه‌سازی‌های پیش‌بینی شاخه (branch prediction) در کامپایلر و سخت‌افزار است.
+
+با این حال، تفاوت سرعت در این سناریو بسیار ناچیز است (زیر یک نانوثانیه) و در عمل، تأثیر قابل توجهی بر عملکرد کلی برنامه نخواهد داشت. بنابراین، انتخاب بین این دو روش بیشتر به سلیقه و خوانایی کد بستگی دارد.
+
+در صورتی که نیاز به جستجو در اندیس‌های خارج از محدوده آرایه باشد، استفاده از دستور &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;switch&lt;/code&gt; با یک حالت پیش‌فرض (&lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;_&lt;/code&gt;) می‌تواند از بروز خطا جلوگیری کند. در این حالت، تابع &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ToString&lt;/code&gt; برای اندیس‌های نامعتبر فراخوانی می‌شود که هزینه عملکردی بیشتری دارد.
+
+در نهایت، توصیه می‌شود که توسعه‌دهندگان &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;.NET&lt;/code&gt; با توجه به نیازهای خاص پروژه و ترجیحات شخصی خود، روش مناسب را انتخاب کنند. هر دو روش از نظر عملکردی قابل قبول هستند و تفاوت قابل توجهی بین آن‌ها وجود ندارد.">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="مقایسه سرعت دسترسی به آرایه در مقابل دستور switch برای جستجو">
+    <meta property="og:description" content="در یک بررسی عملکردی، مقایسه ای بین دسترسی به عناصر یک آرایه و استفاده از دستور &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;switch&lt;/code&gt; برای جستجو انجام شد. هدف این بررسی، تعیین سریع‌ترین روش برای تبدیل اعداد (اندیس‌های صفر مبنا) به رشته‌های از پیش تعریف شده بود.
+
+نتایج نشان داد که در اکثر موارد، دستور &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;switch&lt;/code&gt; به طور مداوم سریع‌تر از دسترسی مستقیم به آرایه عمل می‌کند، به جز در یک مورد خاص که تفاوت قابل توجهی مشاهده نشد. این برتری احتمالا به دلیل بهینه‌سازی‌های پیش‌بینی شاخه (branch prediction) در کامپایلر و سخت‌افزار است.
+
+با این حال، تفاوت سرعت در این سناریو بسیار ناچیز است (زیر یک نانوثانیه) و در عمل، تأثیر قابل توجهی بر عملکرد کلی برنامه نخواهد داشت. بنابراین، انتخاب بین این دو روش بیشتر به سلیقه و خوانایی کد بستگی دارد.
+
+در صورتی که نیاز به جستجو در اندیس‌های خارج از محدوده آرایه باشد، استفاده از دستور &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;switch&lt;/code&gt; با یک حالت پیش‌فرض (&lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;_&lt;/code&gt;) می‌تواند از بروز خطا جلوگیری کند. در این حالت، تابع &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ToString&lt;/code&gt; برای اندیس‌های نامعتبر فراخوانی می‌شود که هزینه عملکردی بیشتری دارد.
+
+در نهایت، توصیه می‌شود که توسعه‌دهندگان &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;.NET&lt;/code&gt; با توجه به نیازهای خاص پروژه و ترجیحات شخصی خود، روش مناسب را انتخاب کنند. هر دو روش از نظر عملکردی قابل قبول هستند و تفاوت قابل توجهی بین آن‌ها وجود ندارد.">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="مقایسه سرعت دسترسی به آرایه در مقابل دستور switch برای جستجو">
+    <meta name="twitter:description" content="در یک بررسی عملکردی، مقایسه ای بین دسترسی به عناصر یک آرایه و استفاده از دستور &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;switch&lt;/code&gt; برای جستجو انجام شد. هدف این بررسی، تعیین سریع‌ترین روش برای تبدیل اعداد (اندیس‌های صفر مبنا) به رشته‌های از پیش تعریف شده بود.
+
+نتایج نشان داد که در اکثر موارد، دستور &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;switch&lt;/code&gt; به طور مداوم سریع‌تر از دسترسی مستقیم به آرایه عمل می‌کند، به جز در یک مورد خاص که تفاوت قابل توجهی مشاهده نشد. این برتری احتمالا به دلیل بهینه‌سازی‌های پیش‌بینی شاخه (branch prediction) در کامپایلر و سخت‌افزار است.
+
+با این حال، تفاوت سرعت در این سناریو بسیار ناچیز است (زیر یک نانوثانیه) و در عمل، تأثیر قابل توجهی بر عملکرد کلی برنامه نخواهد داشت. بنابراین، انتخاب بین این دو روش بیشتر به سلیقه و خوانایی کد بستگی دارد.
+
+در صورتی که نیاز به جستجو در اندیس‌های خارج از محدوده آرایه باشد، استفاده از دستور &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;switch&lt;/code&gt; با یک حالت پیش‌فرض (&lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;_&lt;/code&gt;) می‌تواند از بروز خطا جلوگیری کند. در این حالت، تابع &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ToString&lt;/code&gt; برای اندیس‌های نامعتبر فراخوانی می‌شود که هزینه عملکردی بیشتری دارد.
+
+در نهایت، توصیه می‌شود که توسعه‌دهندگان &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;.NET&lt;/code&gt; با توجه به نیازهای خاص پروژه و ترجیحات شخصی خود، روش مناسب را انتخاب کنند. هر دو روش از نظر عملکردی قابل قبول هستند و تفاوت قابل توجهی بین آن‌ها وجود ندارد.">
+    <meta name="twitter:card" content="در یک بررسی عملکردی، مقایسه ای بین دسترسی به عناصر یک آرایه و استفاده از دستور &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;switch&lt;/code&gt; برای جستجو انجام شد. هدف این بررسی، تعیین سریع‌ترین روش برای تبدیل اعداد (اندیس‌های صفر مبنا) به رشته‌های از پیش تعریف شده بود.
+
+نتایج نشان داد که در اکثر موارد، دستور &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;switch&lt;/code&gt; به طور مداوم سریع‌تر از دسترسی مستقیم به آرایه عمل می‌کند، به جز در یک مورد خاص که تفاوت قابل توجهی مشاهده نشد. این برتری احتمالا به دلیل بهینه‌سازی‌های پیش‌بینی شاخه (branch prediction) در کامپایلر و سخت‌افزار است.
+
+با این حال، تفاوت سرعت در این سناریو بسیار ناچیز است (زیر یک نانوثانیه) و در عمل، تأثیر قابل توجهی بر عملکرد کلی برنامه نخواهد داشت. بنابراین، انتخاب بین این دو روش بیشتر به سلیقه و خوانایی کد بستگی دارد.
+
+در صورتی که نیاز به جستجو در اندیس‌های خارج از محدوده آرایه باشد، استفاده از دستور &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;switch&lt;/code&gt; با یک حالت پیش‌فرض (&lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;_&lt;/code&gt;) می‌تواند از بروز خطا جلوگیری کند. در این حالت، تابع &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ToString&lt;/code&gt; برای اندیس‌های نامعتبر فراخوانی می‌شود که هزینه عملکردی بیشتری دارد.
+
+در نهایت، توصیه می‌شود که توسعه‌دهندگان &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;.NET&lt;/code&gt; با توجه به نیازهای خاص پروژه و ترجیحات شخصی خود، روش مناسب را انتخاب کنند. هر دو روش از نظر عملکردی قابل قبول هستند و تفاوت قابل توجهی بین آن‌ها وجود ندارد.">
+    <meta property="article:published_time" content="Thu, 26 Feb 2026 06:47:37 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
     <meta content='IE=edge' http-equiv='X-UA-Compatible'>
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">
-	
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
 	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
-
     <link href="vs.min.css" rel="stylesheet" type="text/css">
-    <script src="highlight.min.js" type="text/javascript"></script>
-	
+    <script src="highlight.min.js" type="text/javascript"></script>	
     <link href="styles.css" rel="stylesheet" type="text/css">	
     <style>
       @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
@@ -42,8 +94,8 @@
         }
      }
     </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
 </head>
-
 <body dir='rtl'>
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
@@ -53,7 +105,7 @@
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۳۶۹۵</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۶۹۷</span></td>
 </tr>
 <tr>
 <td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
@@ -73,7 +125,7 @@
 </tr>
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۲۲</span></td>
 </tr>
 </tbody>
 </table>
@@ -131,8 +183,5 @@
 
 <!-- to load custom fonts for printing -->
 <div class="useSamimFD">&nbsp;</div>
-
-<script src="SyntaxHighlighter.js" type="text/javascript"></script>
 </body>
-
 </html>

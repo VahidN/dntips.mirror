@@ -1,17 +1,359 @@
 <!DOCTYPE html>
 <html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
-
 <head>
-    <title>‫‫بهبود تست‌نویسی در توسعه نرم‌افزار با تمرکز بر اجتناب از Assertion Roulette</title>
+    <title>‫‫بهبود تست‌نویسی در توسعه نرم‌افزار با تمرکز بر اجتناب از Assertion Roulette</title>     <meta name="description" content="&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در دنیای توسعه نرم‌افزار، تست‌نویسی (Unit Testing) یکی از ارکان اصلی تضمین کیفیت کد است. در چارچوب Microsoft .NET، ابزارهایی مانند MSTest، NUnit و xUnit به توسعه‌دهندگان کمک می‌کنند تا تست‌های خودکار (Automated Tests) بنویسند که رفتار سیستم را بررسی کنند. با این حال، نوشتن تست‌های کارآمد و قابل نگهداری چالش‌هایی دارد. یکی از مشکلات رایج در تست‌نویسی، الگویی به نام Assertion Roulette است که می‌تواند خوانایی و قابلیت عیب‌یابی تست‌ها را کاهش دهد. این مقاله با تحلیل مفهوم Assertion Roulette و ارائه راهکارهایی برای اجتناب از آن، به توسعه‌دهندگان .NET کمک می‌کند تا تست‌هایی منسجم‌تر و قابل اعتمادتر بنویسند.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;Assertion Roulette چیست؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;Assertion Roulette به وضعیتی اشاره دارد که در یک متد تست (Test Method)، چندین ادعا یا بررسی (Assertion) بدون پیام‌های توضیحی واضح وجود داشته باشد. این موضوع باعث می‌شود وقتی تست شکست می‌خورد، تشخیص دلیل دقیق شکست دشوار شود. برای توسعه‌دهندگان .NET که با پروژه‌های پیچیده سروکار دارند، این مشکل می‌تواند زمان عیب‌یابی را افزایش دهد و اعتماد به تست‌ها را کاهش دهد.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;به عنوان مثال، فرض کنید یک متد تست در #C به صورت زیر نوشته شده است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public void TestInvoice_AddLineItem()
+{
+    var invoice = new Invoice();
+    var product = new Product(1, &amp;quot;Widget&amp;quot;, 19.99m);
+    invoice.AddItemQuantity(product, 5);
+    var lineItems = invoice.GetLineItems();
+    var actual = (LineItem)lineItems[0];
+    Assert.AreEqual(invoice, actual.GetInvoice());
+    Assert.AreEqual(product, actual.GetProduct());
+    Assert.AreEqual(5, actual.GetQuantity());
+}&lt;/pre&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در این کد، اگر تست شکست بخورد، خروجی ممکن است تنها نشان‌دهنده عدم برابری دو مقدار باشد، اما مشخص نمی‌کند کدام ادعا (مثلاً بررسی فاکتور، محصول یا تعداد) باعث شکست شده است. این ابهام، به‌ویژه در پروژه‌های بزرگ .NET که ممکن است صدها تست وجود داشته باشد، مشکل‌ساز است.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;چرا Assertion Roulette مشکل‌ساز است؟&lt;/strong&gt;&lt;/div&gt;&lt;ol&gt;&lt;li&gt;&lt;strong&gt;کاهش خوانایی تست:&lt;/strong&gt; بدون پیام‌های توضیحی، توسعه‌دهندگان نمی‌توانند به سرعت متوجه شوند که تست چه چیزی را بررسی می‌کند. این موضوع در تیم‌های بزرگ که افراد مختلف کد را بررسی می‌کنند، اهمیت بیشتری دارد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;دشواری در عیب‌یابی:&lt;/strong&gt; در محیط‌های یکپارچه‌سازی مداوم (Continuous Integration) مانند Azure DevOps، وقتی تست‌ها به صورت خودکار اجرا می‌شوند، گزارش شکست باید اطلاعات کافی برای رفع سریع مشکل ارائه دهد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;افزایش هزینه نگهداری:&lt;/strong&gt; تست‌هایی که به سختی قابل فهم هستند، هزینه نگهداری پروژه را بالا می‌برند، زیرا توسعه‌دهندگان باید زمان بیشتری برای تحلیل و اصلاح آن‌ها صرف کنند.&lt;/li&gt;&lt;/ol&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;راهکارهای اجتناب از Assertion Roulette&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;برای رفع این مشکل، چندین راهکار عملی وجود دارد که در ادامه توضیح داده می‌شوند.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;1. استفاده از پیام‌های توضیحی (Assertion Messages)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;یکی از ساده‌ترین روش‌ها برای بهبود تست‌ها، افزودن پیام‌های توضیحی به هر ادعا است. این پیام‌ها به توسعه‌دهندگان کمک می‌کنند تا در صورت شکست تست، به سرعت دلیل آن را شناسایی کنند. در چارچوب‌های .NET، متدهای Assert معمولاً پارامتری برای پیام دارند.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;مثال بهبودیافته کد قبلی:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public void TestInvoice_AddLineItem()
+{
+    var invoice = new Invoice();
+    var product = new Product(1, &amp;quot;Widget&amp;quot;, 19.99m);
+    invoice.AddItemQuantity(product, 5);
+    var lineItems = invoice.GetLineItems();
+    var actual = (LineItem)lineItems[0];
+    Assert.AreEqual(invoice, actual.GetInvoice(), &amp;quot;فاکتور خط آیتم باید با فاکتور اصلی یکسان باشد&amp;quot;);
+    Assert.AreEqual(product, actual.GetProduct(), &amp;quot;محصول خط آیتم باید با محصول اصلی یکسان باشد&amp;quot;);
+    Assert.AreEqual(5, actual.GetQuantity(), &amp;quot;تعداد باید 5 باشد&amp;quot;);
+}&lt;/pre&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در این کد، هر ادعا با یک پیام توضیحی همراه است که دقیقاً مشخص می‌کند چه چیزی بررسی شده است. اگر تست شکست بخورد، پیام مربوطه در گزارش تست نمایش داده می‌شود و عیب‌یابی را آسان‌تر می‌کند. این روش به‌ویژه در ابزارهایی مانند Visual Studio که گزارش‌های تست را به صورت گرافیکی نمایش می‌دهند، بسیار مؤثر است.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;2. استفاده از Custom Assertions&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;برای پروژه‌هایی که تست‌های مشابه زیادی دارند، می‌توان از ادعاهای سفارشی (Custom Assertions) استفاده کرد. این روش به کاهش تکرار کد و افزایش خوانایی کمک می‌کند. در .NET، می‌توانید متدهای کمکی تعریف کنید که منطق بررسی را کپسوله کنند.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;مثال:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static class InvoiceAssertions
+{
+    public static void AssertLineItem(LineItem actual, Invoice expectedInvoice, Product expectedProduct, int expectedQuantity)
+    {
+        Assert.AreEqual(expectedInvoice, actual.GetInvoice(), &amp;quot;فاکتور خط آیتم باید با فاکتور اصلی یکسان باشد&amp;quot;);
+        Assert.AreEqual(expectedProduct, actual.GetProduct(), &amp;quot;محصول خط آیتم باید با محصول اصلی یکسان باشد&amp;quot;);
+        Assert.AreEqual(expectedQuantity, actual.GetQuantity(), $&amp;quot;تعداد باید {expectedQuantity} باشد&amp;quot;);
+    }
+}
+
+public void TestInvoice_AddLineItem()
+{
+    var invoice = new Invoice();
+    var product = new Product(1, &amp;quot;Widget&amp;quot;, 19.99m);
+    invoice.AddItemQuantity(product, 5);
+    var lineItems = invoice.GetLineItems();
+    var actual = (LineItem)lineItems[0];
+    InvoiceAssertions.AssertLineItem(actual, invoice, product, 5);
+}&lt;/pre&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;این روش نه تنها Assertion Roulette را حذف می‌کند، بلکه تست‌ها را ماژولارتر و قابل استفاده مجدد می‌کند. توسعه‌دهندگان .NET می‌توانند این ادعاهای سفارشی را در پروژه‌های بزرگ برای استانداردسازی تست‌نویسی به کار ببرند. منابع موجود نشان می‌دهند که این رویکرد در پروژه‌های متن‌باز .NET مانند ASP.NET Core به طور گسترده استفاده می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;3. تقسیم تست‌های پیچیده به تست‌های کوچکتر&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;یکی دیگر از راهکارها، تقسیم متدهای تستی است که چندین جنبه از سیستم را بررسی می‌کنند. به جای یک تست با چندین ادعا، می‌توان هر ادعا را در یک متد تست جداگانه قرار داد. این روش &lt;strong&gt;به اصل &amp;quot;یک تست، یک رفتار&amp;quot;&lt;/strong&gt; پایبند است و خوانایی را بهبود می‌بخشد.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;مثال:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public void TestInvoice_AddLineItem_InvoiceMatches()
+{
+    var invoice = new Invoice();
+    var product = new Product(1, &amp;quot;Widget&amp;quot;, 19.99m);
+    invoice.AddItemQuantity(product, 5);
+    var lineItems = invoice.GetLineItems();
+    var actual = (LineItem)lineItems[0];
+    Assert.AreEqual(invoice, actual.GetInvoice(), &amp;quot;فاکتور خط آیتم باید با فاکتور اصلی یکسان باشد&amp;quot;);
+}
+
+public void TestInvoice_AddLineItem_ProductMatches()
+{
+    var invoice = new Invoice();
+    var product = new Product(1, &amp;quot;Widget&amp;quot;, 19.99m);
+    invoice.AddItemQuantity(product, 5);
+    var lineItems = invoice.GetLineItems();
+    var actual = (LineItem)lineItems[0];
+    Assert.AreEqual(product, actual.GetProduct(), &amp;quot;محصول خط آیتم باید با محصول اصلی یکسان باشد&amp;quot;);
+}
+
+public void TestInvoice_AddLineItem_QuantityMatches()
+{
+    var invoice = new Invoice();
+    var product = new Product(1, &amp;quot;Widget&amp;quot;, 19.99m);
+    invoice.AddItemQuantity(product, 5);
+    var lineItems = invoice.GetLineItems();
+    var actual = (LineItem)lineItems[0];
+    Assert.AreEqual(5, actual.GetQuantity(), &amp;quot;تعداد باید 5 باشد&amp;quot;);
+}&lt;/pre&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;این رویکرد اگرچه تعداد متدهای تست را افزایش می‌دهد، اما هر تست را متمرکزتر و قابل فهم‌تر می‌کند. در محیط‌های .NET، ابزارهایی مانند Visual Studio امکان مدیریت آسان این تست‌ها را فراهم می‌کنند. جستجوی وب نشان می‌دهد که این روش در میان توسعه‌دهندگان حرفه‌ای .NET به دلیل وضوح و قابلیت نگهداری محبوب است.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;4. استفاده از ابزارهای گزارش‌دهی پیشرفته&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در چارچوب‌های تست .NET، ابزارهایی مانند NUnit و MSTest قابلیت‌های گزارش‌دهی پیشرفته‌ای ارائه می‌دهند. برای مثال، می‌توانید از افزونه‌هایی مانند ExtentReports یا Allure استفاده کنید تا گزارش‌های دقیق‌تری از تست‌ها تولید کنید. این ابزارها می‌توانند اطلاعات بیشتری درباره شکست تست‌ها ارائه دهند و نیاز به پیام‌های دستی را کاهش دهند.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;نکات تکمیلی برای توسعه‌دهندگان .NET&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;استفاده از Test Data Builders:&lt;/strong&gt; برای کاهش پیچیدگی تنظیم فیکسچرها (Fixtures)، از الگوی Test Data Builder استفاده کنید. این الگو به شما امکان می‌دهد داده‌های تست را به صورت خوانا و قابل تنظیم ایجاد کنید.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;اجتناب از تست‌های بیش از حد مشتاق (Eager Tests):&lt;/strong&gt; تست‌هایی که چندین رفتار را همزمان بررسی می‌کنند، می‌توانند به Assertion Roulette منجر شوند. هر تست را روی یک رفتار خاص متمرکز کنید.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;یکپارچه‌سازی با CI/CD:&lt;/strong&gt; در سیستم‌های یکپارچه‌سازی مداوم مانند Azure DevOps یا GitHub Actions، اطمینان حاصل کنید که گزارش‌های تست شامل جزئیات کافی هستند. این کار از طریق تنظیمات مناسب امکان‌پذیر است.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;Assertion Roulette یکی از مشکلات رایج در تست‌نویسی است که می‌تواند خوانایی، قابلیت عیب‌یابی و نگهداری تست‌ها را به خطر بیندازد. با استفاده از پیام‌های توضیحی، ادعاهای سفارشی، تقسیم تست‌ها به واحدهای کوچکتر و بهره‌گیری از ابزارهای گزارش‌دهی پیشرفته، توسعه‌دهندگان .NET می‌توانند تست‌هایی بنویسند که نه تنها قابل اعتمادتر باشند، بلکه نگهداری آن‌ها نیز آسان‌تر باشد. این رویکردها به بهبود کیفیت کد و کاهش زمان عیب‌یابی در پروژه‌های پیچیده کمک می‌کنند. با رعایت این اصول، می‌توانید تست‌هایی ایجاد کنید که به عنوان مستندات قابل اعتماد پروژه عمل کنند و اعتماد تیم به فرآیند توسعه را افزایش دهند.&lt;/div&gt;">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="بهبود تست‌نویسی در توسعه نرم‌افزار با تمرکز بر اجتناب از Assertion Roulette">
+    <meta itemprop="description" content="&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در دنیای توسعه نرم‌افزار، تست‌نویسی (Unit Testing) یکی از ارکان اصلی تضمین کیفیت کد است. در چارچوب Microsoft .NET، ابزارهایی مانند MSTest، NUnit و xUnit به توسعه‌دهندگان کمک می‌کنند تا تست‌های خودکار (Automated Tests) بنویسند که رفتار سیستم را بررسی کنند. با این حال، نوشتن تست‌های کارآمد و قابل نگهداری چالش‌هایی دارد. یکی از مشکلات رایج در تست‌نویسی، الگویی به نام Assertion Roulette است که می‌تواند خوانایی و قابلیت عیب‌یابی تست‌ها را کاهش دهد. این مقاله با تحلیل مفهوم Assertion Roulette و ارائه راهکارهایی برای اجتناب از آن، به توسعه‌دهندگان .NET کمک می‌کند تا تست‌هایی منسجم‌تر و قابل اعتمادتر بنویسند.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;Assertion Roulette چیست؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;Assertion Roulette به وضعیتی اشاره دارد که در یک متد تست (Test Method)، چندین ادعا یا بررسی (Assertion) بدون پیام‌های توضیحی واضح وجود داشته باشد. این موضوع باعث می‌شود وقتی تست شکست می‌خورد، تشخیص دلیل دقیق شکست دشوار شود. برای توسعه‌دهندگان .NET که با پروژه‌های پیچیده سروکار دارند، این مشکل می‌تواند زمان عیب‌یابی را افزایش دهد و اعتماد به تست‌ها را کاهش دهد.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;به عنوان مثال، فرض کنید یک متد تست در #C به صورت زیر نوشته شده است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public void TestInvoice_AddLineItem()
+{
+    var invoice = new Invoice();
+    var product = new Product(1, &amp;quot;Widget&amp;quot;, 19.99m);
+    invoice.AddItemQuantity(product, 5);
+    var lineItems = invoice.GetLineItems();
+    var actual = (LineItem)lineItems[0];
+    Assert.AreEqual(invoice, actual.GetInvoice());
+    Assert.AreEqual(product, actual.GetProduct());
+    Assert.AreEqual(5, actual.GetQuantity());
+}&lt;/pre&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در این کد، اگر تست شکست بخورد، خروجی ممکن است تنها نشان‌دهنده عدم برابری دو مقدار باشد، اما مشخص نمی‌کند کدام ادعا (مثلاً بررسی فاکتور، محصول یا تعداد) باعث شکست شده است. این ابهام، به‌ویژه در پروژه‌های بزرگ .NET که ممکن است صدها تست وجود داشته باشد، مشکل‌ساز است.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;چرا Assertion Roulette مشکل‌ساز است؟&lt;/strong&gt;&lt;/div&gt;&lt;ol&gt;&lt;li&gt;&lt;strong&gt;کاهش خوانایی تست:&lt;/strong&gt; بدون پیام‌های توضیحی، توسعه‌دهندگان نمی‌توانند به سرعت متوجه شوند که تست چه چیزی را بررسی می‌کند. این موضوع در تیم‌های بزرگ که افراد مختلف کد را بررسی می‌کنند، اهمیت بیشتری دارد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;دشواری در عیب‌یابی:&lt;/strong&gt; در محیط‌های یکپارچه‌سازی مداوم (Continuous Integration) مانند Azure DevOps، وقتی تست‌ها به صورت خودکار اجرا می‌شوند، گزارش شکست باید اطلاعات کافی برای رفع سریع مشکل ارائه دهد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;افزایش هزینه نگهداری:&lt;/strong&gt; تست‌هایی که به سختی قابل فهم هستند، هزینه نگهداری پروژه را بالا می‌برند، زیرا توسعه‌دهندگان باید زمان بیشتری برای تحلیل و اصلاح آن‌ها صرف کنند.&lt;/li&gt;&lt;/ol&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;راهکارهای اجتناب از Assertion Roulette&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;برای رفع این مشکل، چندین راهکار عملی وجود دارد که در ادامه توضیح داده می‌شوند.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;1. استفاده از پیام‌های توضیحی (Assertion Messages)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;یکی از ساده‌ترین روش‌ها برای بهبود تست‌ها، افزودن پیام‌های توضیحی به هر ادعا است. این پیام‌ها به توسعه‌دهندگان کمک می‌کنند تا در صورت شکست تست، به سرعت دلیل آن را شناسایی کنند. در چارچوب‌های .NET، متدهای Assert معمولاً پارامتری برای پیام دارند.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;مثال بهبودیافته کد قبلی:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public void TestInvoice_AddLineItem()
+{
+    var invoice = new Invoice();
+    var product = new Product(1, &amp;quot;Widget&amp;quot;, 19.99m);
+    invoice.AddItemQuantity(product, 5);
+    var lineItems = invoice.GetLineItems();
+    var actual = (LineItem)lineItems[0];
+    Assert.AreEqual(invoice, actual.GetInvoice(), &amp;quot;فاکتور خط آیتم باید با فاکتور اصلی یکسان باشد&amp;quot;);
+    Assert.AreEqual(product, actual.GetProduct(), &amp;quot;محصول خط آیتم باید با محصول اصلی یکسان باشد&amp;quot;);
+    Assert.AreEqual(5, actual.GetQuantity(), &amp;quot;تعداد باید 5 باشد&amp;quot;);
+}&lt;/pre&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در این کد، هر ادعا با یک پیام توضیحی همراه است که دقیقاً مشخص می‌کند چه چیزی بررسی شده است. اگر تست شکست بخورد، پیام مربوطه در گزارش تست نمایش داده می‌شود و عیب‌یابی را آسان‌تر می‌کند. این روش به‌ویژه در ابزارهایی مانند Visual Studio که گزارش‌های تست را به صورت گرافیکی نمایش می‌دهند، بسیار مؤثر است.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;2. استفاده از Custom Assertions&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;برای پروژه‌هایی که تست‌های مشابه زیادی دارند، می‌توان از ادعاهای سفارشی (Custom Assertions) استفاده کرد. این روش به کاهش تکرار کد و افزایش خوانایی کمک می‌کند. در .NET، می‌توانید متدهای کمکی تعریف کنید که منطق بررسی را کپسوله کنند.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;مثال:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static class InvoiceAssertions
+{
+    public static void AssertLineItem(LineItem actual, Invoice expectedInvoice, Product expectedProduct, int expectedQuantity)
+    {
+        Assert.AreEqual(expectedInvoice, actual.GetInvoice(), &amp;quot;فاکتور خط آیتم باید با فاکتور اصلی یکسان باشد&amp;quot;);
+        Assert.AreEqual(expectedProduct, actual.GetProduct(), &amp;quot;محصول خط آیتم باید با محصول اصلی یکسان باشد&amp;quot;);
+        Assert.AreEqual(expectedQuantity, actual.GetQuantity(), $&amp;quot;تعداد باید {expectedQuantity} باشد&amp;quot;);
+    }
+}
+
+public void TestInvoice_AddLineItem()
+{
+    var invoice = new Invoice();
+    var product = new Product(1, &amp;quot;Widget&amp;quot;, 19.99m);
+    invoice.AddItemQuantity(product, 5);
+    var lineItems = invoice.GetLineItems();
+    var actual = (LineItem)lineItems[0];
+    InvoiceAssertions.AssertLineItem(actual, invoice, product, 5);
+}&lt;/pre&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;این روش نه تنها Assertion Roulette را حذف می‌کند، بلکه تست‌ها را ماژولارتر و قابل استفاده مجدد می‌کند. توسعه‌دهندگان .NET می‌توانند این ادعاهای سفارشی را در پروژه‌های بزرگ برای استانداردسازی تست‌نویسی به کار ببرند. منابع موجود نشان می‌دهند که این رویکرد در پروژه‌های متن‌باز .NET مانند ASP.NET Core به طور گسترده استفاده می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;3. تقسیم تست‌های پیچیده به تست‌های کوچکتر&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;یکی دیگر از راهکارها، تقسیم متدهای تستی است که چندین جنبه از سیستم را بررسی می‌کنند. به جای یک تست با چندین ادعا، می‌توان هر ادعا را در یک متد تست جداگانه قرار داد. این روش &lt;strong&gt;به اصل &amp;quot;یک تست، یک رفتار&amp;quot;&lt;/strong&gt; پایبند است و خوانایی را بهبود می‌بخشد.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;مثال:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public void TestInvoice_AddLineItem_InvoiceMatches()
+{
+    var invoice = new Invoice();
+    var product = new Product(1, &amp;quot;Widget&amp;quot;, 19.99m);
+    invoice.AddItemQuantity(product, 5);
+    var lineItems = invoice.GetLineItems();
+    var actual = (LineItem)lineItems[0];
+    Assert.AreEqual(invoice, actual.GetInvoice(), &amp;quot;فاکتور خط آیتم باید با فاکتور اصلی یکسان باشد&amp;quot;);
+}
+
+public void TestInvoice_AddLineItem_ProductMatches()
+{
+    var invoice = new Invoice();
+    var product = new Product(1, &amp;quot;Widget&amp;quot;, 19.99m);
+    invoice.AddItemQuantity(product, 5);
+    var lineItems = invoice.GetLineItems();
+    var actual = (LineItem)lineItems[0];
+    Assert.AreEqual(product, actual.GetProduct(), &amp;quot;محصول خط آیتم باید با محصول اصلی یکسان باشد&amp;quot;);
+}
+
+public void TestInvoice_AddLineItem_QuantityMatches()
+{
+    var invoice = new Invoice();
+    var product = new Product(1, &amp;quot;Widget&amp;quot;, 19.99m);
+    invoice.AddItemQuantity(product, 5);
+    var lineItems = invoice.GetLineItems();
+    var actual = (LineItem)lineItems[0];
+    Assert.AreEqual(5, actual.GetQuantity(), &amp;quot;تعداد باید 5 باشد&amp;quot;);
+}&lt;/pre&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;این رویکرد اگرچه تعداد متدهای تست را افزایش می‌دهد، اما هر تست را متمرکزتر و قابل فهم‌تر می‌کند. در محیط‌های .NET، ابزارهایی مانند Visual Studio امکان مدیریت آسان این تست‌ها را فراهم می‌کنند. جستجوی وب نشان می‌دهد که این روش در میان توسعه‌دهندگان حرفه‌ای .NET به دلیل وضوح و قابلیت نگهداری محبوب است.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;4. استفاده از ابزارهای گزارش‌دهی پیشرفته&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در چارچوب‌های تست .NET، ابزارهایی مانند NUnit و MSTest قابلیت‌های گزارش‌دهی پیشرفته‌ای ارائه می‌دهند. برای مثال، می‌توانید از افزونه‌هایی مانند ExtentReports یا Allure استفاده کنید تا گزارش‌های دقیق‌تری از تست‌ها تولید کنید. این ابزارها می‌توانند اطلاعات بیشتری درباره شکست تست‌ها ارائه دهند و نیاز به پیام‌های دستی را کاهش دهند.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;نکات تکمیلی برای توسعه‌دهندگان .NET&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;استفاده از Test Data Builders:&lt;/strong&gt; برای کاهش پیچیدگی تنظیم فیکسچرها (Fixtures)، از الگوی Test Data Builder استفاده کنید. این الگو به شما امکان می‌دهد داده‌های تست را به صورت خوانا و قابل تنظیم ایجاد کنید.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;اجتناب از تست‌های بیش از حد مشتاق (Eager Tests):&lt;/strong&gt; تست‌هایی که چندین رفتار را همزمان بررسی می‌کنند، می‌توانند به Assertion Roulette منجر شوند. هر تست را روی یک رفتار خاص متمرکز کنید.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;یکپارچه‌سازی با CI/CD:&lt;/strong&gt; در سیستم‌های یکپارچه‌سازی مداوم مانند Azure DevOps یا GitHub Actions، اطمینان حاصل کنید که گزارش‌های تست شامل جزئیات کافی هستند. این کار از طریق تنظیمات مناسب امکان‌پذیر است.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;Assertion Roulette یکی از مشکلات رایج در تست‌نویسی است که می‌تواند خوانایی، قابلیت عیب‌یابی و نگهداری تست‌ها را به خطر بیندازد. با استفاده از پیام‌های توضیحی، ادعاهای سفارشی، تقسیم تست‌ها به واحدهای کوچکتر و بهره‌گیری از ابزارهای گزارش‌دهی پیشرفته، توسعه‌دهندگان .NET می‌توانند تست‌هایی بنویسند که نه تنها قابل اعتمادتر باشند، بلکه نگهداری آن‌ها نیز آسان‌تر باشد. این رویکردها به بهبود کیفیت کد و کاهش زمان عیب‌یابی در پروژه‌های پیچیده کمک می‌کنند. با رعایت این اصول، می‌توانید تست‌هایی ایجاد کنید که به عنوان مستندات قابل اعتماد پروژه عمل کنند و اعتماد تیم به فرآیند توسعه را افزایش دهند.&lt;/div&gt;">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="بهبود تست‌نویسی در توسعه نرم‌افزار با تمرکز بر اجتناب از Assertion Roulette">
+    <meta property="og:description" content="&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در دنیای توسعه نرم‌افزار، تست‌نویسی (Unit Testing) یکی از ارکان اصلی تضمین کیفیت کد است. در چارچوب Microsoft .NET، ابزارهایی مانند MSTest، NUnit و xUnit به توسعه‌دهندگان کمک می‌کنند تا تست‌های خودکار (Automated Tests) بنویسند که رفتار سیستم را بررسی کنند. با این حال، نوشتن تست‌های کارآمد و قابل نگهداری چالش‌هایی دارد. یکی از مشکلات رایج در تست‌نویسی، الگویی به نام Assertion Roulette است که می‌تواند خوانایی و قابلیت عیب‌یابی تست‌ها را کاهش دهد. این مقاله با تحلیل مفهوم Assertion Roulette و ارائه راهکارهایی برای اجتناب از آن، به توسعه‌دهندگان .NET کمک می‌کند تا تست‌هایی منسجم‌تر و قابل اعتمادتر بنویسند.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;Assertion Roulette چیست؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;Assertion Roulette به وضعیتی اشاره دارد که در یک متد تست (Test Method)، چندین ادعا یا بررسی (Assertion) بدون پیام‌های توضیحی واضح وجود داشته باشد. این موضوع باعث می‌شود وقتی تست شکست می‌خورد، تشخیص دلیل دقیق شکست دشوار شود. برای توسعه‌دهندگان .NET که با پروژه‌های پیچیده سروکار دارند، این مشکل می‌تواند زمان عیب‌یابی را افزایش دهد و اعتماد به تست‌ها را کاهش دهد.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;به عنوان مثال، فرض کنید یک متد تست در #C به صورت زیر نوشته شده است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public void TestInvoice_AddLineItem()
+{
+    var invoice = new Invoice();
+    var product = new Product(1, &amp;quot;Widget&amp;quot;, 19.99m);
+    invoice.AddItemQuantity(product, 5);
+    var lineItems = invoice.GetLineItems();
+    var actual = (LineItem)lineItems[0];
+    Assert.AreEqual(invoice, actual.GetInvoice());
+    Assert.AreEqual(product, actual.GetProduct());
+    Assert.AreEqual(5, actual.GetQuantity());
+}&lt;/pre&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در این کد، اگر تست شکست بخورد، خروجی ممکن است تنها نشان‌دهنده عدم برابری دو مقدار باشد، اما مشخص نمی‌کند کدام ادعا (مثلاً بررسی فاکتور، محصول یا تعداد) باعث شکست شده است. این ابهام، به‌ویژه در پروژه‌های بزرگ .NET که ممکن است صدها تست وجود داشته باشد، مشکل‌ساز است.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;چرا Assertion Roulette مشکل‌ساز است؟&lt;/strong&gt;&lt;/div&gt;&lt;ol&gt;&lt;li&gt;&lt;strong&gt;کاهش خوانایی تست:&lt;/strong&gt; بدون پیام‌های توضیحی، توسعه‌دهندگان نمی‌توانند به سرعت متوجه شوند که تست چه چیزی را بررسی می‌کند. این موضوع در تیم‌های بزرگ که افراد مختلف کد را بررسی می‌کنند، اهمیت بیشتری دارد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;دشواری در عیب‌یابی:&lt;/strong&gt; در محیط‌های یکپارچه‌سازی مداوم (Continuous Integration) مانند Azure DevOps، وقتی تست‌ها به صورت خودکار اجرا می‌شوند، گزارش شکست باید اطلاعات کافی برای رفع سریع مشکل ارائه دهد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;افزایش هزینه نگهداری:&lt;/strong&gt; تست‌هایی که به سختی قابل فهم هستند، هزینه نگهداری پروژه را بالا می‌برند، زیرا توسعه‌دهندگان باید زمان بیشتری برای تحلیل و اصلاح آن‌ها صرف کنند.&lt;/li&gt;&lt;/ol&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;راهکارهای اجتناب از Assertion Roulette&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;برای رفع این مشکل، چندین راهکار عملی وجود دارد که در ادامه توضیح داده می‌شوند.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;1. استفاده از پیام‌های توضیحی (Assertion Messages)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;یکی از ساده‌ترین روش‌ها برای بهبود تست‌ها، افزودن پیام‌های توضیحی به هر ادعا است. این پیام‌ها به توسعه‌دهندگان کمک می‌کنند تا در صورت شکست تست، به سرعت دلیل آن را شناسایی کنند. در چارچوب‌های .NET، متدهای Assert معمولاً پارامتری برای پیام دارند.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;مثال بهبودیافته کد قبلی:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public void TestInvoice_AddLineItem()
+{
+    var invoice = new Invoice();
+    var product = new Product(1, &amp;quot;Widget&amp;quot;, 19.99m);
+    invoice.AddItemQuantity(product, 5);
+    var lineItems = invoice.GetLineItems();
+    var actual = (LineItem)lineItems[0];
+    Assert.AreEqual(invoice, actual.GetInvoice(), &amp;quot;فاکتور خط آیتم باید با فاکتور اصلی یکسان باشد&amp;quot;);
+    Assert.AreEqual(product, actual.GetProduct(), &amp;quot;محصول خط آیتم باید با محصول اصلی یکسان باشد&amp;quot;);
+    Assert.AreEqual(5, actual.GetQuantity(), &amp;quot;تعداد باید 5 باشد&amp;quot;);
+}&lt;/pre&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در این کد، هر ادعا با یک پیام توضیحی همراه است که دقیقاً مشخص می‌کند چه چیزی بررسی شده است. اگر تست شکست بخورد، پیام مربوطه در گزارش تست نمایش داده می‌شود و عیب‌یابی را آسان‌تر می‌کند. این روش به‌ویژه در ابزارهایی مانند Visual Studio که گزارش‌های تست را به صورت گرافیکی نمایش می‌دهند، بسیار مؤثر است.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;2. استفاده از Custom Assertions&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;برای پروژه‌هایی که تست‌های مشابه زیادی دارند، می‌توان از ادعاهای سفارشی (Custom Assertions) استفاده کرد. این روش به کاهش تکرار کد و افزایش خوانایی کمک می‌کند. در .NET، می‌توانید متدهای کمکی تعریف کنید که منطق بررسی را کپسوله کنند.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;مثال:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static class InvoiceAssertions
+{
+    public static void AssertLineItem(LineItem actual, Invoice expectedInvoice, Product expectedProduct, int expectedQuantity)
+    {
+        Assert.AreEqual(expectedInvoice, actual.GetInvoice(), &amp;quot;فاکتور خط آیتم باید با فاکتور اصلی یکسان باشد&amp;quot;);
+        Assert.AreEqual(expectedProduct, actual.GetProduct(), &amp;quot;محصول خط آیتم باید با محصول اصلی یکسان باشد&amp;quot;);
+        Assert.AreEqual(expectedQuantity, actual.GetQuantity(), $&amp;quot;تعداد باید {expectedQuantity} باشد&amp;quot;);
+    }
+}
+
+public void TestInvoice_AddLineItem()
+{
+    var invoice = new Invoice();
+    var product = new Product(1, &amp;quot;Widget&amp;quot;, 19.99m);
+    invoice.AddItemQuantity(product, 5);
+    var lineItems = invoice.GetLineItems();
+    var actual = (LineItem)lineItems[0];
+    InvoiceAssertions.AssertLineItem(actual, invoice, product, 5);
+}&lt;/pre&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;این روش نه تنها Assertion Roulette را حذف می‌کند، بلکه تست‌ها را ماژولارتر و قابل استفاده مجدد می‌کند. توسعه‌دهندگان .NET می‌توانند این ادعاهای سفارشی را در پروژه‌های بزرگ برای استانداردسازی تست‌نویسی به کار ببرند. منابع موجود نشان می‌دهند که این رویکرد در پروژه‌های متن‌باز .NET مانند ASP.NET Core به طور گسترده استفاده می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;3. تقسیم تست‌های پیچیده به تست‌های کوچکتر&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;یکی دیگر از راهکارها، تقسیم متدهای تستی است که چندین جنبه از سیستم را بررسی می‌کنند. به جای یک تست با چندین ادعا، می‌توان هر ادعا را در یک متد تست جداگانه قرار داد. این روش &lt;strong&gt;به اصل &amp;quot;یک تست، یک رفتار&amp;quot;&lt;/strong&gt; پایبند است و خوانایی را بهبود می‌بخشد.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;مثال:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public void TestInvoice_AddLineItem_InvoiceMatches()
+{
+    var invoice = new Invoice();
+    var product = new Product(1, &amp;quot;Widget&amp;quot;, 19.99m);
+    invoice.AddItemQuantity(product, 5);
+    var lineItems = invoice.GetLineItems();
+    var actual = (LineItem)lineItems[0];
+    Assert.AreEqual(invoice, actual.GetInvoice(), &amp;quot;فاکتور خط آیتم باید با فاکتور اصلی یکسان باشد&amp;quot;);
+}
+
+public void TestInvoice_AddLineItem_ProductMatches()
+{
+    var invoice = new Invoice();
+    var product = new Product(1, &amp;quot;Widget&amp;quot;, 19.99m);
+    invoice.AddItemQuantity(product, 5);
+    var lineItems = invoice.GetLineItems();
+    var actual = (LineItem)lineItems[0];
+    Assert.AreEqual(product, actual.GetProduct(), &amp;quot;محصول خط آیتم باید با محصول اصلی یکسان باشد&amp;quot;);
+}
+
+public void TestInvoice_AddLineItem_QuantityMatches()
+{
+    var invoice = new Invoice();
+    var product = new Product(1, &amp;quot;Widget&amp;quot;, 19.99m);
+    invoice.AddItemQuantity(product, 5);
+    var lineItems = invoice.GetLineItems();
+    var actual = (LineItem)lineItems[0];
+    Assert.AreEqual(5, actual.GetQuantity(), &amp;quot;تعداد باید 5 باشد&amp;quot;);
+}&lt;/pre&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;این رویکرد اگرچه تعداد متدهای تست را افزایش می‌دهد، اما هر تست را متمرکزتر و قابل فهم‌تر می‌کند. در محیط‌های .NET، ابزارهایی مانند Visual Studio امکان مدیریت آسان این تست‌ها را فراهم می‌کنند. جستجوی وب نشان می‌دهد که این روش در میان توسعه‌دهندگان حرفه‌ای .NET به دلیل وضوح و قابلیت نگهداری محبوب است.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;4. استفاده از ابزارهای گزارش‌دهی پیشرفته&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در چارچوب‌های تست .NET، ابزارهایی مانند NUnit و MSTest قابلیت‌های گزارش‌دهی پیشرفته‌ای ارائه می‌دهند. برای مثال، می‌توانید از افزونه‌هایی مانند ExtentReports یا Allure استفاده کنید تا گزارش‌های دقیق‌تری از تست‌ها تولید کنید. این ابزارها می‌توانند اطلاعات بیشتری درباره شکست تست‌ها ارائه دهند و نیاز به پیام‌های دستی را کاهش دهند.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;نکات تکمیلی برای توسعه‌دهندگان .NET&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;استفاده از Test Data Builders:&lt;/strong&gt; برای کاهش پیچیدگی تنظیم فیکسچرها (Fixtures)، از الگوی Test Data Builder استفاده کنید. این الگو به شما امکان می‌دهد داده‌های تست را به صورت خوانا و قابل تنظیم ایجاد کنید.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;اجتناب از تست‌های بیش از حد مشتاق (Eager Tests):&lt;/strong&gt; تست‌هایی که چندین رفتار را همزمان بررسی می‌کنند، می‌توانند به Assertion Roulette منجر شوند. هر تست را روی یک رفتار خاص متمرکز کنید.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;یکپارچه‌سازی با CI/CD:&lt;/strong&gt; در سیستم‌های یکپارچه‌سازی مداوم مانند Azure DevOps یا GitHub Actions، اطمینان حاصل کنید که گزارش‌های تست شامل جزئیات کافی هستند. این کار از طریق تنظیمات مناسب امکان‌پذیر است.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;Assertion Roulette یکی از مشکلات رایج در تست‌نویسی است که می‌تواند خوانایی، قابلیت عیب‌یابی و نگهداری تست‌ها را به خطر بیندازد. با استفاده از پیام‌های توضیحی، ادعاهای سفارشی، تقسیم تست‌ها به واحدهای کوچکتر و بهره‌گیری از ابزارهای گزارش‌دهی پیشرفته، توسعه‌دهندگان .NET می‌توانند تست‌هایی بنویسند که نه تنها قابل اعتمادتر باشند، بلکه نگهداری آن‌ها نیز آسان‌تر باشد. این رویکردها به بهبود کیفیت کد و کاهش زمان عیب‌یابی در پروژه‌های پیچیده کمک می‌کنند. با رعایت این اصول، می‌توانید تست‌هایی ایجاد کنید که به عنوان مستندات قابل اعتماد پروژه عمل کنند و اعتماد تیم به فرآیند توسعه را افزایش دهند.&lt;/div&gt;">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="بهبود تست‌نویسی در توسعه نرم‌افزار با تمرکز بر اجتناب از Assertion Roulette">
+    <meta name="twitter:description" content="&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در دنیای توسعه نرم‌افزار، تست‌نویسی (Unit Testing) یکی از ارکان اصلی تضمین کیفیت کد است. در چارچوب Microsoft .NET، ابزارهایی مانند MSTest، NUnit و xUnit به توسعه‌دهندگان کمک می‌کنند تا تست‌های خودکار (Automated Tests) بنویسند که رفتار سیستم را بررسی کنند. با این حال، نوشتن تست‌های کارآمد و قابل نگهداری چالش‌هایی دارد. یکی از مشکلات رایج در تست‌نویسی، الگویی به نام Assertion Roulette است که می‌تواند خوانایی و قابلیت عیب‌یابی تست‌ها را کاهش دهد. این مقاله با تحلیل مفهوم Assertion Roulette و ارائه راهکارهایی برای اجتناب از آن، به توسعه‌دهندگان .NET کمک می‌کند تا تست‌هایی منسجم‌تر و قابل اعتمادتر بنویسند.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;Assertion Roulette چیست؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;Assertion Roulette به وضعیتی اشاره دارد که در یک متد تست (Test Method)، چندین ادعا یا بررسی (Assertion) بدون پیام‌های توضیحی واضح وجود داشته باشد. این موضوع باعث می‌شود وقتی تست شکست می‌خورد، تشخیص دلیل دقیق شکست دشوار شود. برای توسعه‌دهندگان .NET که با پروژه‌های پیچیده سروکار دارند، این مشکل می‌تواند زمان عیب‌یابی را افزایش دهد و اعتماد به تست‌ها را کاهش دهد.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;به عنوان مثال، فرض کنید یک متد تست در #C به صورت زیر نوشته شده است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public void TestInvoice_AddLineItem()
+{
+    var invoice = new Invoice();
+    var product = new Product(1, &amp;quot;Widget&amp;quot;, 19.99m);
+    invoice.AddItemQuantity(product, 5);
+    var lineItems = invoice.GetLineItems();
+    var actual = (LineItem)lineItems[0];
+    Assert.AreEqual(invoice, actual.GetInvoice());
+    Assert.AreEqual(product, actual.GetProduct());
+    Assert.AreEqual(5, actual.GetQuantity());
+}&lt;/pre&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در این کد، اگر تست شکست بخورد، خروجی ممکن است تنها نشان‌دهنده عدم برابری دو مقدار باشد، اما مشخص نمی‌کند کدام ادعا (مثلاً بررسی فاکتور، محصول یا تعداد) باعث شکست شده است. این ابهام، به‌ویژه در پروژه‌های بزرگ .NET که ممکن است صدها تست وجود داشته باشد، مشکل‌ساز است.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;چرا Assertion Roulette مشکل‌ساز است؟&lt;/strong&gt;&lt;/div&gt;&lt;ol&gt;&lt;li&gt;&lt;strong&gt;کاهش خوانایی تست:&lt;/strong&gt; بدون پیام‌های توضیحی، توسعه‌دهندگان نمی‌توانند به سرعت متوجه شوند که تست چه چیزی را بررسی می‌کند. این موضوع در تیم‌های بزرگ که افراد مختلف کد را بررسی می‌کنند، اهمیت بیشتری دارد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;دشواری در عیب‌یابی:&lt;/strong&gt; در محیط‌های یکپارچه‌سازی مداوم (Continuous Integration) مانند Azure DevOps، وقتی تست‌ها به صورت خودکار اجرا می‌شوند، گزارش شکست باید اطلاعات کافی برای رفع سریع مشکل ارائه دهد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;افزایش هزینه نگهداری:&lt;/strong&gt; تست‌هایی که به سختی قابل فهم هستند، هزینه نگهداری پروژه را بالا می‌برند، زیرا توسعه‌دهندگان باید زمان بیشتری برای تحلیل و اصلاح آن‌ها صرف کنند.&lt;/li&gt;&lt;/ol&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;راهکارهای اجتناب از Assertion Roulette&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;برای رفع این مشکل، چندین راهکار عملی وجود دارد که در ادامه توضیح داده می‌شوند.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;1. استفاده از پیام‌های توضیحی (Assertion Messages)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;یکی از ساده‌ترین روش‌ها برای بهبود تست‌ها، افزودن پیام‌های توضیحی به هر ادعا است. این پیام‌ها به توسعه‌دهندگان کمک می‌کنند تا در صورت شکست تست، به سرعت دلیل آن را شناسایی کنند. در چارچوب‌های .NET، متدهای Assert معمولاً پارامتری برای پیام دارند.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;مثال بهبودیافته کد قبلی:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public void TestInvoice_AddLineItem()
+{
+    var invoice = new Invoice();
+    var product = new Product(1, &amp;quot;Widget&amp;quot;, 19.99m);
+    invoice.AddItemQuantity(product, 5);
+    var lineItems = invoice.GetLineItems();
+    var actual = (LineItem)lineItems[0];
+    Assert.AreEqual(invoice, actual.GetInvoice(), &amp;quot;فاکتور خط آیتم باید با فاکتور اصلی یکسان باشد&amp;quot;);
+    Assert.AreEqual(product, actual.GetProduct(), &amp;quot;محصول خط آیتم باید با محصول اصلی یکسان باشد&amp;quot;);
+    Assert.AreEqual(5, actual.GetQuantity(), &amp;quot;تعداد باید 5 باشد&amp;quot;);
+}&lt;/pre&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در این کد، هر ادعا با یک پیام توضیحی همراه است که دقیقاً مشخص می‌کند چه چیزی بررسی شده است. اگر تست شکست بخورد، پیام مربوطه در گزارش تست نمایش داده می‌شود و عیب‌یابی را آسان‌تر می‌کند. این روش به‌ویژه در ابزارهایی مانند Visual Studio که گزارش‌های تست را به صورت گرافیکی نمایش می‌دهند، بسیار مؤثر است.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;2. استفاده از Custom Assertions&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;برای پروژه‌هایی که تست‌های مشابه زیادی دارند، می‌توان از ادعاهای سفارشی (Custom Assertions) استفاده کرد. این روش به کاهش تکرار کد و افزایش خوانایی کمک می‌کند. در .NET، می‌توانید متدهای کمکی تعریف کنید که منطق بررسی را کپسوله کنند.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;مثال:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static class InvoiceAssertions
+{
+    public static void AssertLineItem(LineItem actual, Invoice expectedInvoice, Product expectedProduct, int expectedQuantity)
+    {
+        Assert.AreEqual(expectedInvoice, actual.GetInvoice(), &amp;quot;فاکتور خط آیتم باید با فاکتور اصلی یکسان باشد&amp;quot;);
+        Assert.AreEqual(expectedProduct, actual.GetProduct(), &amp;quot;محصول خط آیتم باید با محصول اصلی یکسان باشد&amp;quot;);
+        Assert.AreEqual(expectedQuantity, actual.GetQuantity(), $&amp;quot;تعداد باید {expectedQuantity} باشد&amp;quot;);
+    }
+}
+
+public void TestInvoice_AddLineItem()
+{
+    var invoice = new Invoice();
+    var product = new Product(1, &amp;quot;Widget&amp;quot;, 19.99m);
+    invoice.AddItemQuantity(product, 5);
+    var lineItems = invoice.GetLineItems();
+    var actual = (LineItem)lineItems[0];
+    InvoiceAssertions.AssertLineItem(actual, invoice, product, 5);
+}&lt;/pre&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;این روش نه تنها Assertion Roulette را حذف می‌کند، بلکه تست‌ها را ماژولارتر و قابل استفاده مجدد می‌کند. توسعه‌دهندگان .NET می‌توانند این ادعاهای سفارشی را در پروژه‌های بزرگ برای استانداردسازی تست‌نویسی به کار ببرند. منابع موجود نشان می‌دهند که این رویکرد در پروژه‌های متن‌باز .NET مانند ASP.NET Core به طور گسترده استفاده می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;3. تقسیم تست‌های پیچیده به تست‌های کوچکتر&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;یکی دیگر از راهکارها، تقسیم متدهای تستی است که چندین جنبه از سیستم را بررسی می‌کنند. به جای یک تست با چندین ادعا، می‌توان هر ادعا را در یک متد تست جداگانه قرار داد. این روش &lt;strong&gt;به اصل &amp;quot;یک تست، یک رفتار&amp;quot;&lt;/strong&gt; پایبند است و خوانایی را بهبود می‌بخشد.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;مثال:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public void TestInvoice_AddLineItem_InvoiceMatches()
+{
+    var invoice = new Invoice();
+    var product = new Product(1, &amp;quot;Widget&amp;quot;, 19.99m);
+    invoice.AddItemQuantity(product, 5);
+    var lineItems = invoice.GetLineItems();
+    var actual = (LineItem)lineItems[0];
+    Assert.AreEqual(invoice, actual.GetInvoice(), &amp;quot;فاکتور خط آیتم باید با فاکتور اصلی یکسان باشد&amp;quot;);
+}
+
+public void TestInvoice_AddLineItem_ProductMatches()
+{
+    var invoice = new Invoice();
+    var product = new Product(1, &amp;quot;Widget&amp;quot;, 19.99m);
+    invoice.AddItemQuantity(product, 5);
+    var lineItems = invoice.GetLineItems();
+    var actual = (LineItem)lineItems[0];
+    Assert.AreEqual(product, actual.GetProduct(), &amp;quot;محصول خط آیتم باید با محصول اصلی یکسان باشد&amp;quot;);
+}
+
+public void TestInvoice_AddLineItem_QuantityMatches()
+{
+    var invoice = new Invoice();
+    var product = new Product(1, &amp;quot;Widget&amp;quot;, 19.99m);
+    invoice.AddItemQuantity(product, 5);
+    var lineItems = invoice.GetLineItems();
+    var actual = (LineItem)lineItems[0];
+    Assert.AreEqual(5, actual.GetQuantity(), &amp;quot;تعداد باید 5 باشد&amp;quot;);
+}&lt;/pre&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;این رویکرد اگرچه تعداد متدهای تست را افزایش می‌دهد، اما هر تست را متمرکزتر و قابل فهم‌تر می‌کند. در محیط‌های .NET، ابزارهایی مانند Visual Studio امکان مدیریت آسان این تست‌ها را فراهم می‌کنند. جستجوی وب نشان می‌دهد که این روش در میان توسعه‌دهندگان حرفه‌ای .NET به دلیل وضوح و قابلیت نگهداری محبوب است.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;4. استفاده از ابزارهای گزارش‌دهی پیشرفته&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در چارچوب‌های تست .NET، ابزارهایی مانند NUnit و MSTest قابلیت‌های گزارش‌دهی پیشرفته‌ای ارائه می‌دهند. برای مثال، می‌توانید از افزونه‌هایی مانند ExtentReports یا Allure استفاده کنید تا گزارش‌های دقیق‌تری از تست‌ها تولید کنید. این ابزارها می‌توانند اطلاعات بیشتری درباره شکست تست‌ها ارائه دهند و نیاز به پیام‌های دستی را کاهش دهند.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;نکات تکمیلی برای توسعه‌دهندگان .NET&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;استفاده از Test Data Builders:&lt;/strong&gt; برای کاهش پیچیدگی تنظیم فیکسچرها (Fixtures)، از الگوی Test Data Builder استفاده کنید. این الگو به شما امکان می‌دهد داده‌های تست را به صورت خوانا و قابل تنظیم ایجاد کنید.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;اجتناب از تست‌های بیش از حد مشتاق (Eager Tests):&lt;/strong&gt; تست‌هایی که چندین رفتار را همزمان بررسی می‌کنند، می‌توانند به Assertion Roulette منجر شوند. هر تست را روی یک رفتار خاص متمرکز کنید.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;یکپارچه‌سازی با CI/CD:&lt;/strong&gt; در سیستم‌های یکپارچه‌سازی مداوم مانند Azure DevOps یا GitHub Actions، اطمینان حاصل کنید که گزارش‌های تست شامل جزئیات کافی هستند. این کار از طریق تنظیمات مناسب امکان‌پذیر است.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;Assertion Roulette یکی از مشکلات رایج در تست‌نویسی است که می‌تواند خوانایی، قابلیت عیب‌یابی و نگهداری تست‌ها را به خطر بیندازد. با استفاده از پیام‌های توضیحی، ادعاهای سفارشی، تقسیم تست‌ها به واحدهای کوچکتر و بهره‌گیری از ابزارهای گزارش‌دهی پیشرفته، توسعه‌دهندگان .NET می‌توانند تست‌هایی بنویسند که نه تنها قابل اعتمادتر باشند، بلکه نگهداری آن‌ها نیز آسان‌تر باشد. این رویکردها به بهبود کیفیت کد و کاهش زمان عیب‌یابی در پروژه‌های پیچیده کمک می‌کنند. با رعایت این اصول، می‌توانید تست‌هایی ایجاد کنید که به عنوان مستندات قابل اعتماد پروژه عمل کنند و اعتماد تیم به فرآیند توسعه را افزایش دهند.&lt;/div&gt;">
+    <meta name="twitter:card" content="&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در دنیای توسعه نرم‌افزار، تست‌نویسی (Unit Testing) یکی از ارکان اصلی تضمین کیفیت کد است. در چارچوب Microsoft .NET، ابزارهایی مانند MSTest، NUnit و xUnit به توسعه‌دهندگان کمک می‌کنند تا تست‌های خودکار (Automated Tests) بنویسند که رفتار سیستم را بررسی کنند. با این حال، نوشتن تست‌های کارآمد و قابل نگهداری چالش‌هایی دارد. یکی از مشکلات رایج در تست‌نویسی، الگویی به نام Assertion Roulette است که می‌تواند خوانایی و قابلیت عیب‌یابی تست‌ها را کاهش دهد. این مقاله با تحلیل مفهوم Assertion Roulette و ارائه راهکارهایی برای اجتناب از آن، به توسعه‌دهندگان .NET کمک می‌کند تا تست‌هایی منسجم‌تر و قابل اعتمادتر بنویسند.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;Assertion Roulette چیست؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;Assertion Roulette به وضعیتی اشاره دارد که در یک متد تست (Test Method)، چندین ادعا یا بررسی (Assertion) بدون پیام‌های توضیحی واضح وجود داشته باشد. این موضوع باعث می‌شود وقتی تست شکست می‌خورد، تشخیص دلیل دقیق شکست دشوار شود. برای توسعه‌دهندگان .NET که با پروژه‌های پیچیده سروکار دارند، این مشکل می‌تواند زمان عیب‌یابی را افزایش دهد و اعتماد به تست‌ها را کاهش دهد.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;به عنوان مثال، فرض کنید یک متد تست در #C به صورت زیر نوشته شده است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public void TestInvoice_AddLineItem()
+{
+    var invoice = new Invoice();
+    var product = new Product(1, &amp;quot;Widget&amp;quot;, 19.99m);
+    invoice.AddItemQuantity(product, 5);
+    var lineItems = invoice.GetLineItems();
+    var actual = (LineItem)lineItems[0];
+    Assert.AreEqual(invoice, actual.GetInvoice());
+    Assert.AreEqual(product, actual.GetProduct());
+    Assert.AreEqual(5, actual.GetQuantity());
+}&lt;/pre&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در این کد، اگر تست شکست بخورد، خروجی ممکن است تنها نشان‌دهنده عدم برابری دو مقدار باشد، اما مشخص نمی‌کند کدام ادعا (مثلاً بررسی فاکتور، محصول یا تعداد) باعث شکست شده است. این ابهام، به‌ویژه در پروژه‌های بزرگ .NET که ممکن است صدها تست وجود داشته باشد، مشکل‌ساز است.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;چرا Assertion Roulette مشکل‌ساز است؟&lt;/strong&gt;&lt;/div&gt;&lt;ol&gt;&lt;li&gt;&lt;strong&gt;کاهش خوانایی تست:&lt;/strong&gt; بدون پیام‌های توضیحی، توسعه‌دهندگان نمی‌توانند به سرعت متوجه شوند که تست چه چیزی را بررسی می‌کند. این موضوع در تیم‌های بزرگ که افراد مختلف کد را بررسی می‌کنند، اهمیت بیشتری دارد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;دشواری در عیب‌یابی:&lt;/strong&gt; در محیط‌های یکپارچه‌سازی مداوم (Continuous Integration) مانند Azure DevOps، وقتی تست‌ها به صورت خودکار اجرا می‌شوند، گزارش شکست باید اطلاعات کافی برای رفع سریع مشکل ارائه دهد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;افزایش هزینه نگهداری:&lt;/strong&gt; تست‌هایی که به سختی قابل فهم هستند، هزینه نگهداری پروژه را بالا می‌برند، زیرا توسعه‌دهندگان باید زمان بیشتری برای تحلیل و اصلاح آن‌ها صرف کنند.&lt;/li&gt;&lt;/ol&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;راهکارهای اجتناب از Assertion Roulette&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;برای رفع این مشکل، چندین راهکار عملی وجود دارد که در ادامه توضیح داده می‌شوند.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;1. استفاده از پیام‌های توضیحی (Assertion Messages)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;یکی از ساده‌ترین روش‌ها برای بهبود تست‌ها، افزودن پیام‌های توضیحی به هر ادعا است. این پیام‌ها به توسعه‌دهندگان کمک می‌کنند تا در صورت شکست تست، به سرعت دلیل آن را شناسایی کنند. در چارچوب‌های .NET، متدهای Assert معمولاً پارامتری برای پیام دارند.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;مثال بهبودیافته کد قبلی:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public void TestInvoice_AddLineItem()
+{
+    var invoice = new Invoice();
+    var product = new Product(1, &amp;quot;Widget&amp;quot;, 19.99m);
+    invoice.AddItemQuantity(product, 5);
+    var lineItems = invoice.GetLineItems();
+    var actual = (LineItem)lineItems[0];
+    Assert.AreEqual(invoice, actual.GetInvoice(), &amp;quot;فاکتور خط آیتم باید با فاکتور اصلی یکسان باشد&amp;quot;);
+    Assert.AreEqual(product, actual.GetProduct(), &amp;quot;محصول خط آیتم باید با محصول اصلی یکسان باشد&amp;quot;);
+    Assert.AreEqual(5, actual.GetQuantity(), &amp;quot;تعداد باید 5 باشد&amp;quot;);
+}&lt;/pre&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در این کد، هر ادعا با یک پیام توضیحی همراه است که دقیقاً مشخص می‌کند چه چیزی بررسی شده است. اگر تست شکست بخورد، پیام مربوطه در گزارش تست نمایش داده می‌شود و عیب‌یابی را آسان‌تر می‌کند. این روش به‌ویژه در ابزارهایی مانند Visual Studio که گزارش‌های تست را به صورت گرافیکی نمایش می‌دهند، بسیار مؤثر است.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;2. استفاده از Custom Assertions&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;برای پروژه‌هایی که تست‌های مشابه زیادی دارند، می‌توان از ادعاهای سفارشی (Custom Assertions) استفاده کرد. این روش به کاهش تکرار کد و افزایش خوانایی کمک می‌کند. در .NET، می‌توانید متدهای کمکی تعریف کنید که منطق بررسی را کپسوله کنند.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;مثال:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static class InvoiceAssertions
+{
+    public static void AssertLineItem(LineItem actual, Invoice expectedInvoice, Product expectedProduct, int expectedQuantity)
+    {
+        Assert.AreEqual(expectedInvoice, actual.GetInvoice(), &amp;quot;فاکتور خط آیتم باید با فاکتور اصلی یکسان باشد&amp;quot;);
+        Assert.AreEqual(expectedProduct, actual.GetProduct(), &amp;quot;محصول خط آیتم باید با محصول اصلی یکسان باشد&amp;quot;);
+        Assert.AreEqual(expectedQuantity, actual.GetQuantity(), $&amp;quot;تعداد باید {expectedQuantity} باشد&amp;quot;);
+    }
+}
+
+public void TestInvoice_AddLineItem()
+{
+    var invoice = new Invoice();
+    var product = new Product(1, &amp;quot;Widget&amp;quot;, 19.99m);
+    invoice.AddItemQuantity(product, 5);
+    var lineItems = invoice.GetLineItems();
+    var actual = (LineItem)lineItems[0];
+    InvoiceAssertions.AssertLineItem(actual, invoice, product, 5);
+}&lt;/pre&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;این روش نه تنها Assertion Roulette را حذف می‌کند، بلکه تست‌ها را ماژولارتر و قابل استفاده مجدد می‌کند. توسعه‌دهندگان .NET می‌توانند این ادعاهای سفارشی را در پروژه‌های بزرگ برای استانداردسازی تست‌نویسی به کار ببرند. منابع موجود نشان می‌دهند که این رویکرد در پروژه‌های متن‌باز .NET مانند ASP.NET Core به طور گسترده استفاده می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;3. تقسیم تست‌های پیچیده به تست‌های کوچکتر&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;یکی دیگر از راهکارها، تقسیم متدهای تستی است که چندین جنبه از سیستم را بررسی می‌کنند. به جای یک تست با چندین ادعا، می‌توان هر ادعا را در یک متد تست جداگانه قرار داد. این روش &lt;strong&gt;به اصل &amp;quot;یک تست، یک رفتار&amp;quot;&lt;/strong&gt; پایبند است و خوانایی را بهبود می‌بخشد.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;مثال:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public void TestInvoice_AddLineItem_InvoiceMatches()
+{
+    var invoice = new Invoice();
+    var product = new Product(1, &amp;quot;Widget&amp;quot;, 19.99m);
+    invoice.AddItemQuantity(product, 5);
+    var lineItems = invoice.GetLineItems();
+    var actual = (LineItem)lineItems[0];
+    Assert.AreEqual(invoice, actual.GetInvoice(), &amp;quot;فاکتور خط آیتم باید با فاکتور اصلی یکسان باشد&amp;quot;);
+}
+
+public void TestInvoice_AddLineItem_ProductMatches()
+{
+    var invoice = new Invoice();
+    var product = new Product(1, &amp;quot;Widget&amp;quot;, 19.99m);
+    invoice.AddItemQuantity(product, 5);
+    var lineItems = invoice.GetLineItems();
+    var actual = (LineItem)lineItems[0];
+    Assert.AreEqual(product, actual.GetProduct(), &amp;quot;محصول خط آیتم باید با محصول اصلی یکسان باشد&amp;quot;);
+}
+
+public void TestInvoice_AddLineItem_QuantityMatches()
+{
+    var invoice = new Invoice();
+    var product = new Product(1, &amp;quot;Widget&amp;quot;, 19.99m);
+    invoice.AddItemQuantity(product, 5);
+    var lineItems = invoice.GetLineItems();
+    var actual = (LineItem)lineItems[0];
+    Assert.AreEqual(5, actual.GetQuantity(), &amp;quot;تعداد باید 5 باشد&amp;quot;);
+}&lt;/pre&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;این رویکرد اگرچه تعداد متدهای تست را افزایش می‌دهد، اما هر تست را متمرکزتر و قابل فهم‌تر می‌کند. در محیط‌های .NET، ابزارهایی مانند Visual Studio امکان مدیریت آسان این تست‌ها را فراهم می‌کنند. جستجوی وب نشان می‌دهد که این روش در میان توسعه‌دهندگان حرفه‌ای .NET به دلیل وضوح و قابلیت نگهداری محبوب است.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;4. استفاده از ابزارهای گزارش‌دهی پیشرفته&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در چارچوب‌های تست .NET، ابزارهایی مانند NUnit و MSTest قابلیت‌های گزارش‌دهی پیشرفته‌ای ارائه می‌دهند. برای مثال، می‌توانید از افزونه‌هایی مانند ExtentReports یا Allure استفاده کنید تا گزارش‌های دقیق‌تری از تست‌ها تولید کنید. این ابزارها می‌توانند اطلاعات بیشتری درباره شکست تست‌ها ارائه دهند و نیاز به پیام‌های دستی را کاهش دهند.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;نکات تکمیلی برای توسعه‌دهندگان .NET&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;استفاده از Test Data Builders:&lt;/strong&gt; برای کاهش پیچیدگی تنظیم فیکسچرها (Fixtures)، از الگوی Test Data Builder استفاده کنید. این الگو به شما امکان می‌دهد داده‌های تست را به صورت خوانا و قابل تنظیم ایجاد کنید.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;اجتناب از تست‌های بیش از حد مشتاق (Eager Tests):&lt;/strong&gt; تست‌هایی که چندین رفتار را همزمان بررسی می‌کنند، می‌توانند به Assertion Roulette منجر شوند. هر تست را روی یک رفتار خاص متمرکز کنید.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;یکپارچه‌سازی با CI/CD:&lt;/strong&gt; در سیستم‌های یکپارچه‌سازی مداوم مانند Azure DevOps یا GitHub Actions، اطمینان حاصل کنید که گزارش‌های تست شامل جزئیات کافی هستند. این کار از طریق تنظیمات مناسب امکان‌پذیر است.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;Assertion Roulette یکی از مشکلات رایج در تست‌نویسی است که می‌تواند خوانایی، قابلیت عیب‌یابی و نگهداری تست‌ها را به خطر بیندازد. با استفاده از پیام‌های توضیحی، ادعاهای سفارشی، تقسیم تست‌ها به واحدهای کوچکتر و بهره‌گیری از ابزارهای گزارش‌دهی پیشرفته، توسعه‌دهندگان .NET می‌توانند تست‌هایی بنویسند که نه تنها قابل اعتمادتر باشند، بلکه نگهداری آن‌ها نیز آسان‌تر باشد. این رویکردها به بهبود کیفیت کد و کاهش زمان عیب‌یابی در پروژه‌های پیچیده کمک می‌کنند. با رعایت این اصول، می‌توانید تست‌هایی ایجاد کنید که به عنوان مستندات قابل اعتماد پروژه عمل کنند و اعتماد تیم به فرآیند توسعه را افزایش دهند.&lt;/div&gt;">
+    <meta property="article:published_time" content="Mon, 14 Apr 2025 14:09:45 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
     <meta content='IE=edge' http-equiv='X-UA-Compatible'>
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">
-	
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
 	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
-
     <link href="vs.min.css" rel="stylesheet" type="text/css">
-    <script src="highlight.min.js" type="text/javascript"></script>
-	
+    <script src="highlight.min.js" type="text/javascript"></script>	
     <link href="styles.css" rel="stylesheet" type="text/css">	
     <style>
       @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
@@ -42,8 +384,8 @@
         }
      }
     </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
 </head>
-
 <body dir='rtl'>
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
@@ -53,7 +395,7 @@
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۳۶۹۵</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۶۹۷</span></td>
 </tr>
 <tr>
 <td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
@@ -73,7 +415,7 @@
 </tr>
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۲۲</span></td>
 </tr>
 </tbody>
 </table>
@@ -189,8 +531,5 @@ public void TestInvoice_AddLineItem_QuantityMatches()
 
 <!-- to load custom fonts for printing -->
 <div class="useSamimFD">&nbsp;</div>
-
-<script src="SyntaxHighlighter.js" type="text/javascript"></script>
 </body>
-
 </html>

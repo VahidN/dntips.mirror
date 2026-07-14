@@ -1,17 +1,414 @@
 <!DOCTYPE html>
 <html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
-
 <head>
-    <title>‫‫بهبود کیفیت تست‌نویسی با اجتناب از شبیه‌سازی (Mocking) کلاس‌های مشخص (Concrete Classes)</title>
+    <title>‫‫بهبود کیفیت تست‌نویسی با اجتناب از شبیه‌سازی (Mocking) کلاس‌های مشخص (Concrete Classes)</title>     <meta name="description" content="&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;تست‌نویسی واحد (Unit Testing) یکی از ارکان اصلی توسعه نرم‌افزارهای باکیفیت در چارچوب NET. مایکروسافت است. این فرآیند به توسعه‌دهندگان کمک می‌کند تا از صحت عملکرد کدهای خود اطمینان حاصل کنند و از بروز خطاها جلوگیری کنند. با این حال، استفاده نادرست از ابزارها و تکنیک‌های تست‌نویسی، مانند شبیه‌سازی (Mocking) کلاس‌های مشخص (Concrete Classes)، می‌تواند به پیچیدگی غیرضروری و کاهش کیفیت تست‌ها منجر شود. یکی از الگوهای نادرست رایج، شبیه‌سازی کلاس‌های مشخص به جای استفاده از واسط‌ها (Interfaces) است که می‌تواند اصول طراحی مانند اصل مسئولیت واحد (Single Responsibility Principle) را نقض کند و تست‌ها را شکننده‌تر کند. در این مقاله، به بررسی این الگوی نادرست، دلایل مشکل‌ساز بودن آن و راهکارهای جایگزین می‌پردازیم تا توسعه‌دهندگان NET. بتوانند تست‌هایی کارآمدتر و قابل‌نگهداری‌تر بنویسند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مشکل شبیه‌سازی کلاس‌های مشخص&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;شبیه‌سازی در تست‌نویسی به معنای جایگزینی وابستگی‌های واقعی یک کلاس با نسخه‌های جعلی است که رفتار مشخصی را شبیه‌سازی می‌کنند. ابزارهایی مانند Moq یا NSubstitute معمولاً برای این منظور استفاده می‌شوند. با این حال، وقتی این شبیه‌سازی روی کلاس‌های مشخص اعمال می‌شود، چالش‌هایی به وجود می‌آید. به عنوان مثال، فرض کنید یک کنترلر به نام &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;CustomerOrdersController&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; داریم که به یک سرویس حمل‌ونقل وابسته است:&lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class ShipmentService
+{
+    public List&amp;lt;ShipmentRecord&amp;gt; FetchShipments(int customerId)
+    {
+        // فراخوانی سرویس خارجی برای دریافت داده‌های حمل‌ونقل
+    }
+}
+
+public class CustomerOrdersController
+{
+    private readonly ShipmentService _shipmentService;
+
+    public CustomerOrdersController(ShipmentService shipmentService)
+    {
+        _shipmentService = shipmentService;
+    }
+
+    public string GetSummary(int customerId)
+    {
+        var shipments = _shipmentService.FetchShipments(customerId);
+        return $&amp;quot;تعداد محموله‌ها: {shipments.Count}&amp;quot;;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;اگر بخواهیم &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;ShipmentService&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; را مستقیماً شبیه‌سازی کنیم، با مشکلاتی مواجه می‌شویم. اکثر ابزارهای شبیه‌سازی، مانند Moq، تنها می‌توانند متدهای مجازی (Virtual) یا واسط‌ها را شبیه‌سازی کنند. این یعنی یا باید متدهای کلاس را مجازی کنیم یا به سراغ ابزارهای پیشرفته‌تر و پولی مانند JustMock برویم که محدودیت‌های خاص خود را دارند. این کار نه‌تنها کد را پیچیده‌تر می‌کند، بلکه وابستگی تست به پیاده‌سازی داخلی را افزایش می‌دهد و شکنندگی تست‌ها را بیشتر می‌کند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;علاوه بر این، شبیه‌سازی کلاس‌های مشخص اغلب به نقض اصل مسئولیت واحد منجر می‌شود. در مثال بالا، &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;ShipmentService&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; هم منطق کسب‌وکار را مدیریت می‌کند و هم به سرویس خارجی متصل می‌شود. این ترکیب مسئولیت‌ها، تست‌نویسی را دشوارتر می‌کند، زیرا باید رفتارهای خارجی را نیز شبیه‌سازی کنیم که ممکن است ناپایدار باشند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;راهکار: استفاده از واسط‌ها و جداسازی مسئولیت‌ها&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;به جای شبیه‌سازی کلاس‌های مشخص، بهتر است از واسط‌ها استفاده کنیم و مسئولیت‌ها را جدا کنیم. این رویکرد طراحی بهتری را تضمین می‌کند و تست‌نویسی را ساده‌تر می‌سازد. بیایید مثال بالا را بازطراحی کنیم:&lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public interface IShipmentProvider
+{
+    List&amp;lt;ShipmentRecord&amp;gt; FetchShipments(int customerId);
+}
+
+public class ShipmentService : IShipmentProvider
+{
+    public List&amp;lt;ShipmentRecord&amp;gt; FetchShipments(int customerId)
+    {
+        // فراخوانی سرویس خارجی برای دریافت داده‌های حمل‌ونقل
+    }
+}
+
+public class DeliveryStatistics
+{
+    public (double totalWeight, double totalCost) ComputeStatistics(List&amp;lt;ShipmentRecord&amp;gt; shipments)
+    {
+        double totalWeight = shipments.Sum(x =&amp;gt; x.Weight);
+        double totalCost = shipments.Sum(x =&amp;gt; x.Cost);
+        return (totalWeight, totalCost);
+    }
+}
+
+public class CustomerOrdersController
+{
+    private readonly DeliveryStatistics _statistics;
+    private readonly IShipmentProvider _shipmentProvider;
+
+    public CustomerOrdersController(DeliveryStatistics statistics, IShipmentProvider shipmentProvider)
+    {
+        _statistics = statistics;
+        _shipmentProvider = shipmentProvider;
+    }
+
+    public string GetSummary(int customerId)
+    {
+        var shipments = _shipmentProvider.FetchShipments(customerId);
+        var (totalWeight, totalCost) = _statistics.ComputeStatistics(shipments);
+        return $&amp;quot;وزن کل: {totalWeight}, هزینه کل: {totalCost}&amp;quot;;
+    }
+}&lt;/pre&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در این نسخه، با تعریف واسط &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;IShipmentProvider&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;， مسئولیت دریافت داده‌ها از سرویس خارجی جدا شده و منطق محاسباتی به کلاس &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;DeliveryStatistics&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; منتقل شده است. حالا در تست‌ها، می‌توانیم به‌راحتی واسط را شبیه‌سازی کنیم:&lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[Fact]
+public void GetSummary_ReturnsCorrectSummary()
+{
+    // Arrange
+    var mockShipmentProvider = new Mock&amp;lt;IShipmentProvider&amp;gt;();
+    mockShipmentProvider.Setup(sp =&amp;gt; sp.FetchShipments(1))
+        .Returns(new List&amp;lt;ShipmentRecord&amp;gt; { new ShipmentRecord { Weight = 10, Cost = 100 } });
+    var stats = new DeliveryStatistics();
+    var controller = new CustomerOrdersController(stats, mockShipmentProvider.Object);
+
+    // Act
+    var result = controller.GetSummary(1);
+
+    // Assert
+    Assert.Equal(&amp;quot;وزن کل: 10, هزینه کل: 100&amp;quot;, result);
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;این تست ساده، قابل‌فهم و مستقل از پیاده‌سازی داخلی است. استفاده از واسط‌ها همچنین امکان تزریق وابستگی (Dependency Injection) را تسهیل می‌کند که یک روش استاندارد در NET. است.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;چرا شبیه‌سازی کلاس‌های مشخص یک الگوی نادرست است؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;شبیه‌سازی کلاس‌های مشخص چندین مشکل را ایجاد می‌کند:&lt;/span&gt;&lt;/div&gt;&lt;ol&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;پیچیدگی غیرضروری&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: نیاز به متدهای مجازی یا ابزارهای خاص، کد را پیچیده‌تر می‌کند.&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;شکنندگی تست‌ها&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: تغییرات در پیاده‌سازی کلاس، تست‌ها را خراب می‌کند، حتی اگر رفتار خارجی تغییر نکند.&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;نقض اصول طراحی&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: ترکیب مسئولیت‌ها در یک کلاس مشخص، انعطاف‌پذیری و قابلیت نگهداری کد را کاهش می‌دهد.&lt;/span&gt;&lt;/li&gt;&lt;/ol&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در مقابل، استفاده از واسط‌ها و جداسازی مسئولیت‌ها، تست‌ها را قابل‌اعتمادتر و کد را ماژولارتر می‌کند. این رویکرد با اصول SOLID، به‌ویژه اصل وابستگی معکوس (Dependency Inversion Principle)، هم‌راستاست.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;نکات عملی برای توسعه‌دهندگان NET.&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;از واسط‌ها استفاده کنید&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: حتی اگر در ابتدا به نظر غیرضروری بیاید، واسط‌ها انعطاف‌پذیری و تست‌پذیری را افزایش می‌دهند.&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مسئولیت‌ها را جدا کنید&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: هر کلاس باید یک وظیفه مشخص داشته باشد. این کار شبیه‌سازی و تست‌نویسی را ساده‌تر می‌کند.&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;ابزارهای مناسب را انتخاب کنید&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: ابزارهایی مانند Moq برای شبیه‌سازی واسط‌ها عالی هستند و نیازی به پیچیدگی‌های اضافی ندارند.&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;بازطراحی را در نظر بگیرید&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: اگر با کلاس‌های مشخص پیچیده مواجه هستید، آن‌ها را به واسط‌ها و کلاس‌های مجزا تبدیل کنید.&lt;/span&gt;&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;شبیه‌سازی کلاس‌های مشخص در تست‌نویسی واحد، یک الگوی نادرست است که می‌تواند به شکنندگی تست‌ها، پیچیدگی کد و نقض اصول طراحی منجر شود. با استفاده از واسط‌ها و جداسازی مسئولیت‌ها، توسعه‌دهندگان NET. می‌توانند تست‌هایی بنویسند که هم کارآمدتر باشند و هم با تغییرات کد سازگارتر بمانند. این رویکرد نه‌تنها کیفیت تست‌ها را بهبود می‌بخشد، بلکه به طراحی بهتر و قابل‌نگهداری‌تر نرم‌افزار کمک می‌کند. با رعایت این اصول، می‌توانید از دام‌های رایج تست‌نویسی اجتناب کنید و پروژه‌های خود را با اطمینان بیشتری توسعه دهید.&lt;/span&gt;&lt;/div&gt;">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="بهبود کیفیت تست‌نویسی با اجتناب از شبیه‌سازی (Mocking) کلاس‌های مشخص (Concrete Classes)">
+    <meta itemprop="description" content="&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;تست‌نویسی واحد (Unit Testing) یکی از ارکان اصلی توسعه نرم‌افزارهای باکیفیت در چارچوب NET. مایکروسافت است. این فرآیند به توسعه‌دهندگان کمک می‌کند تا از صحت عملکرد کدهای خود اطمینان حاصل کنند و از بروز خطاها جلوگیری کنند. با این حال، استفاده نادرست از ابزارها و تکنیک‌های تست‌نویسی، مانند شبیه‌سازی (Mocking) کلاس‌های مشخص (Concrete Classes)، می‌تواند به پیچیدگی غیرضروری و کاهش کیفیت تست‌ها منجر شود. یکی از الگوهای نادرست رایج، شبیه‌سازی کلاس‌های مشخص به جای استفاده از واسط‌ها (Interfaces) است که می‌تواند اصول طراحی مانند اصل مسئولیت واحد (Single Responsibility Principle) را نقض کند و تست‌ها را شکننده‌تر کند. در این مقاله، به بررسی این الگوی نادرست، دلایل مشکل‌ساز بودن آن و راهکارهای جایگزین می‌پردازیم تا توسعه‌دهندگان NET. بتوانند تست‌هایی کارآمدتر و قابل‌نگهداری‌تر بنویسند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مشکل شبیه‌سازی کلاس‌های مشخص&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;شبیه‌سازی در تست‌نویسی به معنای جایگزینی وابستگی‌های واقعی یک کلاس با نسخه‌های جعلی است که رفتار مشخصی را شبیه‌سازی می‌کنند. ابزارهایی مانند Moq یا NSubstitute معمولاً برای این منظور استفاده می‌شوند. با این حال، وقتی این شبیه‌سازی روی کلاس‌های مشخص اعمال می‌شود، چالش‌هایی به وجود می‌آید. به عنوان مثال، فرض کنید یک کنترلر به نام &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;CustomerOrdersController&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; داریم که به یک سرویس حمل‌ونقل وابسته است:&lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class ShipmentService
+{
+    public List&amp;lt;ShipmentRecord&amp;gt; FetchShipments(int customerId)
+    {
+        // فراخوانی سرویس خارجی برای دریافت داده‌های حمل‌ونقل
+    }
+}
+
+public class CustomerOrdersController
+{
+    private readonly ShipmentService _shipmentService;
+
+    public CustomerOrdersController(ShipmentService shipmentService)
+    {
+        _shipmentService = shipmentService;
+    }
+
+    public string GetSummary(int customerId)
+    {
+        var shipments = _shipmentService.FetchShipments(customerId);
+        return $&amp;quot;تعداد محموله‌ها: {shipments.Count}&amp;quot;;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;اگر بخواهیم &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;ShipmentService&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; را مستقیماً شبیه‌سازی کنیم، با مشکلاتی مواجه می‌شویم. اکثر ابزارهای شبیه‌سازی، مانند Moq، تنها می‌توانند متدهای مجازی (Virtual) یا واسط‌ها را شبیه‌سازی کنند. این یعنی یا باید متدهای کلاس را مجازی کنیم یا به سراغ ابزارهای پیشرفته‌تر و پولی مانند JustMock برویم که محدودیت‌های خاص خود را دارند. این کار نه‌تنها کد را پیچیده‌تر می‌کند، بلکه وابستگی تست به پیاده‌سازی داخلی را افزایش می‌دهد و شکنندگی تست‌ها را بیشتر می‌کند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;علاوه بر این، شبیه‌سازی کلاس‌های مشخص اغلب به نقض اصل مسئولیت واحد منجر می‌شود. در مثال بالا، &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;ShipmentService&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; هم منطق کسب‌وکار را مدیریت می‌کند و هم به سرویس خارجی متصل می‌شود. این ترکیب مسئولیت‌ها، تست‌نویسی را دشوارتر می‌کند، زیرا باید رفتارهای خارجی را نیز شبیه‌سازی کنیم که ممکن است ناپایدار باشند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;راهکار: استفاده از واسط‌ها و جداسازی مسئولیت‌ها&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;به جای شبیه‌سازی کلاس‌های مشخص، بهتر است از واسط‌ها استفاده کنیم و مسئولیت‌ها را جدا کنیم. این رویکرد طراحی بهتری را تضمین می‌کند و تست‌نویسی را ساده‌تر می‌سازد. بیایید مثال بالا را بازطراحی کنیم:&lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public interface IShipmentProvider
+{
+    List&amp;lt;ShipmentRecord&amp;gt; FetchShipments(int customerId);
+}
+
+public class ShipmentService : IShipmentProvider
+{
+    public List&amp;lt;ShipmentRecord&amp;gt; FetchShipments(int customerId)
+    {
+        // فراخوانی سرویس خارجی برای دریافت داده‌های حمل‌ونقل
+    }
+}
+
+public class DeliveryStatistics
+{
+    public (double totalWeight, double totalCost) ComputeStatistics(List&amp;lt;ShipmentRecord&amp;gt; shipments)
+    {
+        double totalWeight = shipments.Sum(x =&amp;gt; x.Weight);
+        double totalCost = shipments.Sum(x =&amp;gt; x.Cost);
+        return (totalWeight, totalCost);
+    }
+}
+
+public class CustomerOrdersController
+{
+    private readonly DeliveryStatistics _statistics;
+    private readonly IShipmentProvider _shipmentProvider;
+
+    public CustomerOrdersController(DeliveryStatistics statistics, IShipmentProvider shipmentProvider)
+    {
+        _statistics = statistics;
+        _shipmentProvider = shipmentProvider;
+    }
+
+    public string GetSummary(int customerId)
+    {
+        var shipments = _shipmentProvider.FetchShipments(customerId);
+        var (totalWeight, totalCost) = _statistics.ComputeStatistics(shipments);
+        return $&amp;quot;وزن کل: {totalWeight}, هزینه کل: {totalCost}&amp;quot;;
+    }
+}&lt;/pre&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در این نسخه، با تعریف واسط &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;IShipmentProvider&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;， مسئولیت دریافت داده‌ها از سرویس خارجی جدا شده و منطق محاسباتی به کلاس &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;DeliveryStatistics&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; منتقل شده است. حالا در تست‌ها، می‌توانیم به‌راحتی واسط را شبیه‌سازی کنیم:&lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[Fact]
+public void GetSummary_ReturnsCorrectSummary()
+{
+    // Arrange
+    var mockShipmentProvider = new Mock&amp;lt;IShipmentProvider&amp;gt;();
+    mockShipmentProvider.Setup(sp =&amp;gt; sp.FetchShipments(1))
+        .Returns(new List&amp;lt;ShipmentRecord&amp;gt; { new ShipmentRecord { Weight = 10, Cost = 100 } });
+    var stats = new DeliveryStatistics();
+    var controller = new CustomerOrdersController(stats, mockShipmentProvider.Object);
+
+    // Act
+    var result = controller.GetSummary(1);
+
+    // Assert
+    Assert.Equal(&amp;quot;وزن کل: 10, هزینه کل: 100&amp;quot;, result);
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;این تست ساده، قابل‌فهم و مستقل از پیاده‌سازی داخلی است. استفاده از واسط‌ها همچنین امکان تزریق وابستگی (Dependency Injection) را تسهیل می‌کند که یک روش استاندارد در NET. است.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;چرا شبیه‌سازی کلاس‌های مشخص یک الگوی نادرست است؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;شبیه‌سازی کلاس‌های مشخص چندین مشکل را ایجاد می‌کند:&lt;/span&gt;&lt;/div&gt;&lt;ol&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;پیچیدگی غیرضروری&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: نیاز به متدهای مجازی یا ابزارهای خاص، کد را پیچیده‌تر می‌کند.&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;شکنندگی تست‌ها&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: تغییرات در پیاده‌سازی کلاس، تست‌ها را خراب می‌کند، حتی اگر رفتار خارجی تغییر نکند.&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;نقض اصول طراحی&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: ترکیب مسئولیت‌ها در یک کلاس مشخص، انعطاف‌پذیری و قابلیت نگهداری کد را کاهش می‌دهد.&lt;/span&gt;&lt;/li&gt;&lt;/ol&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در مقابل، استفاده از واسط‌ها و جداسازی مسئولیت‌ها، تست‌ها را قابل‌اعتمادتر و کد را ماژولارتر می‌کند. این رویکرد با اصول SOLID، به‌ویژه اصل وابستگی معکوس (Dependency Inversion Principle)، هم‌راستاست.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;نکات عملی برای توسعه‌دهندگان NET.&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;از واسط‌ها استفاده کنید&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: حتی اگر در ابتدا به نظر غیرضروری بیاید، واسط‌ها انعطاف‌پذیری و تست‌پذیری را افزایش می‌دهند.&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مسئولیت‌ها را جدا کنید&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: هر کلاس باید یک وظیفه مشخص داشته باشد. این کار شبیه‌سازی و تست‌نویسی را ساده‌تر می‌کند.&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;ابزارهای مناسب را انتخاب کنید&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: ابزارهایی مانند Moq برای شبیه‌سازی واسط‌ها عالی هستند و نیازی به پیچیدگی‌های اضافی ندارند.&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;بازطراحی را در نظر بگیرید&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: اگر با کلاس‌های مشخص پیچیده مواجه هستید، آن‌ها را به واسط‌ها و کلاس‌های مجزا تبدیل کنید.&lt;/span&gt;&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;شبیه‌سازی کلاس‌های مشخص در تست‌نویسی واحد، یک الگوی نادرست است که می‌تواند به شکنندگی تست‌ها، پیچیدگی کد و نقض اصول طراحی منجر شود. با استفاده از واسط‌ها و جداسازی مسئولیت‌ها، توسعه‌دهندگان NET. می‌توانند تست‌هایی بنویسند که هم کارآمدتر باشند و هم با تغییرات کد سازگارتر بمانند. این رویکرد نه‌تنها کیفیت تست‌ها را بهبود می‌بخشد، بلکه به طراحی بهتر و قابل‌نگهداری‌تر نرم‌افزار کمک می‌کند. با رعایت این اصول، می‌توانید از دام‌های رایج تست‌نویسی اجتناب کنید و پروژه‌های خود را با اطمینان بیشتری توسعه دهید.&lt;/span&gt;&lt;/div&gt;">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="بهبود کیفیت تست‌نویسی با اجتناب از شبیه‌سازی (Mocking) کلاس‌های مشخص (Concrete Classes)">
+    <meta property="og:description" content="&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;تست‌نویسی واحد (Unit Testing) یکی از ارکان اصلی توسعه نرم‌افزارهای باکیفیت در چارچوب NET. مایکروسافت است. این فرآیند به توسعه‌دهندگان کمک می‌کند تا از صحت عملکرد کدهای خود اطمینان حاصل کنند و از بروز خطاها جلوگیری کنند. با این حال، استفاده نادرست از ابزارها و تکنیک‌های تست‌نویسی، مانند شبیه‌سازی (Mocking) کلاس‌های مشخص (Concrete Classes)، می‌تواند به پیچیدگی غیرضروری و کاهش کیفیت تست‌ها منجر شود. یکی از الگوهای نادرست رایج، شبیه‌سازی کلاس‌های مشخص به جای استفاده از واسط‌ها (Interfaces) است که می‌تواند اصول طراحی مانند اصل مسئولیت واحد (Single Responsibility Principle) را نقض کند و تست‌ها را شکننده‌تر کند. در این مقاله، به بررسی این الگوی نادرست، دلایل مشکل‌ساز بودن آن و راهکارهای جایگزین می‌پردازیم تا توسعه‌دهندگان NET. بتوانند تست‌هایی کارآمدتر و قابل‌نگهداری‌تر بنویسند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مشکل شبیه‌سازی کلاس‌های مشخص&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;شبیه‌سازی در تست‌نویسی به معنای جایگزینی وابستگی‌های واقعی یک کلاس با نسخه‌های جعلی است که رفتار مشخصی را شبیه‌سازی می‌کنند. ابزارهایی مانند Moq یا NSubstitute معمولاً برای این منظور استفاده می‌شوند. با این حال، وقتی این شبیه‌سازی روی کلاس‌های مشخص اعمال می‌شود، چالش‌هایی به وجود می‌آید. به عنوان مثال، فرض کنید یک کنترلر به نام &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;CustomerOrdersController&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; داریم که به یک سرویس حمل‌ونقل وابسته است:&lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class ShipmentService
+{
+    public List&amp;lt;ShipmentRecord&amp;gt; FetchShipments(int customerId)
+    {
+        // فراخوانی سرویس خارجی برای دریافت داده‌های حمل‌ونقل
+    }
+}
+
+public class CustomerOrdersController
+{
+    private readonly ShipmentService _shipmentService;
+
+    public CustomerOrdersController(ShipmentService shipmentService)
+    {
+        _shipmentService = shipmentService;
+    }
+
+    public string GetSummary(int customerId)
+    {
+        var shipments = _shipmentService.FetchShipments(customerId);
+        return $&amp;quot;تعداد محموله‌ها: {shipments.Count}&amp;quot;;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;اگر بخواهیم &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;ShipmentService&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; را مستقیماً شبیه‌سازی کنیم، با مشکلاتی مواجه می‌شویم. اکثر ابزارهای شبیه‌سازی، مانند Moq، تنها می‌توانند متدهای مجازی (Virtual) یا واسط‌ها را شبیه‌سازی کنند. این یعنی یا باید متدهای کلاس را مجازی کنیم یا به سراغ ابزارهای پیشرفته‌تر و پولی مانند JustMock برویم که محدودیت‌های خاص خود را دارند. این کار نه‌تنها کد را پیچیده‌تر می‌کند، بلکه وابستگی تست به پیاده‌سازی داخلی را افزایش می‌دهد و شکنندگی تست‌ها را بیشتر می‌کند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;علاوه بر این، شبیه‌سازی کلاس‌های مشخص اغلب به نقض اصل مسئولیت واحد منجر می‌شود. در مثال بالا، &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;ShipmentService&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; هم منطق کسب‌وکار را مدیریت می‌کند و هم به سرویس خارجی متصل می‌شود. این ترکیب مسئولیت‌ها، تست‌نویسی را دشوارتر می‌کند، زیرا باید رفتارهای خارجی را نیز شبیه‌سازی کنیم که ممکن است ناپایدار باشند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;راهکار: استفاده از واسط‌ها و جداسازی مسئولیت‌ها&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;به جای شبیه‌سازی کلاس‌های مشخص، بهتر است از واسط‌ها استفاده کنیم و مسئولیت‌ها را جدا کنیم. این رویکرد طراحی بهتری را تضمین می‌کند و تست‌نویسی را ساده‌تر می‌سازد. بیایید مثال بالا را بازطراحی کنیم:&lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public interface IShipmentProvider
+{
+    List&amp;lt;ShipmentRecord&amp;gt; FetchShipments(int customerId);
+}
+
+public class ShipmentService : IShipmentProvider
+{
+    public List&amp;lt;ShipmentRecord&amp;gt; FetchShipments(int customerId)
+    {
+        // فراخوانی سرویس خارجی برای دریافت داده‌های حمل‌ونقل
+    }
+}
+
+public class DeliveryStatistics
+{
+    public (double totalWeight, double totalCost) ComputeStatistics(List&amp;lt;ShipmentRecord&amp;gt; shipments)
+    {
+        double totalWeight = shipments.Sum(x =&amp;gt; x.Weight);
+        double totalCost = shipments.Sum(x =&amp;gt; x.Cost);
+        return (totalWeight, totalCost);
+    }
+}
+
+public class CustomerOrdersController
+{
+    private readonly DeliveryStatistics _statistics;
+    private readonly IShipmentProvider _shipmentProvider;
+
+    public CustomerOrdersController(DeliveryStatistics statistics, IShipmentProvider shipmentProvider)
+    {
+        _statistics = statistics;
+        _shipmentProvider = shipmentProvider;
+    }
+
+    public string GetSummary(int customerId)
+    {
+        var shipments = _shipmentProvider.FetchShipments(customerId);
+        var (totalWeight, totalCost) = _statistics.ComputeStatistics(shipments);
+        return $&amp;quot;وزن کل: {totalWeight}, هزینه کل: {totalCost}&amp;quot;;
+    }
+}&lt;/pre&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در این نسخه، با تعریف واسط &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;IShipmentProvider&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;， مسئولیت دریافت داده‌ها از سرویس خارجی جدا شده و منطق محاسباتی به کلاس &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;DeliveryStatistics&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; منتقل شده است. حالا در تست‌ها، می‌توانیم به‌راحتی واسط را شبیه‌سازی کنیم:&lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[Fact]
+public void GetSummary_ReturnsCorrectSummary()
+{
+    // Arrange
+    var mockShipmentProvider = new Mock&amp;lt;IShipmentProvider&amp;gt;();
+    mockShipmentProvider.Setup(sp =&amp;gt; sp.FetchShipments(1))
+        .Returns(new List&amp;lt;ShipmentRecord&amp;gt; { new ShipmentRecord { Weight = 10, Cost = 100 } });
+    var stats = new DeliveryStatistics();
+    var controller = new CustomerOrdersController(stats, mockShipmentProvider.Object);
+
+    // Act
+    var result = controller.GetSummary(1);
+
+    // Assert
+    Assert.Equal(&amp;quot;وزن کل: 10, هزینه کل: 100&amp;quot;, result);
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;این تست ساده، قابل‌فهم و مستقل از پیاده‌سازی داخلی است. استفاده از واسط‌ها همچنین امکان تزریق وابستگی (Dependency Injection) را تسهیل می‌کند که یک روش استاندارد در NET. است.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;چرا شبیه‌سازی کلاس‌های مشخص یک الگوی نادرست است؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;شبیه‌سازی کلاس‌های مشخص چندین مشکل را ایجاد می‌کند:&lt;/span&gt;&lt;/div&gt;&lt;ol&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;پیچیدگی غیرضروری&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: نیاز به متدهای مجازی یا ابزارهای خاص، کد را پیچیده‌تر می‌کند.&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;شکنندگی تست‌ها&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: تغییرات در پیاده‌سازی کلاس، تست‌ها را خراب می‌کند، حتی اگر رفتار خارجی تغییر نکند.&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;نقض اصول طراحی&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: ترکیب مسئولیت‌ها در یک کلاس مشخص، انعطاف‌پذیری و قابلیت نگهداری کد را کاهش می‌دهد.&lt;/span&gt;&lt;/li&gt;&lt;/ol&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در مقابل، استفاده از واسط‌ها و جداسازی مسئولیت‌ها، تست‌ها را قابل‌اعتمادتر و کد را ماژولارتر می‌کند. این رویکرد با اصول SOLID، به‌ویژه اصل وابستگی معکوس (Dependency Inversion Principle)، هم‌راستاست.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;نکات عملی برای توسعه‌دهندگان NET.&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;از واسط‌ها استفاده کنید&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: حتی اگر در ابتدا به نظر غیرضروری بیاید، واسط‌ها انعطاف‌پذیری و تست‌پذیری را افزایش می‌دهند.&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مسئولیت‌ها را جدا کنید&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: هر کلاس باید یک وظیفه مشخص داشته باشد. این کار شبیه‌سازی و تست‌نویسی را ساده‌تر می‌کند.&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;ابزارهای مناسب را انتخاب کنید&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: ابزارهایی مانند Moq برای شبیه‌سازی واسط‌ها عالی هستند و نیازی به پیچیدگی‌های اضافی ندارند.&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;بازطراحی را در نظر بگیرید&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: اگر با کلاس‌های مشخص پیچیده مواجه هستید، آن‌ها را به واسط‌ها و کلاس‌های مجزا تبدیل کنید.&lt;/span&gt;&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;شبیه‌سازی کلاس‌های مشخص در تست‌نویسی واحد، یک الگوی نادرست است که می‌تواند به شکنندگی تست‌ها، پیچیدگی کد و نقض اصول طراحی منجر شود. با استفاده از واسط‌ها و جداسازی مسئولیت‌ها، توسعه‌دهندگان NET. می‌توانند تست‌هایی بنویسند که هم کارآمدتر باشند و هم با تغییرات کد سازگارتر بمانند. این رویکرد نه‌تنها کیفیت تست‌ها را بهبود می‌بخشد، بلکه به طراحی بهتر و قابل‌نگهداری‌تر نرم‌افزار کمک می‌کند. با رعایت این اصول، می‌توانید از دام‌های رایج تست‌نویسی اجتناب کنید و پروژه‌های خود را با اطمینان بیشتری توسعه دهید.&lt;/span&gt;&lt;/div&gt;">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="بهبود کیفیت تست‌نویسی با اجتناب از شبیه‌سازی (Mocking) کلاس‌های مشخص (Concrete Classes)">
+    <meta name="twitter:description" content="&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;تست‌نویسی واحد (Unit Testing) یکی از ارکان اصلی توسعه نرم‌افزارهای باکیفیت در چارچوب NET. مایکروسافت است. این فرآیند به توسعه‌دهندگان کمک می‌کند تا از صحت عملکرد کدهای خود اطمینان حاصل کنند و از بروز خطاها جلوگیری کنند. با این حال، استفاده نادرست از ابزارها و تکنیک‌های تست‌نویسی، مانند شبیه‌سازی (Mocking) کلاس‌های مشخص (Concrete Classes)، می‌تواند به پیچیدگی غیرضروری و کاهش کیفیت تست‌ها منجر شود. یکی از الگوهای نادرست رایج، شبیه‌سازی کلاس‌های مشخص به جای استفاده از واسط‌ها (Interfaces) است که می‌تواند اصول طراحی مانند اصل مسئولیت واحد (Single Responsibility Principle) را نقض کند و تست‌ها را شکننده‌تر کند. در این مقاله، به بررسی این الگوی نادرست، دلایل مشکل‌ساز بودن آن و راهکارهای جایگزین می‌پردازیم تا توسعه‌دهندگان NET. بتوانند تست‌هایی کارآمدتر و قابل‌نگهداری‌تر بنویسند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مشکل شبیه‌سازی کلاس‌های مشخص&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;شبیه‌سازی در تست‌نویسی به معنای جایگزینی وابستگی‌های واقعی یک کلاس با نسخه‌های جعلی است که رفتار مشخصی را شبیه‌سازی می‌کنند. ابزارهایی مانند Moq یا NSubstitute معمولاً برای این منظور استفاده می‌شوند. با این حال، وقتی این شبیه‌سازی روی کلاس‌های مشخص اعمال می‌شود، چالش‌هایی به وجود می‌آید. به عنوان مثال، فرض کنید یک کنترلر به نام &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;CustomerOrdersController&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; داریم که به یک سرویس حمل‌ونقل وابسته است:&lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class ShipmentService
+{
+    public List&amp;lt;ShipmentRecord&amp;gt; FetchShipments(int customerId)
+    {
+        // فراخوانی سرویس خارجی برای دریافت داده‌های حمل‌ونقل
+    }
+}
+
+public class CustomerOrdersController
+{
+    private readonly ShipmentService _shipmentService;
+
+    public CustomerOrdersController(ShipmentService shipmentService)
+    {
+        _shipmentService = shipmentService;
+    }
+
+    public string GetSummary(int customerId)
+    {
+        var shipments = _shipmentService.FetchShipments(customerId);
+        return $&amp;quot;تعداد محموله‌ها: {shipments.Count}&amp;quot;;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;اگر بخواهیم &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;ShipmentService&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; را مستقیماً شبیه‌سازی کنیم، با مشکلاتی مواجه می‌شویم. اکثر ابزارهای شبیه‌سازی، مانند Moq، تنها می‌توانند متدهای مجازی (Virtual) یا واسط‌ها را شبیه‌سازی کنند. این یعنی یا باید متدهای کلاس را مجازی کنیم یا به سراغ ابزارهای پیشرفته‌تر و پولی مانند JustMock برویم که محدودیت‌های خاص خود را دارند. این کار نه‌تنها کد را پیچیده‌تر می‌کند، بلکه وابستگی تست به پیاده‌سازی داخلی را افزایش می‌دهد و شکنندگی تست‌ها را بیشتر می‌کند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;علاوه بر این، شبیه‌سازی کلاس‌های مشخص اغلب به نقض اصل مسئولیت واحد منجر می‌شود. در مثال بالا، &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;ShipmentService&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; هم منطق کسب‌وکار را مدیریت می‌کند و هم به سرویس خارجی متصل می‌شود. این ترکیب مسئولیت‌ها، تست‌نویسی را دشوارتر می‌کند، زیرا باید رفتارهای خارجی را نیز شبیه‌سازی کنیم که ممکن است ناپایدار باشند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;راهکار: استفاده از واسط‌ها و جداسازی مسئولیت‌ها&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;به جای شبیه‌سازی کلاس‌های مشخص، بهتر است از واسط‌ها استفاده کنیم و مسئولیت‌ها را جدا کنیم. این رویکرد طراحی بهتری را تضمین می‌کند و تست‌نویسی را ساده‌تر می‌سازد. بیایید مثال بالا را بازطراحی کنیم:&lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public interface IShipmentProvider
+{
+    List&amp;lt;ShipmentRecord&amp;gt; FetchShipments(int customerId);
+}
+
+public class ShipmentService : IShipmentProvider
+{
+    public List&amp;lt;ShipmentRecord&amp;gt; FetchShipments(int customerId)
+    {
+        // فراخوانی سرویس خارجی برای دریافت داده‌های حمل‌ونقل
+    }
+}
+
+public class DeliveryStatistics
+{
+    public (double totalWeight, double totalCost) ComputeStatistics(List&amp;lt;ShipmentRecord&amp;gt; shipments)
+    {
+        double totalWeight = shipments.Sum(x =&amp;gt; x.Weight);
+        double totalCost = shipments.Sum(x =&amp;gt; x.Cost);
+        return (totalWeight, totalCost);
+    }
+}
+
+public class CustomerOrdersController
+{
+    private readonly DeliveryStatistics _statistics;
+    private readonly IShipmentProvider _shipmentProvider;
+
+    public CustomerOrdersController(DeliveryStatistics statistics, IShipmentProvider shipmentProvider)
+    {
+        _statistics = statistics;
+        _shipmentProvider = shipmentProvider;
+    }
+
+    public string GetSummary(int customerId)
+    {
+        var shipments = _shipmentProvider.FetchShipments(customerId);
+        var (totalWeight, totalCost) = _statistics.ComputeStatistics(shipments);
+        return $&amp;quot;وزن کل: {totalWeight}, هزینه کل: {totalCost}&amp;quot;;
+    }
+}&lt;/pre&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در این نسخه، با تعریف واسط &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;IShipmentProvider&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;， مسئولیت دریافت داده‌ها از سرویس خارجی جدا شده و منطق محاسباتی به کلاس &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;DeliveryStatistics&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; منتقل شده است. حالا در تست‌ها، می‌توانیم به‌راحتی واسط را شبیه‌سازی کنیم:&lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[Fact]
+public void GetSummary_ReturnsCorrectSummary()
+{
+    // Arrange
+    var mockShipmentProvider = new Mock&amp;lt;IShipmentProvider&amp;gt;();
+    mockShipmentProvider.Setup(sp =&amp;gt; sp.FetchShipments(1))
+        .Returns(new List&amp;lt;ShipmentRecord&amp;gt; { new ShipmentRecord { Weight = 10, Cost = 100 } });
+    var stats = new DeliveryStatistics();
+    var controller = new CustomerOrdersController(stats, mockShipmentProvider.Object);
+
+    // Act
+    var result = controller.GetSummary(1);
+
+    // Assert
+    Assert.Equal(&amp;quot;وزن کل: 10, هزینه کل: 100&amp;quot;, result);
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;این تست ساده، قابل‌فهم و مستقل از پیاده‌سازی داخلی است. استفاده از واسط‌ها همچنین امکان تزریق وابستگی (Dependency Injection) را تسهیل می‌کند که یک روش استاندارد در NET. است.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;چرا شبیه‌سازی کلاس‌های مشخص یک الگوی نادرست است؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;شبیه‌سازی کلاس‌های مشخص چندین مشکل را ایجاد می‌کند:&lt;/span&gt;&lt;/div&gt;&lt;ol&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;پیچیدگی غیرضروری&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: نیاز به متدهای مجازی یا ابزارهای خاص، کد را پیچیده‌تر می‌کند.&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;شکنندگی تست‌ها&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: تغییرات در پیاده‌سازی کلاس، تست‌ها را خراب می‌کند، حتی اگر رفتار خارجی تغییر نکند.&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;نقض اصول طراحی&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: ترکیب مسئولیت‌ها در یک کلاس مشخص، انعطاف‌پذیری و قابلیت نگهداری کد را کاهش می‌دهد.&lt;/span&gt;&lt;/li&gt;&lt;/ol&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در مقابل، استفاده از واسط‌ها و جداسازی مسئولیت‌ها، تست‌ها را قابل‌اعتمادتر و کد را ماژولارتر می‌کند. این رویکرد با اصول SOLID، به‌ویژه اصل وابستگی معکوس (Dependency Inversion Principle)، هم‌راستاست.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;نکات عملی برای توسعه‌دهندگان NET.&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;از واسط‌ها استفاده کنید&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: حتی اگر در ابتدا به نظر غیرضروری بیاید، واسط‌ها انعطاف‌پذیری و تست‌پذیری را افزایش می‌دهند.&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مسئولیت‌ها را جدا کنید&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: هر کلاس باید یک وظیفه مشخص داشته باشد. این کار شبیه‌سازی و تست‌نویسی را ساده‌تر می‌کند.&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;ابزارهای مناسب را انتخاب کنید&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: ابزارهایی مانند Moq برای شبیه‌سازی واسط‌ها عالی هستند و نیازی به پیچیدگی‌های اضافی ندارند.&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;بازطراحی را در نظر بگیرید&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: اگر با کلاس‌های مشخص پیچیده مواجه هستید، آن‌ها را به واسط‌ها و کلاس‌های مجزا تبدیل کنید.&lt;/span&gt;&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;شبیه‌سازی کلاس‌های مشخص در تست‌نویسی واحد، یک الگوی نادرست است که می‌تواند به شکنندگی تست‌ها، پیچیدگی کد و نقض اصول طراحی منجر شود. با استفاده از واسط‌ها و جداسازی مسئولیت‌ها، توسعه‌دهندگان NET. می‌توانند تست‌هایی بنویسند که هم کارآمدتر باشند و هم با تغییرات کد سازگارتر بمانند. این رویکرد نه‌تنها کیفیت تست‌ها را بهبود می‌بخشد، بلکه به طراحی بهتر و قابل‌نگهداری‌تر نرم‌افزار کمک می‌کند. با رعایت این اصول، می‌توانید از دام‌های رایج تست‌نویسی اجتناب کنید و پروژه‌های خود را با اطمینان بیشتری توسعه دهید.&lt;/span&gt;&lt;/div&gt;">
+    <meta name="twitter:card" content="&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;تست‌نویسی واحد (Unit Testing) یکی از ارکان اصلی توسعه نرم‌افزارهای باکیفیت در چارچوب NET. مایکروسافت است. این فرآیند به توسعه‌دهندگان کمک می‌کند تا از صحت عملکرد کدهای خود اطمینان حاصل کنند و از بروز خطاها جلوگیری کنند. با این حال، استفاده نادرست از ابزارها و تکنیک‌های تست‌نویسی، مانند شبیه‌سازی (Mocking) کلاس‌های مشخص (Concrete Classes)، می‌تواند به پیچیدگی غیرضروری و کاهش کیفیت تست‌ها منجر شود. یکی از الگوهای نادرست رایج، شبیه‌سازی کلاس‌های مشخص به جای استفاده از واسط‌ها (Interfaces) است که می‌تواند اصول طراحی مانند اصل مسئولیت واحد (Single Responsibility Principle) را نقض کند و تست‌ها را شکننده‌تر کند. در این مقاله، به بررسی این الگوی نادرست، دلایل مشکل‌ساز بودن آن و راهکارهای جایگزین می‌پردازیم تا توسعه‌دهندگان NET. بتوانند تست‌هایی کارآمدتر و قابل‌نگهداری‌تر بنویسند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مشکل شبیه‌سازی کلاس‌های مشخص&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;شبیه‌سازی در تست‌نویسی به معنای جایگزینی وابستگی‌های واقعی یک کلاس با نسخه‌های جعلی است که رفتار مشخصی را شبیه‌سازی می‌کنند. ابزارهایی مانند Moq یا NSubstitute معمولاً برای این منظور استفاده می‌شوند. با این حال، وقتی این شبیه‌سازی روی کلاس‌های مشخص اعمال می‌شود، چالش‌هایی به وجود می‌آید. به عنوان مثال، فرض کنید یک کنترلر به نام &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;CustomerOrdersController&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; داریم که به یک سرویس حمل‌ونقل وابسته است:&lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class ShipmentService
+{
+    public List&amp;lt;ShipmentRecord&amp;gt; FetchShipments(int customerId)
+    {
+        // فراخوانی سرویس خارجی برای دریافت داده‌های حمل‌ونقل
+    }
+}
+
+public class CustomerOrdersController
+{
+    private readonly ShipmentService _shipmentService;
+
+    public CustomerOrdersController(ShipmentService shipmentService)
+    {
+        _shipmentService = shipmentService;
+    }
+
+    public string GetSummary(int customerId)
+    {
+        var shipments = _shipmentService.FetchShipments(customerId);
+        return $&amp;quot;تعداد محموله‌ها: {shipments.Count}&amp;quot;;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;اگر بخواهیم &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;ShipmentService&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; را مستقیماً شبیه‌سازی کنیم، با مشکلاتی مواجه می‌شویم. اکثر ابزارهای شبیه‌سازی، مانند Moq، تنها می‌توانند متدهای مجازی (Virtual) یا واسط‌ها را شبیه‌سازی کنند. این یعنی یا باید متدهای کلاس را مجازی کنیم یا به سراغ ابزارهای پیشرفته‌تر و پولی مانند JustMock برویم که محدودیت‌های خاص خود را دارند. این کار نه‌تنها کد را پیچیده‌تر می‌کند، بلکه وابستگی تست به پیاده‌سازی داخلی را افزایش می‌دهد و شکنندگی تست‌ها را بیشتر می‌کند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;علاوه بر این، شبیه‌سازی کلاس‌های مشخص اغلب به نقض اصل مسئولیت واحد منجر می‌شود. در مثال بالا، &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;ShipmentService&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; هم منطق کسب‌وکار را مدیریت می‌کند و هم به سرویس خارجی متصل می‌شود. این ترکیب مسئولیت‌ها، تست‌نویسی را دشوارتر می‌کند، زیرا باید رفتارهای خارجی را نیز شبیه‌سازی کنیم که ممکن است ناپایدار باشند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;راهکار: استفاده از واسط‌ها و جداسازی مسئولیت‌ها&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;به جای شبیه‌سازی کلاس‌های مشخص، بهتر است از واسط‌ها استفاده کنیم و مسئولیت‌ها را جدا کنیم. این رویکرد طراحی بهتری را تضمین می‌کند و تست‌نویسی را ساده‌تر می‌سازد. بیایید مثال بالا را بازطراحی کنیم:&lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public interface IShipmentProvider
+{
+    List&amp;lt;ShipmentRecord&amp;gt; FetchShipments(int customerId);
+}
+
+public class ShipmentService : IShipmentProvider
+{
+    public List&amp;lt;ShipmentRecord&amp;gt; FetchShipments(int customerId)
+    {
+        // فراخوانی سرویس خارجی برای دریافت داده‌های حمل‌ونقل
+    }
+}
+
+public class DeliveryStatistics
+{
+    public (double totalWeight, double totalCost) ComputeStatistics(List&amp;lt;ShipmentRecord&amp;gt; shipments)
+    {
+        double totalWeight = shipments.Sum(x =&amp;gt; x.Weight);
+        double totalCost = shipments.Sum(x =&amp;gt; x.Cost);
+        return (totalWeight, totalCost);
+    }
+}
+
+public class CustomerOrdersController
+{
+    private readonly DeliveryStatistics _statistics;
+    private readonly IShipmentProvider _shipmentProvider;
+
+    public CustomerOrdersController(DeliveryStatistics statistics, IShipmentProvider shipmentProvider)
+    {
+        _statistics = statistics;
+        _shipmentProvider = shipmentProvider;
+    }
+
+    public string GetSummary(int customerId)
+    {
+        var shipments = _shipmentProvider.FetchShipments(customerId);
+        var (totalWeight, totalCost) = _statistics.ComputeStatistics(shipments);
+        return $&amp;quot;وزن کل: {totalWeight}, هزینه کل: {totalCost}&amp;quot;;
+    }
+}&lt;/pre&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در این نسخه، با تعریف واسط &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;IShipmentProvider&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;， مسئولیت دریافت داده‌ها از سرویس خارجی جدا شده و منطق محاسباتی به کلاس &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;DeliveryStatistics&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; منتقل شده است. حالا در تست‌ها، می‌توانیم به‌راحتی واسط را شبیه‌سازی کنیم:&lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[Fact]
+public void GetSummary_ReturnsCorrectSummary()
+{
+    // Arrange
+    var mockShipmentProvider = new Mock&amp;lt;IShipmentProvider&amp;gt;();
+    mockShipmentProvider.Setup(sp =&amp;gt; sp.FetchShipments(1))
+        .Returns(new List&amp;lt;ShipmentRecord&amp;gt; { new ShipmentRecord { Weight = 10, Cost = 100 } });
+    var stats = new DeliveryStatistics();
+    var controller = new CustomerOrdersController(stats, mockShipmentProvider.Object);
+
+    // Act
+    var result = controller.GetSummary(1);
+
+    // Assert
+    Assert.Equal(&amp;quot;وزن کل: 10, هزینه کل: 100&amp;quot;, result);
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;این تست ساده، قابل‌فهم و مستقل از پیاده‌سازی داخلی است. استفاده از واسط‌ها همچنین امکان تزریق وابستگی (Dependency Injection) را تسهیل می‌کند که یک روش استاندارد در NET. است.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;چرا شبیه‌سازی کلاس‌های مشخص یک الگوی نادرست است؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;شبیه‌سازی کلاس‌های مشخص چندین مشکل را ایجاد می‌کند:&lt;/span&gt;&lt;/div&gt;&lt;ol&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;پیچیدگی غیرضروری&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: نیاز به متدهای مجازی یا ابزارهای خاص، کد را پیچیده‌تر می‌کند.&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;شکنندگی تست‌ها&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: تغییرات در پیاده‌سازی کلاس، تست‌ها را خراب می‌کند، حتی اگر رفتار خارجی تغییر نکند.&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;نقض اصول طراحی&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: ترکیب مسئولیت‌ها در یک کلاس مشخص، انعطاف‌پذیری و قابلیت نگهداری کد را کاهش می‌دهد.&lt;/span&gt;&lt;/li&gt;&lt;/ol&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در مقابل، استفاده از واسط‌ها و جداسازی مسئولیت‌ها، تست‌ها را قابل‌اعتمادتر و کد را ماژولارتر می‌کند. این رویکرد با اصول SOLID، به‌ویژه اصل وابستگی معکوس (Dependency Inversion Principle)، هم‌راستاست.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;نکات عملی برای توسعه‌دهندگان NET.&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;از واسط‌ها استفاده کنید&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: حتی اگر در ابتدا به نظر غیرضروری بیاید، واسط‌ها انعطاف‌پذیری و تست‌پذیری را افزایش می‌دهند.&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مسئولیت‌ها را جدا کنید&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: هر کلاس باید یک وظیفه مشخص داشته باشد. این کار شبیه‌سازی و تست‌نویسی را ساده‌تر می‌کند.&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;ابزارهای مناسب را انتخاب کنید&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: ابزارهایی مانند Moq برای شبیه‌سازی واسط‌ها عالی هستند و نیازی به پیچیدگی‌های اضافی ندارند.&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;بازطراحی را در نظر بگیرید&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: اگر با کلاس‌های مشخص پیچیده مواجه هستید، آن‌ها را به واسط‌ها و کلاس‌های مجزا تبدیل کنید.&lt;/span&gt;&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;شبیه‌سازی کلاس‌های مشخص در تست‌نویسی واحد، یک الگوی نادرست است که می‌تواند به شکنندگی تست‌ها، پیچیدگی کد و نقض اصول طراحی منجر شود. با استفاده از واسط‌ها و جداسازی مسئولیت‌ها، توسعه‌دهندگان NET. می‌توانند تست‌هایی بنویسند که هم کارآمدتر باشند و هم با تغییرات کد سازگارتر بمانند. این رویکرد نه‌تنها کیفیت تست‌ها را بهبود می‌بخشد، بلکه به طراحی بهتر و قابل‌نگهداری‌تر نرم‌افزار کمک می‌کند. با رعایت این اصول، می‌توانید از دام‌های رایج تست‌نویسی اجتناب کنید و پروژه‌های خود را با اطمینان بیشتری توسعه دهید.&lt;/span&gt;&lt;/div&gt;">
+    <meta property="article:published_time" content="Sat, 29 Mar 2025 18:45:47 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
     <meta content='IE=edge' http-equiv='X-UA-Compatible'>
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">
-	
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
 	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
-
     <link href="vs.min.css" rel="stylesheet" type="text/css">
-    <script src="highlight.min.js" type="text/javascript"></script>
-	
+    <script src="highlight.min.js" type="text/javascript"></script>	
     <link href="styles.css" rel="stylesheet" type="text/css">	
     <style>
       @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
@@ -42,8 +439,8 @@
         }
      }
     </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
 </head>
-
 <body dir='rtl'>
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
@@ -53,7 +450,7 @@
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۳۶۹۵</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۶۹۷</span></td>
 </tr>
 <tr>
 <td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
@@ -73,7 +470,7 @@
 </tr>
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۲۲</span></td>
 </tr>
 </tbody>
 </table>
@@ -200,8 +597,5 @@ public void GetSummary_ReturnsCorrectSummary()
 
 <!-- to load custom fonts for printing -->
 <div class="useSamimFD">&nbsp;</div>
-
-<script src="SyntaxHighlighter.js" type="text/javascript"></script>
 </body>
-
 </html>

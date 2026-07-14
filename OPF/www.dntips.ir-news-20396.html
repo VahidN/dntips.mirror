@@ -1,17 +1,589 @@
 <!DOCTYPE html>
 <html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
-
 <head>
-    <title>‫‫تست‌ داده‌محور در xUnit با استفاده از [InlineData]، [MemberData] و [ClassData]</title>
+    <title>‫‫تست‌ داده‌محور در xUnit با استفاده از [InlineData]، [MemberData] و [ClassData]</title>     <meta name="description" content="&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در دنیای واقعی توسعه، تست‌های واحد به منزله منبع اصلی صحت عملکرد کد، شامل اعتبارسنجی‌ها، قوانین کسب‌وکار و دیگر منطق‌های پیاده‌سازی شده، عمل می‌کنند. فریم‌ورک xUnit.net با ارائه ویژگی تست‌ داده‌محور (Data-Driven Testing) فرآیند تست را تسهیل می‌کند. این رویکرد به توسعه‌دهندگان اجازه می‌دهد تا یک تست واحد را با مجموعه‌ای از داده‌های مختلف اجرا کنند و از صحت عملکرد کد در شرایط گوناگون اطمینان حاصل نمایند. در این مقاله آموزشی، به بررسی سهAttribute مهم در xUnit.net برای پیاده‌سازی تست‌محور داده، یعنی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt;, &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[MemberData]&lt;/code&gt; و &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[ClassData]&lt;/code&gt; خواهیم پرداخت و نحوه استفاده از آن‌ها را با مثال‌هایی مبتنی بر تست توابع تولید دنباله فیبوناچی (Fibonacci Sequence) شرح خواهیم داد. همچنین، به منظور درک بهتر تفاوت‌های عملکردی، یک سنجش عملکرد (Benchmarking) ساده نیز برای مقایسه روش‌های مختلف پیاده‌سازی تست ارائه خواهد شد.&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;ویژگی [Theory]&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;به طور پیش‌فرض، xUnit.net از ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[Fact]&lt;/code&gt; برای تعریف تست‌های واحد بدون پارامتر استفاده می‌کند. در مقابل، ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[Theory]&lt;/code&gt; برای تعریف تست‌های پارامتری به کار می‌رود. این ویژگی به xUnit.net اعلام می‌کند که متد تست مورد نظر باید با مجموعه‌ای از داده‌های مختلف اجرا شود. داده‌های مورد نیاز برای این تست‌ها می‌توانند از طریق ویژگی‌های مختلفی تامین شوند که رایج‌ترین آن‌ها &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt; است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;ویژگی [InlineData] - داده‌های ساده و مستقیم&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt; زمانی مورد استفاده قرار می‌گیرد که مجموعه داده‌های تست کوچک و ثابت باشد. این ویژگی ساده‌ترین راه برای ارسال پارامتر به یک متد تست را فراهم می‌کند. اگرچه درک آن آسان است، اما بررسی آن به منظور پوشش کامل مفاهیم ضروری است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در مثال زیر، نحوه استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt; برای تست تابع بازگشتی (Recursive) محاسبه دنباله فیبوناچی نشان داده شده است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;using Fibonacci.Library;
+using System.Diagnostics;
+using Xunit;
+
+namespace Fibonacci.UnitTest;
+
+public class FibonacciTests
+{
+    private readonly FibonacciHelper fibonacciHelper;
+    public FibonacciTests()
+    {
+        this.fibonacciHelper = new FibonacciHelper();
+    }
+
+    [Theory]
+    [InlineData(0, 0)]
+    [InlineData(1, 1)]
+    [InlineData(5, 5)]
+    [InlineData(10, 55)]
+    public void Fibonacci_Recursive_InlineData(int input, int expected)
+    {
+        var watch = Stopwatch.StartNew();
+        int result = fibonacciHelper.Recursive(input);
+        watch.Stop();
+
+        Assert.Equal(expected, result);
+
+        Console.WriteLine($&amp;quot;[Recursive] Fibonacci({input}) took {watch.ElapsedMilliseconds} ms&amp;quot;);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این مثال، ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[Theory]&lt;/code&gt; به همراه چهار نمونه &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt; استفاده شده است. هر &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt; یک مجموعه داده تست منحصربه‌فرد را شامل می‌شود که در این مورد، شامل ورودی (&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;input&lt;/code&gt;) و مقدار مورد انتظار (&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;expected&lt;/code&gt;) برای تابع &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Recursive&lt;/code&gt; است. در نتیجه، متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Fibonacci_Recursive_InlineData&lt;/code&gt; چهار بار با داده‌های مختلف اجرا خواهد شد. &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt; برای داده‌های تست کوچک و ثابت بسیار مناسب است. خروجی کنسول نشان می‌دهد که هر تست با ورودی‌های مختلف اجرا شده و زمان اجرای هر کدام نیز ثبت شده است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;ویژگی [MemberData] - داده‌های قابل استفاده مجدد در کلاس مشابه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[MemberData]&lt;/code&gt; به توسعه‌دهندگان اجازه می‌دهد تا از اعضای کلاس (فیلدها، خصوصیات یا متدهایی) که یک شیء از نوع &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IEnumerable&amp;lt;object[]&amp;gt;&lt;/code&gt; را به عنوان منبع داده تست برمی‌گردانند، استفاده مجدد کنند. این ویژگی به ویژه زمانی مفید است که بخواهید داده‌های تست را از متد تست جدا نگه دارید یا آن‌ها را به صورت برنامه‌نویسی تولید کنید.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مثال زیر نحوه استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[MemberData]&lt;/code&gt; برای تست تابع تکراری (Iterative) محاسبه دنباله فیبوناچی را نشان می‌دهد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;using Fibonacci.Library;
+using System.Collections.Generic;
+using System.Linq;
+using Xunit;
+
+namespace Fibonacci.UnitTest
+{
+    public class FibonacciTest1
+    {
+        private readonly FibonacciHelper fibonacciHelper;
+
+        public FibonacciTest1()
+        {
+            this.fibonacciHelper = new FibonacciHelper();
+        }
+
+        public static IEnumerable&amp;lt;object[]&amp;gt; GetData(int numFiboTest)
+        {
+            var data = new List&amp;lt;object[]&amp;gt;
+            {
+                new object[] { 6, 8 },
+                new object[] { 7, 13 },
+                new object[] { 8, 21 },
+                new object[] { 9, 34 }
+            };
+
+            return data.Take(numFiboTest);
+        }
+
+        [Theory]
+        [MemberData(nameof(GetData), parameters: 4)]
+        public void Fibonacci_Iterative_MemberData(int input, int expected)
+        {
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            int result = fibonacciHelper.Iterative(input);
+
+            watch.Stop();
+
+            Assert.Equal(expected, result);
+
+            Console.WriteLine($&amp;quot;[Iterative] Fibonacci({input}) took {watch.ElapsedMilliseconds} ms&amp;quot;);
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این مثال، متد استاتیک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GetData&lt;/code&gt; یک لیست از آرایه‌های شیء (&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;object[]&lt;/code&gt;) را برمی‌گرداند که هر آرایه شامل یک ورودی و مقدار مورد انتظار برای تست است. ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[MemberData]&lt;/code&gt; با استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;nameof(GetData)&lt;/code&gt; به این متد ارجاع می‌دهد و پارامتر &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;parameters: 4&lt;/code&gt; مشخص می‌کند که چهار مجموعه داده اول از لیست &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;data&lt;/code&gt; برای تست استفاده شوند. خروجی کنسول نشان می‌دهد که تست &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Fibonacci_Iterative_MemberData&lt;/code&gt; چهار بار با داده‌های ارائه شده توسط متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GetData&lt;/code&gt; اجرا شده است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;ویژگی [ClassData] - داده‌های پیچیده یا منابع خارجی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[ClassData]&lt;/code&gt; امکان تعریف یک کلاس را فراهم می‌کند که رابط &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IEnumerable&amp;lt;object[]&amp;gt;&lt;/code&gt; را پیاده‌سازی می‌کند. این ویژگی به شما اجازه می‌دهد تا مجموعه‌های داده پیچیده‌تری را بارگیری یا ایجاد کنید، مانند خواندن داده‌ها از فایل‌ها، پایگاه‌های داده یا فراخوانی‌های API (به صورت شبیه‌سازی شده). این ویژگی به ویژه برای مدیریت مجموعه‌های داده بزرگ یا پویا که از منابع خارجی تامین می‌شوند، مفید است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مثال زیر نحوه استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[ClassData]&lt;/code&gt; را نشان می‌دهد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;using Fibonacci.Library;
+using System.Collections;
+using System.Collections.Generic;
+using Xunit;
+
+namespace Fibonacci.UnitTest;
+
+public class AddTestDataClass : IEnumerable&amp;lt;object[]&amp;gt;
+{
+    public IEnumerator&amp;lt;object[]&amp;gt; GetEnumerator()
+    {
+        yield return new object[] { 11, 89 };
+        yield return new object[] { 12, 144 };
+        yield return new object[] { 13, 233 };
+        yield return new object[] { 14, 377 };
+    }
+
+    IEnumerator IEnumerable.GetEnumerator() =&amp;gt; GetEnumerator();
+}
+
+public class FibonacciTest2
+{
+    private readonly FibonacciHelper fibonacciHelper;
+
+    public FibonacciTest2()
+    {
+        this.fibonacciHelper = new FibonacciHelper();
+    }
+
+    [Theory]
+    [ClassData(typeof(AddTestDataClass))]
+    public void Fibonacci_Iterative_ClassData(int input, int expected)
+    {
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        int result = fibonacciHelper.Iterative(input);
+        watch.Stop();
+
+        Assert.Equal(expected, result);
+        Console.WriteLine($&amp;quot;[Iterative/ClassData] Fibonacci({input}) took {watch.ElapsedMilliseconds} ms&amp;quot;);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این مثال، کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;AddTestDataClass&lt;/code&gt; رابط &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IEnumerable&amp;lt;object[]&amp;gt;&lt;/code&gt; را پیاده‌سازی کرده و در متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GetEnumerator&lt;/code&gt; خود، چهار مجموعه داده تست را به صورت &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;yield return&lt;/code&gt; ارائه می‌دهد. ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[ClassData]&lt;/code&gt; با استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;typeof(AddTestDataClass)&lt;/code&gt; به این کلاس ارجاع می‌دهد. در نتیجه، متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Fibonacci_Iterative_ClassData&lt;/code&gt; چهار بار با داده‌های تعریف شده در کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;AddTestDataClass&lt;/code&gt; اجرا خواهد شد. خروجی کنسول نشان می‌دهد که هر تست با ورودی‌های مختلف اجرا شده و زمان اجرای آن‌ها نیز ثبت شده است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در xUnit.net، انتخاب بین &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt;, &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[MemberData]&lt;/code&gt; و &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[ClassData]&lt;/code&gt; به نیازها و پیچیدگی داده‌های تست شما بستگی دارد.&lt;/div&gt;&lt;ul&gt;&lt;li&gt;ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt; برای مقادیر تست کوچک و ثابت بهترین گزینه است. استفاده از آن ساده و خوانا است، اما قابلیت استفاده مجدد در تست‌های مختلف را ندارد.&lt;/li&gt;&lt;li&gt;زمانیکه به داده‌های تست پویاتر یا قابل استفاده مجدد نیاز دارید و منطق تولید این داده‌ها در داخل کلاس تست شما قرار دارد، ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[MemberData]&lt;/code&gt; ایده‌آل است. این ویژگی تعادلی بین قابلیت استفاده مجدد و پیچیدگی ارائه می‌دهد.&lt;/li&gt;&lt;li&gt;ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[ClassData]&lt;/code&gt; بیشترین انعطاف‌پذیری را برای سناریوهای پیشرفته‌تر، مانند بارگیری مجموعه‌های داده بزرگ از منابع خارجی (فایل‌ها، APIها یا پایگاه‌های داده) فراهم می‌کند. اگرچه تنظیمات آن پیچیده‌تر است، اما امکان جداسازی منطق داده و ارتقاء قابلیت استفاده مجدد در سراسر مجموعه‌های تست را فراهم می‌سازد.&lt;/li&gt;&lt;/ul&gt;">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="تست‌ داده‌محور در xUnit با استفاده از [InlineData]، [MemberData] و [ClassData]">
+    <meta itemprop="description" content="&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در دنیای واقعی توسعه، تست‌های واحد به منزله منبع اصلی صحت عملکرد کد، شامل اعتبارسنجی‌ها، قوانین کسب‌وکار و دیگر منطق‌های پیاده‌سازی شده، عمل می‌کنند. فریم‌ورک xUnit.net با ارائه ویژگی تست‌ داده‌محور (Data-Driven Testing) فرآیند تست را تسهیل می‌کند. این رویکرد به توسعه‌دهندگان اجازه می‌دهد تا یک تست واحد را با مجموعه‌ای از داده‌های مختلف اجرا کنند و از صحت عملکرد کد در شرایط گوناگون اطمینان حاصل نمایند. در این مقاله آموزشی، به بررسی سهAttribute مهم در xUnit.net برای پیاده‌سازی تست‌محور داده، یعنی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt;, &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[MemberData]&lt;/code&gt; و &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[ClassData]&lt;/code&gt; خواهیم پرداخت و نحوه استفاده از آن‌ها را با مثال‌هایی مبتنی بر تست توابع تولید دنباله فیبوناچی (Fibonacci Sequence) شرح خواهیم داد. همچنین، به منظور درک بهتر تفاوت‌های عملکردی، یک سنجش عملکرد (Benchmarking) ساده نیز برای مقایسه روش‌های مختلف پیاده‌سازی تست ارائه خواهد شد.&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;ویژگی [Theory]&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;به طور پیش‌فرض، xUnit.net از ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[Fact]&lt;/code&gt; برای تعریف تست‌های واحد بدون پارامتر استفاده می‌کند. در مقابل، ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[Theory]&lt;/code&gt; برای تعریف تست‌های پارامتری به کار می‌رود. این ویژگی به xUnit.net اعلام می‌کند که متد تست مورد نظر باید با مجموعه‌ای از داده‌های مختلف اجرا شود. داده‌های مورد نیاز برای این تست‌ها می‌توانند از طریق ویژگی‌های مختلفی تامین شوند که رایج‌ترین آن‌ها &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt; است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;ویژگی [InlineData] - داده‌های ساده و مستقیم&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt; زمانی مورد استفاده قرار می‌گیرد که مجموعه داده‌های تست کوچک و ثابت باشد. این ویژگی ساده‌ترین راه برای ارسال پارامتر به یک متد تست را فراهم می‌کند. اگرچه درک آن آسان است، اما بررسی آن به منظور پوشش کامل مفاهیم ضروری است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در مثال زیر، نحوه استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt; برای تست تابع بازگشتی (Recursive) محاسبه دنباله فیبوناچی نشان داده شده است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;using Fibonacci.Library;
+using System.Diagnostics;
+using Xunit;
+
+namespace Fibonacci.UnitTest;
+
+public class FibonacciTests
+{
+    private readonly FibonacciHelper fibonacciHelper;
+    public FibonacciTests()
+    {
+        this.fibonacciHelper = new FibonacciHelper();
+    }
+
+    [Theory]
+    [InlineData(0, 0)]
+    [InlineData(1, 1)]
+    [InlineData(5, 5)]
+    [InlineData(10, 55)]
+    public void Fibonacci_Recursive_InlineData(int input, int expected)
+    {
+        var watch = Stopwatch.StartNew();
+        int result = fibonacciHelper.Recursive(input);
+        watch.Stop();
+
+        Assert.Equal(expected, result);
+
+        Console.WriteLine($&amp;quot;[Recursive] Fibonacci({input}) took {watch.ElapsedMilliseconds} ms&amp;quot;);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این مثال، ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[Theory]&lt;/code&gt; به همراه چهار نمونه &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt; استفاده شده است. هر &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt; یک مجموعه داده تست منحصربه‌فرد را شامل می‌شود که در این مورد، شامل ورودی (&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;input&lt;/code&gt;) و مقدار مورد انتظار (&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;expected&lt;/code&gt;) برای تابع &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Recursive&lt;/code&gt; است. در نتیجه، متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Fibonacci_Recursive_InlineData&lt;/code&gt; چهار بار با داده‌های مختلف اجرا خواهد شد. &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt; برای داده‌های تست کوچک و ثابت بسیار مناسب است. خروجی کنسول نشان می‌دهد که هر تست با ورودی‌های مختلف اجرا شده و زمان اجرای هر کدام نیز ثبت شده است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;ویژگی [MemberData] - داده‌های قابل استفاده مجدد در کلاس مشابه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[MemberData]&lt;/code&gt; به توسعه‌دهندگان اجازه می‌دهد تا از اعضای کلاس (فیلدها، خصوصیات یا متدهایی) که یک شیء از نوع &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IEnumerable&amp;lt;object[]&amp;gt;&lt;/code&gt; را به عنوان منبع داده تست برمی‌گردانند، استفاده مجدد کنند. این ویژگی به ویژه زمانی مفید است که بخواهید داده‌های تست را از متد تست جدا نگه دارید یا آن‌ها را به صورت برنامه‌نویسی تولید کنید.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مثال زیر نحوه استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[MemberData]&lt;/code&gt; برای تست تابع تکراری (Iterative) محاسبه دنباله فیبوناچی را نشان می‌دهد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;using Fibonacci.Library;
+using System.Collections.Generic;
+using System.Linq;
+using Xunit;
+
+namespace Fibonacci.UnitTest
+{
+    public class FibonacciTest1
+    {
+        private readonly FibonacciHelper fibonacciHelper;
+
+        public FibonacciTest1()
+        {
+            this.fibonacciHelper = new FibonacciHelper();
+        }
+
+        public static IEnumerable&amp;lt;object[]&amp;gt; GetData(int numFiboTest)
+        {
+            var data = new List&amp;lt;object[]&amp;gt;
+            {
+                new object[] { 6, 8 },
+                new object[] { 7, 13 },
+                new object[] { 8, 21 },
+                new object[] { 9, 34 }
+            };
+
+            return data.Take(numFiboTest);
+        }
+
+        [Theory]
+        [MemberData(nameof(GetData), parameters: 4)]
+        public void Fibonacci_Iterative_MemberData(int input, int expected)
+        {
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            int result = fibonacciHelper.Iterative(input);
+
+            watch.Stop();
+
+            Assert.Equal(expected, result);
+
+            Console.WriteLine($&amp;quot;[Iterative] Fibonacci({input}) took {watch.ElapsedMilliseconds} ms&amp;quot;);
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این مثال، متد استاتیک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GetData&lt;/code&gt; یک لیست از آرایه‌های شیء (&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;object[]&lt;/code&gt;) را برمی‌گرداند که هر آرایه شامل یک ورودی و مقدار مورد انتظار برای تست است. ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[MemberData]&lt;/code&gt; با استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;nameof(GetData)&lt;/code&gt; به این متد ارجاع می‌دهد و پارامتر &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;parameters: 4&lt;/code&gt; مشخص می‌کند که چهار مجموعه داده اول از لیست &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;data&lt;/code&gt; برای تست استفاده شوند. خروجی کنسول نشان می‌دهد که تست &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Fibonacci_Iterative_MemberData&lt;/code&gt; چهار بار با داده‌های ارائه شده توسط متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GetData&lt;/code&gt; اجرا شده است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;ویژگی [ClassData] - داده‌های پیچیده یا منابع خارجی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[ClassData]&lt;/code&gt; امکان تعریف یک کلاس را فراهم می‌کند که رابط &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IEnumerable&amp;lt;object[]&amp;gt;&lt;/code&gt; را پیاده‌سازی می‌کند. این ویژگی به شما اجازه می‌دهد تا مجموعه‌های داده پیچیده‌تری را بارگیری یا ایجاد کنید، مانند خواندن داده‌ها از فایل‌ها، پایگاه‌های داده یا فراخوانی‌های API (به صورت شبیه‌سازی شده). این ویژگی به ویژه برای مدیریت مجموعه‌های داده بزرگ یا پویا که از منابع خارجی تامین می‌شوند، مفید است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مثال زیر نحوه استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[ClassData]&lt;/code&gt; را نشان می‌دهد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;using Fibonacci.Library;
+using System.Collections;
+using System.Collections.Generic;
+using Xunit;
+
+namespace Fibonacci.UnitTest;
+
+public class AddTestDataClass : IEnumerable&amp;lt;object[]&amp;gt;
+{
+    public IEnumerator&amp;lt;object[]&amp;gt; GetEnumerator()
+    {
+        yield return new object[] { 11, 89 };
+        yield return new object[] { 12, 144 };
+        yield return new object[] { 13, 233 };
+        yield return new object[] { 14, 377 };
+    }
+
+    IEnumerator IEnumerable.GetEnumerator() =&amp;gt; GetEnumerator();
+}
+
+public class FibonacciTest2
+{
+    private readonly FibonacciHelper fibonacciHelper;
+
+    public FibonacciTest2()
+    {
+        this.fibonacciHelper = new FibonacciHelper();
+    }
+
+    [Theory]
+    [ClassData(typeof(AddTestDataClass))]
+    public void Fibonacci_Iterative_ClassData(int input, int expected)
+    {
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        int result = fibonacciHelper.Iterative(input);
+        watch.Stop();
+
+        Assert.Equal(expected, result);
+        Console.WriteLine($&amp;quot;[Iterative/ClassData] Fibonacci({input}) took {watch.ElapsedMilliseconds} ms&amp;quot;);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این مثال، کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;AddTestDataClass&lt;/code&gt; رابط &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IEnumerable&amp;lt;object[]&amp;gt;&lt;/code&gt; را پیاده‌سازی کرده و در متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GetEnumerator&lt;/code&gt; خود، چهار مجموعه داده تست را به صورت &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;yield return&lt;/code&gt; ارائه می‌دهد. ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[ClassData]&lt;/code&gt; با استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;typeof(AddTestDataClass)&lt;/code&gt; به این کلاس ارجاع می‌دهد. در نتیجه، متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Fibonacci_Iterative_ClassData&lt;/code&gt; چهار بار با داده‌های تعریف شده در کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;AddTestDataClass&lt;/code&gt; اجرا خواهد شد. خروجی کنسول نشان می‌دهد که هر تست با ورودی‌های مختلف اجرا شده و زمان اجرای آن‌ها نیز ثبت شده است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در xUnit.net، انتخاب بین &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt;, &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[MemberData]&lt;/code&gt; و &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[ClassData]&lt;/code&gt; به نیازها و پیچیدگی داده‌های تست شما بستگی دارد.&lt;/div&gt;&lt;ul&gt;&lt;li&gt;ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt; برای مقادیر تست کوچک و ثابت بهترین گزینه است. استفاده از آن ساده و خوانا است، اما قابلیت استفاده مجدد در تست‌های مختلف را ندارد.&lt;/li&gt;&lt;li&gt;زمانیکه به داده‌های تست پویاتر یا قابل استفاده مجدد نیاز دارید و منطق تولید این داده‌ها در داخل کلاس تست شما قرار دارد، ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[MemberData]&lt;/code&gt; ایده‌آل است. این ویژگی تعادلی بین قابلیت استفاده مجدد و پیچیدگی ارائه می‌دهد.&lt;/li&gt;&lt;li&gt;ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[ClassData]&lt;/code&gt; بیشترین انعطاف‌پذیری را برای سناریوهای پیشرفته‌تر، مانند بارگیری مجموعه‌های داده بزرگ از منابع خارجی (فایل‌ها، APIها یا پایگاه‌های داده) فراهم می‌کند. اگرچه تنظیمات آن پیچیده‌تر است، اما امکان جداسازی منطق داده و ارتقاء قابلیت استفاده مجدد در سراسر مجموعه‌های تست را فراهم می‌سازد.&lt;/li&gt;&lt;/ul&gt;">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="تست‌ داده‌محور در xUnit با استفاده از [InlineData]، [MemberData] و [ClassData]">
+    <meta property="og:description" content="&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در دنیای واقعی توسعه، تست‌های واحد به منزله منبع اصلی صحت عملکرد کد، شامل اعتبارسنجی‌ها، قوانین کسب‌وکار و دیگر منطق‌های پیاده‌سازی شده، عمل می‌کنند. فریم‌ورک xUnit.net با ارائه ویژگی تست‌ داده‌محور (Data-Driven Testing) فرآیند تست را تسهیل می‌کند. این رویکرد به توسعه‌دهندگان اجازه می‌دهد تا یک تست واحد را با مجموعه‌ای از داده‌های مختلف اجرا کنند و از صحت عملکرد کد در شرایط گوناگون اطمینان حاصل نمایند. در این مقاله آموزشی، به بررسی سهAttribute مهم در xUnit.net برای پیاده‌سازی تست‌محور داده، یعنی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt;, &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[MemberData]&lt;/code&gt; و &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[ClassData]&lt;/code&gt; خواهیم پرداخت و نحوه استفاده از آن‌ها را با مثال‌هایی مبتنی بر تست توابع تولید دنباله فیبوناچی (Fibonacci Sequence) شرح خواهیم داد. همچنین، به منظور درک بهتر تفاوت‌های عملکردی، یک سنجش عملکرد (Benchmarking) ساده نیز برای مقایسه روش‌های مختلف پیاده‌سازی تست ارائه خواهد شد.&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;ویژگی [Theory]&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;به طور پیش‌فرض، xUnit.net از ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[Fact]&lt;/code&gt; برای تعریف تست‌های واحد بدون پارامتر استفاده می‌کند. در مقابل، ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[Theory]&lt;/code&gt; برای تعریف تست‌های پارامتری به کار می‌رود. این ویژگی به xUnit.net اعلام می‌کند که متد تست مورد نظر باید با مجموعه‌ای از داده‌های مختلف اجرا شود. داده‌های مورد نیاز برای این تست‌ها می‌توانند از طریق ویژگی‌های مختلفی تامین شوند که رایج‌ترین آن‌ها &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt; است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;ویژگی [InlineData] - داده‌های ساده و مستقیم&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt; زمانی مورد استفاده قرار می‌گیرد که مجموعه داده‌های تست کوچک و ثابت باشد. این ویژگی ساده‌ترین راه برای ارسال پارامتر به یک متد تست را فراهم می‌کند. اگرچه درک آن آسان است، اما بررسی آن به منظور پوشش کامل مفاهیم ضروری است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در مثال زیر، نحوه استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt; برای تست تابع بازگشتی (Recursive) محاسبه دنباله فیبوناچی نشان داده شده است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;using Fibonacci.Library;
+using System.Diagnostics;
+using Xunit;
+
+namespace Fibonacci.UnitTest;
+
+public class FibonacciTests
+{
+    private readonly FibonacciHelper fibonacciHelper;
+    public FibonacciTests()
+    {
+        this.fibonacciHelper = new FibonacciHelper();
+    }
+
+    [Theory]
+    [InlineData(0, 0)]
+    [InlineData(1, 1)]
+    [InlineData(5, 5)]
+    [InlineData(10, 55)]
+    public void Fibonacci_Recursive_InlineData(int input, int expected)
+    {
+        var watch = Stopwatch.StartNew();
+        int result = fibonacciHelper.Recursive(input);
+        watch.Stop();
+
+        Assert.Equal(expected, result);
+
+        Console.WriteLine($&amp;quot;[Recursive] Fibonacci({input}) took {watch.ElapsedMilliseconds} ms&amp;quot;);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این مثال، ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[Theory]&lt;/code&gt; به همراه چهار نمونه &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt; استفاده شده است. هر &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt; یک مجموعه داده تست منحصربه‌فرد را شامل می‌شود که در این مورد، شامل ورودی (&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;input&lt;/code&gt;) و مقدار مورد انتظار (&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;expected&lt;/code&gt;) برای تابع &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Recursive&lt;/code&gt; است. در نتیجه، متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Fibonacci_Recursive_InlineData&lt;/code&gt; چهار بار با داده‌های مختلف اجرا خواهد شد. &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt; برای داده‌های تست کوچک و ثابت بسیار مناسب است. خروجی کنسول نشان می‌دهد که هر تست با ورودی‌های مختلف اجرا شده و زمان اجرای هر کدام نیز ثبت شده است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;ویژگی [MemberData] - داده‌های قابل استفاده مجدد در کلاس مشابه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[MemberData]&lt;/code&gt; به توسعه‌دهندگان اجازه می‌دهد تا از اعضای کلاس (فیلدها، خصوصیات یا متدهایی) که یک شیء از نوع &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IEnumerable&amp;lt;object[]&amp;gt;&lt;/code&gt; را به عنوان منبع داده تست برمی‌گردانند، استفاده مجدد کنند. این ویژگی به ویژه زمانی مفید است که بخواهید داده‌های تست را از متد تست جدا نگه دارید یا آن‌ها را به صورت برنامه‌نویسی تولید کنید.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مثال زیر نحوه استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[MemberData]&lt;/code&gt; برای تست تابع تکراری (Iterative) محاسبه دنباله فیبوناچی را نشان می‌دهد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;using Fibonacci.Library;
+using System.Collections.Generic;
+using System.Linq;
+using Xunit;
+
+namespace Fibonacci.UnitTest
+{
+    public class FibonacciTest1
+    {
+        private readonly FibonacciHelper fibonacciHelper;
+
+        public FibonacciTest1()
+        {
+            this.fibonacciHelper = new FibonacciHelper();
+        }
+
+        public static IEnumerable&amp;lt;object[]&amp;gt; GetData(int numFiboTest)
+        {
+            var data = new List&amp;lt;object[]&amp;gt;
+            {
+                new object[] { 6, 8 },
+                new object[] { 7, 13 },
+                new object[] { 8, 21 },
+                new object[] { 9, 34 }
+            };
+
+            return data.Take(numFiboTest);
+        }
+
+        [Theory]
+        [MemberData(nameof(GetData), parameters: 4)]
+        public void Fibonacci_Iterative_MemberData(int input, int expected)
+        {
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            int result = fibonacciHelper.Iterative(input);
+
+            watch.Stop();
+
+            Assert.Equal(expected, result);
+
+            Console.WriteLine($&amp;quot;[Iterative] Fibonacci({input}) took {watch.ElapsedMilliseconds} ms&amp;quot;);
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این مثال، متد استاتیک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GetData&lt;/code&gt; یک لیست از آرایه‌های شیء (&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;object[]&lt;/code&gt;) را برمی‌گرداند که هر آرایه شامل یک ورودی و مقدار مورد انتظار برای تست است. ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[MemberData]&lt;/code&gt; با استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;nameof(GetData)&lt;/code&gt; به این متد ارجاع می‌دهد و پارامتر &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;parameters: 4&lt;/code&gt; مشخص می‌کند که چهار مجموعه داده اول از لیست &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;data&lt;/code&gt; برای تست استفاده شوند. خروجی کنسول نشان می‌دهد که تست &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Fibonacci_Iterative_MemberData&lt;/code&gt; چهار بار با داده‌های ارائه شده توسط متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GetData&lt;/code&gt; اجرا شده است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;ویژگی [ClassData] - داده‌های پیچیده یا منابع خارجی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[ClassData]&lt;/code&gt; امکان تعریف یک کلاس را فراهم می‌کند که رابط &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IEnumerable&amp;lt;object[]&amp;gt;&lt;/code&gt; را پیاده‌سازی می‌کند. این ویژگی به شما اجازه می‌دهد تا مجموعه‌های داده پیچیده‌تری را بارگیری یا ایجاد کنید، مانند خواندن داده‌ها از فایل‌ها، پایگاه‌های داده یا فراخوانی‌های API (به صورت شبیه‌سازی شده). این ویژگی به ویژه برای مدیریت مجموعه‌های داده بزرگ یا پویا که از منابع خارجی تامین می‌شوند، مفید است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مثال زیر نحوه استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[ClassData]&lt;/code&gt; را نشان می‌دهد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;using Fibonacci.Library;
+using System.Collections;
+using System.Collections.Generic;
+using Xunit;
+
+namespace Fibonacci.UnitTest;
+
+public class AddTestDataClass : IEnumerable&amp;lt;object[]&amp;gt;
+{
+    public IEnumerator&amp;lt;object[]&amp;gt; GetEnumerator()
+    {
+        yield return new object[] { 11, 89 };
+        yield return new object[] { 12, 144 };
+        yield return new object[] { 13, 233 };
+        yield return new object[] { 14, 377 };
+    }
+
+    IEnumerator IEnumerable.GetEnumerator() =&amp;gt; GetEnumerator();
+}
+
+public class FibonacciTest2
+{
+    private readonly FibonacciHelper fibonacciHelper;
+
+    public FibonacciTest2()
+    {
+        this.fibonacciHelper = new FibonacciHelper();
+    }
+
+    [Theory]
+    [ClassData(typeof(AddTestDataClass))]
+    public void Fibonacci_Iterative_ClassData(int input, int expected)
+    {
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        int result = fibonacciHelper.Iterative(input);
+        watch.Stop();
+
+        Assert.Equal(expected, result);
+        Console.WriteLine($&amp;quot;[Iterative/ClassData] Fibonacci({input}) took {watch.ElapsedMilliseconds} ms&amp;quot;);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این مثال، کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;AddTestDataClass&lt;/code&gt; رابط &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IEnumerable&amp;lt;object[]&amp;gt;&lt;/code&gt; را پیاده‌سازی کرده و در متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GetEnumerator&lt;/code&gt; خود، چهار مجموعه داده تست را به صورت &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;yield return&lt;/code&gt; ارائه می‌دهد. ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[ClassData]&lt;/code&gt; با استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;typeof(AddTestDataClass)&lt;/code&gt; به این کلاس ارجاع می‌دهد. در نتیجه، متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Fibonacci_Iterative_ClassData&lt;/code&gt; چهار بار با داده‌های تعریف شده در کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;AddTestDataClass&lt;/code&gt; اجرا خواهد شد. خروجی کنسول نشان می‌دهد که هر تست با ورودی‌های مختلف اجرا شده و زمان اجرای آن‌ها نیز ثبت شده است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در xUnit.net، انتخاب بین &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt;, &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[MemberData]&lt;/code&gt; و &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[ClassData]&lt;/code&gt; به نیازها و پیچیدگی داده‌های تست شما بستگی دارد.&lt;/div&gt;&lt;ul&gt;&lt;li&gt;ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt; برای مقادیر تست کوچک و ثابت بهترین گزینه است. استفاده از آن ساده و خوانا است، اما قابلیت استفاده مجدد در تست‌های مختلف را ندارد.&lt;/li&gt;&lt;li&gt;زمانیکه به داده‌های تست پویاتر یا قابل استفاده مجدد نیاز دارید و منطق تولید این داده‌ها در داخل کلاس تست شما قرار دارد، ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[MemberData]&lt;/code&gt; ایده‌آل است. این ویژگی تعادلی بین قابلیت استفاده مجدد و پیچیدگی ارائه می‌دهد.&lt;/li&gt;&lt;li&gt;ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[ClassData]&lt;/code&gt; بیشترین انعطاف‌پذیری را برای سناریوهای پیشرفته‌تر، مانند بارگیری مجموعه‌های داده بزرگ از منابع خارجی (فایل‌ها، APIها یا پایگاه‌های داده) فراهم می‌کند. اگرچه تنظیمات آن پیچیده‌تر است، اما امکان جداسازی منطق داده و ارتقاء قابلیت استفاده مجدد در سراسر مجموعه‌های تست را فراهم می‌سازد.&lt;/li&gt;&lt;/ul&gt;">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="تست‌ داده‌محور در xUnit با استفاده از [InlineData]، [MemberData] و [ClassData]">
+    <meta name="twitter:description" content="&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در دنیای واقعی توسعه، تست‌های واحد به منزله منبع اصلی صحت عملکرد کد، شامل اعتبارسنجی‌ها، قوانین کسب‌وکار و دیگر منطق‌های پیاده‌سازی شده، عمل می‌کنند. فریم‌ورک xUnit.net با ارائه ویژگی تست‌ داده‌محور (Data-Driven Testing) فرآیند تست را تسهیل می‌کند. این رویکرد به توسعه‌دهندگان اجازه می‌دهد تا یک تست واحد را با مجموعه‌ای از داده‌های مختلف اجرا کنند و از صحت عملکرد کد در شرایط گوناگون اطمینان حاصل نمایند. در این مقاله آموزشی، به بررسی سهAttribute مهم در xUnit.net برای پیاده‌سازی تست‌محور داده، یعنی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt;, &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[MemberData]&lt;/code&gt; و &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[ClassData]&lt;/code&gt; خواهیم پرداخت و نحوه استفاده از آن‌ها را با مثال‌هایی مبتنی بر تست توابع تولید دنباله فیبوناچی (Fibonacci Sequence) شرح خواهیم داد. همچنین، به منظور درک بهتر تفاوت‌های عملکردی، یک سنجش عملکرد (Benchmarking) ساده نیز برای مقایسه روش‌های مختلف پیاده‌سازی تست ارائه خواهد شد.&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;ویژگی [Theory]&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;به طور پیش‌فرض، xUnit.net از ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[Fact]&lt;/code&gt; برای تعریف تست‌های واحد بدون پارامتر استفاده می‌کند. در مقابل، ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[Theory]&lt;/code&gt; برای تعریف تست‌های پارامتری به کار می‌رود. این ویژگی به xUnit.net اعلام می‌کند که متد تست مورد نظر باید با مجموعه‌ای از داده‌های مختلف اجرا شود. داده‌های مورد نیاز برای این تست‌ها می‌توانند از طریق ویژگی‌های مختلفی تامین شوند که رایج‌ترین آن‌ها &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt; است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;ویژگی [InlineData] - داده‌های ساده و مستقیم&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt; زمانی مورد استفاده قرار می‌گیرد که مجموعه داده‌های تست کوچک و ثابت باشد. این ویژگی ساده‌ترین راه برای ارسال پارامتر به یک متد تست را فراهم می‌کند. اگرچه درک آن آسان است، اما بررسی آن به منظور پوشش کامل مفاهیم ضروری است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در مثال زیر، نحوه استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt; برای تست تابع بازگشتی (Recursive) محاسبه دنباله فیبوناچی نشان داده شده است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;using Fibonacci.Library;
+using System.Diagnostics;
+using Xunit;
+
+namespace Fibonacci.UnitTest;
+
+public class FibonacciTests
+{
+    private readonly FibonacciHelper fibonacciHelper;
+    public FibonacciTests()
+    {
+        this.fibonacciHelper = new FibonacciHelper();
+    }
+
+    [Theory]
+    [InlineData(0, 0)]
+    [InlineData(1, 1)]
+    [InlineData(5, 5)]
+    [InlineData(10, 55)]
+    public void Fibonacci_Recursive_InlineData(int input, int expected)
+    {
+        var watch = Stopwatch.StartNew();
+        int result = fibonacciHelper.Recursive(input);
+        watch.Stop();
+
+        Assert.Equal(expected, result);
+
+        Console.WriteLine($&amp;quot;[Recursive] Fibonacci({input}) took {watch.ElapsedMilliseconds} ms&amp;quot;);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این مثال، ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[Theory]&lt;/code&gt; به همراه چهار نمونه &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt; استفاده شده است. هر &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt; یک مجموعه داده تست منحصربه‌فرد را شامل می‌شود که در این مورد، شامل ورودی (&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;input&lt;/code&gt;) و مقدار مورد انتظار (&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;expected&lt;/code&gt;) برای تابع &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Recursive&lt;/code&gt; است. در نتیجه، متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Fibonacci_Recursive_InlineData&lt;/code&gt; چهار بار با داده‌های مختلف اجرا خواهد شد. &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt; برای داده‌های تست کوچک و ثابت بسیار مناسب است. خروجی کنسول نشان می‌دهد که هر تست با ورودی‌های مختلف اجرا شده و زمان اجرای هر کدام نیز ثبت شده است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;ویژگی [MemberData] - داده‌های قابل استفاده مجدد در کلاس مشابه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[MemberData]&lt;/code&gt; به توسعه‌دهندگان اجازه می‌دهد تا از اعضای کلاس (فیلدها، خصوصیات یا متدهایی) که یک شیء از نوع &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IEnumerable&amp;lt;object[]&amp;gt;&lt;/code&gt; را به عنوان منبع داده تست برمی‌گردانند، استفاده مجدد کنند. این ویژگی به ویژه زمانی مفید است که بخواهید داده‌های تست را از متد تست جدا نگه دارید یا آن‌ها را به صورت برنامه‌نویسی تولید کنید.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مثال زیر نحوه استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[MemberData]&lt;/code&gt; برای تست تابع تکراری (Iterative) محاسبه دنباله فیبوناچی را نشان می‌دهد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;using Fibonacci.Library;
+using System.Collections.Generic;
+using System.Linq;
+using Xunit;
+
+namespace Fibonacci.UnitTest
+{
+    public class FibonacciTest1
+    {
+        private readonly FibonacciHelper fibonacciHelper;
+
+        public FibonacciTest1()
+        {
+            this.fibonacciHelper = new FibonacciHelper();
+        }
+
+        public static IEnumerable&amp;lt;object[]&amp;gt; GetData(int numFiboTest)
+        {
+            var data = new List&amp;lt;object[]&amp;gt;
+            {
+                new object[] { 6, 8 },
+                new object[] { 7, 13 },
+                new object[] { 8, 21 },
+                new object[] { 9, 34 }
+            };
+
+            return data.Take(numFiboTest);
+        }
+
+        [Theory]
+        [MemberData(nameof(GetData), parameters: 4)]
+        public void Fibonacci_Iterative_MemberData(int input, int expected)
+        {
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            int result = fibonacciHelper.Iterative(input);
+
+            watch.Stop();
+
+            Assert.Equal(expected, result);
+
+            Console.WriteLine($&amp;quot;[Iterative] Fibonacci({input}) took {watch.ElapsedMilliseconds} ms&amp;quot;);
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این مثال، متد استاتیک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GetData&lt;/code&gt; یک لیست از آرایه‌های شیء (&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;object[]&lt;/code&gt;) را برمی‌گرداند که هر آرایه شامل یک ورودی و مقدار مورد انتظار برای تست است. ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[MemberData]&lt;/code&gt; با استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;nameof(GetData)&lt;/code&gt; به این متد ارجاع می‌دهد و پارامتر &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;parameters: 4&lt;/code&gt; مشخص می‌کند که چهار مجموعه داده اول از لیست &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;data&lt;/code&gt; برای تست استفاده شوند. خروجی کنسول نشان می‌دهد که تست &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Fibonacci_Iterative_MemberData&lt;/code&gt; چهار بار با داده‌های ارائه شده توسط متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GetData&lt;/code&gt; اجرا شده است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;ویژگی [ClassData] - داده‌های پیچیده یا منابع خارجی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[ClassData]&lt;/code&gt; امکان تعریف یک کلاس را فراهم می‌کند که رابط &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IEnumerable&amp;lt;object[]&amp;gt;&lt;/code&gt; را پیاده‌سازی می‌کند. این ویژگی به شما اجازه می‌دهد تا مجموعه‌های داده پیچیده‌تری را بارگیری یا ایجاد کنید، مانند خواندن داده‌ها از فایل‌ها، پایگاه‌های داده یا فراخوانی‌های API (به صورت شبیه‌سازی شده). این ویژگی به ویژه برای مدیریت مجموعه‌های داده بزرگ یا پویا که از منابع خارجی تامین می‌شوند، مفید است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مثال زیر نحوه استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[ClassData]&lt;/code&gt; را نشان می‌دهد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;using Fibonacci.Library;
+using System.Collections;
+using System.Collections.Generic;
+using Xunit;
+
+namespace Fibonacci.UnitTest;
+
+public class AddTestDataClass : IEnumerable&amp;lt;object[]&amp;gt;
+{
+    public IEnumerator&amp;lt;object[]&amp;gt; GetEnumerator()
+    {
+        yield return new object[] { 11, 89 };
+        yield return new object[] { 12, 144 };
+        yield return new object[] { 13, 233 };
+        yield return new object[] { 14, 377 };
+    }
+
+    IEnumerator IEnumerable.GetEnumerator() =&amp;gt; GetEnumerator();
+}
+
+public class FibonacciTest2
+{
+    private readonly FibonacciHelper fibonacciHelper;
+
+    public FibonacciTest2()
+    {
+        this.fibonacciHelper = new FibonacciHelper();
+    }
+
+    [Theory]
+    [ClassData(typeof(AddTestDataClass))]
+    public void Fibonacci_Iterative_ClassData(int input, int expected)
+    {
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        int result = fibonacciHelper.Iterative(input);
+        watch.Stop();
+
+        Assert.Equal(expected, result);
+        Console.WriteLine($&amp;quot;[Iterative/ClassData] Fibonacci({input}) took {watch.ElapsedMilliseconds} ms&amp;quot;);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این مثال، کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;AddTestDataClass&lt;/code&gt; رابط &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IEnumerable&amp;lt;object[]&amp;gt;&lt;/code&gt; را پیاده‌سازی کرده و در متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GetEnumerator&lt;/code&gt; خود، چهار مجموعه داده تست را به صورت &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;yield return&lt;/code&gt; ارائه می‌دهد. ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[ClassData]&lt;/code&gt; با استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;typeof(AddTestDataClass)&lt;/code&gt; به این کلاس ارجاع می‌دهد. در نتیجه، متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Fibonacci_Iterative_ClassData&lt;/code&gt; چهار بار با داده‌های تعریف شده در کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;AddTestDataClass&lt;/code&gt; اجرا خواهد شد. خروجی کنسول نشان می‌دهد که هر تست با ورودی‌های مختلف اجرا شده و زمان اجرای آن‌ها نیز ثبت شده است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در xUnit.net، انتخاب بین &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt;, &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[MemberData]&lt;/code&gt; و &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[ClassData]&lt;/code&gt; به نیازها و پیچیدگی داده‌های تست شما بستگی دارد.&lt;/div&gt;&lt;ul&gt;&lt;li&gt;ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt; برای مقادیر تست کوچک و ثابت بهترین گزینه است. استفاده از آن ساده و خوانا است، اما قابلیت استفاده مجدد در تست‌های مختلف را ندارد.&lt;/li&gt;&lt;li&gt;زمانیکه به داده‌های تست پویاتر یا قابل استفاده مجدد نیاز دارید و منطق تولید این داده‌ها در داخل کلاس تست شما قرار دارد، ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[MemberData]&lt;/code&gt; ایده‌آل است. این ویژگی تعادلی بین قابلیت استفاده مجدد و پیچیدگی ارائه می‌دهد.&lt;/li&gt;&lt;li&gt;ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[ClassData]&lt;/code&gt; بیشترین انعطاف‌پذیری را برای سناریوهای پیشرفته‌تر، مانند بارگیری مجموعه‌های داده بزرگ از منابع خارجی (فایل‌ها، APIها یا پایگاه‌های داده) فراهم می‌کند. اگرچه تنظیمات آن پیچیده‌تر است، اما امکان جداسازی منطق داده و ارتقاء قابلیت استفاده مجدد در سراسر مجموعه‌های تست را فراهم می‌سازد.&lt;/li&gt;&lt;/ul&gt;">
+    <meta name="twitter:card" content="&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در دنیای واقعی توسعه، تست‌های واحد به منزله منبع اصلی صحت عملکرد کد، شامل اعتبارسنجی‌ها، قوانین کسب‌وکار و دیگر منطق‌های پیاده‌سازی شده، عمل می‌کنند. فریم‌ورک xUnit.net با ارائه ویژگی تست‌ داده‌محور (Data-Driven Testing) فرآیند تست را تسهیل می‌کند. این رویکرد به توسعه‌دهندگان اجازه می‌دهد تا یک تست واحد را با مجموعه‌ای از داده‌های مختلف اجرا کنند و از صحت عملکرد کد در شرایط گوناگون اطمینان حاصل نمایند. در این مقاله آموزشی، به بررسی سهAttribute مهم در xUnit.net برای پیاده‌سازی تست‌محور داده، یعنی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt;, &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[MemberData]&lt;/code&gt; و &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[ClassData]&lt;/code&gt; خواهیم پرداخت و نحوه استفاده از آن‌ها را با مثال‌هایی مبتنی بر تست توابع تولید دنباله فیبوناچی (Fibonacci Sequence) شرح خواهیم داد. همچنین، به منظور درک بهتر تفاوت‌های عملکردی، یک سنجش عملکرد (Benchmarking) ساده نیز برای مقایسه روش‌های مختلف پیاده‌سازی تست ارائه خواهد شد.&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;ویژگی [Theory]&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;به طور پیش‌فرض، xUnit.net از ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[Fact]&lt;/code&gt; برای تعریف تست‌های واحد بدون پارامتر استفاده می‌کند. در مقابل، ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[Theory]&lt;/code&gt; برای تعریف تست‌های پارامتری به کار می‌رود. این ویژگی به xUnit.net اعلام می‌کند که متد تست مورد نظر باید با مجموعه‌ای از داده‌های مختلف اجرا شود. داده‌های مورد نیاز برای این تست‌ها می‌توانند از طریق ویژگی‌های مختلفی تامین شوند که رایج‌ترین آن‌ها &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt; است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;ویژگی [InlineData] - داده‌های ساده و مستقیم&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt; زمانی مورد استفاده قرار می‌گیرد که مجموعه داده‌های تست کوچک و ثابت باشد. این ویژگی ساده‌ترین راه برای ارسال پارامتر به یک متد تست را فراهم می‌کند. اگرچه درک آن آسان است، اما بررسی آن به منظور پوشش کامل مفاهیم ضروری است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در مثال زیر، نحوه استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt; برای تست تابع بازگشتی (Recursive) محاسبه دنباله فیبوناچی نشان داده شده است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;using Fibonacci.Library;
+using System.Diagnostics;
+using Xunit;
+
+namespace Fibonacci.UnitTest;
+
+public class FibonacciTests
+{
+    private readonly FibonacciHelper fibonacciHelper;
+    public FibonacciTests()
+    {
+        this.fibonacciHelper = new FibonacciHelper();
+    }
+
+    [Theory]
+    [InlineData(0, 0)]
+    [InlineData(1, 1)]
+    [InlineData(5, 5)]
+    [InlineData(10, 55)]
+    public void Fibonacci_Recursive_InlineData(int input, int expected)
+    {
+        var watch = Stopwatch.StartNew();
+        int result = fibonacciHelper.Recursive(input);
+        watch.Stop();
+
+        Assert.Equal(expected, result);
+
+        Console.WriteLine($&amp;quot;[Recursive] Fibonacci({input}) took {watch.ElapsedMilliseconds} ms&amp;quot;);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این مثال، ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[Theory]&lt;/code&gt; به همراه چهار نمونه &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt; استفاده شده است. هر &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt; یک مجموعه داده تست منحصربه‌فرد را شامل می‌شود که در این مورد، شامل ورودی (&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;input&lt;/code&gt;) و مقدار مورد انتظار (&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;expected&lt;/code&gt;) برای تابع &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Recursive&lt;/code&gt; است. در نتیجه، متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Fibonacci_Recursive_InlineData&lt;/code&gt; چهار بار با داده‌های مختلف اجرا خواهد شد. &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt; برای داده‌های تست کوچک و ثابت بسیار مناسب است. خروجی کنسول نشان می‌دهد که هر تست با ورودی‌های مختلف اجرا شده و زمان اجرای هر کدام نیز ثبت شده است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;ویژگی [MemberData] - داده‌های قابل استفاده مجدد در کلاس مشابه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[MemberData]&lt;/code&gt; به توسعه‌دهندگان اجازه می‌دهد تا از اعضای کلاس (فیلدها، خصوصیات یا متدهایی) که یک شیء از نوع &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IEnumerable&amp;lt;object[]&amp;gt;&lt;/code&gt; را به عنوان منبع داده تست برمی‌گردانند، استفاده مجدد کنند. این ویژگی به ویژه زمانی مفید است که بخواهید داده‌های تست را از متد تست جدا نگه دارید یا آن‌ها را به صورت برنامه‌نویسی تولید کنید.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مثال زیر نحوه استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[MemberData]&lt;/code&gt; برای تست تابع تکراری (Iterative) محاسبه دنباله فیبوناچی را نشان می‌دهد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;using Fibonacci.Library;
+using System.Collections.Generic;
+using System.Linq;
+using Xunit;
+
+namespace Fibonacci.UnitTest
+{
+    public class FibonacciTest1
+    {
+        private readonly FibonacciHelper fibonacciHelper;
+
+        public FibonacciTest1()
+        {
+            this.fibonacciHelper = new FibonacciHelper();
+        }
+
+        public static IEnumerable&amp;lt;object[]&amp;gt; GetData(int numFiboTest)
+        {
+            var data = new List&amp;lt;object[]&amp;gt;
+            {
+                new object[] { 6, 8 },
+                new object[] { 7, 13 },
+                new object[] { 8, 21 },
+                new object[] { 9, 34 }
+            };
+
+            return data.Take(numFiboTest);
+        }
+
+        [Theory]
+        [MemberData(nameof(GetData), parameters: 4)]
+        public void Fibonacci_Iterative_MemberData(int input, int expected)
+        {
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            int result = fibonacciHelper.Iterative(input);
+
+            watch.Stop();
+
+            Assert.Equal(expected, result);
+
+            Console.WriteLine($&amp;quot;[Iterative] Fibonacci({input}) took {watch.ElapsedMilliseconds} ms&amp;quot;);
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این مثال، متد استاتیک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GetData&lt;/code&gt; یک لیست از آرایه‌های شیء (&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;object[]&lt;/code&gt;) را برمی‌گرداند که هر آرایه شامل یک ورودی و مقدار مورد انتظار برای تست است. ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[MemberData]&lt;/code&gt; با استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;nameof(GetData)&lt;/code&gt; به این متد ارجاع می‌دهد و پارامتر &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;parameters: 4&lt;/code&gt; مشخص می‌کند که چهار مجموعه داده اول از لیست &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;data&lt;/code&gt; برای تست استفاده شوند. خروجی کنسول نشان می‌دهد که تست &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Fibonacci_Iterative_MemberData&lt;/code&gt; چهار بار با داده‌های ارائه شده توسط متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GetData&lt;/code&gt; اجرا شده است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;ویژگی [ClassData] - داده‌های پیچیده یا منابع خارجی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[ClassData]&lt;/code&gt; امکان تعریف یک کلاس را فراهم می‌کند که رابط &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IEnumerable&amp;lt;object[]&amp;gt;&lt;/code&gt; را پیاده‌سازی می‌کند. این ویژگی به شما اجازه می‌دهد تا مجموعه‌های داده پیچیده‌تری را بارگیری یا ایجاد کنید، مانند خواندن داده‌ها از فایل‌ها، پایگاه‌های داده یا فراخوانی‌های API (به صورت شبیه‌سازی شده). این ویژگی به ویژه برای مدیریت مجموعه‌های داده بزرگ یا پویا که از منابع خارجی تامین می‌شوند، مفید است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مثال زیر نحوه استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[ClassData]&lt;/code&gt; را نشان می‌دهد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;using Fibonacci.Library;
+using System.Collections;
+using System.Collections.Generic;
+using Xunit;
+
+namespace Fibonacci.UnitTest;
+
+public class AddTestDataClass : IEnumerable&amp;lt;object[]&amp;gt;
+{
+    public IEnumerator&amp;lt;object[]&amp;gt; GetEnumerator()
+    {
+        yield return new object[] { 11, 89 };
+        yield return new object[] { 12, 144 };
+        yield return new object[] { 13, 233 };
+        yield return new object[] { 14, 377 };
+    }
+
+    IEnumerator IEnumerable.GetEnumerator() =&amp;gt; GetEnumerator();
+}
+
+public class FibonacciTest2
+{
+    private readonly FibonacciHelper fibonacciHelper;
+
+    public FibonacciTest2()
+    {
+        this.fibonacciHelper = new FibonacciHelper();
+    }
+
+    [Theory]
+    [ClassData(typeof(AddTestDataClass))]
+    public void Fibonacci_Iterative_ClassData(int input, int expected)
+    {
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        int result = fibonacciHelper.Iterative(input);
+        watch.Stop();
+
+        Assert.Equal(expected, result);
+        Console.WriteLine($&amp;quot;[Iterative/ClassData] Fibonacci({input}) took {watch.ElapsedMilliseconds} ms&amp;quot;);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این مثال، کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;AddTestDataClass&lt;/code&gt; رابط &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IEnumerable&amp;lt;object[]&amp;gt;&lt;/code&gt; را پیاده‌سازی کرده و در متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GetEnumerator&lt;/code&gt; خود، چهار مجموعه داده تست را به صورت &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;yield return&lt;/code&gt; ارائه می‌دهد. ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[ClassData]&lt;/code&gt; با استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;typeof(AddTestDataClass)&lt;/code&gt; به این کلاس ارجاع می‌دهد. در نتیجه، متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Fibonacci_Iterative_ClassData&lt;/code&gt; چهار بار با داده‌های تعریف شده در کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;AddTestDataClass&lt;/code&gt; اجرا خواهد شد. خروجی کنسول نشان می‌دهد که هر تست با ورودی‌های مختلف اجرا شده و زمان اجرای آن‌ها نیز ثبت شده است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در xUnit.net، انتخاب بین &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt;, &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[MemberData]&lt;/code&gt; و &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[ClassData]&lt;/code&gt; به نیازها و پیچیدگی داده‌های تست شما بستگی دارد.&lt;/div&gt;&lt;ul&gt;&lt;li&gt;ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[InlineData]&lt;/code&gt; برای مقادیر تست کوچک و ثابت بهترین گزینه است. استفاده از آن ساده و خوانا است، اما قابلیت استفاده مجدد در تست‌های مختلف را ندارد.&lt;/li&gt;&lt;li&gt;زمانیکه به داده‌های تست پویاتر یا قابل استفاده مجدد نیاز دارید و منطق تولید این داده‌ها در داخل کلاس تست شما قرار دارد، ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[MemberData]&lt;/code&gt; ایده‌آل است. این ویژگی تعادلی بین قابلیت استفاده مجدد و پیچیدگی ارائه می‌دهد.&lt;/li&gt;&lt;li&gt;ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;[ClassData]&lt;/code&gt; بیشترین انعطاف‌پذیری را برای سناریوهای پیشرفته‌تر، مانند بارگیری مجموعه‌های داده بزرگ از منابع خارجی (فایل‌ها، APIها یا پایگاه‌های داده) فراهم می‌کند. اگرچه تنظیمات آن پیچیده‌تر است، اما امکان جداسازی منطق داده و ارتقاء قابلیت استفاده مجدد در سراسر مجموعه‌های تست را فراهم می‌سازد.&lt;/li&gt;&lt;/ul&gt;">
+    <meta property="article:published_time" content="Sun, 11 May 2025 03:21:24 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
     <meta content='IE=edge' http-equiv='X-UA-Compatible'>
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">
-	
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
 	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
-
     <link href="vs.min.css" rel="stylesheet" type="text/css">
-    <script src="highlight.min.js" type="text/javascript"></script>
-	
+    <script src="highlight.min.js" type="text/javascript"></script>	
     <link href="styles.css" rel="stylesheet" type="text/css">	
     <style>
       @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
@@ -42,8 +614,8 @@
         }
      }
     </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
 </head>
-
 <body dir='rtl'>
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
@@ -53,7 +625,7 @@
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۳۶۹۵</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۶۹۷</span></td>
 </tr>
 <tr>
 <td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
@@ -73,7 +645,7 @@
 </tr>
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۲۲</span></td>
 </tr>
 </tbody>
 </table>
@@ -235,8 +807,5 @@ public class FibonacciTest2
 
 <!-- to load custom fonts for printing -->
 <div class="useSamimFD">&nbsp;</div>
-
-<script src="SyntaxHighlighter.js" type="text/javascript"></script>
 </body>
-
 </html>

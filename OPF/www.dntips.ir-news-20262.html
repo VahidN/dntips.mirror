@@ -1,17 +1,659 @@
 <!DOCTYPE html>
 <html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
-
 <head>
-    <title>‫‫آشنایی با الگوی مخزن نشتی‌دار در برنامه‌نویسی #C و روش‌های رفع آن</title>
+    <title>‫‫آشنایی با الگوی مخزن نشتی‌دار در برنامه‌نویسی #C و روش‌های رفع آن</title>     <meta name="description" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;الگوی مخزن (Repository Pattern) یکی از الگوهای پرکاربرد در توسعه نرم‌افزارهای مبتنی بر #C و فریم‌ورک .NET است که به منظور جداسازی منطق کسب‌وکار از لایه دسترسی به داده‌ها استفاده می‌شود. این الگو با هدف افزایش قابلیت تست‌پذیری، نگهداری آسان‌تر کد و ایجاد انعطاف‌پذیری در معماری برنامه‌ها طراحی شده است. با این حال، پیاده‌سازی نادرست این الگو می‌تواند به مشکلات متعددی از جمله نشت جزئیات پیاده‌سازی (&lt;strong&gt;Leaky Abstraction&lt;/strong&gt;) منجر شود که وعده‌های اولیه آن را زیر سؤال می‌برد. در این مقاله آموزشی، ابتدا به بررسی مشکلات رایج در پیاده‌سازی الگوی مخزن می‌پردازیم و سپس راهکارهایی عملی و حرفه‌ای را برای بهینه‌سازی آن ارائه می‌دهیم. این مطلب برای توسعه‌دهندگانی که با فریم‌ورک .NET کار می‌کنند و به دنبال طراحی کد تمیز و قابل اطمینان هستند، تهیه شده است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مشکلات رایج در پیاده‌سازی الگوی مخزن&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;نشت IQueryable و انعطاف‌پذیری بیش از حد&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl ql-align-right&quot;&gt;یکی از شایع‌ترین اشتباهات در طراحی مخزن، بازگرداندن نوع &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IQueryable&amp;lt;T&amp;gt;&lt;/code&gt; از متدهای مخزن است. این کار به ظاهر انعطاف‌پذیری بالایی به مصرف‌کنندگان می‌دهد، اما در عمل جزئیات پیاده‌سازی را افشا می‌کند. به عنوان مثال:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public interface IProductRepository
+{
+    IQueryable&amp;lt;Product&amp;gt; GetProducts();
+}
+
+public class ProductRepository : IProductRepository
+{
+    private readonly DbContext _context;
+    
+    public ProductRepository(DbContext context)
+    {
+        _context = context;
+    }
+    
+    public IQueryable&amp;lt;Product&amp;gt; GetProducts()
+    {
+        return _context.Products;
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;در این کد، مصرف‌کننده می‌تواند کوئری‌هایی مانند زیر بنویسد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;var discountedProducts = repository.GetProducts()
+    .Where(p =&amp;gt; p.Category == &amp;quot;EBooks&amp;quot;)
+    .Where(p =&amp;gt; p.Price &amp;gt; 100)
+    .OrderBy(p =&amp;gt; p.Name)
+    .Skip(100)
+    .Take(10)
+    .ToList();&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مشکل اینجاست که مخزن هیچ کنترلی بر نحوه اجرای کوئری ندارد و ممکن است کوئری‌های ناکارآمد یا وابسته به ارائه‌دهنده داده (مانند Entity Framework) ایجاد شود. این نشت، جداسازی لایه‌ها را نقض می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;وابستگی به مفاهیم خاص فریم‌ورک&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl ql-align-right&quot;&gt;گاهی اوقات رابط‌های مخزن به مفاهیم خاص یک ORM (مانند Entity Framework) وابسته می‌شوند. برای مثال:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public interface IRepository&amp;lt;T&amp;gt; where T : class
+{
+    DbSet&amp;lt;T&amp;gt; Entities { get; }
+    void Attach(T entity);
+    void DetachEntity(T entity);
+    EntityEntry&amp;lt;T&amp;gt; GetEntityEntry(T entity);
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رابط به وضوح به Entity Framework وابسته است و تغییر ارائه‌دهنده داده بدون بازنویسی کد مصرف‌کننده غیرممکن می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;نشت استثناها&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl ql-align-right&quot;&gt;عدم مدیریت صحیح استثناهای لایه داده نیز یکی دیگر از مشکلات رایج است. به عنوان مثال:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public Customer GetById(int id)
+{
+    try
+    {
+        return _context.Customers.Find(id);
+    }
+    catch (SqlException ex)
+    {
+        throw;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در اینجا، استثنای &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;SqlException&lt;/code&gt; که خاص SQL Server است، به لایه بالاتر نشت می‌کند و مصرف‌کننده را مجبور به وابستگی به جزئیات پایگاه داده می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;رفتارهای ناخواسته مانند بارگذاری تنبل (Lazy Loading)&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl ql-align-right&quot;&gt;وقتی مخزن اشیاء را با ویژگی‌های ناوبری (Navigation Properties) بازمی‌گرداند، مصرف‌کننده ممکن است ناخواسته با مشکلاتی مانند &amp;quot;N+1 Query Problem&amp;quot; مواجه شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class OrderRepository : IOrderRepository
+{
+    private readonly DbContext _context;
+    
+    public Order GetById(int id)
+    {
+        return _context.Orders.Find(id);
+    }
+}
+
+var order = orderRepository.GetById(1111);
+foreach (var item in order.OrderItems)
+{
+    // ممکن است کوئری‌های اضافی اجرا شود
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رفتار به دلیل بارگذاری تنبل در Entity Framework رخ می‌دهد و عملکرد برنامه را تحت تأثیر قرار می‌دهد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;راهکارهای بهینه‌سازی الگوی مخزن&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;بازگرداندن مجموعه‌های مشخص به جای IQueryable&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl ql-align-right&quot;&gt;برای جلوگیری از نشت، بهتر است به جای IQueryable از مجموعه‌های مشخص مانند IReadOnlyCollection استفاده شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public interface IProductRepository
+{
+    IReadOnlyCollection&amp;lt;Product&amp;gt; GetProductsByCategory(string category);
+    IReadOnlyCollection&amp;lt;Product&amp;gt; GetDiscountedProducts(decimal minPrice);
+    PagedResult&amp;lt;Product&amp;gt; GetProductsPaged(int page, int pageSize, string sortField);
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این روش، مخزن را مجبور می‌کند تا متدهای مشخص و هدفمندی تعریف کند که نیازهای کسب‌وکار را برآورده کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;استفاده از الگوی مشخصات (Specification Pattern)&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl ql-align-right&quot;&gt;برای کوئری‌های پیچیده‌تر، الگوی مشخصات می‌تواند جایگزین مناسبی باشد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public interface ISpecification&amp;lt;T&amp;gt;
+{
+    Expression&amp;lt;Func&amp;lt;T, bool&amp;gt;&amp;gt; Criteria { get; }
+    List&amp;lt;Expression&amp;lt;Func&amp;lt;T, object&amp;gt;&amp;gt;&amp;gt; Includes { get; }
+    Expression&amp;lt;Func&amp;lt;T, object&amp;gt;&amp;gt; OrderBy { get; }
+    int Take { get; }
+    int Skip { get; }
+}
+
+public interface IRepository&amp;lt;T&amp;gt;
+{
+    IReadOnlyList&amp;lt;T&amp;gt; FindAll(ISpecification&amp;lt;T&amp;gt; spec);
+}
+
+public class DiscountedEbooksSpecification : BaseSpecification&amp;lt;Product&amp;gt;
+{
+    public DiscountedEbooksSpecification(decimal minPrice)
+        : base(p =&amp;gt; p.Category == &amp;quot;Ebooks&amp;quot; &amp;amp;&amp;amp; p.Price &amp;gt; minPrice)
+    {
+        AddOrderBy(p =&amp;gt; p.Name);
+        ApplyPaging(10, 10);
+    }
+}
+
+var spec = new DiscountedEbooksSpecification(69);
+var products = repository.FindAll(spec);&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این الگو به مصرف‌کننده اجازه می‌دهد کوئری‌ها را بدون افشای جزئیات پیاده‌سازی تعریف کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;مدیریت استثناها و انتزاع آنها&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;به جای نشت استثناهای خاص پایگاه داده، باید آنها را به استثناهای دامنه‌محور ترجمه کرد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class EntityNotFoundException : Exception
+{
+    public EntityNotFoundException(string entityType, object key)
+        : base($&amp;quot;{entityType} با شناسه {key} یافت نشد.&amp;quot;)
+    {
+    }
+}
+
+public Customer GetById(int id)
+{
+    try
+    {
+        var customer = _context.Customers.Find(id);
+        if (customer == null)
+            throw new EntityNotFoundException(&amp;quot;Customer&amp;quot;, id);
+        return customer;
+    }
+    catch (SqlException ex)
+    {
+        throw new Exception(&amp;quot;خطا در دسترسی به داده‌ها&amp;quot;, ex);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رویکرد، وابستگی به فناوری خاص را از بین می‌برد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;بارگذاری مشتاقانه (Eager Loading) و استفاده از پروجکشن&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl ql-align-right&quot;&gt;برای جلوگیری از مشکلات بارگذاری تنبل، باید داده‌ها به صورت صریح بارگذاری شوند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public Order GetOrderWithDetails(int id)
+{
+    return _context.Orders
+        .Include(o =&amp;gt; o.OrderItems)
+        .ThenInclude(i =&amp;gt; i.Product)
+        .FirstOrDefault(o =&amp;gt; o.Id == id);
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;یا از پروجکشن به DTOها استفاده شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public OrderDetailsDto GetOrderDetails(int id)
+{
+    return _context.Orders
+        .Where(o =&amp;gt; o.Id == id)
+        .Select(o =&amp;gt; new OrderDetailsDto
+        {
+            OrderId = o.Id,
+            CustomerName = o.Customer.Name,
+            Items = o.OrderItems.Select(i =&amp;gt; new OrderItemDto
+            {
+                ProductName = i.Product.Name,
+                Quantity = i.Quantity
+            }).ToList()
+        })
+        .FirstOrDefault();
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این روش کنترل بیشتری بر داده‌های بارگذاری‌شده فراهم می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;الگوی مخزن اگرچه ابزاری قدرتمند برای جداسازی لایه‌ها در برنامه‌های .NET است، اما پیاده‌سازی نادرست آن می‌تواند به نشت جزئیات پیاده‌سازی و کاهش کارایی منجر شود. با اجتناب از بازگرداندن &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IQueryable renormalization&lt;/code&gt;، استفاده از الگوی مشخصات برای کوئری‌های پیچیده، مدیریت صحیح استثناها و به‌کارگیری بارگذاری مشتاق یا پروجکشن، می‌توان مخزن‌هایی طراحی کرد که واقعاً به وعده‌های خود عمل کنند. این اصول به توسعه‌دهندگان کمک می‌کند تا کدهایی تمیز، قابل نگهداری و مستقل از فناوری بنویسند که در بلندمدت ارزش خود را حفظ کنند.&lt;/div&gt;">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="آشنایی با الگوی مخزن نشتی‌دار در برنامه‌نویسی #C و روش‌های رفع آن">
+    <meta itemprop="description" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;الگوی مخزن (Repository Pattern) یکی از الگوهای پرکاربرد در توسعه نرم‌افزارهای مبتنی بر #C و فریم‌ورک .NET است که به منظور جداسازی منطق کسب‌وکار از لایه دسترسی به داده‌ها استفاده می‌شود. این الگو با هدف افزایش قابلیت تست‌پذیری، نگهداری آسان‌تر کد و ایجاد انعطاف‌پذیری در معماری برنامه‌ها طراحی شده است. با این حال، پیاده‌سازی نادرست این الگو می‌تواند به مشکلات متعددی از جمله نشت جزئیات پیاده‌سازی (&lt;strong&gt;Leaky Abstraction&lt;/strong&gt;) منجر شود که وعده‌های اولیه آن را زیر سؤال می‌برد. در این مقاله آموزشی، ابتدا به بررسی مشکلات رایج در پیاده‌سازی الگوی مخزن می‌پردازیم و سپس راهکارهایی عملی و حرفه‌ای را برای بهینه‌سازی آن ارائه می‌دهیم. این مطلب برای توسعه‌دهندگانی که با فریم‌ورک .NET کار می‌کنند و به دنبال طراحی کد تمیز و قابل اطمینان هستند، تهیه شده است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مشکلات رایج در پیاده‌سازی الگوی مخزن&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;نشت IQueryable و انعطاف‌پذیری بیش از حد&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl ql-align-right&quot;&gt;یکی از شایع‌ترین اشتباهات در طراحی مخزن، بازگرداندن نوع &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IQueryable&amp;lt;T&amp;gt;&lt;/code&gt; از متدهای مخزن است. این کار به ظاهر انعطاف‌پذیری بالایی به مصرف‌کنندگان می‌دهد، اما در عمل جزئیات پیاده‌سازی را افشا می‌کند. به عنوان مثال:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public interface IProductRepository
+{
+    IQueryable&amp;lt;Product&amp;gt; GetProducts();
+}
+
+public class ProductRepository : IProductRepository
+{
+    private readonly DbContext _context;
+    
+    public ProductRepository(DbContext context)
+    {
+        _context = context;
+    }
+    
+    public IQueryable&amp;lt;Product&amp;gt; GetProducts()
+    {
+        return _context.Products;
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;در این کد، مصرف‌کننده می‌تواند کوئری‌هایی مانند زیر بنویسد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;var discountedProducts = repository.GetProducts()
+    .Where(p =&amp;gt; p.Category == &amp;quot;EBooks&amp;quot;)
+    .Where(p =&amp;gt; p.Price &amp;gt; 100)
+    .OrderBy(p =&amp;gt; p.Name)
+    .Skip(100)
+    .Take(10)
+    .ToList();&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مشکل اینجاست که مخزن هیچ کنترلی بر نحوه اجرای کوئری ندارد و ممکن است کوئری‌های ناکارآمد یا وابسته به ارائه‌دهنده داده (مانند Entity Framework) ایجاد شود. این نشت، جداسازی لایه‌ها را نقض می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;وابستگی به مفاهیم خاص فریم‌ورک&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl ql-align-right&quot;&gt;گاهی اوقات رابط‌های مخزن به مفاهیم خاص یک ORM (مانند Entity Framework) وابسته می‌شوند. برای مثال:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public interface IRepository&amp;lt;T&amp;gt; where T : class
+{
+    DbSet&amp;lt;T&amp;gt; Entities { get; }
+    void Attach(T entity);
+    void DetachEntity(T entity);
+    EntityEntry&amp;lt;T&amp;gt; GetEntityEntry(T entity);
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رابط به وضوح به Entity Framework وابسته است و تغییر ارائه‌دهنده داده بدون بازنویسی کد مصرف‌کننده غیرممکن می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;نشت استثناها&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl ql-align-right&quot;&gt;عدم مدیریت صحیح استثناهای لایه داده نیز یکی دیگر از مشکلات رایج است. به عنوان مثال:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public Customer GetById(int id)
+{
+    try
+    {
+        return _context.Customers.Find(id);
+    }
+    catch (SqlException ex)
+    {
+        throw;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در اینجا، استثنای &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;SqlException&lt;/code&gt; که خاص SQL Server است، به لایه بالاتر نشت می‌کند و مصرف‌کننده را مجبور به وابستگی به جزئیات پایگاه داده می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;رفتارهای ناخواسته مانند بارگذاری تنبل (Lazy Loading)&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl ql-align-right&quot;&gt;وقتی مخزن اشیاء را با ویژگی‌های ناوبری (Navigation Properties) بازمی‌گرداند، مصرف‌کننده ممکن است ناخواسته با مشکلاتی مانند &amp;quot;N+1 Query Problem&amp;quot; مواجه شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class OrderRepository : IOrderRepository
+{
+    private readonly DbContext _context;
+    
+    public Order GetById(int id)
+    {
+        return _context.Orders.Find(id);
+    }
+}
+
+var order = orderRepository.GetById(1111);
+foreach (var item in order.OrderItems)
+{
+    // ممکن است کوئری‌های اضافی اجرا شود
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رفتار به دلیل بارگذاری تنبل در Entity Framework رخ می‌دهد و عملکرد برنامه را تحت تأثیر قرار می‌دهد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;راهکارهای بهینه‌سازی الگوی مخزن&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;بازگرداندن مجموعه‌های مشخص به جای IQueryable&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl ql-align-right&quot;&gt;برای جلوگیری از نشت، بهتر است به جای IQueryable از مجموعه‌های مشخص مانند IReadOnlyCollection استفاده شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public interface IProductRepository
+{
+    IReadOnlyCollection&amp;lt;Product&amp;gt; GetProductsByCategory(string category);
+    IReadOnlyCollection&amp;lt;Product&amp;gt; GetDiscountedProducts(decimal minPrice);
+    PagedResult&amp;lt;Product&amp;gt; GetProductsPaged(int page, int pageSize, string sortField);
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این روش، مخزن را مجبور می‌کند تا متدهای مشخص و هدفمندی تعریف کند که نیازهای کسب‌وکار را برآورده کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;استفاده از الگوی مشخصات (Specification Pattern)&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl ql-align-right&quot;&gt;برای کوئری‌های پیچیده‌تر، الگوی مشخصات می‌تواند جایگزین مناسبی باشد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public interface ISpecification&amp;lt;T&amp;gt;
+{
+    Expression&amp;lt;Func&amp;lt;T, bool&amp;gt;&amp;gt; Criteria { get; }
+    List&amp;lt;Expression&amp;lt;Func&amp;lt;T, object&amp;gt;&amp;gt;&amp;gt; Includes { get; }
+    Expression&amp;lt;Func&amp;lt;T, object&amp;gt;&amp;gt; OrderBy { get; }
+    int Take { get; }
+    int Skip { get; }
+}
+
+public interface IRepository&amp;lt;T&amp;gt;
+{
+    IReadOnlyList&amp;lt;T&amp;gt; FindAll(ISpecification&amp;lt;T&amp;gt; spec);
+}
+
+public class DiscountedEbooksSpecification : BaseSpecification&amp;lt;Product&amp;gt;
+{
+    public DiscountedEbooksSpecification(decimal minPrice)
+        : base(p =&amp;gt; p.Category == &amp;quot;Ebooks&amp;quot; &amp;amp;&amp;amp; p.Price &amp;gt; minPrice)
+    {
+        AddOrderBy(p =&amp;gt; p.Name);
+        ApplyPaging(10, 10);
+    }
+}
+
+var spec = new DiscountedEbooksSpecification(69);
+var products = repository.FindAll(spec);&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این الگو به مصرف‌کننده اجازه می‌دهد کوئری‌ها را بدون افشای جزئیات پیاده‌سازی تعریف کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;مدیریت استثناها و انتزاع آنها&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;به جای نشت استثناهای خاص پایگاه داده، باید آنها را به استثناهای دامنه‌محور ترجمه کرد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class EntityNotFoundException : Exception
+{
+    public EntityNotFoundException(string entityType, object key)
+        : base($&amp;quot;{entityType} با شناسه {key} یافت نشد.&amp;quot;)
+    {
+    }
+}
+
+public Customer GetById(int id)
+{
+    try
+    {
+        var customer = _context.Customers.Find(id);
+        if (customer == null)
+            throw new EntityNotFoundException(&amp;quot;Customer&amp;quot;, id);
+        return customer;
+    }
+    catch (SqlException ex)
+    {
+        throw new Exception(&amp;quot;خطا در دسترسی به داده‌ها&amp;quot;, ex);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رویکرد، وابستگی به فناوری خاص را از بین می‌برد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;بارگذاری مشتاقانه (Eager Loading) و استفاده از پروجکشن&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl ql-align-right&quot;&gt;برای جلوگیری از مشکلات بارگذاری تنبل، باید داده‌ها به صورت صریح بارگذاری شوند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public Order GetOrderWithDetails(int id)
+{
+    return _context.Orders
+        .Include(o =&amp;gt; o.OrderItems)
+        .ThenInclude(i =&amp;gt; i.Product)
+        .FirstOrDefault(o =&amp;gt; o.Id == id);
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;یا از پروجکشن به DTOها استفاده شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public OrderDetailsDto GetOrderDetails(int id)
+{
+    return _context.Orders
+        .Where(o =&amp;gt; o.Id == id)
+        .Select(o =&amp;gt; new OrderDetailsDto
+        {
+            OrderId = o.Id,
+            CustomerName = o.Customer.Name,
+            Items = o.OrderItems.Select(i =&amp;gt; new OrderItemDto
+            {
+                ProductName = i.Product.Name,
+                Quantity = i.Quantity
+            }).ToList()
+        })
+        .FirstOrDefault();
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این روش کنترل بیشتری بر داده‌های بارگذاری‌شده فراهم می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;الگوی مخزن اگرچه ابزاری قدرتمند برای جداسازی لایه‌ها در برنامه‌های .NET است، اما پیاده‌سازی نادرست آن می‌تواند به نشت جزئیات پیاده‌سازی و کاهش کارایی منجر شود. با اجتناب از بازگرداندن &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IQueryable renormalization&lt;/code&gt;، استفاده از الگوی مشخصات برای کوئری‌های پیچیده، مدیریت صحیح استثناها و به‌کارگیری بارگذاری مشتاق یا پروجکشن، می‌توان مخزن‌هایی طراحی کرد که واقعاً به وعده‌های خود عمل کنند. این اصول به توسعه‌دهندگان کمک می‌کند تا کدهایی تمیز، قابل نگهداری و مستقل از فناوری بنویسند که در بلندمدت ارزش خود را حفظ کنند.&lt;/div&gt;">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="آشنایی با الگوی مخزن نشتی‌دار در برنامه‌نویسی #C و روش‌های رفع آن">
+    <meta property="og:description" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;الگوی مخزن (Repository Pattern) یکی از الگوهای پرکاربرد در توسعه نرم‌افزارهای مبتنی بر #C و فریم‌ورک .NET است که به منظور جداسازی منطق کسب‌وکار از لایه دسترسی به داده‌ها استفاده می‌شود. این الگو با هدف افزایش قابلیت تست‌پذیری، نگهداری آسان‌تر کد و ایجاد انعطاف‌پذیری در معماری برنامه‌ها طراحی شده است. با این حال، پیاده‌سازی نادرست این الگو می‌تواند به مشکلات متعددی از جمله نشت جزئیات پیاده‌سازی (&lt;strong&gt;Leaky Abstraction&lt;/strong&gt;) منجر شود که وعده‌های اولیه آن را زیر سؤال می‌برد. در این مقاله آموزشی، ابتدا به بررسی مشکلات رایج در پیاده‌سازی الگوی مخزن می‌پردازیم و سپس راهکارهایی عملی و حرفه‌ای را برای بهینه‌سازی آن ارائه می‌دهیم. این مطلب برای توسعه‌دهندگانی که با فریم‌ورک .NET کار می‌کنند و به دنبال طراحی کد تمیز و قابل اطمینان هستند، تهیه شده است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مشکلات رایج در پیاده‌سازی الگوی مخزن&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;نشت IQueryable و انعطاف‌پذیری بیش از حد&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl ql-align-right&quot;&gt;یکی از شایع‌ترین اشتباهات در طراحی مخزن، بازگرداندن نوع &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IQueryable&amp;lt;T&amp;gt;&lt;/code&gt; از متدهای مخزن است. این کار به ظاهر انعطاف‌پذیری بالایی به مصرف‌کنندگان می‌دهد، اما در عمل جزئیات پیاده‌سازی را افشا می‌کند. به عنوان مثال:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public interface IProductRepository
+{
+    IQueryable&amp;lt;Product&amp;gt; GetProducts();
+}
+
+public class ProductRepository : IProductRepository
+{
+    private readonly DbContext _context;
+    
+    public ProductRepository(DbContext context)
+    {
+        _context = context;
+    }
+    
+    public IQueryable&amp;lt;Product&amp;gt; GetProducts()
+    {
+        return _context.Products;
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;در این کد، مصرف‌کننده می‌تواند کوئری‌هایی مانند زیر بنویسد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;var discountedProducts = repository.GetProducts()
+    .Where(p =&amp;gt; p.Category == &amp;quot;EBooks&amp;quot;)
+    .Where(p =&amp;gt; p.Price &amp;gt; 100)
+    .OrderBy(p =&amp;gt; p.Name)
+    .Skip(100)
+    .Take(10)
+    .ToList();&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مشکل اینجاست که مخزن هیچ کنترلی بر نحوه اجرای کوئری ندارد و ممکن است کوئری‌های ناکارآمد یا وابسته به ارائه‌دهنده داده (مانند Entity Framework) ایجاد شود. این نشت، جداسازی لایه‌ها را نقض می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;وابستگی به مفاهیم خاص فریم‌ورک&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl ql-align-right&quot;&gt;گاهی اوقات رابط‌های مخزن به مفاهیم خاص یک ORM (مانند Entity Framework) وابسته می‌شوند. برای مثال:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public interface IRepository&amp;lt;T&amp;gt; where T : class
+{
+    DbSet&amp;lt;T&amp;gt; Entities { get; }
+    void Attach(T entity);
+    void DetachEntity(T entity);
+    EntityEntry&amp;lt;T&amp;gt; GetEntityEntry(T entity);
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رابط به وضوح به Entity Framework وابسته است و تغییر ارائه‌دهنده داده بدون بازنویسی کد مصرف‌کننده غیرممکن می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;نشت استثناها&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl ql-align-right&quot;&gt;عدم مدیریت صحیح استثناهای لایه داده نیز یکی دیگر از مشکلات رایج است. به عنوان مثال:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public Customer GetById(int id)
+{
+    try
+    {
+        return _context.Customers.Find(id);
+    }
+    catch (SqlException ex)
+    {
+        throw;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در اینجا، استثنای &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;SqlException&lt;/code&gt; که خاص SQL Server است، به لایه بالاتر نشت می‌کند و مصرف‌کننده را مجبور به وابستگی به جزئیات پایگاه داده می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;رفتارهای ناخواسته مانند بارگذاری تنبل (Lazy Loading)&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl ql-align-right&quot;&gt;وقتی مخزن اشیاء را با ویژگی‌های ناوبری (Navigation Properties) بازمی‌گرداند، مصرف‌کننده ممکن است ناخواسته با مشکلاتی مانند &amp;quot;N+1 Query Problem&amp;quot; مواجه شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class OrderRepository : IOrderRepository
+{
+    private readonly DbContext _context;
+    
+    public Order GetById(int id)
+    {
+        return _context.Orders.Find(id);
+    }
+}
+
+var order = orderRepository.GetById(1111);
+foreach (var item in order.OrderItems)
+{
+    // ممکن است کوئری‌های اضافی اجرا شود
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رفتار به دلیل بارگذاری تنبل در Entity Framework رخ می‌دهد و عملکرد برنامه را تحت تأثیر قرار می‌دهد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;راهکارهای بهینه‌سازی الگوی مخزن&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;بازگرداندن مجموعه‌های مشخص به جای IQueryable&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl ql-align-right&quot;&gt;برای جلوگیری از نشت، بهتر است به جای IQueryable از مجموعه‌های مشخص مانند IReadOnlyCollection استفاده شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public interface IProductRepository
+{
+    IReadOnlyCollection&amp;lt;Product&amp;gt; GetProductsByCategory(string category);
+    IReadOnlyCollection&amp;lt;Product&amp;gt; GetDiscountedProducts(decimal minPrice);
+    PagedResult&amp;lt;Product&amp;gt; GetProductsPaged(int page, int pageSize, string sortField);
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این روش، مخزن را مجبور می‌کند تا متدهای مشخص و هدفمندی تعریف کند که نیازهای کسب‌وکار را برآورده کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;استفاده از الگوی مشخصات (Specification Pattern)&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl ql-align-right&quot;&gt;برای کوئری‌های پیچیده‌تر، الگوی مشخصات می‌تواند جایگزین مناسبی باشد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public interface ISpecification&amp;lt;T&amp;gt;
+{
+    Expression&amp;lt;Func&amp;lt;T, bool&amp;gt;&amp;gt; Criteria { get; }
+    List&amp;lt;Expression&amp;lt;Func&amp;lt;T, object&amp;gt;&amp;gt;&amp;gt; Includes { get; }
+    Expression&amp;lt;Func&amp;lt;T, object&amp;gt;&amp;gt; OrderBy { get; }
+    int Take { get; }
+    int Skip { get; }
+}
+
+public interface IRepository&amp;lt;T&amp;gt;
+{
+    IReadOnlyList&amp;lt;T&amp;gt; FindAll(ISpecification&amp;lt;T&amp;gt; spec);
+}
+
+public class DiscountedEbooksSpecification : BaseSpecification&amp;lt;Product&amp;gt;
+{
+    public DiscountedEbooksSpecification(decimal minPrice)
+        : base(p =&amp;gt; p.Category == &amp;quot;Ebooks&amp;quot; &amp;amp;&amp;amp; p.Price &amp;gt; minPrice)
+    {
+        AddOrderBy(p =&amp;gt; p.Name);
+        ApplyPaging(10, 10);
+    }
+}
+
+var spec = new DiscountedEbooksSpecification(69);
+var products = repository.FindAll(spec);&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این الگو به مصرف‌کننده اجازه می‌دهد کوئری‌ها را بدون افشای جزئیات پیاده‌سازی تعریف کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;مدیریت استثناها و انتزاع آنها&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;به جای نشت استثناهای خاص پایگاه داده، باید آنها را به استثناهای دامنه‌محور ترجمه کرد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class EntityNotFoundException : Exception
+{
+    public EntityNotFoundException(string entityType, object key)
+        : base($&amp;quot;{entityType} با شناسه {key} یافت نشد.&amp;quot;)
+    {
+    }
+}
+
+public Customer GetById(int id)
+{
+    try
+    {
+        var customer = _context.Customers.Find(id);
+        if (customer == null)
+            throw new EntityNotFoundException(&amp;quot;Customer&amp;quot;, id);
+        return customer;
+    }
+    catch (SqlException ex)
+    {
+        throw new Exception(&amp;quot;خطا در دسترسی به داده‌ها&amp;quot;, ex);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رویکرد، وابستگی به فناوری خاص را از بین می‌برد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;بارگذاری مشتاقانه (Eager Loading) و استفاده از پروجکشن&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl ql-align-right&quot;&gt;برای جلوگیری از مشکلات بارگذاری تنبل، باید داده‌ها به صورت صریح بارگذاری شوند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public Order GetOrderWithDetails(int id)
+{
+    return _context.Orders
+        .Include(o =&amp;gt; o.OrderItems)
+        .ThenInclude(i =&amp;gt; i.Product)
+        .FirstOrDefault(o =&amp;gt; o.Id == id);
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;یا از پروجکشن به DTOها استفاده شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public OrderDetailsDto GetOrderDetails(int id)
+{
+    return _context.Orders
+        .Where(o =&amp;gt; o.Id == id)
+        .Select(o =&amp;gt; new OrderDetailsDto
+        {
+            OrderId = o.Id,
+            CustomerName = o.Customer.Name,
+            Items = o.OrderItems.Select(i =&amp;gt; new OrderItemDto
+            {
+                ProductName = i.Product.Name,
+                Quantity = i.Quantity
+            }).ToList()
+        })
+        .FirstOrDefault();
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این روش کنترل بیشتری بر داده‌های بارگذاری‌شده فراهم می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;الگوی مخزن اگرچه ابزاری قدرتمند برای جداسازی لایه‌ها در برنامه‌های .NET است، اما پیاده‌سازی نادرست آن می‌تواند به نشت جزئیات پیاده‌سازی و کاهش کارایی منجر شود. با اجتناب از بازگرداندن &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IQueryable renormalization&lt;/code&gt;، استفاده از الگوی مشخصات برای کوئری‌های پیچیده، مدیریت صحیح استثناها و به‌کارگیری بارگذاری مشتاق یا پروجکشن، می‌توان مخزن‌هایی طراحی کرد که واقعاً به وعده‌های خود عمل کنند. این اصول به توسعه‌دهندگان کمک می‌کند تا کدهایی تمیز، قابل نگهداری و مستقل از فناوری بنویسند که در بلندمدت ارزش خود را حفظ کنند.&lt;/div&gt;">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="آشنایی با الگوی مخزن نشتی‌دار در برنامه‌نویسی #C و روش‌های رفع آن">
+    <meta name="twitter:description" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;الگوی مخزن (Repository Pattern) یکی از الگوهای پرکاربرد در توسعه نرم‌افزارهای مبتنی بر #C و فریم‌ورک .NET است که به منظور جداسازی منطق کسب‌وکار از لایه دسترسی به داده‌ها استفاده می‌شود. این الگو با هدف افزایش قابلیت تست‌پذیری، نگهداری آسان‌تر کد و ایجاد انعطاف‌پذیری در معماری برنامه‌ها طراحی شده است. با این حال، پیاده‌سازی نادرست این الگو می‌تواند به مشکلات متعددی از جمله نشت جزئیات پیاده‌سازی (&lt;strong&gt;Leaky Abstraction&lt;/strong&gt;) منجر شود که وعده‌های اولیه آن را زیر سؤال می‌برد. در این مقاله آموزشی، ابتدا به بررسی مشکلات رایج در پیاده‌سازی الگوی مخزن می‌پردازیم و سپس راهکارهایی عملی و حرفه‌ای را برای بهینه‌سازی آن ارائه می‌دهیم. این مطلب برای توسعه‌دهندگانی که با فریم‌ورک .NET کار می‌کنند و به دنبال طراحی کد تمیز و قابل اطمینان هستند، تهیه شده است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مشکلات رایج در پیاده‌سازی الگوی مخزن&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;نشت IQueryable و انعطاف‌پذیری بیش از حد&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl ql-align-right&quot;&gt;یکی از شایع‌ترین اشتباهات در طراحی مخزن، بازگرداندن نوع &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IQueryable&amp;lt;T&amp;gt;&lt;/code&gt; از متدهای مخزن است. این کار به ظاهر انعطاف‌پذیری بالایی به مصرف‌کنندگان می‌دهد، اما در عمل جزئیات پیاده‌سازی را افشا می‌کند. به عنوان مثال:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public interface IProductRepository
+{
+    IQueryable&amp;lt;Product&amp;gt; GetProducts();
+}
+
+public class ProductRepository : IProductRepository
+{
+    private readonly DbContext _context;
+    
+    public ProductRepository(DbContext context)
+    {
+        _context = context;
+    }
+    
+    public IQueryable&amp;lt;Product&amp;gt; GetProducts()
+    {
+        return _context.Products;
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;در این کد، مصرف‌کننده می‌تواند کوئری‌هایی مانند زیر بنویسد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;var discountedProducts = repository.GetProducts()
+    .Where(p =&amp;gt; p.Category == &amp;quot;EBooks&amp;quot;)
+    .Where(p =&amp;gt; p.Price &amp;gt; 100)
+    .OrderBy(p =&amp;gt; p.Name)
+    .Skip(100)
+    .Take(10)
+    .ToList();&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مشکل اینجاست که مخزن هیچ کنترلی بر نحوه اجرای کوئری ندارد و ممکن است کوئری‌های ناکارآمد یا وابسته به ارائه‌دهنده داده (مانند Entity Framework) ایجاد شود. این نشت، جداسازی لایه‌ها را نقض می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;وابستگی به مفاهیم خاص فریم‌ورک&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl ql-align-right&quot;&gt;گاهی اوقات رابط‌های مخزن به مفاهیم خاص یک ORM (مانند Entity Framework) وابسته می‌شوند. برای مثال:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public interface IRepository&amp;lt;T&amp;gt; where T : class
+{
+    DbSet&amp;lt;T&amp;gt; Entities { get; }
+    void Attach(T entity);
+    void DetachEntity(T entity);
+    EntityEntry&amp;lt;T&amp;gt; GetEntityEntry(T entity);
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رابط به وضوح به Entity Framework وابسته است و تغییر ارائه‌دهنده داده بدون بازنویسی کد مصرف‌کننده غیرممکن می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;نشت استثناها&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl ql-align-right&quot;&gt;عدم مدیریت صحیح استثناهای لایه داده نیز یکی دیگر از مشکلات رایج است. به عنوان مثال:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public Customer GetById(int id)
+{
+    try
+    {
+        return _context.Customers.Find(id);
+    }
+    catch (SqlException ex)
+    {
+        throw;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در اینجا، استثنای &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;SqlException&lt;/code&gt; که خاص SQL Server است، به لایه بالاتر نشت می‌کند و مصرف‌کننده را مجبور به وابستگی به جزئیات پایگاه داده می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;رفتارهای ناخواسته مانند بارگذاری تنبل (Lazy Loading)&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl ql-align-right&quot;&gt;وقتی مخزن اشیاء را با ویژگی‌های ناوبری (Navigation Properties) بازمی‌گرداند، مصرف‌کننده ممکن است ناخواسته با مشکلاتی مانند &amp;quot;N+1 Query Problem&amp;quot; مواجه شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class OrderRepository : IOrderRepository
+{
+    private readonly DbContext _context;
+    
+    public Order GetById(int id)
+    {
+        return _context.Orders.Find(id);
+    }
+}
+
+var order = orderRepository.GetById(1111);
+foreach (var item in order.OrderItems)
+{
+    // ممکن است کوئری‌های اضافی اجرا شود
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رفتار به دلیل بارگذاری تنبل در Entity Framework رخ می‌دهد و عملکرد برنامه را تحت تأثیر قرار می‌دهد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;راهکارهای بهینه‌سازی الگوی مخزن&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;بازگرداندن مجموعه‌های مشخص به جای IQueryable&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl ql-align-right&quot;&gt;برای جلوگیری از نشت، بهتر است به جای IQueryable از مجموعه‌های مشخص مانند IReadOnlyCollection استفاده شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public interface IProductRepository
+{
+    IReadOnlyCollection&amp;lt;Product&amp;gt; GetProductsByCategory(string category);
+    IReadOnlyCollection&amp;lt;Product&amp;gt; GetDiscountedProducts(decimal minPrice);
+    PagedResult&amp;lt;Product&amp;gt; GetProductsPaged(int page, int pageSize, string sortField);
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این روش، مخزن را مجبور می‌کند تا متدهای مشخص و هدفمندی تعریف کند که نیازهای کسب‌وکار را برآورده کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;استفاده از الگوی مشخصات (Specification Pattern)&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl ql-align-right&quot;&gt;برای کوئری‌های پیچیده‌تر، الگوی مشخصات می‌تواند جایگزین مناسبی باشد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public interface ISpecification&amp;lt;T&amp;gt;
+{
+    Expression&amp;lt;Func&amp;lt;T, bool&amp;gt;&amp;gt; Criteria { get; }
+    List&amp;lt;Expression&amp;lt;Func&amp;lt;T, object&amp;gt;&amp;gt;&amp;gt; Includes { get; }
+    Expression&amp;lt;Func&amp;lt;T, object&amp;gt;&amp;gt; OrderBy { get; }
+    int Take { get; }
+    int Skip { get; }
+}
+
+public interface IRepository&amp;lt;T&amp;gt;
+{
+    IReadOnlyList&amp;lt;T&amp;gt; FindAll(ISpecification&amp;lt;T&amp;gt; spec);
+}
+
+public class DiscountedEbooksSpecification : BaseSpecification&amp;lt;Product&amp;gt;
+{
+    public DiscountedEbooksSpecification(decimal minPrice)
+        : base(p =&amp;gt; p.Category == &amp;quot;Ebooks&amp;quot; &amp;amp;&amp;amp; p.Price &amp;gt; minPrice)
+    {
+        AddOrderBy(p =&amp;gt; p.Name);
+        ApplyPaging(10, 10);
+    }
+}
+
+var spec = new DiscountedEbooksSpecification(69);
+var products = repository.FindAll(spec);&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این الگو به مصرف‌کننده اجازه می‌دهد کوئری‌ها را بدون افشای جزئیات پیاده‌سازی تعریف کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;مدیریت استثناها و انتزاع آنها&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;به جای نشت استثناهای خاص پایگاه داده، باید آنها را به استثناهای دامنه‌محور ترجمه کرد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class EntityNotFoundException : Exception
+{
+    public EntityNotFoundException(string entityType, object key)
+        : base($&amp;quot;{entityType} با شناسه {key} یافت نشد.&amp;quot;)
+    {
+    }
+}
+
+public Customer GetById(int id)
+{
+    try
+    {
+        var customer = _context.Customers.Find(id);
+        if (customer == null)
+            throw new EntityNotFoundException(&amp;quot;Customer&amp;quot;, id);
+        return customer;
+    }
+    catch (SqlException ex)
+    {
+        throw new Exception(&amp;quot;خطا در دسترسی به داده‌ها&amp;quot;, ex);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رویکرد، وابستگی به فناوری خاص را از بین می‌برد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;بارگذاری مشتاقانه (Eager Loading) و استفاده از پروجکشن&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl ql-align-right&quot;&gt;برای جلوگیری از مشکلات بارگذاری تنبل، باید داده‌ها به صورت صریح بارگذاری شوند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public Order GetOrderWithDetails(int id)
+{
+    return _context.Orders
+        .Include(o =&amp;gt; o.OrderItems)
+        .ThenInclude(i =&amp;gt; i.Product)
+        .FirstOrDefault(o =&amp;gt; o.Id == id);
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;یا از پروجکشن به DTOها استفاده شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public OrderDetailsDto GetOrderDetails(int id)
+{
+    return _context.Orders
+        .Where(o =&amp;gt; o.Id == id)
+        .Select(o =&amp;gt; new OrderDetailsDto
+        {
+            OrderId = o.Id,
+            CustomerName = o.Customer.Name,
+            Items = o.OrderItems.Select(i =&amp;gt; new OrderItemDto
+            {
+                ProductName = i.Product.Name,
+                Quantity = i.Quantity
+            }).ToList()
+        })
+        .FirstOrDefault();
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این روش کنترل بیشتری بر داده‌های بارگذاری‌شده فراهم می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;الگوی مخزن اگرچه ابزاری قدرتمند برای جداسازی لایه‌ها در برنامه‌های .NET است، اما پیاده‌سازی نادرست آن می‌تواند به نشت جزئیات پیاده‌سازی و کاهش کارایی منجر شود. با اجتناب از بازگرداندن &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IQueryable renormalization&lt;/code&gt;، استفاده از الگوی مشخصات برای کوئری‌های پیچیده، مدیریت صحیح استثناها و به‌کارگیری بارگذاری مشتاق یا پروجکشن، می‌توان مخزن‌هایی طراحی کرد که واقعاً به وعده‌های خود عمل کنند. این اصول به توسعه‌دهندگان کمک می‌کند تا کدهایی تمیز، قابل نگهداری و مستقل از فناوری بنویسند که در بلندمدت ارزش خود را حفظ کنند.&lt;/div&gt;">
+    <meta name="twitter:card" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;الگوی مخزن (Repository Pattern) یکی از الگوهای پرکاربرد در توسعه نرم‌افزارهای مبتنی بر #C و فریم‌ورک .NET است که به منظور جداسازی منطق کسب‌وکار از لایه دسترسی به داده‌ها استفاده می‌شود. این الگو با هدف افزایش قابلیت تست‌پذیری، نگهداری آسان‌تر کد و ایجاد انعطاف‌پذیری در معماری برنامه‌ها طراحی شده است. با این حال، پیاده‌سازی نادرست این الگو می‌تواند به مشکلات متعددی از جمله نشت جزئیات پیاده‌سازی (&lt;strong&gt;Leaky Abstraction&lt;/strong&gt;) منجر شود که وعده‌های اولیه آن را زیر سؤال می‌برد. در این مقاله آموزشی، ابتدا به بررسی مشکلات رایج در پیاده‌سازی الگوی مخزن می‌پردازیم و سپس راهکارهایی عملی و حرفه‌ای را برای بهینه‌سازی آن ارائه می‌دهیم. این مطلب برای توسعه‌دهندگانی که با فریم‌ورک .NET کار می‌کنند و به دنبال طراحی کد تمیز و قابل اطمینان هستند، تهیه شده است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مشکلات رایج در پیاده‌سازی الگوی مخزن&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;نشت IQueryable و انعطاف‌پذیری بیش از حد&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl ql-align-right&quot;&gt;یکی از شایع‌ترین اشتباهات در طراحی مخزن، بازگرداندن نوع &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IQueryable&amp;lt;T&amp;gt;&lt;/code&gt; از متدهای مخزن است. این کار به ظاهر انعطاف‌پذیری بالایی به مصرف‌کنندگان می‌دهد، اما در عمل جزئیات پیاده‌سازی را افشا می‌کند. به عنوان مثال:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public interface IProductRepository
+{
+    IQueryable&amp;lt;Product&amp;gt; GetProducts();
+}
+
+public class ProductRepository : IProductRepository
+{
+    private readonly DbContext _context;
+    
+    public ProductRepository(DbContext context)
+    {
+        _context = context;
+    }
+    
+    public IQueryable&amp;lt;Product&amp;gt; GetProducts()
+    {
+        return _context.Products;
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;در این کد، مصرف‌کننده می‌تواند کوئری‌هایی مانند زیر بنویسد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;var discountedProducts = repository.GetProducts()
+    .Where(p =&amp;gt; p.Category == &amp;quot;EBooks&amp;quot;)
+    .Where(p =&amp;gt; p.Price &amp;gt; 100)
+    .OrderBy(p =&amp;gt; p.Name)
+    .Skip(100)
+    .Take(10)
+    .ToList();&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مشکل اینجاست که مخزن هیچ کنترلی بر نحوه اجرای کوئری ندارد و ممکن است کوئری‌های ناکارآمد یا وابسته به ارائه‌دهنده داده (مانند Entity Framework) ایجاد شود. این نشت، جداسازی لایه‌ها را نقض می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;وابستگی به مفاهیم خاص فریم‌ورک&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl ql-align-right&quot;&gt;گاهی اوقات رابط‌های مخزن به مفاهیم خاص یک ORM (مانند Entity Framework) وابسته می‌شوند. برای مثال:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public interface IRepository&amp;lt;T&amp;gt; where T : class
+{
+    DbSet&amp;lt;T&amp;gt; Entities { get; }
+    void Attach(T entity);
+    void DetachEntity(T entity);
+    EntityEntry&amp;lt;T&amp;gt; GetEntityEntry(T entity);
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رابط به وضوح به Entity Framework وابسته است و تغییر ارائه‌دهنده داده بدون بازنویسی کد مصرف‌کننده غیرممکن می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;نشت استثناها&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl ql-align-right&quot;&gt;عدم مدیریت صحیح استثناهای لایه داده نیز یکی دیگر از مشکلات رایج است. به عنوان مثال:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public Customer GetById(int id)
+{
+    try
+    {
+        return _context.Customers.Find(id);
+    }
+    catch (SqlException ex)
+    {
+        throw;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در اینجا، استثنای &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;SqlException&lt;/code&gt; که خاص SQL Server است، به لایه بالاتر نشت می‌کند و مصرف‌کننده را مجبور به وابستگی به جزئیات پایگاه داده می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;رفتارهای ناخواسته مانند بارگذاری تنبل (Lazy Loading)&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl ql-align-right&quot;&gt;وقتی مخزن اشیاء را با ویژگی‌های ناوبری (Navigation Properties) بازمی‌گرداند، مصرف‌کننده ممکن است ناخواسته با مشکلاتی مانند &amp;quot;N+1 Query Problem&amp;quot; مواجه شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class OrderRepository : IOrderRepository
+{
+    private readonly DbContext _context;
+    
+    public Order GetById(int id)
+    {
+        return _context.Orders.Find(id);
+    }
+}
+
+var order = orderRepository.GetById(1111);
+foreach (var item in order.OrderItems)
+{
+    // ممکن است کوئری‌های اضافی اجرا شود
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رفتار به دلیل بارگذاری تنبل در Entity Framework رخ می‌دهد و عملکرد برنامه را تحت تأثیر قرار می‌دهد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;راهکارهای بهینه‌سازی الگوی مخزن&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;بازگرداندن مجموعه‌های مشخص به جای IQueryable&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl ql-align-right&quot;&gt;برای جلوگیری از نشت، بهتر است به جای IQueryable از مجموعه‌های مشخص مانند IReadOnlyCollection استفاده شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public interface IProductRepository
+{
+    IReadOnlyCollection&amp;lt;Product&amp;gt; GetProductsByCategory(string category);
+    IReadOnlyCollection&amp;lt;Product&amp;gt; GetDiscountedProducts(decimal minPrice);
+    PagedResult&amp;lt;Product&amp;gt; GetProductsPaged(int page, int pageSize, string sortField);
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این روش، مخزن را مجبور می‌کند تا متدهای مشخص و هدفمندی تعریف کند که نیازهای کسب‌وکار را برآورده کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;استفاده از الگوی مشخصات (Specification Pattern)&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl ql-align-right&quot;&gt;برای کوئری‌های پیچیده‌تر، الگوی مشخصات می‌تواند جایگزین مناسبی باشد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public interface ISpecification&amp;lt;T&amp;gt;
+{
+    Expression&amp;lt;Func&amp;lt;T, bool&amp;gt;&amp;gt; Criteria { get; }
+    List&amp;lt;Expression&amp;lt;Func&amp;lt;T, object&amp;gt;&amp;gt;&amp;gt; Includes { get; }
+    Expression&amp;lt;Func&amp;lt;T, object&amp;gt;&amp;gt; OrderBy { get; }
+    int Take { get; }
+    int Skip { get; }
+}
+
+public interface IRepository&amp;lt;T&amp;gt;
+{
+    IReadOnlyList&amp;lt;T&amp;gt; FindAll(ISpecification&amp;lt;T&amp;gt; spec);
+}
+
+public class DiscountedEbooksSpecification : BaseSpecification&amp;lt;Product&amp;gt;
+{
+    public DiscountedEbooksSpecification(decimal minPrice)
+        : base(p =&amp;gt; p.Category == &amp;quot;Ebooks&amp;quot; &amp;amp;&amp;amp; p.Price &amp;gt; minPrice)
+    {
+        AddOrderBy(p =&amp;gt; p.Name);
+        ApplyPaging(10, 10);
+    }
+}
+
+var spec = new DiscountedEbooksSpecification(69);
+var products = repository.FindAll(spec);&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این الگو به مصرف‌کننده اجازه می‌دهد کوئری‌ها را بدون افشای جزئیات پیاده‌سازی تعریف کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;مدیریت استثناها و انتزاع آنها&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;به جای نشت استثناهای خاص پایگاه داده، باید آنها را به استثناهای دامنه‌محور ترجمه کرد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class EntityNotFoundException : Exception
+{
+    public EntityNotFoundException(string entityType, object key)
+        : base($&amp;quot;{entityType} با شناسه {key} یافت نشد.&amp;quot;)
+    {
+    }
+}
+
+public Customer GetById(int id)
+{
+    try
+    {
+        var customer = _context.Customers.Find(id);
+        if (customer == null)
+            throw new EntityNotFoundException(&amp;quot;Customer&amp;quot;, id);
+        return customer;
+    }
+    catch (SqlException ex)
+    {
+        throw new Exception(&amp;quot;خطا در دسترسی به داده‌ها&amp;quot;, ex);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رویکرد، وابستگی به فناوری خاص را از بین می‌برد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;بارگذاری مشتاقانه (Eager Loading) و استفاده از پروجکشن&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl ql-align-right&quot;&gt;برای جلوگیری از مشکلات بارگذاری تنبل، باید داده‌ها به صورت صریح بارگذاری شوند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public Order GetOrderWithDetails(int id)
+{
+    return _context.Orders
+        .Include(o =&amp;gt; o.OrderItems)
+        .ThenInclude(i =&amp;gt; i.Product)
+        .FirstOrDefault(o =&amp;gt; o.Id == id);
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;یا از پروجکشن به DTOها استفاده شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public OrderDetailsDto GetOrderDetails(int id)
+{
+    return _context.Orders
+        .Where(o =&amp;gt; o.Id == id)
+        .Select(o =&amp;gt; new OrderDetailsDto
+        {
+            OrderId = o.Id,
+            CustomerName = o.Customer.Name,
+            Items = o.OrderItems.Select(i =&amp;gt; new OrderItemDto
+            {
+                ProductName = i.Product.Name,
+                Quantity = i.Quantity
+            }).ToList()
+        })
+        .FirstOrDefault();
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این روش کنترل بیشتری بر داده‌های بارگذاری‌شده فراهم می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;الگوی مخزن اگرچه ابزاری قدرتمند برای جداسازی لایه‌ها در برنامه‌های .NET است، اما پیاده‌سازی نادرست آن می‌تواند به نشت جزئیات پیاده‌سازی و کاهش کارایی منجر شود. با اجتناب از بازگرداندن &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IQueryable renormalization&lt;/code&gt;، استفاده از الگوی مشخصات برای کوئری‌های پیچیده، مدیریت صحیح استثناها و به‌کارگیری بارگذاری مشتاق یا پروجکشن، می‌توان مخزن‌هایی طراحی کرد که واقعاً به وعده‌های خود عمل کنند. این اصول به توسعه‌دهندگان کمک می‌کند تا کدهایی تمیز، قابل نگهداری و مستقل از فناوری بنویسند که در بلندمدت ارزش خود را حفظ کنند.&lt;/div&gt;">
+    <meta property="article:published_time" content="Thu, 10 Apr 2025 03:48:22 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
     <meta content='IE=edge' http-equiv='X-UA-Compatible'>
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">
-	
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
 	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
-
     <link href="vs.min.css" rel="stylesheet" type="text/css">
-    <script src="highlight.min.js" type="text/javascript"></script>
-	
+    <script src="highlight.min.js" type="text/javascript"></script>	
     <link href="styles.css" rel="stylesheet" type="text/css">	
     <style>
       @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
@@ -42,8 +684,8 @@
         }
      }
     </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
 </head>
-
 <body dir='rtl'>
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
@@ -53,7 +695,7 @@
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۳۶۹۵</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۶۹۷</span></td>
 </tr>
 <tr>
 <td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
@@ -73,7 +715,7 @@
 </tr>
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۲۲</span></td>
 </tr>
 </tbody>
 </table>
@@ -249,8 +891,5 @@ public Customer GetById(int id)
 
 <!-- to load custom fonts for printing -->
 <div class="useSamimFD">&nbsp;</div>
-
-<script src="SyntaxHighlighter.js" type="text/javascript"></script>
 </body>
-
 </html>

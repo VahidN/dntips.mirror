@@ -1,17 +1,469 @@
 <!DOCTYPE html>
 <html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
-
 <head>
-    <title>‫‫انتشار نسخهٔ پایدار System.CommandLine  توسط مایکروسافت</title>
+    <title>‫‫انتشار نسخهٔ پایدار System.CommandLine  توسط مایکروسافت</title>     <meta name="description" content="&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;در &lt;strong&gt;۱۱ نوامبر ۲۰۲۵&lt;/strong&gt; (چند روز پیش)، مایکروسافت بالاخره نسخهٔ &lt;strong&gt;پایدار و GA (General Availability)&lt;/strong&gt; بستهٔ &lt;strong&gt;System.CommandLine 2.0.0&lt;/strong&gt; را منتشر کرد. این بسته بعد از حدود ۴ سال ماندن در مرحلهٔ بتا و RC، حالا به‌صورت کاملاً پایدار و آمادهٔ استفاده در پروژه‌های تولیدی در دسترس است.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;System.CommandLine بهترین و رسمی‌ترین راه برای ساخت ابزارهای خط فرمان حرفه‌ای در اکوسیستم .NET است و قابلیت‌هایی مثل:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;پارسینگ خودکار آرگومان‌ها و آپشن‌ها&lt;/li&gt;&lt;li&gt;تولید خودکار &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;--help&lt;/code&gt; و &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;--version&lt;/code&gt;&lt;/li&gt;&lt;li&gt;اعتبارسنجی ورودی‌ها&lt;/li&gt;&lt;li&gt;پیشنهاد تکمیل دستورات (Suggestion)&lt;/li&gt;&lt;li&gt;پشتیبانی از Response File (@file)&lt;/li&gt;&lt;li&gt;میان‌افزارها (Middleware)&lt;/li&gt;&lt;li&gt;ادغام کامل با Microsoft.Extensions.Hosting و Dependency Injection&lt;/li&gt;&lt;li&gt;قابلیت انتشار به‌صورت dotnet tool&lt;/li&gt;&lt;li&gt;محلی‌سازی متن کمک&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;را به‌صورت آماده و بدون نیاز به کد اضافی ارائه می‌دهد.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نصب بسته&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;plain&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;dotnet add package System.CommandLine --version 2.0.0&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;(در زمان نوشتن این مقاله، این آخرین نسخهٔ پایدار است)&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پروژهٔ سادهٔ Console در .NET 10&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;یک پروژهٔ کنسولی معمولی بسازید:&lt;/div&gt;&lt;pre data-language=&quot;bash&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;dotnet new console -n DemoCli
+cd DemoCli
+dotnet add package System.CommandLine&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;فایل &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;DemoCli.csproj&lt;/code&gt; را به این شکل تغییر دهید تا به‌صورت dotnet tool منتشر شود:&lt;/div&gt;&lt;pre data-language=&quot;xml&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;lt;Project Sdk=&amp;quot;Microsoft.NET.Sdk&amp;quot;&amp;gt;
+
+  &amp;lt;PropertyGroup&amp;gt;
+    &amp;lt;OutputType&amp;gt;Exe&amp;lt;/OutputType&amp;gt;
+    &amp;lt;TargetFramework&amp;gt;net10.0&amp;lt;/TargetFramework&amp;gt;
+    &amp;lt;ImplicitUsings&amp;gt;enable&amp;lt;/ImplicitUsings&amp;gt;
+    &amp;lt;Nullable&amp;gt;enable&amp;lt;/Nullable&amp;gt;
+
+    &amp;lt;!-- این بخش باعث می‌شود بتوانید با dotnet pack → dotnet tool install -g demo اجرا کنید --&amp;gt;
+    &amp;lt;PackAsTool&amp;gt;true&amp;lt;/PackAsTool&amp;gt;
+    &amp;lt;ToolCommandName&amp;gt;demo&amp;lt;/ToolCommandName&amp;gt; &amp;lt;!-- نام دستوری که در ترمینال استفاده می‌شود --&amp;gt;
+    &amp;lt;PackageId&amp;gt;DemoCli&amp;lt;/PackageId&amp;gt;
+    &amp;lt;Version&amp;gt;1.0.0&amp;lt;/Version&amp;gt;
+  &amp;lt;/PropertyGroup&amp;gt;
+
+&amp;lt;/Project&amp;gt;&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مثال عملی: دستور&lt;/strong&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;greet&lt;/code&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;هدف:&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;demo greet Diane 3&lt;/code&gt; → سه بار Hello, Diane! چاپ کند&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;demo greet Jack 5 -u&lt;/code&gt; → پنج بار HELLO, JACK! چاپ کند&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;نسخهٔ تمیز و توصیه‌شده (با Binding خودکار)&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;using System.CommandLine;
+using System.CommandLine.Invocation;
+
+var nameArg = new Argument&amp;lt;string&amp;gt;(&amp;quot;name&amp;quot;, &amp;quot;نام شخص برای سلام کردن&amp;quot;);
+var timesArg = new Argument&amp;lt;int&amp;gt;(&amp;quot;times&amp;quot;, &amp;quot;تعداد دفعات تکرار سلام&amp;quot;)
+{
+    // مقدار پیش‌فرض اختیاری
+    Arity = ArgumentArity.ZeroOrOne
+};
+timesArg.SetDefaultValue(1); // اگر مقدار ندهیم، یک بار اجرا شود
+
+var upperOption = new Option&amp;lt;bool&amp;gt;(
+    aliases: [&amp;quot;--uppercase&amp;quot;, &amp;quot;-u&amp;quot;],
+    description: &amp;quot;خروجی را با حروف بزرگ نمایش بده&amp;quot;);
+
+// زیر دستور greet
+var greetCommand = new Command(&amp;quot;greet&amp;quot;, &amp;quot;چاپ پیام سلام&amp;quot;)
+{
+    nameArg,
+    timesArg,
+    upperOption
+};
+
+// این خط جادویی است! تمام پارسینگ و بایندینگ خودکار انجام می‌شود
+greetCommand.SetHandler((string name, int times, bool uppercase) =&amp;gt;
+{
+    var message = uppercase 
+        ? $&amp;quot;HELLO, {name.ToUpperInvariant()}!&amp;quot; 
+        : $&amp;quot;Hello, {name}!&amp;quot;;
+
+    for (int i = 0; i &amp;lt; times; i++)
+        Console.WriteLine(message);
+
+}, nameArg, timesArg, upperOption);
+
+// دستور ریشه (root command)
+var rootCommand = new RootCommand(&amp;quot;ابزار دمو CLI ساخته‌شده با System.CommandLine 2.0&amp;quot;)
+{
+    greetCommand
+};
+
+// این دو گزینه به‌صورت خودکار اضافه می‌شوند
+rootCommand.AddGlobalOption(new Option&amp;lt;bool&amp;gt;([&amp;quot;--version&amp;quot;], &amp;quot;نمایش نسخه&amp;quot;));
+rootCommand.Description = &amp;quot;یک ابزار ساده برای تست System.CommandLine&amp;quot;;
+
+return await rootCommand.InvokeAsync(args);&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;این دقیقاً همان کاری است که در کد اولیهٔ شما بود، اما بسیار تمیزتر، خواناتر و بدون نیاز به &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;parsed.GetRequiredValue(...)&lt;/code&gt;.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;اجرای سریع برای دیباگ (launchSettings.json)&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;در پوشهٔ &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Properties/launchSettings.json&lt;/code&gt; این پروفایل‌ها را اضافه کنید:&lt;/div&gt;&lt;pre data-language=&quot;json&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;{
+  &amp;quot;profiles&amp;quot;: {
+    &amp;quot;Greet Diane 3 times&amp;quot;: {
+      &amp;quot;commandName&amp;quot;: &amp;quot;Project&amp;quot;,
+      &amp;quot;commandLineArgs&amp;quot;: &amp;quot;greet Diane 3&amp;quot;
+    },
+    &amp;quot;Shout at Jack&amp;quot;: {
+      &amp;quot;commandName&amp;quot;: &amp;quot;Project&amp;quot;,
+      &amp;quot;commandLineArgs&amp;quot;: &amp;quot;greet Jack 1 -u&amp;quot;
+    },
+    &amp;quot;Shout 5 times&amp;quot;: {
+      &amp;quot;commandName&amp;quot;: &amp;quot;Project&amp;quot;,
+      &amp;quot;commandLineArgs&amp;quot;: &amp;quot;greet Jack 5 --uppercase&amp;quot;
+    }
+  }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;حالا در Visual Studio یا VS Code می‌توانید مستقیماً این سناریوها را دیباگ کنید.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;انتشار به‌صورت dotnet tool&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;bash&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;dotnet pack -c Release
+dotnet tool install --global --add-source ./nupkg demo&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;حالا در هر ترمینالی می‌توانید بنویسید:&lt;/div&gt;&lt;pre data-language=&quot;bash&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;demo greet Ali 4 -u&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نکات پیشرفتهٔ نسخهٔ 2.0&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong&gt;اعتبارسنجی خودکار&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;var ageArg = new Argument&amp;lt;int&amp;gt;(&amp;quot;age&amp;quot;, &amp;quot;سن شخص&amp;quot;);
+ageArg.AddValidator(result =&amp;gt;
+{
+    if (result.GetValueOrDefault&amp;lt;int&amp;gt;() &amp;lt; 0)
+        result.ErrorMessage = &amp;quot;سن نمی‌تواند منفی باشد!&amp;quot;;
+});&lt;/pre&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong&gt;آپشن‌های پیچیده‌تر (مثل Enum یا List)&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;var colorOption = new Option&amp;lt;ConsoleColor&amp;gt;([&amp;quot;--color&amp;quot;, &amp;quot;-c&amp;quot;], &amp;quot;رنگ متن&amp;quot;)
+{
+    Arity = ArgumentArity.ExactlyOne
+};&lt;/pre&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong&gt;استفاده از Microsoft.Extensions.Hosting (تزریق وابستگی)&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;var builder = Host.CreateDefaultBuilder(args)
+    .ConfigureServices(services =&amp;gt; services.AddSingleton&amp;lt;MyService&amp;gt;())
+    .UseCommandLine(rootCommand); // این extension جدید است!&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong&gt;محلی‌سازی Help&lt;/strong&gt; در نسخهٔ 2.0 می‌توانید &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;HelpBuilder&lt;/code&gt; را کاملاً سفارشی کنید یا متن‌های کمک را محلی‌سازی کنید.&lt;/div&gt;">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="انتشار نسخهٔ پایدار System.CommandLine  توسط مایکروسافت">
+    <meta itemprop="description" content="&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;در &lt;strong&gt;۱۱ نوامبر ۲۰۲۵&lt;/strong&gt; (چند روز پیش)، مایکروسافت بالاخره نسخهٔ &lt;strong&gt;پایدار و GA (General Availability)&lt;/strong&gt; بستهٔ &lt;strong&gt;System.CommandLine 2.0.0&lt;/strong&gt; را منتشر کرد. این بسته بعد از حدود ۴ سال ماندن در مرحلهٔ بتا و RC، حالا به‌صورت کاملاً پایدار و آمادهٔ استفاده در پروژه‌های تولیدی در دسترس است.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;System.CommandLine بهترین و رسمی‌ترین راه برای ساخت ابزارهای خط فرمان حرفه‌ای در اکوسیستم .NET است و قابلیت‌هایی مثل:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;پارسینگ خودکار آرگومان‌ها و آپشن‌ها&lt;/li&gt;&lt;li&gt;تولید خودکار &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;--help&lt;/code&gt; و &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;--version&lt;/code&gt;&lt;/li&gt;&lt;li&gt;اعتبارسنجی ورودی‌ها&lt;/li&gt;&lt;li&gt;پیشنهاد تکمیل دستورات (Suggestion)&lt;/li&gt;&lt;li&gt;پشتیبانی از Response File (@file)&lt;/li&gt;&lt;li&gt;میان‌افزارها (Middleware)&lt;/li&gt;&lt;li&gt;ادغام کامل با Microsoft.Extensions.Hosting و Dependency Injection&lt;/li&gt;&lt;li&gt;قابلیت انتشار به‌صورت dotnet tool&lt;/li&gt;&lt;li&gt;محلی‌سازی متن کمک&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;را به‌صورت آماده و بدون نیاز به کد اضافی ارائه می‌دهد.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نصب بسته&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;plain&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;dotnet add package System.CommandLine --version 2.0.0&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;(در زمان نوشتن این مقاله، این آخرین نسخهٔ پایدار است)&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پروژهٔ سادهٔ Console در .NET 10&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;یک پروژهٔ کنسولی معمولی بسازید:&lt;/div&gt;&lt;pre data-language=&quot;bash&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;dotnet new console -n DemoCli
+cd DemoCli
+dotnet add package System.CommandLine&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;فایل &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;DemoCli.csproj&lt;/code&gt; را به این شکل تغییر دهید تا به‌صورت dotnet tool منتشر شود:&lt;/div&gt;&lt;pre data-language=&quot;xml&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;lt;Project Sdk=&amp;quot;Microsoft.NET.Sdk&amp;quot;&amp;gt;
+
+  &amp;lt;PropertyGroup&amp;gt;
+    &amp;lt;OutputType&amp;gt;Exe&amp;lt;/OutputType&amp;gt;
+    &amp;lt;TargetFramework&amp;gt;net10.0&amp;lt;/TargetFramework&amp;gt;
+    &amp;lt;ImplicitUsings&amp;gt;enable&amp;lt;/ImplicitUsings&amp;gt;
+    &amp;lt;Nullable&amp;gt;enable&amp;lt;/Nullable&amp;gt;
+
+    &amp;lt;!-- این بخش باعث می‌شود بتوانید با dotnet pack → dotnet tool install -g demo اجرا کنید --&amp;gt;
+    &amp;lt;PackAsTool&amp;gt;true&amp;lt;/PackAsTool&amp;gt;
+    &amp;lt;ToolCommandName&amp;gt;demo&amp;lt;/ToolCommandName&amp;gt; &amp;lt;!-- نام دستوری که در ترمینال استفاده می‌شود --&amp;gt;
+    &amp;lt;PackageId&amp;gt;DemoCli&amp;lt;/PackageId&amp;gt;
+    &amp;lt;Version&amp;gt;1.0.0&amp;lt;/Version&amp;gt;
+  &amp;lt;/PropertyGroup&amp;gt;
+
+&amp;lt;/Project&amp;gt;&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مثال عملی: دستور&lt;/strong&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;greet&lt;/code&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;هدف:&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;demo greet Diane 3&lt;/code&gt; → سه بار Hello, Diane! چاپ کند&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;demo greet Jack 5 -u&lt;/code&gt; → پنج بار HELLO, JACK! چاپ کند&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;نسخهٔ تمیز و توصیه‌شده (با Binding خودکار)&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;using System.CommandLine;
+using System.CommandLine.Invocation;
+
+var nameArg = new Argument&amp;lt;string&amp;gt;(&amp;quot;name&amp;quot;, &amp;quot;نام شخص برای سلام کردن&amp;quot;);
+var timesArg = new Argument&amp;lt;int&amp;gt;(&amp;quot;times&amp;quot;, &amp;quot;تعداد دفعات تکرار سلام&amp;quot;)
+{
+    // مقدار پیش‌فرض اختیاری
+    Arity = ArgumentArity.ZeroOrOne
+};
+timesArg.SetDefaultValue(1); // اگر مقدار ندهیم، یک بار اجرا شود
+
+var upperOption = new Option&amp;lt;bool&amp;gt;(
+    aliases: [&amp;quot;--uppercase&amp;quot;, &amp;quot;-u&amp;quot;],
+    description: &amp;quot;خروجی را با حروف بزرگ نمایش بده&amp;quot;);
+
+// زیر دستور greet
+var greetCommand = new Command(&amp;quot;greet&amp;quot;, &amp;quot;چاپ پیام سلام&amp;quot;)
+{
+    nameArg,
+    timesArg,
+    upperOption
+};
+
+// این خط جادویی است! تمام پارسینگ و بایندینگ خودکار انجام می‌شود
+greetCommand.SetHandler((string name, int times, bool uppercase) =&amp;gt;
+{
+    var message = uppercase 
+        ? $&amp;quot;HELLO, {name.ToUpperInvariant()}!&amp;quot; 
+        : $&amp;quot;Hello, {name}!&amp;quot;;
+
+    for (int i = 0; i &amp;lt; times; i++)
+        Console.WriteLine(message);
+
+}, nameArg, timesArg, upperOption);
+
+// دستور ریشه (root command)
+var rootCommand = new RootCommand(&amp;quot;ابزار دمو CLI ساخته‌شده با System.CommandLine 2.0&amp;quot;)
+{
+    greetCommand
+};
+
+// این دو گزینه به‌صورت خودکار اضافه می‌شوند
+rootCommand.AddGlobalOption(new Option&amp;lt;bool&amp;gt;([&amp;quot;--version&amp;quot;], &amp;quot;نمایش نسخه&amp;quot;));
+rootCommand.Description = &amp;quot;یک ابزار ساده برای تست System.CommandLine&amp;quot;;
+
+return await rootCommand.InvokeAsync(args);&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;این دقیقاً همان کاری است که در کد اولیهٔ شما بود، اما بسیار تمیزتر، خواناتر و بدون نیاز به &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;parsed.GetRequiredValue(...)&lt;/code&gt;.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;اجرای سریع برای دیباگ (launchSettings.json)&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;در پوشهٔ &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Properties/launchSettings.json&lt;/code&gt; این پروفایل‌ها را اضافه کنید:&lt;/div&gt;&lt;pre data-language=&quot;json&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;{
+  &amp;quot;profiles&amp;quot;: {
+    &amp;quot;Greet Diane 3 times&amp;quot;: {
+      &amp;quot;commandName&amp;quot;: &amp;quot;Project&amp;quot;,
+      &amp;quot;commandLineArgs&amp;quot;: &amp;quot;greet Diane 3&amp;quot;
+    },
+    &amp;quot;Shout at Jack&amp;quot;: {
+      &amp;quot;commandName&amp;quot;: &amp;quot;Project&amp;quot;,
+      &amp;quot;commandLineArgs&amp;quot;: &amp;quot;greet Jack 1 -u&amp;quot;
+    },
+    &amp;quot;Shout 5 times&amp;quot;: {
+      &amp;quot;commandName&amp;quot;: &amp;quot;Project&amp;quot;,
+      &amp;quot;commandLineArgs&amp;quot;: &amp;quot;greet Jack 5 --uppercase&amp;quot;
+    }
+  }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;حالا در Visual Studio یا VS Code می‌توانید مستقیماً این سناریوها را دیباگ کنید.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;انتشار به‌صورت dotnet tool&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;bash&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;dotnet pack -c Release
+dotnet tool install --global --add-source ./nupkg demo&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;حالا در هر ترمینالی می‌توانید بنویسید:&lt;/div&gt;&lt;pre data-language=&quot;bash&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;demo greet Ali 4 -u&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نکات پیشرفتهٔ نسخهٔ 2.0&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong&gt;اعتبارسنجی خودکار&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;var ageArg = new Argument&amp;lt;int&amp;gt;(&amp;quot;age&amp;quot;, &amp;quot;سن شخص&amp;quot;);
+ageArg.AddValidator(result =&amp;gt;
+{
+    if (result.GetValueOrDefault&amp;lt;int&amp;gt;() &amp;lt; 0)
+        result.ErrorMessage = &amp;quot;سن نمی‌تواند منفی باشد!&amp;quot;;
+});&lt;/pre&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong&gt;آپشن‌های پیچیده‌تر (مثل Enum یا List)&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;var colorOption = new Option&amp;lt;ConsoleColor&amp;gt;([&amp;quot;--color&amp;quot;, &amp;quot;-c&amp;quot;], &amp;quot;رنگ متن&amp;quot;)
+{
+    Arity = ArgumentArity.ExactlyOne
+};&lt;/pre&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong&gt;استفاده از Microsoft.Extensions.Hosting (تزریق وابستگی)&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;var builder = Host.CreateDefaultBuilder(args)
+    .ConfigureServices(services =&amp;gt; services.AddSingleton&amp;lt;MyService&amp;gt;())
+    .UseCommandLine(rootCommand); // این extension جدید است!&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong&gt;محلی‌سازی Help&lt;/strong&gt; در نسخهٔ 2.0 می‌توانید &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;HelpBuilder&lt;/code&gt; را کاملاً سفارشی کنید یا متن‌های کمک را محلی‌سازی کنید.&lt;/div&gt;">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="انتشار نسخهٔ پایدار System.CommandLine  توسط مایکروسافت">
+    <meta property="og:description" content="&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;در &lt;strong&gt;۱۱ نوامبر ۲۰۲۵&lt;/strong&gt; (چند روز پیش)، مایکروسافت بالاخره نسخهٔ &lt;strong&gt;پایدار و GA (General Availability)&lt;/strong&gt; بستهٔ &lt;strong&gt;System.CommandLine 2.0.0&lt;/strong&gt; را منتشر کرد. این بسته بعد از حدود ۴ سال ماندن در مرحلهٔ بتا و RC، حالا به‌صورت کاملاً پایدار و آمادهٔ استفاده در پروژه‌های تولیدی در دسترس است.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;System.CommandLine بهترین و رسمی‌ترین راه برای ساخت ابزارهای خط فرمان حرفه‌ای در اکوسیستم .NET است و قابلیت‌هایی مثل:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;پارسینگ خودکار آرگومان‌ها و آپشن‌ها&lt;/li&gt;&lt;li&gt;تولید خودکار &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;--help&lt;/code&gt; و &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;--version&lt;/code&gt;&lt;/li&gt;&lt;li&gt;اعتبارسنجی ورودی‌ها&lt;/li&gt;&lt;li&gt;پیشنهاد تکمیل دستورات (Suggestion)&lt;/li&gt;&lt;li&gt;پشتیبانی از Response File (@file)&lt;/li&gt;&lt;li&gt;میان‌افزارها (Middleware)&lt;/li&gt;&lt;li&gt;ادغام کامل با Microsoft.Extensions.Hosting و Dependency Injection&lt;/li&gt;&lt;li&gt;قابلیت انتشار به‌صورت dotnet tool&lt;/li&gt;&lt;li&gt;محلی‌سازی متن کمک&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;را به‌صورت آماده و بدون نیاز به کد اضافی ارائه می‌دهد.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نصب بسته&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;plain&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;dotnet add package System.CommandLine --version 2.0.0&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;(در زمان نوشتن این مقاله، این آخرین نسخهٔ پایدار است)&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پروژهٔ سادهٔ Console در .NET 10&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;یک پروژهٔ کنسولی معمولی بسازید:&lt;/div&gt;&lt;pre data-language=&quot;bash&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;dotnet new console -n DemoCli
+cd DemoCli
+dotnet add package System.CommandLine&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;فایل &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;DemoCli.csproj&lt;/code&gt; را به این شکل تغییر دهید تا به‌صورت dotnet tool منتشر شود:&lt;/div&gt;&lt;pre data-language=&quot;xml&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;lt;Project Sdk=&amp;quot;Microsoft.NET.Sdk&amp;quot;&amp;gt;
+
+  &amp;lt;PropertyGroup&amp;gt;
+    &amp;lt;OutputType&amp;gt;Exe&amp;lt;/OutputType&amp;gt;
+    &amp;lt;TargetFramework&amp;gt;net10.0&amp;lt;/TargetFramework&amp;gt;
+    &amp;lt;ImplicitUsings&amp;gt;enable&amp;lt;/ImplicitUsings&amp;gt;
+    &amp;lt;Nullable&amp;gt;enable&amp;lt;/Nullable&amp;gt;
+
+    &amp;lt;!-- این بخش باعث می‌شود بتوانید با dotnet pack → dotnet tool install -g demo اجرا کنید --&amp;gt;
+    &amp;lt;PackAsTool&amp;gt;true&amp;lt;/PackAsTool&amp;gt;
+    &amp;lt;ToolCommandName&amp;gt;demo&amp;lt;/ToolCommandName&amp;gt; &amp;lt;!-- نام دستوری که در ترمینال استفاده می‌شود --&amp;gt;
+    &amp;lt;PackageId&amp;gt;DemoCli&amp;lt;/PackageId&amp;gt;
+    &amp;lt;Version&amp;gt;1.0.0&amp;lt;/Version&amp;gt;
+  &amp;lt;/PropertyGroup&amp;gt;
+
+&amp;lt;/Project&amp;gt;&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مثال عملی: دستور&lt;/strong&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;greet&lt;/code&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;هدف:&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;demo greet Diane 3&lt;/code&gt; → سه بار Hello, Diane! چاپ کند&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;demo greet Jack 5 -u&lt;/code&gt; → پنج بار HELLO, JACK! چاپ کند&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;نسخهٔ تمیز و توصیه‌شده (با Binding خودکار)&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;using System.CommandLine;
+using System.CommandLine.Invocation;
+
+var nameArg = new Argument&amp;lt;string&amp;gt;(&amp;quot;name&amp;quot;, &amp;quot;نام شخص برای سلام کردن&amp;quot;);
+var timesArg = new Argument&amp;lt;int&amp;gt;(&amp;quot;times&amp;quot;, &amp;quot;تعداد دفعات تکرار سلام&amp;quot;)
+{
+    // مقدار پیش‌فرض اختیاری
+    Arity = ArgumentArity.ZeroOrOne
+};
+timesArg.SetDefaultValue(1); // اگر مقدار ندهیم، یک بار اجرا شود
+
+var upperOption = new Option&amp;lt;bool&amp;gt;(
+    aliases: [&amp;quot;--uppercase&amp;quot;, &amp;quot;-u&amp;quot;],
+    description: &amp;quot;خروجی را با حروف بزرگ نمایش بده&amp;quot;);
+
+// زیر دستور greet
+var greetCommand = new Command(&amp;quot;greet&amp;quot;, &amp;quot;چاپ پیام سلام&amp;quot;)
+{
+    nameArg,
+    timesArg,
+    upperOption
+};
+
+// این خط جادویی است! تمام پارسینگ و بایندینگ خودکار انجام می‌شود
+greetCommand.SetHandler((string name, int times, bool uppercase) =&amp;gt;
+{
+    var message = uppercase 
+        ? $&amp;quot;HELLO, {name.ToUpperInvariant()}!&amp;quot; 
+        : $&amp;quot;Hello, {name}!&amp;quot;;
+
+    for (int i = 0; i &amp;lt; times; i++)
+        Console.WriteLine(message);
+
+}, nameArg, timesArg, upperOption);
+
+// دستور ریشه (root command)
+var rootCommand = new RootCommand(&amp;quot;ابزار دمو CLI ساخته‌شده با System.CommandLine 2.0&amp;quot;)
+{
+    greetCommand
+};
+
+// این دو گزینه به‌صورت خودکار اضافه می‌شوند
+rootCommand.AddGlobalOption(new Option&amp;lt;bool&amp;gt;([&amp;quot;--version&amp;quot;], &amp;quot;نمایش نسخه&amp;quot;));
+rootCommand.Description = &amp;quot;یک ابزار ساده برای تست System.CommandLine&amp;quot;;
+
+return await rootCommand.InvokeAsync(args);&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;این دقیقاً همان کاری است که در کد اولیهٔ شما بود، اما بسیار تمیزتر، خواناتر و بدون نیاز به &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;parsed.GetRequiredValue(...)&lt;/code&gt;.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;اجرای سریع برای دیباگ (launchSettings.json)&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;در پوشهٔ &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Properties/launchSettings.json&lt;/code&gt; این پروفایل‌ها را اضافه کنید:&lt;/div&gt;&lt;pre data-language=&quot;json&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;{
+  &amp;quot;profiles&amp;quot;: {
+    &amp;quot;Greet Diane 3 times&amp;quot;: {
+      &amp;quot;commandName&amp;quot;: &amp;quot;Project&amp;quot;,
+      &amp;quot;commandLineArgs&amp;quot;: &amp;quot;greet Diane 3&amp;quot;
+    },
+    &amp;quot;Shout at Jack&amp;quot;: {
+      &amp;quot;commandName&amp;quot;: &amp;quot;Project&amp;quot;,
+      &amp;quot;commandLineArgs&amp;quot;: &amp;quot;greet Jack 1 -u&amp;quot;
+    },
+    &amp;quot;Shout 5 times&amp;quot;: {
+      &amp;quot;commandName&amp;quot;: &amp;quot;Project&amp;quot;,
+      &amp;quot;commandLineArgs&amp;quot;: &amp;quot;greet Jack 5 --uppercase&amp;quot;
+    }
+  }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;حالا در Visual Studio یا VS Code می‌توانید مستقیماً این سناریوها را دیباگ کنید.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;انتشار به‌صورت dotnet tool&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;bash&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;dotnet pack -c Release
+dotnet tool install --global --add-source ./nupkg demo&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;حالا در هر ترمینالی می‌توانید بنویسید:&lt;/div&gt;&lt;pre data-language=&quot;bash&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;demo greet Ali 4 -u&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نکات پیشرفتهٔ نسخهٔ 2.0&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong&gt;اعتبارسنجی خودکار&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;var ageArg = new Argument&amp;lt;int&amp;gt;(&amp;quot;age&amp;quot;, &amp;quot;سن شخص&amp;quot;);
+ageArg.AddValidator(result =&amp;gt;
+{
+    if (result.GetValueOrDefault&amp;lt;int&amp;gt;() &amp;lt; 0)
+        result.ErrorMessage = &amp;quot;سن نمی‌تواند منفی باشد!&amp;quot;;
+});&lt;/pre&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong&gt;آپشن‌های پیچیده‌تر (مثل Enum یا List)&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;var colorOption = new Option&amp;lt;ConsoleColor&amp;gt;([&amp;quot;--color&amp;quot;, &amp;quot;-c&amp;quot;], &amp;quot;رنگ متن&amp;quot;)
+{
+    Arity = ArgumentArity.ExactlyOne
+};&lt;/pre&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong&gt;استفاده از Microsoft.Extensions.Hosting (تزریق وابستگی)&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;var builder = Host.CreateDefaultBuilder(args)
+    .ConfigureServices(services =&amp;gt; services.AddSingleton&amp;lt;MyService&amp;gt;())
+    .UseCommandLine(rootCommand); // این extension جدید است!&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong&gt;محلی‌سازی Help&lt;/strong&gt; در نسخهٔ 2.0 می‌توانید &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;HelpBuilder&lt;/code&gt; را کاملاً سفارشی کنید یا متن‌های کمک را محلی‌سازی کنید.&lt;/div&gt;">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="انتشار نسخهٔ پایدار System.CommandLine  توسط مایکروسافت">
+    <meta name="twitter:description" content="&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;در &lt;strong&gt;۱۱ نوامبر ۲۰۲۵&lt;/strong&gt; (چند روز پیش)، مایکروسافت بالاخره نسخهٔ &lt;strong&gt;پایدار و GA (General Availability)&lt;/strong&gt; بستهٔ &lt;strong&gt;System.CommandLine 2.0.0&lt;/strong&gt; را منتشر کرد. این بسته بعد از حدود ۴ سال ماندن در مرحلهٔ بتا و RC، حالا به‌صورت کاملاً پایدار و آمادهٔ استفاده در پروژه‌های تولیدی در دسترس است.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;System.CommandLine بهترین و رسمی‌ترین راه برای ساخت ابزارهای خط فرمان حرفه‌ای در اکوسیستم .NET است و قابلیت‌هایی مثل:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;پارسینگ خودکار آرگومان‌ها و آپشن‌ها&lt;/li&gt;&lt;li&gt;تولید خودکار &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;--help&lt;/code&gt; و &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;--version&lt;/code&gt;&lt;/li&gt;&lt;li&gt;اعتبارسنجی ورودی‌ها&lt;/li&gt;&lt;li&gt;پیشنهاد تکمیل دستورات (Suggestion)&lt;/li&gt;&lt;li&gt;پشتیبانی از Response File (@file)&lt;/li&gt;&lt;li&gt;میان‌افزارها (Middleware)&lt;/li&gt;&lt;li&gt;ادغام کامل با Microsoft.Extensions.Hosting و Dependency Injection&lt;/li&gt;&lt;li&gt;قابلیت انتشار به‌صورت dotnet tool&lt;/li&gt;&lt;li&gt;محلی‌سازی متن کمک&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;را به‌صورت آماده و بدون نیاز به کد اضافی ارائه می‌دهد.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نصب بسته&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;plain&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;dotnet add package System.CommandLine --version 2.0.0&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;(در زمان نوشتن این مقاله، این آخرین نسخهٔ پایدار است)&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پروژهٔ سادهٔ Console در .NET 10&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;یک پروژهٔ کنسولی معمولی بسازید:&lt;/div&gt;&lt;pre data-language=&quot;bash&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;dotnet new console -n DemoCli
+cd DemoCli
+dotnet add package System.CommandLine&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;فایل &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;DemoCli.csproj&lt;/code&gt; را به این شکل تغییر دهید تا به‌صورت dotnet tool منتشر شود:&lt;/div&gt;&lt;pre data-language=&quot;xml&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;lt;Project Sdk=&amp;quot;Microsoft.NET.Sdk&amp;quot;&amp;gt;
+
+  &amp;lt;PropertyGroup&amp;gt;
+    &amp;lt;OutputType&amp;gt;Exe&amp;lt;/OutputType&amp;gt;
+    &amp;lt;TargetFramework&amp;gt;net10.0&amp;lt;/TargetFramework&amp;gt;
+    &amp;lt;ImplicitUsings&amp;gt;enable&amp;lt;/ImplicitUsings&amp;gt;
+    &amp;lt;Nullable&amp;gt;enable&amp;lt;/Nullable&amp;gt;
+
+    &amp;lt;!-- این بخش باعث می‌شود بتوانید با dotnet pack → dotnet tool install -g demo اجرا کنید --&amp;gt;
+    &amp;lt;PackAsTool&amp;gt;true&amp;lt;/PackAsTool&amp;gt;
+    &amp;lt;ToolCommandName&amp;gt;demo&amp;lt;/ToolCommandName&amp;gt; &amp;lt;!-- نام دستوری که در ترمینال استفاده می‌شود --&amp;gt;
+    &amp;lt;PackageId&amp;gt;DemoCli&amp;lt;/PackageId&amp;gt;
+    &amp;lt;Version&amp;gt;1.0.0&amp;lt;/Version&amp;gt;
+  &amp;lt;/PropertyGroup&amp;gt;
+
+&amp;lt;/Project&amp;gt;&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مثال عملی: دستور&lt;/strong&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;greet&lt;/code&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;هدف:&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;demo greet Diane 3&lt;/code&gt; → سه بار Hello, Diane! چاپ کند&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;demo greet Jack 5 -u&lt;/code&gt; → پنج بار HELLO, JACK! چاپ کند&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;نسخهٔ تمیز و توصیه‌شده (با Binding خودکار)&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;using System.CommandLine;
+using System.CommandLine.Invocation;
+
+var nameArg = new Argument&amp;lt;string&amp;gt;(&amp;quot;name&amp;quot;, &amp;quot;نام شخص برای سلام کردن&amp;quot;);
+var timesArg = new Argument&amp;lt;int&amp;gt;(&amp;quot;times&amp;quot;, &amp;quot;تعداد دفعات تکرار سلام&amp;quot;)
+{
+    // مقدار پیش‌فرض اختیاری
+    Arity = ArgumentArity.ZeroOrOne
+};
+timesArg.SetDefaultValue(1); // اگر مقدار ندهیم، یک بار اجرا شود
+
+var upperOption = new Option&amp;lt;bool&amp;gt;(
+    aliases: [&amp;quot;--uppercase&amp;quot;, &amp;quot;-u&amp;quot;],
+    description: &amp;quot;خروجی را با حروف بزرگ نمایش بده&amp;quot;);
+
+// زیر دستور greet
+var greetCommand = new Command(&amp;quot;greet&amp;quot;, &amp;quot;چاپ پیام سلام&amp;quot;)
+{
+    nameArg,
+    timesArg,
+    upperOption
+};
+
+// این خط جادویی است! تمام پارسینگ و بایندینگ خودکار انجام می‌شود
+greetCommand.SetHandler((string name, int times, bool uppercase) =&amp;gt;
+{
+    var message = uppercase 
+        ? $&amp;quot;HELLO, {name.ToUpperInvariant()}!&amp;quot; 
+        : $&amp;quot;Hello, {name}!&amp;quot;;
+
+    for (int i = 0; i &amp;lt; times; i++)
+        Console.WriteLine(message);
+
+}, nameArg, timesArg, upperOption);
+
+// دستور ریشه (root command)
+var rootCommand = new RootCommand(&amp;quot;ابزار دمو CLI ساخته‌شده با System.CommandLine 2.0&amp;quot;)
+{
+    greetCommand
+};
+
+// این دو گزینه به‌صورت خودکار اضافه می‌شوند
+rootCommand.AddGlobalOption(new Option&amp;lt;bool&amp;gt;([&amp;quot;--version&amp;quot;], &amp;quot;نمایش نسخه&amp;quot;));
+rootCommand.Description = &amp;quot;یک ابزار ساده برای تست System.CommandLine&amp;quot;;
+
+return await rootCommand.InvokeAsync(args);&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;این دقیقاً همان کاری است که در کد اولیهٔ شما بود، اما بسیار تمیزتر، خواناتر و بدون نیاز به &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;parsed.GetRequiredValue(...)&lt;/code&gt;.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;اجرای سریع برای دیباگ (launchSettings.json)&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;در پوشهٔ &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Properties/launchSettings.json&lt;/code&gt; این پروفایل‌ها را اضافه کنید:&lt;/div&gt;&lt;pre data-language=&quot;json&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;{
+  &amp;quot;profiles&amp;quot;: {
+    &amp;quot;Greet Diane 3 times&amp;quot;: {
+      &amp;quot;commandName&amp;quot;: &amp;quot;Project&amp;quot;,
+      &amp;quot;commandLineArgs&amp;quot;: &amp;quot;greet Diane 3&amp;quot;
+    },
+    &amp;quot;Shout at Jack&amp;quot;: {
+      &amp;quot;commandName&amp;quot;: &amp;quot;Project&amp;quot;,
+      &amp;quot;commandLineArgs&amp;quot;: &amp;quot;greet Jack 1 -u&amp;quot;
+    },
+    &amp;quot;Shout 5 times&amp;quot;: {
+      &amp;quot;commandName&amp;quot;: &amp;quot;Project&amp;quot;,
+      &amp;quot;commandLineArgs&amp;quot;: &amp;quot;greet Jack 5 --uppercase&amp;quot;
+    }
+  }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;حالا در Visual Studio یا VS Code می‌توانید مستقیماً این سناریوها را دیباگ کنید.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;انتشار به‌صورت dotnet tool&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;bash&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;dotnet pack -c Release
+dotnet tool install --global --add-source ./nupkg demo&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;حالا در هر ترمینالی می‌توانید بنویسید:&lt;/div&gt;&lt;pre data-language=&quot;bash&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;demo greet Ali 4 -u&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نکات پیشرفتهٔ نسخهٔ 2.0&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong&gt;اعتبارسنجی خودکار&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;var ageArg = new Argument&amp;lt;int&amp;gt;(&amp;quot;age&amp;quot;, &amp;quot;سن شخص&amp;quot;);
+ageArg.AddValidator(result =&amp;gt;
+{
+    if (result.GetValueOrDefault&amp;lt;int&amp;gt;() &amp;lt; 0)
+        result.ErrorMessage = &amp;quot;سن نمی‌تواند منفی باشد!&amp;quot;;
+});&lt;/pre&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong&gt;آپشن‌های پیچیده‌تر (مثل Enum یا List)&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;var colorOption = new Option&amp;lt;ConsoleColor&amp;gt;([&amp;quot;--color&amp;quot;, &amp;quot;-c&amp;quot;], &amp;quot;رنگ متن&amp;quot;)
+{
+    Arity = ArgumentArity.ExactlyOne
+};&lt;/pre&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong&gt;استفاده از Microsoft.Extensions.Hosting (تزریق وابستگی)&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;var builder = Host.CreateDefaultBuilder(args)
+    .ConfigureServices(services =&amp;gt; services.AddSingleton&amp;lt;MyService&amp;gt;())
+    .UseCommandLine(rootCommand); // این extension جدید است!&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong&gt;محلی‌سازی Help&lt;/strong&gt; در نسخهٔ 2.0 می‌توانید &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;HelpBuilder&lt;/code&gt; را کاملاً سفارشی کنید یا متن‌های کمک را محلی‌سازی کنید.&lt;/div&gt;">
+    <meta name="twitter:card" content="&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;در &lt;strong&gt;۱۱ نوامبر ۲۰۲۵&lt;/strong&gt; (چند روز پیش)، مایکروسافت بالاخره نسخهٔ &lt;strong&gt;پایدار و GA (General Availability)&lt;/strong&gt; بستهٔ &lt;strong&gt;System.CommandLine 2.0.0&lt;/strong&gt; را منتشر کرد. این بسته بعد از حدود ۴ سال ماندن در مرحلهٔ بتا و RC، حالا به‌صورت کاملاً پایدار و آمادهٔ استفاده در پروژه‌های تولیدی در دسترس است.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;System.CommandLine بهترین و رسمی‌ترین راه برای ساخت ابزارهای خط فرمان حرفه‌ای در اکوسیستم .NET است و قابلیت‌هایی مثل:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;پارسینگ خودکار آرگومان‌ها و آپشن‌ها&lt;/li&gt;&lt;li&gt;تولید خودکار &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;--help&lt;/code&gt; و &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;--version&lt;/code&gt;&lt;/li&gt;&lt;li&gt;اعتبارسنجی ورودی‌ها&lt;/li&gt;&lt;li&gt;پیشنهاد تکمیل دستورات (Suggestion)&lt;/li&gt;&lt;li&gt;پشتیبانی از Response File (@file)&lt;/li&gt;&lt;li&gt;میان‌افزارها (Middleware)&lt;/li&gt;&lt;li&gt;ادغام کامل با Microsoft.Extensions.Hosting و Dependency Injection&lt;/li&gt;&lt;li&gt;قابلیت انتشار به‌صورت dotnet tool&lt;/li&gt;&lt;li&gt;محلی‌سازی متن کمک&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;را به‌صورت آماده و بدون نیاز به کد اضافی ارائه می‌دهد.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نصب بسته&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;plain&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;dotnet add package System.CommandLine --version 2.0.0&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;(در زمان نوشتن این مقاله، این آخرین نسخهٔ پایدار است)&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پروژهٔ سادهٔ Console در .NET 10&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;یک پروژهٔ کنسولی معمولی بسازید:&lt;/div&gt;&lt;pre data-language=&quot;bash&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;dotnet new console -n DemoCli
+cd DemoCli
+dotnet add package System.CommandLine&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;فایل &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;DemoCli.csproj&lt;/code&gt; را به این شکل تغییر دهید تا به‌صورت dotnet tool منتشر شود:&lt;/div&gt;&lt;pre data-language=&quot;xml&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;lt;Project Sdk=&amp;quot;Microsoft.NET.Sdk&amp;quot;&amp;gt;
+
+  &amp;lt;PropertyGroup&amp;gt;
+    &amp;lt;OutputType&amp;gt;Exe&amp;lt;/OutputType&amp;gt;
+    &amp;lt;TargetFramework&amp;gt;net10.0&amp;lt;/TargetFramework&amp;gt;
+    &amp;lt;ImplicitUsings&amp;gt;enable&amp;lt;/ImplicitUsings&amp;gt;
+    &amp;lt;Nullable&amp;gt;enable&amp;lt;/Nullable&amp;gt;
+
+    &amp;lt;!-- این بخش باعث می‌شود بتوانید با dotnet pack → dotnet tool install -g demo اجرا کنید --&amp;gt;
+    &amp;lt;PackAsTool&amp;gt;true&amp;lt;/PackAsTool&amp;gt;
+    &amp;lt;ToolCommandName&amp;gt;demo&amp;lt;/ToolCommandName&amp;gt; &amp;lt;!-- نام دستوری که در ترمینال استفاده می‌شود --&amp;gt;
+    &amp;lt;PackageId&amp;gt;DemoCli&amp;lt;/PackageId&amp;gt;
+    &amp;lt;Version&amp;gt;1.0.0&amp;lt;/Version&amp;gt;
+  &amp;lt;/PropertyGroup&amp;gt;
+
+&amp;lt;/Project&amp;gt;&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مثال عملی: دستور&lt;/strong&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;greet&lt;/code&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;هدف:&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;demo greet Diane 3&lt;/code&gt; → سه بار Hello, Diane! چاپ کند&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;demo greet Jack 5 -u&lt;/code&gt; → پنج بار HELLO, JACK! چاپ کند&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;نسخهٔ تمیز و توصیه‌شده (با Binding خودکار)&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;using System.CommandLine;
+using System.CommandLine.Invocation;
+
+var nameArg = new Argument&amp;lt;string&amp;gt;(&amp;quot;name&amp;quot;, &amp;quot;نام شخص برای سلام کردن&amp;quot;);
+var timesArg = new Argument&amp;lt;int&amp;gt;(&amp;quot;times&amp;quot;, &amp;quot;تعداد دفعات تکرار سلام&amp;quot;)
+{
+    // مقدار پیش‌فرض اختیاری
+    Arity = ArgumentArity.ZeroOrOne
+};
+timesArg.SetDefaultValue(1); // اگر مقدار ندهیم، یک بار اجرا شود
+
+var upperOption = new Option&amp;lt;bool&amp;gt;(
+    aliases: [&amp;quot;--uppercase&amp;quot;, &amp;quot;-u&amp;quot;],
+    description: &amp;quot;خروجی را با حروف بزرگ نمایش بده&amp;quot;);
+
+// زیر دستور greet
+var greetCommand = new Command(&amp;quot;greet&amp;quot;, &amp;quot;چاپ پیام سلام&amp;quot;)
+{
+    nameArg,
+    timesArg,
+    upperOption
+};
+
+// این خط جادویی است! تمام پارسینگ و بایندینگ خودکار انجام می‌شود
+greetCommand.SetHandler((string name, int times, bool uppercase) =&amp;gt;
+{
+    var message = uppercase 
+        ? $&amp;quot;HELLO, {name.ToUpperInvariant()}!&amp;quot; 
+        : $&amp;quot;Hello, {name}!&amp;quot;;
+
+    for (int i = 0; i &amp;lt; times; i++)
+        Console.WriteLine(message);
+
+}, nameArg, timesArg, upperOption);
+
+// دستور ریشه (root command)
+var rootCommand = new RootCommand(&amp;quot;ابزار دمو CLI ساخته‌شده با System.CommandLine 2.0&amp;quot;)
+{
+    greetCommand
+};
+
+// این دو گزینه به‌صورت خودکار اضافه می‌شوند
+rootCommand.AddGlobalOption(new Option&amp;lt;bool&amp;gt;([&amp;quot;--version&amp;quot;], &amp;quot;نمایش نسخه&amp;quot;));
+rootCommand.Description = &amp;quot;یک ابزار ساده برای تست System.CommandLine&amp;quot;;
+
+return await rootCommand.InvokeAsync(args);&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;این دقیقاً همان کاری است که در کد اولیهٔ شما بود، اما بسیار تمیزتر، خواناتر و بدون نیاز به &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;parsed.GetRequiredValue(...)&lt;/code&gt;.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;اجرای سریع برای دیباگ (launchSettings.json)&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;در پوشهٔ &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Properties/launchSettings.json&lt;/code&gt; این پروفایل‌ها را اضافه کنید:&lt;/div&gt;&lt;pre data-language=&quot;json&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;{
+  &amp;quot;profiles&amp;quot;: {
+    &amp;quot;Greet Diane 3 times&amp;quot;: {
+      &amp;quot;commandName&amp;quot;: &amp;quot;Project&amp;quot;,
+      &amp;quot;commandLineArgs&amp;quot;: &amp;quot;greet Diane 3&amp;quot;
+    },
+    &amp;quot;Shout at Jack&amp;quot;: {
+      &amp;quot;commandName&amp;quot;: &amp;quot;Project&amp;quot;,
+      &amp;quot;commandLineArgs&amp;quot;: &amp;quot;greet Jack 1 -u&amp;quot;
+    },
+    &amp;quot;Shout 5 times&amp;quot;: {
+      &amp;quot;commandName&amp;quot;: &amp;quot;Project&amp;quot;,
+      &amp;quot;commandLineArgs&amp;quot;: &amp;quot;greet Jack 5 --uppercase&amp;quot;
+    }
+  }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;حالا در Visual Studio یا VS Code می‌توانید مستقیماً این سناریوها را دیباگ کنید.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;انتشار به‌صورت dotnet tool&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;bash&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;dotnet pack -c Release
+dotnet tool install --global --add-source ./nupkg demo&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;حالا در هر ترمینالی می‌توانید بنویسید:&lt;/div&gt;&lt;pre data-language=&quot;bash&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;demo greet Ali 4 -u&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نکات پیشرفتهٔ نسخهٔ 2.0&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong&gt;اعتبارسنجی خودکار&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;var ageArg = new Argument&amp;lt;int&amp;gt;(&amp;quot;age&amp;quot;, &amp;quot;سن شخص&amp;quot;);
+ageArg.AddValidator(result =&amp;gt;
+{
+    if (result.GetValueOrDefault&amp;lt;int&amp;gt;() &amp;lt; 0)
+        result.ErrorMessage = &amp;quot;سن نمی‌تواند منفی باشد!&amp;quot;;
+});&lt;/pre&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong&gt;آپشن‌های پیچیده‌تر (مثل Enum یا List)&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;var colorOption = new Option&amp;lt;ConsoleColor&amp;gt;([&amp;quot;--color&amp;quot;, &amp;quot;-c&amp;quot;], &amp;quot;رنگ متن&amp;quot;)
+{
+    Arity = ArgumentArity.ExactlyOne
+};&lt;/pre&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong&gt;استفاده از Microsoft.Extensions.Hosting (تزریق وابستگی)&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;var builder = Host.CreateDefaultBuilder(args)
+    .ConfigureServices(services =&amp;gt; services.AddSingleton&amp;lt;MyService&amp;gt;())
+    .UseCommandLine(rootCommand); // این extension جدید است!&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;strong&gt;محلی‌سازی Help&lt;/strong&gt; در نسخهٔ 2.0 می‌توانید &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;HelpBuilder&lt;/code&gt; را کاملاً سفارشی کنید یا متن‌های کمک را محلی‌سازی کنید.&lt;/div&gt;">
+    <meta property="article:published_time" content="Sat, 15 Nov 2025 07:27:04 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
     <meta content='IE=edge' http-equiv='X-UA-Compatible'>
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">
-	
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
 	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
-
     <link href="vs.min.css" rel="stylesheet" type="text/css">
-    <script src="highlight.min.js" type="text/javascript"></script>
-	
+    <script src="highlight.min.js" type="text/javascript"></script>	
     <link href="styles.css" rel="stylesheet" type="text/css">	
     <style>
       @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
@@ -42,8 +494,8 @@
         }
      }
     </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
 </head>
-
 <body dir='rtl'>
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
@@ -53,7 +505,7 @@
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۳۶۹۵</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۶۹۷</span></td>
 </tr>
 <tr>
 <td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
@@ -73,7 +525,7 @@
 </tr>
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۲۲</span></td>
 </tr>
 </tbody>
 </table>
@@ -211,8 +663,5 @@ ageArg.AddValidator(result =&gt;
 
 <!-- to load custom fonts for printing -->
 <div class="useSamimFD">&nbsp;</div>
-
-<script src="SyntaxHighlighter.js" type="text/javascript"></script>
 </body>
-
 </html>

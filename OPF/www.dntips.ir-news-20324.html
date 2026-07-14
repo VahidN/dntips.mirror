@@ -1,17 +1,599 @@
 <!DOCTYPE html>
 <html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
-
 <head>
-    <title>‫‫پیاده‌سازی Server-Sent Events در ASP.NET Core و NET 10.</title>
+    <title>‫‫پیاده‌سازی Server-Sent Events در ASP.NET Core و NET 10.</title>     <meta name="description" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در دنیای توسعه وب، ارائه به‌روزرسانی‌های بلادرنگ (Real-Time Updates) به کاربران یکی از نیازهای کلیدی بسیاری از برنامه‌های کاربردی مدرن است. از فیدهای خبری زنده گرفته تا نمایش لحظه‌ای تغییرات قیمت سهام، فناوری‌هایی که امکان ارسال داده از سرور به کلاینت را به‌صورت یک‌طرفه فراهم می‌کنند، جایگاه ویژه‌ای دارند. یکی از این فناوری‌ها، رویدادهای ارسالی از سرور (Server-Sent Events یا SSE) است که به دلیل سادگی و استفاده از پروتکل HTTP، گزینه‌ای سبک و کارآمد برای پیاده‌سازی ارتباطات بلادرنگ محسوب می‌شود. با انتشار .NET 10 و بهبودهای اعمال‌شده در ASP.NET Core، پشتیبانی داخلی از SSE در Minimal APIs، توسعه‌دهندگان را قادر ساخته است تا با کمترین پیچیدگی، این فناوری را در پروژه‌های خود به کار گیرند. این مقاله به بررسی نحوه پیاده‌سازی SSE در ASP.NET Core با استفاده از .NET 10 می‌پردازد. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;Server-Sent Events چیست؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;رویدادهای ارسالی از سرور (Server-Sent Events) یک استاندارد وب است که امکان برقراری یک کانال ارتباطی یک‌طرفه از سرور به کلاینت را فراهم می‌کند. برخلاف فناوری وب‌سوکت (WebSocket) که ارتباط دوطرفه را پشتیبانی می‌کند، SSE برای سناریوهایی طراحی شده است که سرور نیاز دارد داده‌ها را به‌صورت مداوم و بدون درخواست مستقیم از کلاینت به آن ارسال کند. این فناوری بر پایه پروتکل HTTP عمل می‌کند و از فرمت متنی ساده‌ای با نوع محتوا (Content-Type) &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;text/event-stream&lt;/code&gt; استفاده می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مزایای اصلی SSE شامل موارد زیر است:&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;سادگی پیاده‌سازی:&lt;/strong&gt; نیازی به پروتکل‌های پیچیده مانند WebSocket ندارد و با ابزارهای استاندارد HTTP قابل پیاده‌سازی است.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;سبک بودن:&lt;/strong&gt; به دلیل عدم نیاز به ارتباط دوطرفه، منابع کمتری مصرف می‌کند.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;پشتیبانی گسترده:&lt;/strong&gt; تمامی مرورگرهای مدرن از SSE پشتیبانی می‌کنند.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در مقایسه با SignalR، که معمولاً از WebSocket به‌عنوان پروتکل پیش‌فرض استفاده می‌کند، SSE گزینه‌ای سبک‌تر برای سناریوهایی است که تنها نیاز به ارسال داده از سرور به کلاینت دارند، مانند به‌روزرسانی‌های لحظه‌ای در فیدهای خبری یا داشبوردهای داده.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پیاده‌سازی SSE در ASP.NET Core با NET 10.&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;NET 10. با معرفی قابلیت‌های جدید در ASP.NET Core Minimal APIs، امکان استفاده مستقیم از SSE را از طریق کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;TypedResults&lt;/code&gt; فراهم کرده است. این قابلیت به توسعه‌دهندگان اجازه می‌دهد تا با حداقل کد، یک نقطه پایانی (Endpoint) برای ارسال رویدادهای سرور ایجاد کنند. در ادامه، مراحل پیاده‌سازی یک مثال ساده با استفاده از Minimal APIs، یک سرویس پس‌زمینه (Background Service)، و جاوااسکریپت برای کلاینت توضیح داده می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;1. تنظیم پروژه و نقطه پایانی SSE&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای شروع، یک پروژه Minimal API در ASP.NET Core ایجاد می‌کنیم. کد زیر ساختار اولیه پروژه را نشان می‌دهد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;using System.ComponentModel;
+using System.Runtime.CompilerServices;
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddSingleton&amp;lt;FoodService&amp;gt;();
+builder.Services.AddHostedService&amp;lt;FoodServiceWorker&amp;gt;();
+
+var app = builder.Build();
+app.UseDefaultFiles().UseStaticFiles();
+
+app.MapGet(&amp;quot;/orders&amp;quot;, (FoodService foods, CancellationToken token) =&amp;gt;
+    TypedResults.ServerSentEvents(
+        foods.GetCurrent(token),
+        eventType: &amp;quot;order&amp;quot;)
+);
+
+app.Run();&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;در این کد:&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;سرویس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;FoodService&lt;/code&gt; به‌عنوان یک سرویس Singleton ثبت می‌شود تا مدیریت داده‌های مشترک بین کلاینت‌ها را بر عهده گیرد.&lt;/li&gt;&lt;li&gt;سرویس پس‌زمینه &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;FoodServiceWorker&lt;/code&gt; برای به‌روزرسانی دوره‌ای داده‌ها ثبت می‌شود.&lt;/li&gt;&lt;li&gt;نقطه پایانی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;/orders&lt;/code&gt; با استفاده از متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;TypedResults.ServerSentEvents&lt;/code&gt; تعریف شده است که یک جریان (Stream) از نوع &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IAsyncEnumerable&amp;lt;string&amp;gt;&lt;/code&gt; را از متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GetCurrent&lt;/code&gt; دریافت می‌کند.&lt;/li&gt;&lt;li&gt;پارامتر &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;eventType&lt;/code&gt; نوع رویداد را مشخص می‌کند (در اینجا &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;order&lt;/code&gt;) که در سمت کلاینت برای شناسایی رویدادها استفاده می‌شود.&lt;/li&gt;&lt;li&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; امکان لغو اشتراک کلاینت را فراهم می‌کند، که برای مدیریت منابع سرور ضروری است.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-ltr&quot; dir=&quot;ltr&quot; style=&quot;text-align: left;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;2. پیاده‌سازی سرویس FoodService با IAsyncEnumerable&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;FoodService&lt;/code&gt; مسئول تولید جریان داده‌ها و همگام‌سازی کلاینت‌ها با یک منبع داده واحد است. این کلاس از الگوی اعلان تغییرات (INotifyPropertyChanged) استفاده می‌کند تا تمام کلاینت‌ها به‌روزرسانی‌های یکسانی دریافت کنند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class FoodService : INotifyPropertyChanged
+{
+    public FoodService()
+    {
+        Current = Foods[Random.Shared.Next(Foods.Length)];
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+    private static readonly string[] Foods = [&amp;quot;&amp;#127828;&amp;quot;, &amp;quot;&amp;#127839;&amp;quot;, &amp;quot;&amp;#129380;&amp;quot;, &amp;quot;&amp;#127844;&amp;quot;, &amp;quot;&amp;#127829;&amp;quot;, &amp;quot;&amp;#127790;&amp;quot;, &amp;quot;&amp;#129369;&amp;quot;];
+
+    private string Current
+    {
+        get =&amp;gt; field;
+        set
+        {
+            field = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public async IAsyncEnumerable&amp;lt;string&amp;gt; GetCurrent(
+        [EnumeratorCancellation] CancellationToken ct)
+    {
+        while (!ct.IsCancellationRequested)
+        {
+            yield return Current;
+            var tcs = new TaskCompletionSource();
+            PropertyChangedEventHandler handler = (_, _) =&amp;gt; tcs.SetResult();
+            PropertyChanged += handler;
+            try
+            {
+                await tcs.Task.WaitAsync(ct);
+            }
+            finally
+            {
+                PropertyChanged -= handler;
+            }
+        }
+    }
+
+    public void Set()
+    {
+        Current = Foods[Random.Shared.Next(Foods.Length)];
+    }
+
+    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نکات کلیدی در این کد:&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;آرایه &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Foods&lt;/code&gt; شامل اموجی‌هایی است که به‌صورت تصادفی به کلاینت‌ها ارسال می‌شوند.&lt;/li&gt;&lt;li&gt;متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GetCurrent&lt;/code&gt; یک جریان &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IAsyncEnumerable&lt;/code&gt; تولید می‌کند که در هر چرخه، مقدار &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Current&lt;/code&gt; را بازمی‌گرداند و منتظر تغییر بعدی می‌ماند.&lt;/li&gt;&lt;li&gt;استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;TaskCompletionSource&lt;/code&gt; و رویداد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PropertyChanged&lt;/code&gt; تضمین می‌کند که تمام کلاینت‌ها به‌روزرسانی‌های هم‌زمان دریافت کنند.&lt;/li&gt;&lt;li&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; امکان توقف جریان را در صورت قطع ارتباط کلاینت فراهم می‌کند.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-ltr&quot; dir=&quot;ltr&quot; style=&quot;text-align: left;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;3. سرویس پس‌زمینه برای به‌روزرسانی داده‌ها&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای شبیه‌سازی به‌روزرسانی‌های دوره‌ای، از یک سرویس پس‌زمینه استفاده می‌کنیم:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class FoodServiceWorker(FoodService foodService) : BackgroundService
+{
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            foodService.Set();
+            await Task.Delay(1000, stoppingToken);
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این سرویس هر ثانیه متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Set&lt;/code&gt; را فراخوانی می‌کند تا مقدار &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Current&lt;/code&gt; در &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;FoodService&lt;/code&gt; به‌روزرسانی شود، که به‌طور خودکار تمام کلاینت‌های متصل را از طریق جریان &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IAsyncEnumerable&lt;/code&gt; مطلع می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;4. کلاینت جاوااسکریپت برای دریافت رویدادها&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;در سمت کلاینت، از شیء &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;EventSource&lt;/code&gt; برای اشتراک در نقطه پایانی SSE استفاده می‌کنیم. کد HTML و جاوااسکریپت زیر این فرآیند را نشان می‌دهد:&lt;/div&gt;&lt;pre data-language=&quot;xml&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;lt;!DOCTYPE html&amp;gt;
+&amp;lt;html lang=&amp;quot;en&amp;quot;&amp;gt;
+&amp;lt;head&amp;gt;
+    &amp;lt;meta charset=&amp;quot;UTF-8&amp;quot;&amp;gt;
+    &amp;lt;title&amp;gt;Khalid&amp;#39;s Fast-Food Fair&amp;lt;/title&amp;gt;
+&amp;lt;/head&amp;gt;
+&amp;lt;style&amp;gt;
+    ul {
+        display: flex;
+        flex-direction: row;
+        list-style: none;
+        flex-wrap: wrap;
+        width: 90%;
+        gap: 1rem;
+        padding: 0;
+    }
+    li {
+        font-size: 2rem;
+    }
+&amp;lt;/style&amp;gt;
+&amp;lt;body&amp;gt;
+    &amp;lt;h1&amp;gt;Khalid&amp;#39;s Fast-Food Fair&amp;lt;/h1&amp;gt;
+    &amp;lt;ul id=&amp;quot;orders&amp;quot;&amp;gt;&amp;lt;/ul&amp;gt;
+    &amp;lt;script&amp;gt;
+        const eventSource = new EventSource(&amp;#39;/orders&amp;#39;);
+        const angelsList = document.getElementById(&amp;#39;orders&amp;#39;);
+
+        eventSource.addEventListener(&amp;#39;order&amp;#39;, event =&amp;gt; {
+            const li = document.createElement(&amp;#39;li&amp;#39;);
+            li.textContent = event.data;
+            angelsList.appendChild(li);
+        });
+
+        eventSource.onerror = error =&amp;gt; {
+            console.error(&amp;#39;EventSource failed:&amp;#39;, error);
+            eventSource.close();
+        };
+    &amp;lt;/script&amp;gt;
+&amp;lt;/body&amp;gt;
+&amp;lt;/html&amp;gt;&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;در این کد:&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;شیء &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;EventSource&lt;/code&gt; به نقطه پایانی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;/orders&lt;/code&gt; متصل می‌شود.&lt;/li&gt;&lt;li&gt;رویداد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;order&lt;/code&gt; توسط &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;addEventListener&lt;/code&gt; شنیده می‌شود و داده دریافتی (اموجی غذا) به لیست &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ul&lt;/code&gt; اضافه می‌شود.&lt;/li&gt;&lt;li&gt;در صورت بروز خطا، اتصال بسته می‌شود و پیام خطا در کنسول نمایش داده می‌شود.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;5. نکات پیشرفته و ارزش افزوده&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای بهبود این پیاده‌سازی در سناریوهای واقعی، می‌توان موارد زیر را در نظر گرفت:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;مدیریت خطاها:&lt;/strong&gt; افزودن مکانیزم‌های Retry در سمت کلاینت با استفاده از ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;reconnect&lt;/code&gt; در &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;EventSource&lt;/code&gt; می‌تواند پایداری ارتباط را افزایش دهد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;پیکربندی سرور:&lt;/strong&gt; در صورت استفاده از پروکسی‌هایی مانند Nginx، باید تنظیمات مربوط به Buffering غیرفعال شود تا جریان SSE به درستی کار کند.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;استفاده از کتابخانه‌ها:&lt;/strong&gt; کتابخانه‌هایی مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Lib.AspNetCore.ServerSentEvents&lt;/code&gt; می‌توانند پیاده‌سازی SSE را ساده‌تر کنند، به‌ویژه برای مدیریت چندین نقطه پایانی یا سناریوهای پیچیده‌تر.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;مقایسه با SignalR:&lt;/strong&gt; در پروژه‌هایی که نیاز به ارتباط دوطرفه وجود دارد، SignalR همچنان گزینه مناسب‌تری است، اما برای سناریوهای ساده‌تر، SSE به دلیل کاهش سربار، ارجحیت دارد.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;رویدادهای ارسالی از سرور (Server-Sent Events) یک ابزار قدرتمند و ساده برای پیاده‌سازی به‌روزرسانی‌های بلادرنگ در برنامه‌های وب است. با معرفی پشتیبانی داخلی در .NET 10 و ASP.NET Core Minimal APIs، توسعه‌دهندگان می‌توانند با حداقل کد، نقاط پایانی SSE را ایجاد کرده و کلاینت‌ها را به‌روزرسانی کنند. مثال ارائه‌شده در این مقاله، که شامل یک سرویس پس‌زمینه، جریان &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IAsyncEnumerable&lt;/code&gt;، و کلاینت جاوااسکریپت است، نشان‌دهنده سادگی و انعطاف‌پذیری این فناوری است. برای توسعه‌دهندگانی که به دنبال راه‌حل‌های سبک و کارآمد برای ارتباطات بلادرنگ هستند، SSE جایگزینی مناسب برای فناوری‌های پیچیده‌تر مانند WebSocket و SignalR است. با این حال، انتخاب فناوری مناسب باید بر اساس نیازهای خاص پروژه انجام شود.&lt;/div&gt;">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="پیاده‌سازی Server-Sent Events در ASP.NET Core و NET 10.">
+    <meta itemprop="description" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در دنیای توسعه وب، ارائه به‌روزرسانی‌های بلادرنگ (Real-Time Updates) به کاربران یکی از نیازهای کلیدی بسیاری از برنامه‌های کاربردی مدرن است. از فیدهای خبری زنده گرفته تا نمایش لحظه‌ای تغییرات قیمت سهام، فناوری‌هایی که امکان ارسال داده از سرور به کلاینت را به‌صورت یک‌طرفه فراهم می‌کنند، جایگاه ویژه‌ای دارند. یکی از این فناوری‌ها، رویدادهای ارسالی از سرور (Server-Sent Events یا SSE) است که به دلیل سادگی و استفاده از پروتکل HTTP، گزینه‌ای سبک و کارآمد برای پیاده‌سازی ارتباطات بلادرنگ محسوب می‌شود. با انتشار .NET 10 و بهبودهای اعمال‌شده در ASP.NET Core، پشتیبانی داخلی از SSE در Minimal APIs، توسعه‌دهندگان را قادر ساخته است تا با کمترین پیچیدگی، این فناوری را در پروژه‌های خود به کار گیرند. این مقاله به بررسی نحوه پیاده‌سازی SSE در ASP.NET Core با استفاده از .NET 10 می‌پردازد. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;Server-Sent Events چیست؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;رویدادهای ارسالی از سرور (Server-Sent Events) یک استاندارد وب است که امکان برقراری یک کانال ارتباطی یک‌طرفه از سرور به کلاینت را فراهم می‌کند. برخلاف فناوری وب‌سوکت (WebSocket) که ارتباط دوطرفه را پشتیبانی می‌کند، SSE برای سناریوهایی طراحی شده است که سرور نیاز دارد داده‌ها را به‌صورت مداوم و بدون درخواست مستقیم از کلاینت به آن ارسال کند. این فناوری بر پایه پروتکل HTTP عمل می‌کند و از فرمت متنی ساده‌ای با نوع محتوا (Content-Type) &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;text/event-stream&lt;/code&gt; استفاده می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مزایای اصلی SSE شامل موارد زیر است:&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;سادگی پیاده‌سازی:&lt;/strong&gt; نیازی به پروتکل‌های پیچیده مانند WebSocket ندارد و با ابزارهای استاندارد HTTP قابل پیاده‌سازی است.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;سبک بودن:&lt;/strong&gt; به دلیل عدم نیاز به ارتباط دوطرفه، منابع کمتری مصرف می‌کند.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;پشتیبانی گسترده:&lt;/strong&gt; تمامی مرورگرهای مدرن از SSE پشتیبانی می‌کنند.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در مقایسه با SignalR، که معمولاً از WebSocket به‌عنوان پروتکل پیش‌فرض استفاده می‌کند، SSE گزینه‌ای سبک‌تر برای سناریوهایی است که تنها نیاز به ارسال داده از سرور به کلاینت دارند، مانند به‌روزرسانی‌های لحظه‌ای در فیدهای خبری یا داشبوردهای داده.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پیاده‌سازی SSE در ASP.NET Core با NET 10.&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;NET 10. با معرفی قابلیت‌های جدید در ASP.NET Core Minimal APIs، امکان استفاده مستقیم از SSE را از طریق کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;TypedResults&lt;/code&gt; فراهم کرده است. این قابلیت به توسعه‌دهندگان اجازه می‌دهد تا با حداقل کد، یک نقطه پایانی (Endpoint) برای ارسال رویدادهای سرور ایجاد کنند. در ادامه، مراحل پیاده‌سازی یک مثال ساده با استفاده از Minimal APIs، یک سرویس پس‌زمینه (Background Service)، و جاوااسکریپت برای کلاینت توضیح داده می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;1. تنظیم پروژه و نقطه پایانی SSE&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای شروع، یک پروژه Minimal API در ASP.NET Core ایجاد می‌کنیم. کد زیر ساختار اولیه پروژه را نشان می‌دهد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;using System.ComponentModel;
+using System.Runtime.CompilerServices;
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddSingleton&amp;lt;FoodService&amp;gt;();
+builder.Services.AddHostedService&amp;lt;FoodServiceWorker&amp;gt;();
+
+var app = builder.Build();
+app.UseDefaultFiles().UseStaticFiles();
+
+app.MapGet(&amp;quot;/orders&amp;quot;, (FoodService foods, CancellationToken token) =&amp;gt;
+    TypedResults.ServerSentEvents(
+        foods.GetCurrent(token),
+        eventType: &amp;quot;order&amp;quot;)
+);
+
+app.Run();&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;در این کد:&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;سرویس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;FoodService&lt;/code&gt; به‌عنوان یک سرویس Singleton ثبت می‌شود تا مدیریت داده‌های مشترک بین کلاینت‌ها را بر عهده گیرد.&lt;/li&gt;&lt;li&gt;سرویس پس‌زمینه &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;FoodServiceWorker&lt;/code&gt; برای به‌روزرسانی دوره‌ای داده‌ها ثبت می‌شود.&lt;/li&gt;&lt;li&gt;نقطه پایانی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;/orders&lt;/code&gt; با استفاده از متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;TypedResults.ServerSentEvents&lt;/code&gt; تعریف شده است که یک جریان (Stream) از نوع &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IAsyncEnumerable&amp;lt;string&amp;gt;&lt;/code&gt; را از متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GetCurrent&lt;/code&gt; دریافت می‌کند.&lt;/li&gt;&lt;li&gt;پارامتر &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;eventType&lt;/code&gt; نوع رویداد را مشخص می‌کند (در اینجا &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;order&lt;/code&gt;) که در سمت کلاینت برای شناسایی رویدادها استفاده می‌شود.&lt;/li&gt;&lt;li&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; امکان لغو اشتراک کلاینت را فراهم می‌کند، که برای مدیریت منابع سرور ضروری است.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-ltr&quot; dir=&quot;ltr&quot; style=&quot;text-align: left;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;2. پیاده‌سازی سرویس FoodService با IAsyncEnumerable&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;FoodService&lt;/code&gt; مسئول تولید جریان داده‌ها و همگام‌سازی کلاینت‌ها با یک منبع داده واحد است. این کلاس از الگوی اعلان تغییرات (INotifyPropertyChanged) استفاده می‌کند تا تمام کلاینت‌ها به‌روزرسانی‌های یکسانی دریافت کنند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class FoodService : INotifyPropertyChanged
+{
+    public FoodService()
+    {
+        Current = Foods[Random.Shared.Next(Foods.Length)];
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+    private static readonly string[] Foods = [&amp;quot;&amp;#127828;&amp;quot;, &amp;quot;&amp;#127839;&amp;quot;, &amp;quot;&amp;#129380;&amp;quot;, &amp;quot;&amp;#127844;&amp;quot;, &amp;quot;&amp;#127829;&amp;quot;, &amp;quot;&amp;#127790;&amp;quot;, &amp;quot;&amp;#129369;&amp;quot;];
+
+    private string Current
+    {
+        get =&amp;gt; field;
+        set
+        {
+            field = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public async IAsyncEnumerable&amp;lt;string&amp;gt; GetCurrent(
+        [EnumeratorCancellation] CancellationToken ct)
+    {
+        while (!ct.IsCancellationRequested)
+        {
+            yield return Current;
+            var tcs = new TaskCompletionSource();
+            PropertyChangedEventHandler handler = (_, _) =&amp;gt; tcs.SetResult();
+            PropertyChanged += handler;
+            try
+            {
+                await tcs.Task.WaitAsync(ct);
+            }
+            finally
+            {
+                PropertyChanged -= handler;
+            }
+        }
+    }
+
+    public void Set()
+    {
+        Current = Foods[Random.Shared.Next(Foods.Length)];
+    }
+
+    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نکات کلیدی در این کد:&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;آرایه &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Foods&lt;/code&gt; شامل اموجی‌هایی است که به‌صورت تصادفی به کلاینت‌ها ارسال می‌شوند.&lt;/li&gt;&lt;li&gt;متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GetCurrent&lt;/code&gt; یک جریان &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IAsyncEnumerable&lt;/code&gt; تولید می‌کند که در هر چرخه، مقدار &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Current&lt;/code&gt; را بازمی‌گرداند و منتظر تغییر بعدی می‌ماند.&lt;/li&gt;&lt;li&gt;استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;TaskCompletionSource&lt;/code&gt; و رویداد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PropertyChanged&lt;/code&gt; تضمین می‌کند که تمام کلاینت‌ها به‌روزرسانی‌های هم‌زمان دریافت کنند.&lt;/li&gt;&lt;li&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; امکان توقف جریان را در صورت قطع ارتباط کلاینت فراهم می‌کند.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-ltr&quot; dir=&quot;ltr&quot; style=&quot;text-align: left;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;3. سرویس پس‌زمینه برای به‌روزرسانی داده‌ها&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای شبیه‌سازی به‌روزرسانی‌های دوره‌ای، از یک سرویس پس‌زمینه استفاده می‌کنیم:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class FoodServiceWorker(FoodService foodService) : BackgroundService
+{
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            foodService.Set();
+            await Task.Delay(1000, stoppingToken);
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این سرویس هر ثانیه متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Set&lt;/code&gt; را فراخوانی می‌کند تا مقدار &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Current&lt;/code&gt; در &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;FoodService&lt;/code&gt; به‌روزرسانی شود، که به‌طور خودکار تمام کلاینت‌های متصل را از طریق جریان &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IAsyncEnumerable&lt;/code&gt; مطلع می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;4. کلاینت جاوااسکریپت برای دریافت رویدادها&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;در سمت کلاینت، از شیء &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;EventSource&lt;/code&gt; برای اشتراک در نقطه پایانی SSE استفاده می‌کنیم. کد HTML و جاوااسکریپت زیر این فرآیند را نشان می‌دهد:&lt;/div&gt;&lt;pre data-language=&quot;xml&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;lt;!DOCTYPE html&amp;gt;
+&amp;lt;html lang=&amp;quot;en&amp;quot;&amp;gt;
+&amp;lt;head&amp;gt;
+    &amp;lt;meta charset=&amp;quot;UTF-8&amp;quot;&amp;gt;
+    &amp;lt;title&amp;gt;Khalid&amp;#39;s Fast-Food Fair&amp;lt;/title&amp;gt;
+&amp;lt;/head&amp;gt;
+&amp;lt;style&amp;gt;
+    ul {
+        display: flex;
+        flex-direction: row;
+        list-style: none;
+        flex-wrap: wrap;
+        width: 90%;
+        gap: 1rem;
+        padding: 0;
+    }
+    li {
+        font-size: 2rem;
+    }
+&amp;lt;/style&amp;gt;
+&amp;lt;body&amp;gt;
+    &amp;lt;h1&amp;gt;Khalid&amp;#39;s Fast-Food Fair&amp;lt;/h1&amp;gt;
+    &amp;lt;ul id=&amp;quot;orders&amp;quot;&amp;gt;&amp;lt;/ul&amp;gt;
+    &amp;lt;script&amp;gt;
+        const eventSource = new EventSource(&amp;#39;/orders&amp;#39;);
+        const angelsList = document.getElementById(&amp;#39;orders&amp;#39;);
+
+        eventSource.addEventListener(&amp;#39;order&amp;#39;, event =&amp;gt; {
+            const li = document.createElement(&amp;#39;li&amp;#39;);
+            li.textContent = event.data;
+            angelsList.appendChild(li);
+        });
+
+        eventSource.onerror = error =&amp;gt; {
+            console.error(&amp;#39;EventSource failed:&amp;#39;, error);
+            eventSource.close();
+        };
+    &amp;lt;/script&amp;gt;
+&amp;lt;/body&amp;gt;
+&amp;lt;/html&amp;gt;&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;در این کد:&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;شیء &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;EventSource&lt;/code&gt; به نقطه پایانی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;/orders&lt;/code&gt; متصل می‌شود.&lt;/li&gt;&lt;li&gt;رویداد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;order&lt;/code&gt; توسط &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;addEventListener&lt;/code&gt; شنیده می‌شود و داده دریافتی (اموجی غذا) به لیست &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ul&lt;/code&gt; اضافه می‌شود.&lt;/li&gt;&lt;li&gt;در صورت بروز خطا، اتصال بسته می‌شود و پیام خطا در کنسول نمایش داده می‌شود.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;5. نکات پیشرفته و ارزش افزوده&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای بهبود این پیاده‌سازی در سناریوهای واقعی، می‌توان موارد زیر را در نظر گرفت:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;مدیریت خطاها:&lt;/strong&gt; افزودن مکانیزم‌های Retry در سمت کلاینت با استفاده از ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;reconnect&lt;/code&gt; در &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;EventSource&lt;/code&gt; می‌تواند پایداری ارتباط را افزایش دهد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;پیکربندی سرور:&lt;/strong&gt; در صورت استفاده از پروکسی‌هایی مانند Nginx، باید تنظیمات مربوط به Buffering غیرفعال شود تا جریان SSE به درستی کار کند.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;استفاده از کتابخانه‌ها:&lt;/strong&gt; کتابخانه‌هایی مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Lib.AspNetCore.ServerSentEvents&lt;/code&gt; می‌توانند پیاده‌سازی SSE را ساده‌تر کنند، به‌ویژه برای مدیریت چندین نقطه پایانی یا سناریوهای پیچیده‌تر.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;مقایسه با SignalR:&lt;/strong&gt; در پروژه‌هایی که نیاز به ارتباط دوطرفه وجود دارد، SignalR همچنان گزینه مناسب‌تری است، اما برای سناریوهای ساده‌تر، SSE به دلیل کاهش سربار، ارجحیت دارد.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;رویدادهای ارسالی از سرور (Server-Sent Events) یک ابزار قدرتمند و ساده برای پیاده‌سازی به‌روزرسانی‌های بلادرنگ در برنامه‌های وب است. با معرفی پشتیبانی داخلی در .NET 10 و ASP.NET Core Minimal APIs، توسعه‌دهندگان می‌توانند با حداقل کد، نقاط پایانی SSE را ایجاد کرده و کلاینت‌ها را به‌روزرسانی کنند. مثال ارائه‌شده در این مقاله، که شامل یک سرویس پس‌زمینه، جریان &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IAsyncEnumerable&lt;/code&gt;، و کلاینت جاوااسکریپت است، نشان‌دهنده سادگی و انعطاف‌پذیری این فناوری است. برای توسعه‌دهندگانی که به دنبال راه‌حل‌های سبک و کارآمد برای ارتباطات بلادرنگ هستند، SSE جایگزینی مناسب برای فناوری‌های پیچیده‌تر مانند WebSocket و SignalR است. با این حال، انتخاب فناوری مناسب باید بر اساس نیازهای خاص پروژه انجام شود.&lt;/div&gt;">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="پیاده‌سازی Server-Sent Events در ASP.NET Core و NET 10.">
+    <meta property="og:description" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در دنیای توسعه وب، ارائه به‌روزرسانی‌های بلادرنگ (Real-Time Updates) به کاربران یکی از نیازهای کلیدی بسیاری از برنامه‌های کاربردی مدرن است. از فیدهای خبری زنده گرفته تا نمایش لحظه‌ای تغییرات قیمت سهام، فناوری‌هایی که امکان ارسال داده از سرور به کلاینت را به‌صورت یک‌طرفه فراهم می‌کنند، جایگاه ویژه‌ای دارند. یکی از این فناوری‌ها، رویدادهای ارسالی از سرور (Server-Sent Events یا SSE) است که به دلیل سادگی و استفاده از پروتکل HTTP، گزینه‌ای سبک و کارآمد برای پیاده‌سازی ارتباطات بلادرنگ محسوب می‌شود. با انتشار .NET 10 و بهبودهای اعمال‌شده در ASP.NET Core، پشتیبانی داخلی از SSE در Minimal APIs، توسعه‌دهندگان را قادر ساخته است تا با کمترین پیچیدگی، این فناوری را در پروژه‌های خود به کار گیرند. این مقاله به بررسی نحوه پیاده‌سازی SSE در ASP.NET Core با استفاده از .NET 10 می‌پردازد. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;Server-Sent Events چیست؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;رویدادهای ارسالی از سرور (Server-Sent Events) یک استاندارد وب است که امکان برقراری یک کانال ارتباطی یک‌طرفه از سرور به کلاینت را فراهم می‌کند. برخلاف فناوری وب‌سوکت (WebSocket) که ارتباط دوطرفه را پشتیبانی می‌کند، SSE برای سناریوهایی طراحی شده است که سرور نیاز دارد داده‌ها را به‌صورت مداوم و بدون درخواست مستقیم از کلاینت به آن ارسال کند. این فناوری بر پایه پروتکل HTTP عمل می‌کند و از فرمت متنی ساده‌ای با نوع محتوا (Content-Type) &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;text/event-stream&lt;/code&gt; استفاده می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مزایای اصلی SSE شامل موارد زیر است:&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;سادگی پیاده‌سازی:&lt;/strong&gt; نیازی به پروتکل‌های پیچیده مانند WebSocket ندارد و با ابزارهای استاندارد HTTP قابل پیاده‌سازی است.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;سبک بودن:&lt;/strong&gt; به دلیل عدم نیاز به ارتباط دوطرفه، منابع کمتری مصرف می‌کند.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;پشتیبانی گسترده:&lt;/strong&gt; تمامی مرورگرهای مدرن از SSE پشتیبانی می‌کنند.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در مقایسه با SignalR، که معمولاً از WebSocket به‌عنوان پروتکل پیش‌فرض استفاده می‌کند، SSE گزینه‌ای سبک‌تر برای سناریوهایی است که تنها نیاز به ارسال داده از سرور به کلاینت دارند، مانند به‌روزرسانی‌های لحظه‌ای در فیدهای خبری یا داشبوردهای داده.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پیاده‌سازی SSE در ASP.NET Core با NET 10.&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;NET 10. با معرفی قابلیت‌های جدید در ASP.NET Core Minimal APIs، امکان استفاده مستقیم از SSE را از طریق کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;TypedResults&lt;/code&gt; فراهم کرده است. این قابلیت به توسعه‌دهندگان اجازه می‌دهد تا با حداقل کد، یک نقطه پایانی (Endpoint) برای ارسال رویدادهای سرور ایجاد کنند. در ادامه، مراحل پیاده‌سازی یک مثال ساده با استفاده از Minimal APIs، یک سرویس پس‌زمینه (Background Service)، و جاوااسکریپت برای کلاینت توضیح داده می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;1. تنظیم پروژه و نقطه پایانی SSE&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای شروع، یک پروژه Minimal API در ASP.NET Core ایجاد می‌کنیم. کد زیر ساختار اولیه پروژه را نشان می‌دهد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;using System.ComponentModel;
+using System.Runtime.CompilerServices;
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddSingleton&amp;lt;FoodService&amp;gt;();
+builder.Services.AddHostedService&amp;lt;FoodServiceWorker&amp;gt;();
+
+var app = builder.Build();
+app.UseDefaultFiles().UseStaticFiles();
+
+app.MapGet(&amp;quot;/orders&amp;quot;, (FoodService foods, CancellationToken token) =&amp;gt;
+    TypedResults.ServerSentEvents(
+        foods.GetCurrent(token),
+        eventType: &amp;quot;order&amp;quot;)
+);
+
+app.Run();&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;در این کد:&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;سرویس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;FoodService&lt;/code&gt; به‌عنوان یک سرویس Singleton ثبت می‌شود تا مدیریت داده‌های مشترک بین کلاینت‌ها را بر عهده گیرد.&lt;/li&gt;&lt;li&gt;سرویس پس‌زمینه &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;FoodServiceWorker&lt;/code&gt; برای به‌روزرسانی دوره‌ای داده‌ها ثبت می‌شود.&lt;/li&gt;&lt;li&gt;نقطه پایانی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;/orders&lt;/code&gt; با استفاده از متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;TypedResults.ServerSentEvents&lt;/code&gt; تعریف شده است که یک جریان (Stream) از نوع &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IAsyncEnumerable&amp;lt;string&amp;gt;&lt;/code&gt; را از متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GetCurrent&lt;/code&gt; دریافت می‌کند.&lt;/li&gt;&lt;li&gt;پارامتر &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;eventType&lt;/code&gt; نوع رویداد را مشخص می‌کند (در اینجا &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;order&lt;/code&gt;) که در سمت کلاینت برای شناسایی رویدادها استفاده می‌شود.&lt;/li&gt;&lt;li&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; امکان لغو اشتراک کلاینت را فراهم می‌کند، که برای مدیریت منابع سرور ضروری است.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-ltr&quot; dir=&quot;ltr&quot; style=&quot;text-align: left;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;2. پیاده‌سازی سرویس FoodService با IAsyncEnumerable&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;FoodService&lt;/code&gt; مسئول تولید جریان داده‌ها و همگام‌سازی کلاینت‌ها با یک منبع داده واحد است. این کلاس از الگوی اعلان تغییرات (INotifyPropertyChanged) استفاده می‌کند تا تمام کلاینت‌ها به‌روزرسانی‌های یکسانی دریافت کنند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class FoodService : INotifyPropertyChanged
+{
+    public FoodService()
+    {
+        Current = Foods[Random.Shared.Next(Foods.Length)];
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+    private static readonly string[] Foods = [&amp;quot;&amp;#127828;&amp;quot;, &amp;quot;&amp;#127839;&amp;quot;, &amp;quot;&amp;#129380;&amp;quot;, &amp;quot;&amp;#127844;&amp;quot;, &amp;quot;&amp;#127829;&amp;quot;, &amp;quot;&amp;#127790;&amp;quot;, &amp;quot;&amp;#129369;&amp;quot;];
+
+    private string Current
+    {
+        get =&amp;gt; field;
+        set
+        {
+            field = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public async IAsyncEnumerable&amp;lt;string&amp;gt; GetCurrent(
+        [EnumeratorCancellation] CancellationToken ct)
+    {
+        while (!ct.IsCancellationRequested)
+        {
+            yield return Current;
+            var tcs = new TaskCompletionSource();
+            PropertyChangedEventHandler handler = (_, _) =&amp;gt; tcs.SetResult();
+            PropertyChanged += handler;
+            try
+            {
+                await tcs.Task.WaitAsync(ct);
+            }
+            finally
+            {
+                PropertyChanged -= handler;
+            }
+        }
+    }
+
+    public void Set()
+    {
+        Current = Foods[Random.Shared.Next(Foods.Length)];
+    }
+
+    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نکات کلیدی در این کد:&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;آرایه &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Foods&lt;/code&gt; شامل اموجی‌هایی است که به‌صورت تصادفی به کلاینت‌ها ارسال می‌شوند.&lt;/li&gt;&lt;li&gt;متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GetCurrent&lt;/code&gt; یک جریان &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IAsyncEnumerable&lt;/code&gt; تولید می‌کند که در هر چرخه، مقدار &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Current&lt;/code&gt; را بازمی‌گرداند و منتظر تغییر بعدی می‌ماند.&lt;/li&gt;&lt;li&gt;استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;TaskCompletionSource&lt;/code&gt; و رویداد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PropertyChanged&lt;/code&gt; تضمین می‌کند که تمام کلاینت‌ها به‌روزرسانی‌های هم‌زمان دریافت کنند.&lt;/li&gt;&lt;li&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; امکان توقف جریان را در صورت قطع ارتباط کلاینت فراهم می‌کند.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-ltr&quot; dir=&quot;ltr&quot; style=&quot;text-align: left;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;3. سرویس پس‌زمینه برای به‌روزرسانی داده‌ها&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای شبیه‌سازی به‌روزرسانی‌های دوره‌ای، از یک سرویس پس‌زمینه استفاده می‌کنیم:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class FoodServiceWorker(FoodService foodService) : BackgroundService
+{
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            foodService.Set();
+            await Task.Delay(1000, stoppingToken);
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این سرویس هر ثانیه متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Set&lt;/code&gt; را فراخوانی می‌کند تا مقدار &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Current&lt;/code&gt; در &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;FoodService&lt;/code&gt; به‌روزرسانی شود، که به‌طور خودکار تمام کلاینت‌های متصل را از طریق جریان &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IAsyncEnumerable&lt;/code&gt; مطلع می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;4. کلاینت جاوااسکریپت برای دریافت رویدادها&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;در سمت کلاینت، از شیء &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;EventSource&lt;/code&gt; برای اشتراک در نقطه پایانی SSE استفاده می‌کنیم. کد HTML و جاوااسکریپت زیر این فرآیند را نشان می‌دهد:&lt;/div&gt;&lt;pre data-language=&quot;xml&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;lt;!DOCTYPE html&amp;gt;
+&amp;lt;html lang=&amp;quot;en&amp;quot;&amp;gt;
+&amp;lt;head&amp;gt;
+    &amp;lt;meta charset=&amp;quot;UTF-8&amp;quot;&amp;gt;
+    &amp;lt;title&amp;gt;Khalid&amp;#39;s Fast-Food Fair&amp;lt;/title&amp;gt;
+&amp;lt;/head&amp;gt;
+&amp;lt;style&amp;gt;
+    ul {
+        display: flex;
+        flex-direction: row;
+        list-style: none;
+        flex-wrap: wrap;
+        width: 90%;
+        gap: 1rem;
+        padding: 0;
+    }
+    li {
+        font-size: 2rem;
+    }
+&amp;lt;/style&amp;gt;
+&amp;lt;body&amp;gt;
+    &amp;lt;h1&amp;gt;Khalid&amp;#39;s Fast-Food Fair&amp;lt;/h1&amp;gt;
+    &amp;lt;ul id=&amp;quot;orders&amp;quot;&amp;gt;&amp;lt;/ul&amp;gt;
+    &amp;lt;script&amp;gt;
+        const eventSource = new EventSource(&amp;#39;/orders&amp;#39;);
+        const angelsList = document.getElementById(&amp;#39;orders&amp;#39;);
+
+        eventSource.addEventListener(&amp;#39;order&amp;#39;, event =&amp;gt; {
+            const li = document.createElement(&amp;#39;li&amp;#39;);
+            li.textContent = event.data;
+            angelsList.appendChild(li);
+        });
+
+        eventSource.onerror = error =&amp;gt; {
+            console.error(&amp;#39;EventSource failed:&amp;#39;, error);
+            eventSource.close();
+        };
+    &amp;lt;/script&amp;gt;
+&amp;lt;/body&amp;gt;
+&amp;lt;/html&amp;gt;&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;در این کد:&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;شیء &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;EventSource&lt;/code&gt; به نقطه پایانی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;/orders&lt;/code&gt; متصل می‌شود.&lt;/li&gt;&lt;li&gt;رویداد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;order&lt;/code&gt; توسط &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;addEventListener&lt;/code&gt; شنیده می‌شود و داده دریافتی (اموجی غذا) به لیست &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ul&lt;/code&gt; اضافه می‌شود.&lt;/li&gt;&lt;li&gt;در صورت بروز خطا، اتصال بسته می‌شود و پیام خطا در کنسول نمایش داده می‌شود.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;5. نکات پیشرفته و ارزش افزوده&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای بهبود این پیاده‌سازی در سناریوهای واقعی، می‌توان موارد زیر را در نظر گرفت:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;مدیریت خطاها:&lt;/strong&gt; افزودن مکانیزم‌های Retry در سمت کلاینت با استفاده از ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;reconnect&lt;/code&gt; در &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;EventSource&lt;/code&gt; می‌تواند پایداری ارتباط را افزایش دهد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;پیکربندی سرور:&lt;/strong&gt; در صورت استفاده از پروکسی‌هایی مانند Nginx، باید تنظیمات مربوط به Buffering غیرفعال شود تا جریان SSE به درستی کار کند.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;استفاده از کتابخانه‌ها:&lt;/strong&gt; کتابخانه‌هایی مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Lib.AspNetCore.ServerSentEvents&lt;/code&gt; می‌توانند پیاده‌سازی SSE را ساده‌تر کنند، به‌ویژه برای مدیریت چندین نقطه پایانی یا سناریوهای پیچیده‌تر.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;مقایسه با SignalR:&lt;/strong&gt; در پروژه‌هایی که نیاز به ارتباط دوطرفه وجود دارد، SignalR همچنان گزینه مناسب‌تری است، اما برای سناریوهای ساده‌تر، SSE به دلیل کاهش سربار، ارجحیت دارد.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;رویدادهای ارسالی از سرور (Server-Sent Events) یک ابزار قدرتمند و ساده برای پیاده‌سازی به‌روزرسانی‌های بلادرنگ در برنامه‌های وب است. با معرفی پشتیبانی داخلی در .NET 10 و ASP.NET Core Minimal APIs، توسعه‌دهندگان می‌توانند با حداقل کد، نقاط پایانی SSE را ایجاد کرده و کلاینت‌ها را به‌روزرسانی کنند. مثال ارائه‌شده در این مقاله، که شامل یک سرویس پس‌زمینه، جریان &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IAsyncEnumerable&lt;/code&gt;، و کلاینت جاوااسکریپت است، نشان‌دهنده سادگی و انعطاف‌پذیری این فناوری است. برای توسعه‌دهندگانی که به دنبال راه‌حل‌های سبک و کارآمد برای ارتباطات بلادرنگ هستند، SSE جایگزینی مناسب برای فناوری‌های پیچیده‌تر مانند WebSocket و SignalR است. با این حال، انتخاب فناوری مناسب باید بر اساس نیازهای خاص پروژه انجام شود.&lt;/div&gt;">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="پیاده‌سازی Server-Sent Events در ASP.NET Core و NET 10.">
+    <meta name="twitter:description" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در دنیای توسعه وب، ارائه به‌روزرسانی‌های بلادرنگ (Real-Time Updates) به کاربران یکی از نیازهای کلیدی بسیاری از برنامه‌های کاربردی مدرن است. از فیدهای خبری زنده گرفته تا نمایش لحظه‌ای تغییرات قیمت سهام، فناوری‌هایی که امکان ارسال داده از سرور به کلاینت را به‌صورت یک‌طرفه فراهم می‌کنند، جایگاه ویژه‌ای دارند. یکی از این فناوری‌ها، رویدادهای ارسالی از سرور (Server-Sent Events یا SSE) است که به دلیل سادگی و استفاده از پروتکل HTTP، گزینه‌ای سبک و کارآمد برای پیاده‌سازی ارتباطات بلادرنگ محسوب می‌شود. با انتشار .NET 10 و بهبودهای اعمال‌شده در ASP.NET Core، پشتیبانی داخلی از SSE در Minimal APIs، توسعه‌دهندگان را قادر ساخته است تا با کمترین پیچیدگی، این فناوری را در پروژه‌های خود به کار گیرند. این مقاله به بررسی نحوه پیاده‌سازی SSE در ASP.NET Core با استفاده از .NET 10 می‌پردازد. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;Server-Sent Events چیست؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;رویدادهای ارسالی از سرور (Server-Sent Events) یک استاندارد وب است که امکان برقراری یک کانال ارتباطی یک‌طرفه از سرور به کلاینت را فراهم می‌کند. برخلاف فناوری وب‌سوکت (WebSocket) که ارتباط دوطرفه را پشتیبانی می‌کند، SSE برای سناریوهایی طراحی شده است که سرور نیاز دارد داده‌ها را به‌صورت مداوم و بدون درخواست مستقیم از کلاینت به آن ارسال کند. این فناوری بر پایه پروتکل HTTP عمل می‌کند و از فرمت متنی ساده‌ای با نوع محتوا (Content-Type) &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;text/event-stream&lt;/code&gt; استفاده می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مزایای اصلی SSE شامل موارد زیر است:&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;سادگی پیاده‌سازی:&lt;/strong&gt; نیازی به پروتکل‌های پیچیده مانند WebSocket ندارد و با ابزارهای استاندارد HTTP قابل پیاده‌سازی است.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;سبک بودن:&lt;/strong&gt; به دلیل عدم نیاز به ارتباط دوطرفه، منابع کمتری مصرف می‌کند.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;پشتیبانی گسترده:&lt;/strong&gt; تمامی مرورگرهای مدرن از SSE پشتیبانی می‌کنند.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در مقایسه با SignalR، که معمولاً از WebSocket به‌عنوان پروتکل پیش‌فرض استفاده می‌کند، SSE گزینه‌ای سبک‌تر برای سناریوهایی است که تنها نیاز به ارسال داده از سرور به کلاینت دارند، مانند به‌روزرسانی‌های لحظه‌ای در فیدهای خبری یا داشبوردهای داده.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پیاده‌سازی SSE در ASP.NET Core با NET 10.&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;NET 10. با معرفی قابلیت‌های جدید در ASP.NET Core Minimal APIs، امکان استفاده مستقیم از SSE را از طریق کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;TypedResults&lt;/code&gt; فراهم کرده است. این قابلیت به توسعه‌دهندگان اجازه می‌دهد تا با حداقل کد، یک نقطه پایانی (Endpoint) برای ارسال رویدادهای سرور ایجاد کنند. در ادامه، مراحل پیاده‌سازی یک مثال ساده با استفاده از Minimal APIs، یک سرویس پس‌زمینه (Background Service)، و جاوااسکریپت برای کلاینت توضیح داده می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;1. تنظیم پروژه و نقطه پایانی SSE&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای شروع، یک پروژه Minimal API در ASP.NET Core ایجاد می‌کنیم. کد زیر ساختار اولیه پروژه را نشان می‌دهد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;using System.ComponentModel;
+using System.Runtime.CompilerServices;
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddSingleton&amp;lt;FoodService&amp;gt;();
+builder.Services.AddHostedService&amp;lt;FoodServiceWorker&amp;gt;();
+
+var app = builder.Build();
+app.UseDefaultFiles().UseStaticFiles();
+
+app.MapGet(&amp;quot;/orders&amp;quot;, (FoodService foods, CancellationToken token) =&amp;gt;
+    TypedResults.ServerSentEvents(
+        foods.GetCurrent(token),
+        eventType: &amp;quot;order&amp;quot;)
+);
+
+app.Run();&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;در این کد:&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;سرویس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;FoodService&lt;/code&gt; به‌عنوان یک سرویس Singleton ثبت می‌شود تا مدیریت داده‌های مشترک بین کلاینت‌ها را بر عهده گیرد.&lt;/li&gt;&lt;li&gt;سرویس پس‌زمینه &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;FoodServiceWorker&lt;/code&gt; برای به‌روزرسانی دوره‌ای داده‌ها ثبت می‌شود.&lt;/li&gt;&lt;li&gt;نقطه پایانی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;/orders&lt;/code&gt; با استفاده از متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;TypedResults.ServerSentEvents&lt;/code&gt; تعریف شده است که یک جریان (Stream) از نوع &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IAsyncEnumerable&amp;lt;string&amp;gt;&lt;/code&gt; را از متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GetCurrent&lt;/code&gt; دریافت می‌کند.&lt;/li&gt;&lt;li&gt;پارامتر &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;eventType&lt;/code&gt; نوع رویداد را مشخص می‌کند (در اینجا &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;order&lt;/code&gt;) که در سمت کلاینت برای شناسایی رویدادها استفاده می‌شود.&lt;/li&gt;&lt;li&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; امکان لغو اشتراک کلاینت را فراهم می‌کند، که برای مدیریت منابع سرور ضروری است.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-ltr&quot; dir=&quot;ltr&quot; style=&quot;text-align: left;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;2. پیاده‌سازی سرویس FoodService با IAsyncEnumerable&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;FoodService&lt;/code&gt; مسئول تولید جریان داده‌ها و همگام‌سازی کلاینت‌ها با یک منبع داده واحد است. این کلاس از الگوی اعلان تغییرات (INotifyPropertyChanged) استفاده می‌کند تا تمام کلاینت‌ها به‌روزرسانی‌های یکسانی دریافت کنند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class FoodService : INotifyPropertyChanged
+{
+    public FoodService()
+    {
+        Current = Foods[Random.Shared.Next(Foods.Length)];
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+    private static readonly string[] Foods = [&amp;quot;&amp;#127828;&amp;quot;, &amp;quot;&amp;#127839;&amp;quot;, &amp;quot;&amp;#129380;&amp;quot;, &amp;quot;&amp;#127844;&amp;quot;, &amp;quot;&amp;#127829;&amp;quot;, &amp;quot;&amp;#127790;&amp;quot;, &amp;quot;&amp;#129369;&amp;quot;];
+
+    private string Current
+    {
+        get =&amp;gt; field;
+        set
+        {
+            field = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public async IAsyncEnumerable&amp;lt;string&amp;gt; GetCurrent(
+        [EnumeratorCancellation] CancellationToken ct)
+    {
+        while (!ct.IsCancellationRequested)
+        {
+            yield return Current;
+            var tcs = new TaskCompletionSource();
+            PropertyChangedEventHandler handler = (_, _) =&amp;gt; tcs.SetResult();
+            PropertyChanged += handler;
+            try
+            {
+                await tcs.Task.WaitAsync(ct);
+            }
+            finally
+            {
+                PropertyChanged -= handler;
+            }
+        }
+    }
+
+    public void Set()
+    {
+        Current = Foods[Random.Shared.Next(Foods.Length)];
+    }
+
+    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نکات کلیدی در این کد:&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;آرایه &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Foods&lt;/code&gt; شامل اموجی‌هایی است که به‌صورت تصادفی به کلاینت‌ها ارسال می‌شوند.&lt;/li&gt;&lt;li&gt;متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GetCurrent&lt;/code&gt; یک جریان &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IAsyncEnumerable&lt;/code&gt; تولید می‌کند که در هر چرخه، مقدار &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Current&lt;/code&gt; را بازمی‌گرداند و منتظر تغییر بعدی می‌ماند.&lt;/li&gt;&lt;li&gt;استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;TaskCompletionSource&lt;/code&gt; و رویداد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PropertyChanged&lt;/code&gt; تضمین می‌کند که تمام کلاینت‌ها به‌روزرسانی‌های هم‌زمان دریافت کنند.&lt;/li&gt;&lt;li&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; امکان توقف جریان را در صورت قطع ارتباط کلاینت فراهم می‌کند.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-ltr&quot; dir=&quot;ltr&quot; style=&quot;text-align: left;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;3. سرویس پس‌زمینه برای به‌روزرسانی داده‌ها&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای شبیه‌سازی به‌روزرسانی‌های دوره‌ای، از یک سرویس پس‌زمینه استفاده می‌کنیم:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class FoodServiceWorker(FoodService foodService) : BackgroundService
+{
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            foodService.Set();
+            await Task.Delay(1000, stoppingToken);
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این سرویس هر ثانیه متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Set&lt;/code&gt; را فراخوانی می‌کند تا مقدار &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Current&lt;/code&gt; در &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;FoodService&lt;/code&gt; به‌روزرسانی شود، که به‌طور خودکار تمام کلاینت‌های متصل را از طریق جریان &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IAsyncEnumerable&lt;/code&gt; مطلع می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;4. کلاینت جاوااسکریپت برای دریافت رویدادها&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;در سمت کلاینت، از شیء &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;EventSource&lt;/code&gt; برای اشتراک در نقطه پایانی SSE استفاده می‌کنیم. کد HTML و جاوااسکریپت زیر این فرآیند را نشان می‌دهد:&lt;/div&gt;&lt;pre data-language=&quot;xml&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;lt;!DOCTYPE html&amp;gt;
+&amp;lt;html lang=&amp;quot;en&amp;quot;&amp;gt;
+&amp;lt;head&amp;gt;
+    &amp;lt;meta charset=&amp;quot;UTF-8&amp;quot;&amp;gt;
+    &amp;lt;title&amp;gt;Khalid&amp;#39;s Fast-Food Fair&amp;lt;/title&amp;gt;
+&amp;lt;/head&amp;gt;
+&amp;lt;style&amp;gt;
+    ul {
+        display: flex;
+        flex-direction: row;
+        list-style: none;
+        flex-wrap: wrap;
+        width: 90%;
+        gap: 1rem;
+        padding: 0;
+    }
+    li {
+        font-size: 2rem;
+    }
+&amp;lt;/style&amp;gt;
+&amp;lt;body&amp;gt;
+    &amp;lt;h1&amp;gt;Khalid&amp;#39;s Fast-Food Fair&amp;lt;/h1&amp;gt;
+    &amp;lt;ul id=&amp;quot;orders&amp;quot;&amp;gt;&amp;lt;/ul&amp;gt;
+    &amp;lt;script&amp;gt;
+        const eventSource = new EventSource(&amp;#39;/orders&amp;#39;);
+        const angelsList = document.getElementById(&amp;#39;orders&amp;#39;);
+
+        eventSource.addEventListener(&amp;#39;order&amp;#39;, event =&amp;gt; {
+            const li = document.createElement(&amp;#39;li&amp;#39;);
+            li.textContent = event.data;
+            angelsList.appendChild(li);
+        });
+
+        eventSource.onerror = error =&amp;gt; {
+            console.error(&amp;#39;EventSource failed:&amp;#39;, error);
+            eventSource.close();
+        };
+    &amp;lt;/script&amp;gt;
+&amp;lt;/body&amp;gt;
+&amp;lt;/html&amp;gt;&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;در این کد:&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;شیء &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;EventSource&lt;/code&gt; به نقطه پایانی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;/orders&lt;/code&gt; متصل می‌شود.&lt;/li&gt;&lt;li&gt;رویداد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;order&lt;/code&gt; توسط &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;addEventListener&lt;/code&gt; شنیده می‌شود و داده دریافتی (اموجی غذا) به لیست &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ul&lt;/code&gt; اضافه می‌شود.&lt;/li&gt;&lt;li&gt;در صورت بروز خطا، اتصال بسته می‌شود و پیام خطا در کنسول نمایش داده می‌شود.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;5. نکات پیشرفته و ارزش افزوده&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای بهبود این پیاده‌سازی در سناریوهای واقعی، می‌توان موارد زیر را در نظر گرفت:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;مدیریت خطاها:&lt;/strong&gt; افزودن مکانیزم‌های Retry در سمت کلاینت با استفاده از ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;reconnect&lt;/code&gt; در &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;EventSource&lt;/code&gt; می‌تواند پایداری ارتباط را افزایش دهد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;پیکربندی سرور:&lt;/strong&gt; در صورت استفاده از پروکسی‌هایی مانند Nginx، باید تنظیمات مربوط به Buffering غیرفعال شود تا جریان SSE به درستی کار کند.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;استفاده از کتابخانه‌ها:&lt;/strong&gt; کتابخانه‌هایی مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Lib.AspNetCore.ServerSentEvents&lt;/code&gt; می‌توانند پیاده‌سازی SSE را ساده‌تر کنند، به‌ویژه برای مدیریت چندین نقطه پایانی یا سناریوهای پیچیده‌تر.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;مقایسه با SignalR:&lt;/strong&gt; در پروژه‌هایی که نیاز به ارتباط دوطرفه وجود دارد، SignalR همچنان گزینه مناسب‌تری است، اما برای سناریوهای ساده‌تر، SSE به دلیل کاهش سربار، ارجحیت دارد.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;رویدادهای ارسالی از سرور (Server-Sent Events) یک ابزار قدرتمند و ساده برای پیاده‌سازی به‌روزرسانی‌های بلادرنگ در برنامه‌های وب است. با معرفی پشتیبانی داخلی در .NET 10 و ASP.NET Core Minimal APIs، توسعه‌دهندگان می‌توانند با حداقل کد، نقاط پایانی SSE را ایجاد کرده و کلاینت‌ها را به‌روزرسانی کنند. مثال ارائه‌شده در این مقاله، که شامل یک سرویس پس‌زمینه، جریان &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IAsyncEnumerable&lt;/code&gt;، و کلاینت جاوااسکریپت است، نشان‌دهنده سادگی و انعطاف‌پذیری این فناوری است. برای توسعه‌دهندگانی که به دنبال راه‌حل‌های سبک و کارآمد برای ارتباطات بلادرنگ هستند، SSE جایگزینی مناسب برای فناوری‌های پیچیده‌تر مانند WebSocket و SignalR است. با این حال، انتخاب فناوری مناسب باید بر اساس نیازهای خاص پروژه انجام شود.&lt;/div&gt;">
+    <meta name="twitter:card" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در دنیای توسعه وب، ارائه به‌روزرسانی‌های بلادرنگ (Real-Time Updates) به کاربران یکی از نیازهای کلیدی بسیاری از برنامه‌های کاربردی مدرن است. از فیدهای خبری زنده گرفته تا نمایش لحظه‌ای تغییرات قیمت سهام، فناوری‌هایی که امکان ارسال داده از سرور به کلاینت را به‌صورت یک‌طرفه فراهم می‌کنند، جایگاه ویژه‌ای دارند. یکی از این فناوری‌ها، رویدادهای ارسالی از سرور (Server-Sent Events یا SSE) است که به دلیل سادگی و استفاده از پروتکل HTTP، گزینه‌ای سبک و کارآمد برای پیاده‌سازی ارتباطات بلادرنگ محسوب می‌شود. با انتشار .NET 10 و بهبودهای اعمال‌شده در ASP.NET Core، پشتیبانی داخلی از SSE در Minimal APIs، توسعه‌دهندگان را قادر ساخته است تا با کمترین پیچیدگی، این فناوری را در پروژه‌های خود به کار گیرند. این مقاله به بررسی نحوه پیاده‌سازی SSE در ASP.NET Core با استفاده از .NET 10 می‌پردازد. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;Server-Sent Events چیست؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;رویدادهای ارسالی از سرور (Server-Sent Events) یک استاندارد وب است که امکان برقراری یک کانال ارتباطی یک‌طرفه از سرور به کلاینت را فراهم می‌کند. برخلاف فناوری وب‌سوکت (WebSocket) که ارتباط دوطرفه را پشتیبانی می‌کند، SSE برای سناریوهایی طراحی شده است که سرور نیاز دارد داده‌ها را به‌صورت مداوم و بدون درخواست مستقیم از کلاینت به آن ارسال کند. این فناوری بر پایه پروتکل HTTP عمل می‌کند و از فرمت متنی ساده‌ای با نوع محتوا (Content-Type) &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;text/event-stream&lt;/code&gt; استفاده می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مزایای اصلی SSE شامل موارد زیر است:&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;سادگی پیاده‌سازی:&lt;/strong&gt; نیازی به پروتکل‌های پیچیده مانند WebSocket ندارد و با ابزارهای استاندارد HTTP قابل پیاده‌سازی است.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;سبک بودن:&lt;/strong&gt; به دلیل عدم نیاز به ارتباط دوطرفه، منابع کمتری مصرف می‌کند.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;پشتیبانی گسترده:&lt;/strong&gt; تمامی مرورگرهای مدرن از SSE پشتیبانی می‌کنند.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در مقایسه با SignalR، که معمولاً از WebSocket به‌عنوان پروتکل پیش‌فرض استفاده می‌کند، SSE گزینه‌ای سبک‌تر برای سناریوهایی است که تنها نیاز به ارسال داده از سرور به کلاینت دارند، مانند به‌روزرسانی‌های لحظه‌ای در فیدهای خبری یا داشبوردهای داده.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پیاده‌سازی SSE در ASP.NET Core با NET 10.&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;NET 10. با معرفی قابلیت‌های جدید در ASP.NET Core Minimal APIs، امکان استفاده مستقیم از SSE را از طریق کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;TypedResults&lt;/code&gt; فراهم کرده است. این قابلیت به توسعه‌دهندگان اجازه می‌دهد تا با حداقل کد، یک نقطه پایانی (Endpoint) برای ارسال رویدادهای سرور ایجاد کنند. در ادامه، مراحل پیاده‌سازی یک مثال ساده با استفاده از Minimal APIs، یک سرویس پس‌زمینه (Background Service)، و جاوااسکریپت برای کلاینت توضیح داده می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;1. تنظیم پروژه و نقطه پایانی SSE&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای شروع، یک پروژه Minimal API در ASP.NET Core ایجاد می‌کنیم. کد زیر ساختار اولیه پروژه را نشان می‌دهد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;using System.ComponentModel;
+using System.Runtime.CompilerServices;
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddSingleton&amp;lt;FoodService&amp;gt;();
+builder.Services.AddHostedService&amp;lt;FoodServiceWorker&amp;gt;();
+
+var app = builder.Build();
+app.UseDefaultFiles().UseStaticFiles();
+
+app.MapGet(&amp;quot;/orders&amp;quot;, (FoodService foods, CancellationToken token) =&amp;gt;
+    TypedResults.ServerSentEvents(
+        foods.GetCurrent(token),
+        eventType: &amp;quot;order&amp;quot;)
+);
+
+app.Run();&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;در این کد:&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;سرویس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;FoodService&lt;/code&gt; به‌عنوان یک سرویس Singleton ثبت می‌شود تا مدیریت داده‌های مشترک بین کلاینت‌ها را بر عهده گیرد.&lt;/li&gt;&lt;li&gt;سرویس پس‌زمینه &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;FoodServiceWorker&lt;/code&gt; برای به‌روزرسانی دوره‌ای داده‌ها ثبت می‌شود.&lt;/li&gt;&lt;li&gt;نقطه پایانی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;/orders&lt;/code&gt; با استفاده از متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;TypedResults.ServerSentEvents&lt;/code&gt; تعریف شده است که یک جریان (Stream) از نوع &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IAsyncEnumerable&amp;lt;string&amp;gt;&lt;/code&gt; را از متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GetCurrent&lt;/code&gt; دریافت می‌کند.&lt;/li&gt;&lt;li&gt;پارامتر &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;eventType&lt;/code&gt; نوع رویداد را مشخص می‌کند (در اینجا &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;order&lt;/code&gt;) که در سمت کلاینت برای شناسایی رویدادها استفاده می‌شود.&lt;/li&gt;&lt;li&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; امکان لغو اشتراک کلاینت را فراهم می‌کند، که برای مدیریت منابع سرور ضروری است.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-ltr&quot; dir=&quot;ltr&quot; style=&quot;text-align: left;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;2. پیاده‌سازی سرویس FoodService با IAsyncEnumerable&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;FoodService&lt;/code&gt; مسئول تولید جریان داده‌ها و همگام‌سازی کلاینت‌ها با یک منبع داده واحد است. این کلاس از الگوی اعلان تغییرات (INotifyPropertyChanged) استفاده می‌کند تا تمام کلاینت‌ها به‌روزرسانی‌های یکسانی دریافت کنند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class FoodService : INotifyPropertyChanged
+{
+    public FoodService()
+    {
+        Current = Foods[Random.Shared.Next(Foods.Length)];
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+    private static readonly string[] Foods = [&amp;quot;&amp;#127828;&amp;quot;, &amp;quot;&amp;#127839;&amp;quot;, &amp;quot;&amp;#129380;&amp;quot;, &amp;quot;&amp;#127844;&amp;quot;, &amp;quot;&amp;#127829;&amp;quot;, &amp;quot;&amp;#127790;&amp;quot;, &amp;quot;&amp;#129369;&amp;quot;];
+
+    private string Current
+    {
+        get =&amp;gt; field;
+        set
+        {
+            field = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public async IAsyncEnumerable&amp;lt;string&amp;gt; GetCurrent(
+        [EnumeratorCancellation] CancellationToken ct)
+    {
+        while (!ct.IsCancellationRequested)
+        {
+            yield return Current;
+            var tcs = new TaskCompletionSource();
+            PropertyChangedEventHandler handler = (_, _) =&amp;gt; tcs.SetResult();
+            PropertyChanged += handler;
+            try
+            {
+                await tcs.Task.WaitAsync(ct);
+            }
+            finally
+            {
+                PropertyChanged -= handler;
+            }
+        }
+    }
+
+    public void Set()
+    {
+        Current = Foods[Random.Shared.Next(Foods.Length)];
+    }
+
+    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نکات کلیدی در این کد:&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;آرایه &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Foods&lt;/code&gt; شامل اموجی‌هایی است که به‌صورت تصادفی به کلاینت‌ها ارسال می‌شوند.&lt;/li&gt;&lt;li&gt;متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GetCurrent&lt;/code&gt; یک جریان &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IAsyncEnumerable&lt;/code&gt; تولید می‌کند که در هر چرخه، مقدار &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Current&lt;/code&gt; را بازمی‌گرداند و منتظر تغییر بعدی می‌ماند.&lt;/li&gt;&lt;li&gt;استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;TaskCompletionSource&lt;/code&gt; و رویداد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PropertyChanged&lt;/code&gt; تضمین می‌کند که تمام کلاینت‌ها به‌روزرسانی‌های هم‌زمان دریافت کنند.&lt;/li&gt;&lt;li&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; امکان توقف جریان را در صورت قطع ارتباط کلاینت فراهم می‌کند.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-ltr&quot; dir=&quot;ltr&quot; style=&quot;text-align: left;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;3. سرویس پس‌زمینه برای به‌روزرسانی داده‌ها&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای شبیه‌سازی به‌روزرسانی‌های دوره‌ای، از یک سرویس پس‌زمینه استفاده می‌کنیم:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class FoodServiceWorker(FoodService foodService) : BackgroundService
+{
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            foodService.Set();
+            await Task.Delay(1000, stoppingToken);
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این سرویس هر ثانیه متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Set&lt;/code&gt; را فراخوانی می‌کند تا مقدار &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Current&lt;/code&gt; در &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;FoodService&lt;/code&gt; به‌روزرسانی شود، که به‌طور خودکار تمام کلاینت‌های متصل را از طریق جریان &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IAsyncEnumerable&lt;/code&gt; مطلع می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;4. کلاینت جاوااسکریپت برای دریافت رویدادها&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;در سمت کلاینت، از شیء &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;EventSource&lt;/code&gt; برای اشتراک در نقطه پایانی SSE استفاده می‌کنیم. کد HTML و جاوااسکریپت زیر این فرآیند را نشان می‌دهد:&lt;/div&gt;&lt;pre data-language=&quot;xml&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;lt;!DOCTYPE html&amp;gt;
+&amp;lt;html lang=&amp;quot;en&amp;quot;&amp;gt;
+&amp;lt;head&amp;gt;
+    &amp;lt;meta charset=&amp;quot;UTF-8&amp;quot;&amp;gt;
+    &amp;lt;title&amp;gt;Khalid&amp;#39;s Fast-Food Fair&amp;lt;/title&amp;gt;
+&amp;lt;/head&amp;gt;
+&amp;lt;style&amp;gt;
+    ul {
+        display: flex;
+        flex-direction: row;
+        list-style: none;
+        flex-wrap: wrap;
+        width: 90%;
+        gap: 1rem;
+        padding: 0;
+    }
+    li {
+        font-size: 2rem;
+    }
+&amp;lt;/style&amp;gt;
+&amp;lt;body&amp;gt;
+    &amp;lt;h1&amp;gt;Khalid&amp;#39;s Fast-Food Fair&amp;lt;/h1&amp;gt;
+    &amp;lt;ul id=&amp;quot;orders&amp;quot;&amp;gt;&amp;lt;/ul&amp;gt;
+    &amp;lt;script&amp;gt;
+        const eventSource = new EventSource(&amp;#39;/orders&amp;#39;);
+        const angelsList = document.getElementById(&amp;#39;orders&amp;#39;);
+
+        eventSource.addEventListener(&amp;#39;order&amp;#39;, event =&amp;gt; {
+            const li = document.createElement(&amp;#39;li&amp;#39;);
+            li.textContent = event.data;
+            angelsList.appendChild(li);
+        });
+
+        eventSource.onerror = error =&amp;gt; {
+            console.error(&amp;#39;EventSource failed:&amp;#39;, error);
+            eventSource.close();
+        };
+    &amp;lt;/script&amp;gt;
+&amp;lt;/body&amp;gt;
+&amp;lt;/html&amp;gt;&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;در این کد:&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;شیء &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;EventSource&lt;/code&gt; به نقطه پایانی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;/orders&lt;/code&gt; متصل می‌شود.&lt;/li&gt;&lt;li&gt;رویداد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;order&lt;/code&gt; توسط &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;addEventListener&lt;/code&gt; شنیده می‌شود و داده دریافتی (اموجی غذا) به لیست &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ul&lt;/code&gt; اضافه می‌شود.&lt;/li&gt;&lt;li&gt;در صورت بروز خطا، اتصال بسته می‌شود و پیام خطا در کنسول نمایش داده می‌شود.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;5. نکات پیشرفته و ارزش افزوده&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای بهبود این پیاده‌سازی در سناریوهای واقعی، می‌توان موارد زیر را در نظر گرفت:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;مدیریت خطاها:&lt;/strong&gt; افزودن مکانیزم‌های Retry در سمت کلاینت با استفاده از ویژگی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;reconnect&lt;/code&gt; در &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;EventSource&lt;/code&gt; می‌تواند پایداری ارتباط را افزایش دهد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;پیکربندی سرور:&lt;/strong&gt; در صورت استفاده از پروکسی‌هایی مانند Nginx، باید تنظیمات مربوط به Buffering غیرفعال شود تا جریان SSE به درستی کار کند.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;استفاده از کتابخانه‌ها:&lt;/strong&gt; کتابخانه‌هایی مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Lib.AspNetCore.ServerSentEvents&lt;/code&gt; می‌توانند پیاده‌سازی SSE را ساده‌تر کنند، به‌ویژه برای مدیریت چندین نقطه پایانی یا سناریوهای پیچیده‌تر.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;مقایسه با SignalR:&lt;/strong&gt; در پروژه‌هایی که نیاز به ارتباط دوطرفه وجود دارد، SignalR همچنان گزینه مناسب‌تری است، اما برای سناریوهای ساده‌تر، SSE به دلیل کاهش سربار، ارجحیت دارد.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;رویدادهای ارسالی از سرور (Server-Sent Events) یک ابزار قدرتمند و ساده برای پیاده‌سازی به‌روزرسانی‌های بلادرنگ در برنامه‌های وب است. با معرفی پشتیبانی داخلی در .NET 10 و ASP.NET Core Minimal APIs، توسعه‌دهندگان می‌توانند با حداقل کد، نقاط پایانی SSE را ایجاد کرده و کلاینت‌ها را به‌روزرسانی کنند. مثال ارائه‌شده در این مقاله، که شامل یک سرویس پس‌زمینه، جریان &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IAsyncEnumerable&lt;/code&gt;، و کلاینت جاوااسکریپت است، نشان‌دهنده سادگی و انعطاف‌پذیری این فناوری است. برای توسعه‌دهندگانی که به دنبال راه‌حل‌های سبک و کارآمد برای ارتباطات بلادرنگ هستند، SSE جایگزینی مناسب برای فناوری‌های پیچیده‌تر مانند WebSocket و SignalR است. با این حال، انتخاب فناوری مناسب باید بر اساس نیازهای خاص پروژه انجام شود.&lt;/div&gt;">
+    <meta property="article:published_time" content="Wed, 23 Apr 2025 05:14:43 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
     <meta content='IE=edge' http-equiv='X-UA-Compatible'>
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">
-	
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
 	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
-
     <link href="vs.min.css" rel="stylesheet" type="text/css">
-    <script src="highlight.min.js" type="text/javascript"></script>
-	
+    <script src="highlight.min.js" type="text/javascript"></script>	
     <link href="styles.css" rel="stylesheet" type="text/css">	
     <style>
       @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
@@ -42,8 +624,8 @@
         }
      }
     </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
 </head>
-
 <body dir='rtl'>
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
@@ -53,7 +635,7 @@
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۳۶۹۵</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۶۹۷</span></td>
 </tr>
 <tr>
 <td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
@@ -73,7 +655,7 @@
 </tr>
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۲۲</span></td>
 </tr>
 </tbody>
 </table>
@@ -237,8 +819,5 @@ app.Run();</pre><div class="ql-direction-rtl" dir="rtl" style="text-align: right
 
 <!-- to load custom fonts for printing -->
 <div class="useSamimFD">&nbsp;</div>
-
-<script src="SyntaxHighlighter.js" type="text/javascript"></script>
 </body>
-
 </html>

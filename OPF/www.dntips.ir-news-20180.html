@@ -1,17 +1,399 @@
 <!DOCTYPE html>
 <html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
-
 <head>
-    <title>‫‫روش استفاده از ویژگی Turnstile کلودفلر برای پیاده‌سازی کپچا در برنامه‌های ASP.NET Core</title>
+    <title>‫‫روش استفاده از ویژگی Turnstile کلودفلر برای پیاده‌سازی کپچا در برنامه‌های ASP.NET Core</title>     <meta name="description" content="&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در دنیای امروز، امنیت وب‌سایت‌ها از اهمیت بالایی برخوردار است. یکی از چالش‌های مهم در این زمینه، مقابله با ربات‌ها (bots) است که می‌توانند فعالیت‌های مخربی را مانند ارسال درخواست‌های متعدد برای بازنشانی رمز عبور انجام دهند. برای مقابله با این تهدید، از روش‌های مختلفی مانند کپچا (CAPTCHA) استفاده می‌شود. در این مقاله، به بررسی نحوه استفاده از Cloudflare Turnstile به عنوان جایگزینی برای reCAPTCHA گوگل در وب‌سایت‌های ASP.NET Core می‌پردازیم.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;تاکنون، از سرویس reCAPTCHA گوگل برای مقابله با ربات‌ها استفاده می‌شد. این سرویس عملکرد خوبی داشت، اما با انتقال آن به Google Cloud، فرصتی برای بررسی جایگزین‌های دیگر فراهم شد. با توجه به استفاده گسترده از خدمات Cloudflare، ویژگی Turnstile آن به عنوان گزینه‌ای مناسب انتخاب شد. یکی از مزایای اصلی Turnstile، سادگی استفاده‌ی از آن برای کاربران است و دیگر نیازی به انتخاب تصاویر چراغ راهنمایی نیست.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;برای شروع استفاده از Turnstile در ASP.NET Core، ابتدا باید یک حساب کاربری Cloudflare را ایجاد کنید. سپس، با دنبال کردن مراحل زیر، یک ویجت (widget) Turnstile ایجاد کنید:&lt;/div&gt;&lt;ol&gt;&lt;li&gt;در داشبورد Cloudflare، روی Turnstile در منوی سمت چپ کلیک کنید.&lt;/li&gt;&lt;li&gt;روی دکمه Add widget کلیک کنید.&lt;/li&gt;&lt;li&gt;یک نام برای ویجت انتخاب کرده و نام دامنه خود را اضافه کنید.&lt;/li&gt;&lt;li&gt;در Widget Mode، گزینه Managed را انتخاب کرده و سایر گزینه‌ها را به صورت پیش‌فرض رها کنید.&lt;/li&gt;&lt;li&gt;روی دکمه Save کلیک کرده و کلید سایت (site key) و کلید مخفی (secret key) را برای استفاده در مراحل بعدی کپی کنید.&lt;/li&gt;&lt;/ol&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;حال به سراغ کدنویسی می‌رویم. در صفحه‌ای که می‌خواهید ویجت Turnstile نمایش داده شود، ابتدا اسکریپت زیر را اضافه کنید:&lt;/div&gt;&lt;pre data-language=&quot;xml&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;lt;script src=&amp;quot;https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&amp;amp;onload=onloadTurnstileCallback&amp;quot; async defer&amp;gt;&amp;lt;/script&amp;gt;&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;سپس، در داخل یک عنصر فرم (form)، یک ظرف (container) برای نمایش ویجت اضافه کنید:&lt;/div&gt;&lt;pre data-language=&quot;xml&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;lt;form ...&amp;gt;
+  &amp;lt;div id=&amp;quot;turnstile-container&amp;quot;&amp;gt;&amp;lt;/div&amp;gt;
+&amp;lt;/form&amp;gt;&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در مرحله بعد، یک فایل جاوا اسکریپت (JavaScript) ایجاد کرده و کد زیر را در آن قرار دهید:&lt;/div&gt;&lt;pre data-language=&quot;javascript&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;const captchaSolved = ref(false);
+
+window.onloadTurnstileCallback = function () {
+  turnstile.render(&amp;quot;#turnstile-container&amp;quot;, {
+    sitekey: &amp;quot;SITE_KEY&amp;quot;,
+    callback: function (token) {
+        captchaSolved.value = true;
+    },
+    &amp;#39;expired-callback&amp;#39;: function () {
+        captchaSolved.value = false;
+    }
+  });
+};&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;تابع &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;onloadTurnstileCallback&lt;/code&gt; توسط اسکریپت Turnstile فراخوانی می‌شود تا ویجت را بارگذاری کند. وقتی کاربر، چالش را با موفقیت حل کند، تابع &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;callback&lt;/code&gt; فراخوانی می‌شود. به یاد داشته باشید که &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;SITE_KEY&lt;/code&gt; را با کلید سایت Turnstile که در مرحله قبل کپی کردید، جایگزین کنید.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;هنگام ارسال فرم، باید توکن (token) تولید شده توسط ویجت Turnstile را نیز ارسال کنید. نحوه پیاده‌سازی درخواست ارسال (submit request) بستگی به فریم‌ورک (framework) مورد استفاده شما دارد. در اینجا یک مثال، با استفاده از data binding در عنصر فرم و یک متد به نام &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;onSubmit&lt;/code&gt; آورده شده است:&lt;/div&gt;&lt;pre data-language=&quot;javascript&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;const onSubmit = handleSubmit(() =&amp;gt; {
+    const token = turnstile.getResponse();
+    if (token === &amp;quot;&amp;quot; || token == undefined || token == null) {
+        return;
+    }
+
+    captchaSolved.value = false;
+    axios
+        .post(&amp;#39;/myendpoint&amp;#39;, Qs.stringify({ captcha: token }))
+        .then(response =&amp;gt; {
+            turnstile.reset(&amp;quot;#turnstile-container&amp;quot;);
+            captchaSolved.value = false;
+            
+            // Success
+        })
+        .catch(error =&amp;gt; {
+            turnstile.reset(&amp;quot;#turnstile-container&amp;quot;);
+            captchaSolved.value = false;
+
+            // Failure
+        });
+});&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;کد بالا توکن را از ویجت Turnstile دریافت کرده و به عنوان یک پارامتر (parameter) به بک‌اند (backend) ارسال می‌کند. حال باید متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;/myendpoint&lt;/code&gt; را در ASP.NET Core پیاده‌سازی کنیم:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class MyController(Captcha captcha) : ControllerBase
+{
+    [HttpPost]
+    [Route(&amp;quot;myendpoint&amp;quot;)]
+    public async Task&amp;lt;ActionResult&amp;gt; MyEndpoint(string token)
+    {
+        if (!await captcha.IsValid(token)) return BadRequest();
+        
+        // Business logic goes here
+        
+        return Ok();
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در این مثال، از یک کنترلر MVC استفاده شده است، اما می‌توان این کد را با Minimal API نیز پیاده‌سازی کرد. دقت کنید که endpoint POST توکن تولید شده در کلاینت (client) را به عنوان یک پارامتر به نام &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;token&lt;/code&gt; دریافت می‌کند و این توکن برای اعتبارسنجی (validation) به یک کلاس به نام &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Captcha&lt;/code&gt; ارسال می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;برای پیاده‌سازی اعتبارسنجی توکن، کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Captcha&lt;/code&gt; را به عنوان یک کلاینت HTTP ساده پیاده‌سازی می‌کنیم. اگرچه پکیج‌های NuGet متعددی برای این کار وجود دارند، اما پیاده‌سازی دستی آن بسیار ساده است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class Captcha(HttpClient captchaClient)
+{
+    public async Task&amp;lt;bool&amp;gt; IsValid(string token)
+    {
+        try
+        {
+            var formData = new Dictionary&amp;lt;string, string&amp;gt;
+            {
+                { &amp;quot;secret&amp;quot;, &amp;quot;SITE_SECRET&amp;quot; },
+                { &amp;quot;response&amp;quot;, token }
+            };
+
+            var content = new FormUrlEncodedContent(formData);
+            var postTask = await captchaClient.PostAsync(&amp;quot;/turnstile/v0/siteverify&amp;quot;, content);
+
+            var result = await postTask.Content.ReadAsStringAsync();
+            var resultObject = JsonSerializer.Deserialize&amp;lt;JsonElement&amp;gt;(result);
+            return resultObject.GetProperty(&amp;quot;success&amp;quot;).GetBoolean();
+        }
+        catch
+        {
+            return false;
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Captcha&lt;/code&gt; اعتبارسنجی توکن را با استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;HttpClient&lt;/code&gt; ارائه شده در سازنده (constructor) پیاده‌سازی می‌کند. متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IsValid&lt;/code&gt; یک درخواست HTTP POST به endpoint &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;/turnstile/v0/siteverify&lt;/code&gt; با کلید مخفی Turnstile و توکن تولید شده ارسال می‌کند. API Cloudflare یک مقدار بولی (boolean) را برمی‌گرداند که نشان‌دهنده معتبر بودن یا نبودن توکن است. به یاد داشته باشید که &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;SITE_SECRET&lt;/code&gt; را با کلید مخفی Turnstile که در مرحله قبل کپی کردید، جایگزین کنید.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;تنها بخش باقی‌مانده، تنظیم کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Captcha&lt;/code&gt; برای تزریق وابستگی (dependency injection) در &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Program.cs&lt;/code&gt; است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;builder.Services.AddHttpClient&amp;lt;Captcha&amp;gt;(x =&amp;gt;
+{
+    x.BaseAddress = new Uri(&amp;quot;https://challenges.cloudflare.com&amp;quot;);
+});&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;این کد کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Captcha&lt;/code&gt; را با یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;HttpClient&lt;/code&gt; ارائه شده اضافه می‌کند که با API Cloudflare ارتباط برقرار می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;با انجام این مراحل، Turnstile در ASP.NET Core پیاده‌سازی می‌شود و مقابله با ربات‌ها برای وب‌سایت شما دشوارتر می‌شود، در حالی که تجربه کاربری برای کاربران واقعی بهبود می‌یابد. اگر از خدمات Cloudflare استفاده می‌کنید، Turnstile یک گزینه عالی برای پیاده‌سازی کپچا در ASP.NET Core است.&lt;/div&gt;">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="روش استفاده از ویژگی Turnstile کلودفلر برای پیاده‌سازی کپچا در برنامه‌های ASP.NET Core">
+    <meta itemprop="description" content="&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در دنیای امروز، امنیت وب‌سایت‌ها از اهمیت بالایی برخوردار است. یکی از چالش‌های مهم در این زمینه، مقابله با ربات‌ها (bots) است که می‌توانند فعالیت‌های مخربی را مانند ارسال درخواست‌های متعدد برای بازنشانی رمز عبور انجام دهند. برای مقابله با این تهدید، از روش‌های مختلفی مانند کپچا (CAPTCHA) استفاده می‌شود. در این مقاله، به بررسی نحوه استفاده از Cloudflare Turnstile به عنوان جایگزینی برای reCAPTCHA گوگل در وب‌سایت‌های ASP.NET Core می‌پردازیم.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;تاکنون، از سرویس reCAPTCHA گوگل برای مقابله با ربات‌ها استفاده می‌شد. این سرویس عملکرد خوبی داشت، اما با انتقال آن به Google Cloud، فرصتی برای بررسی جایگزین‌های دیگر فراهم شد. با توجه به استفاده گسترده از خدمات Cloudflare، ویژگی Turnstile آن به عنوان گزینه‌ای مناسب انتخاب شد. یکی از مزایای اصلی Turnstile، سادگی استفاده‌ی از آن برای کاربران است و دیگر نیازی به انتخاب تصاویر چراغ راهنمایی نیست.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;برای شروع استفاده از Turnstile در ASP.NET Core، ابتدا باید یک حساب کاربری Cloudflare را ایجاد کنید. سپس، با دنبال کردن مراحل زیر، یک ویجت (widget) Turnstile ایجاد کنید:&lt;/div&gt;&lt;ol&gt;&lt;li&gt;در داشبورد Cloudflare، روی Turnstile در منوی سمت چپ کلیک کنید.&lt;/li&gt;&lt;li&gt;روی دکمه Add widget کلیک کنید.&lt;/li&gt;&lt;li&gt;یک نام برای ویجت انتخاب کرده و نام دامنه خود را اضافه کنید.&lt;/li&gt;&lt;li&gt;در Widget Mode، گزینه Managed را انتخاب کرده و سایر گزینه‌ها را به صورت پیش‌فرض رها کنید.&lt;/li&gt;&lt;li&gt;روی دکمه Save کلیک کرده و کلید سایت (site key) و کلید مخفی (secret key) را برای استفاده در مراحل بعدی کپی کنید.&lt;/li&gt;&lt;/ol&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;حال به سراغ کدنویسی می‌رویم. در صفحه‌ای که می‌خواهید ویجت Turnstile نمایش داده شود، ابتدا اسکریپت زیر را اضافه کنید:&lt;/div&gt;&lt;pre data-language=&quot;xml&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;lt;script src=&amp;quot;https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&amp;amp;onload=onloadTurnstileCallback&amp;quot; async defer&amp;gt;&amp;lt;/script&amp;gt;&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;سپس، در داخل یک عنصر فرم (form)، یک ظرف (container) برای نمایش ویجت اضافه کنید:&lt;/div&gt;&lt;pre data-language=&quot;xml&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;lt;form ...&amp;gt;
+  &amp;lt;div id=&amp;quot;turnstile-container&amp;quot;&amp;gt;&amp;lt;/div&amp;gt;
+&amp;lt;/form&amp;gt;&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در مرحله بعد، یک فایل جاوا اسکریپت (JavaScript) ایجاد کرده و کد زیر را در آن قرار دهید:&lt;/div&gt;&lt;pre data-language=&quot;javascript&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;const captchaSolved = ref(false);
+
+window.onloadTurnstileCallback = function () {
+  turnstile.render(&amp;quot;#turnstile-container&amp;quot;, {
+    sitekey: &amp;quot;SITE_KEY&amp;quot;,
+    callback: function (token) {
+        captchaSolved.value = true;
+    },
+    &amp;#39;expired-callback&amp;#39;: function () {
+        captchaSolved.value = false;
+    }
+  });
+};&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;تابع &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;onloadTurnstileCallback&lt;/code&gt; توسط اسکریپت Turnstile فراخوانی می‌شود تا ویجت را بارگذاری کند. وقتی کاربر، چالش را با موفقیت حل کند، تابع &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;callback&lt;/code&gt; فراخوانی می‌شود. به یاد داشته باشید که &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;SITE_KEY&lt;/code&gt; را با کلید سایت Turnstile که در مرحله قبل کپی کردید، جایگزین کنید.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;هنگام ارسال فرم، باید توکن (token) تولید شده توسط ویجت Turnstile را نیز ارسال کنید. نحوه پیاده‌سازی درخواست ارسال (submit request) بستگی به فریم‌ورک (framework) مورد استفاده شما دارد. در اینجا یک مثال، با استفاده از data binding در عنصر فرم و یک متد به نام &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;onSubmit&lt;/code&gt; آورده شده است:&lt;/div&gt;&lt;pre data-language=&quot;javascript&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;const onSubmit = handleSubmit(() =&amp;gt; {
+    const token = turnstile.getResponse();
+    if (token === &amp;quot;&amp;quot; || token == undefined || token == null) {
+        return;
+    }
+
+    captchaSolved.value = false;
+    axios
+        .post(&amp;#39;/myendpoint&amp;#39;, Qs.stringify({ captcha: token }))
+        .then(response =&amp;gt; {
+            turnstile.reset(&amp;quot;#turnstile-container&amp;quot;);
+            captchaSolved.value = false;
+            
+            // Success
+        })
+        .catch(error =&amp;gt; {
+            turnstile.reset(&amp;quot;#turnstile-container&amp;quot;);
+            captchaSolved.value = false;
+
+            // Failure
+        });
+});&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;کد بالا توکن را از ویجت Turnstile دریافت کرده و به عنوان یک پارامتر (parameter) به بک‌اند (backend) ارسال می‌کند. حال باید متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;/myendpoint&lt;/code&gt; را در ASP.NET Core پیاده‌سازی کنیم:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class MyController(Captcha captcha) : ControllerBase
+{
+    [HttpPost]
+    [Route(&amp;quot;myendpoint&amp;quot;)]
+    public async Task&amp;lt;ActionResult&amp;gt; MyEndpoint(string token)
+    {
+        if (!await captcha.IsValid(token)) return BadRequest();
+        
+        // Business logic goes here
+        
+        return Ok();
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در این مثال، از یک کنترلر MVC استفاده شده است، اما می‌توان این کد را با Minimal API نیز پیاده‌سازی کرد. دقت کنید که endpoint POST توکن تولید شده در کلاینت (client) را به عنوان یک پارامتر به نام &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;token&lt;/code&gt; دریافت می‌کند و این توکن برای اعتبارسنجی (validation) به یک کلاس به نام &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Captcha&lt;/code&gt; ارسال می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;برای پیاده‌سازی اعتبارسنجی توکن، کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Captcha&lt;/code&gt; را به عنوان یک کلاینت HTTP ساده پیاده‌سازی می‌کنیم. اگرچه پکیج‌های NuGet متعددی برای این کار وجود دارند، اما پیاده‌سازی دستی آن بسیار ساده است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class Captcha(HttpClient captchaClient)
+{
+    public async Task&amp;lt;bool&amp;gt; IsValid(string token)
+    {
+        try
+        {
+            var formData = new Dictionary&amp;lt;string, string&amp;gt;
+            {
+                { &amp;quot;secret&amp;quot;, &amp;quot;SITE_SECRET&amp;quot; },
+                { &amp;quot;response&amp;quot;, token }
+            };
+
+            var content = new FormUrlEncodedContent(formData);
+            var postTask = await captchaClient.PostAsync(&amp;quot;/turnstile/v0/siteverify&amp;quot;, content);
+
+            var result = await postTask.Content.ReadAsStringAsync();
+            var resultObject = JsonSerializer.Deserialize&amp;lt;JsonElement&amp;gt;(result);
+            return resultObject.GetProperty(&amp;quot;success&amp;quot;).GetBoolean();
+        }
+        catch
+        {
+            return false;
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Captcha&lt;/code&gt; اعتبارسنجی توکن را با استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;HttpClient&lt;/code&gt; ارائه شده در سازنده (constructor) پیاده‌سازی می‌کند. متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IsValid&lt;/code&gt; یک درخواست HTTP POST به endpoint &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;/turnstile/v0/siteverify&lt;/code&gt; با کلید مخفی Turnstile و توکن تولید شده ارسال می‌کند. API Cloudflare یک مقدار بولی (boolean) را برمی‌گرداند که نشان‌دهنده معتبر بودن یا نبودن توکن است. به یاد داشته باشید که &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;SITE_SECRET&lt;/code&gt; را با کلید مخفی Turnstile که در مرحله قبل کپی کردید، جایگزین کنید.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;تنها بخش باقی‌مانده، تنظیم کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Captcha&lt;/code&gt; برای تزریق وابستگی (dependency injection) در &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Program.cs&lt;/code&gt; است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;builder.Services.AddHttpClient&amp;lt;Captcha&amp;gt;(x =&amp;gt;
+{
+    x.BaseAddress = new Uri(&amp;quot;https://challenges.cloudflare.com&amp;quot;);
+});&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;این کد کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Captcha&lt;/code&gt; را با یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;HttpClient&lt;/code&gt; ارائه شده اضافه می‌کند که با API Cloudflare ارتباط برقرار می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;با انجام این مراحل، Turnstile در ASP.NET Core پیاده‌سازی می‌شود و مقابله با ربات‌ها برای وب‌سایت شما دشوارتر می‌شود، در حالی که تجربه کاربری برای کاربران واقعی بهبود می‌یابد. اگر از خدمات Cloudflare استفاده می‌کنید، Turnstile یک گزینه عالی برای پیاده‌سازی کپچا در ASP.NET Core است.&lt;/div&gt;">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="روش استفاده از ویژگی Turnstile کلودفلر برای پیاده‌سازی کپچا در برنامه‌های ASP.NET Core">
+    <meta property="og:description" content="&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در دنیای امروز، امنیت وب‌سایت‌ها از اهمیت بالایی برخوردار است. یکی از چالش‌های مهم در این زمینه، مقابله با ربات‌ها (bots) است که می‌توانند فعالیت‌های مخربی را مانند ارسال درخواست‌های متعدد برای بازنشانی رمز عبور انجام دهند. برای مقابله با این تهدید، از روش‌های مختلفی مانند کپچا (CAPTCHA) استفاده می‌شود. در این مقاله، به بررسی نحوه استفاده از Cloudflare Turnstile به عنوان جایگزینی برای reCAPTCHA گوگل در وب‌سایت‌های ASP.NET Core می‌پردازیم.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;تاکنون، از سرویس reCAPTCHA گوگل برای مقابله با ربات‌ها استفاده می‌شد. این سرویس عملکرد خوبی داشت، اما با انتقال آن به Google Cloud، فرصتی برای بررسی جایگزین‌های دیگر فراهم شد. با توجه به استفاده گسترده از خدمات Cloudflare، ویژگی Turnstile آن به عنوان گزینه‌ای مناسب انتخاب شد. یکی از مزایای اصلی Turnstile، سادگی استفاده‌ی از آن برای کاربران است و دیگر نیازی به انتخاب تصاویر چراغ راهنمایی نیست.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;برای شروع استفاده از Turnstile در ASP.NET Core، ابتدا باید یک حساب کاربری Cloudflare را ایجاد کنید. سپس، با دنبال کردن مراحل زیر، یک ویجت (widget) Turnstile ایجاد کنید:&lt;/div&gt;&lt;ol&gt;&lt;li&gt;در داشبورد Cloudflare، روی Turnstile در منوی سمت چپ کلیک کنید.&lt;/li&gt;&lt;li&gt;روی دکمه Add widget کلیک کنید.&lt;/li&gt;&lt;li&gt;یک نام برای ویجت انتخاب کرده و نام دامنه خود را اضافه کنید.&lt;/li&gt;&lt;li&gt;در Widget Mode، گزینه Managed را انتخاب کرده و سایر گزینه‌ها را به صورت پیش‌فرض رها کنید.&lt;/li&gt;&lt;li&gt;روی دکمه Save کلیک کرده و کلید سایت (site key) و کلید مخفی (secret key) را برای استفاده در مراحل بعدی کپی کنید.&lt;/li&gt;&lt;/ol&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;حال به سراغ کدنویسی می‌رویم. در صفحه‌ای که می‌خواهید ویجت Turnstile نمایش داده شود، ابتدا اسکریپت زیر را اضافه کنید:&lt;/div&gt;&lt;pre data-language=&quot;xml&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;lt;script src=&amp;quot;https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&amp;amp;onload=onloadTurnstileCallback&amp;quot; async defer&amp;gt;&amp;lt;/script&amp;gt;&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;سپس، در داخل یک عنصر فرم (form)، یک ظرف (container) برای نمایش ویجت اضافه کنید:&lt;/div&gt;&lt;pre data-language=&quot;xml&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;lt;form ...&amp;gt;
+  &amp;lt;div id=&amp;quot;turnstile-container&amp;quot;&amp;gt;&amp;lt;/div&amp;gt;
+&amp;lt;/form&amp;gt;&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در مرحله بعد، یک فایل جاوا اسکریپت (JavaScript) ایجاد کرده و کد زیر را در آن قرار دهید:&lt;/div&gt;&lt;pre data-language=&quot;javascript&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;const captchaSolved = ref(false);
+
+window.onloadTurnstileCallback = function () {
+  turnstile.render(&amp;quot;#turnstile-container&amp;quot;, {
+    sitekey: &amp;quot;SITE_KEY&amp;quot;,
+    callback: function (token) {
+        captchaSolved.value = true;
+    },
+    &amp;#39;expired-callback&amp;#39;: function () {
+        captchaSolved.value = false;
+    }
+  });
+};&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;تابع &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;onloadTurnstileCallback&lt;/code&gt; توسط اسکریپت Turnstile فراخوانی می‌شود تا ویجت را بارگذاری کند. وقتی کاربر، چالش را با موفقیت حل کند، تابع &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;callback&lt;/code&gt; فراخوانی می‌شود. به یاد داشته باشید که &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;SITE_KEY&lt;/code&gt; را با کلید سایت Turnstile که در مرحله قبل کپی کردید، جایگزین کنید.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;هنگام ارسال فرم، باید توکن (token) تولید شده توسط ویجت Turnstile را نیز ارسال کنید. نحوه پیاده‌سازی درخواست ارسال (submit request) بستگی به فریم‌ورک (framework) مورد استفاده شما دارد. در اینجا یک مثال، با استفاده از data binding در عنصر فرم و یک متد به نام &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;onSubmit&lt;/code&gt; آورده شده است:&lt;/div&gt;&lt;pre data-language=&quot;javascript&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;const onSubmit = handleSubmit(() =&amp;gt; {
+    const token = turnstile.getResponse();
+    if (token === &amp;quot;&amp;quot; || token == undefined || token == null) {
+        return;
+    }
+
+    captchaSolved.value = false;
+    axios
+        .post(&amp;#39;/myendpoint&amp;#39;, Qs.stringify({ captcha: token }))
+        .then(response =&amp;gt; {
+            turnstile.reset(&amp;quot;#turnstile-container&amp;quot;);
+            captchaSolved.value = false;
+            
+            // Success
+        })
+        .catch(error =&amp;gt; {
+            turnstile.reset(&amp;quot;#turnstile-container&amp;quot;);
+            captchaSolved.value = false;
+
+            // Failure
+        });
+});&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;کد بالا توکن را از ویجت Turnstile دریافت کرده و به عنوان یک پارامتر (parameter) به بک‌اند (backend) ارسال می‌کند. حال باید متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;/myendpoint&lt;/code&gt; را در ASP.NET Core پیاده‌سازی کنیم:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class MyController(Captcha captcha) : ControllerBase
+{
+    [HttpPost]
+    [Route(&amp;quot;myendpoint&amp;quot;)]
+    public async Task&amp;lt;ActionResult&amp;gt; MyEndpoint(string token)
+    {
+        if (!await captcha.IsValid(token)) return BadRequest();
+        
+        // Business logic goes here
+        
+        return Ok();
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در این مثال، از یک کنترلر MVC استفاده شده است، اما می‌توان این کد را با Minimal API نیز پیاده‌سازی کرد. دقت کنید که endpoint POST توکن تولید شده در کلاینت (client) را به عنوان یک پارامتر به نام &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;token&lt;/code&gt; دریافت می‌کند و این توکن برای اعتبارسنجی (validation) به یک کلاس به نام &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Captcha&lt;/code&gt; ارسال می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;برای پیاده‌سازی اعتبارسنجی توکن، کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Captcha&lt;/code&gt; را به عنوان یک کلاینت HTTP ساده پیاده‌سازی می‌کنیم. اگرچه پکیج‌های NuGet متعددی برای این کار وجود دارند، اما پیاده‌سازی دستی آن بسیار ساده است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class Captcha(HttpClient captchaClient)
+{
+    public async Task&amp;lt;bool&amp;gt; IsValid(string token)
+    {
+        try
+        {
+            var formData = new Dictionary&amp;lt;string, string&amp;gt;
+            {
+                { &amp;quot;secret&amp;quot;, &amp;quot;SITE_SECRET&amp;quot; },
+                { &amp;quot;response&amp;quot;, token }
+            };
+
+            var content = new FormUrlEncodedContent(formData);
+            var postTask = await captchaClient.PostAsync(&amp;quot;/turnstile/v0/siteverify&amp;quot;, content);
+
+            var result = await postTask.Content.ReadAsStringAsync();
+            var resultObject = JsonSerializer.Deserialize&amp;lt;JsonElement&amp;gt;(result);
+            return resultObject.GetProperty(&amp;quot;success&amp;quot;).GetBoolean();
+        }
+        catch
+        {
+            return false;
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Captcha&lt;/code&gt; اعتبارسنجی توکن را با استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;HttpClient&lt;/code&gt; ارائه شده در سازنده (constructor) پیاده‌سازی می‌کند. متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IsValid&lt;/code&gt; یک درخواست HTTP POST به endpoint &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;/turnstile/v0/siteverify&lt;/code&gt; با کلید مخفی Turnstile و توکن تولید شده ارسال می‌کند. API Cloudflare یک مقدار بولی (boolean) را برمی‌گرداند که نشان‌دهنده معتبر بودن یا نبودن توکن است. به یاد داشته باشید که &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;SITE_SECRET&lt;/code&gt; را با کلید مخفی Turnstile که در مرحله قبل کپی کردید، جایگزین کنید.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;تنها بخش باقی‌مانده، تنظیم کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Captcha&lt;/code&gt; برای تزریق وابستگی (dependency injection) در &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Program.cs&lt;/code&gt; است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;builder.Services.AddHttpClient&amp;lt;Captcha&amp;gt;(x =&amp;gt;
+{
+    x.BaseAddress = new Uri(&amp;quot;https://challenges.cloudflare.com&amp;quot;);
+});&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;این کد کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Captcha&lt;/code&gt; را با یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;HttpClient&lt;/code&gt; ارائه شده اضافه می‌کند که با API Cloudflare ارتباط برقرار می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;با انجام این مراحل، Turnstile در ASP.NET Core پیاده‌سازی می‌شود و مقابله با ربات‌ها برای وب‌سایت شما دشوارتر می‌شود، در حالی که تجربه کاربری برای کاربران واقعی بهبود می‌یابد. اگر از خدمات Cloudflare استفاده می‌کنید، Turnstile یک گزینه عالی برای پیاده‌سازی کپچا در ASP.NET Core است.&lt;/div&gt;">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="روش استفاده از ویژگی Turnstile کلودفلر برای پیاده‌سازی کپچا در برنامه‌های ASP.NET Core">
+    <meta name="twitter:description" content="&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در دنیای امروز، امنیت وب‌سایت‌ها از اهمیت بالایی برخوردار است. یکی از چالش‌های مهم در این زمینه، مقابله با ربات‌ها (bots) است که می‌توانند فعالیت‌های مخربی را مانند ارسال درخواست‌های متعدد برای بازنشانی رمز عبور انجام دهند. برای مقابله با این تهدید، از روش‌های مختلفی مانند کپچا (CAPTCHA) استفاده می‌شود. در این مقاله، به بررسی نحوه استفاده از Cloudflare Turnstile به عنوان جایگزینی برای reCAPTCHA گوگل در وب‌سایت‌های ASP.NET Core می‌پردازیم.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;تاکنون، از سرویس reCAPTCHA گوگل برای مقابله با ربات‌ها استفاده می‌شد. این سرویس عملکرد خوبی داشت، اما با انتقال آن به Google Cloud، فرصتی برای بررسی جایگزین‌های دیگر فراهم شد. با توجه به استفاده گسترده از خدمات Cloudflare، ویژگی Turnstile آن به عنوان گزینه‌ای مناسب انتخاب شد. یکی از مزایای اصلی Turnstile، سادگی استفاده‌ی از آن برای کاربران است و دیگر نیازی به انتخاب تصاویر چراغ راهنمایی نیست.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;برای شروع استفاده از Turnstile در ASP.NET Core، ابتدا باید یک حساب کاربری Cloudflare را ایجاد کنید. سپس، با دنبال کردن مراحل زیر، یک ویجت (widget) Turnstile ایجاد کنید:&lt;/div&gt;&lt;ol&gt;&lt;li&gt;در داشبورد Cloudflare، روی Turnstile در منوی سمت چپ کلیک کنید.&lt;/li&gt;&lt;li&gt;روی دکمه Add widget کلیک کنید.&lt;/li&gt;&lt;li&gt;یک نام برای ویجت انتخاب کرده و نام دامنه خود را اضافه کنید.&lt;/li&gt;&lt;li&gt;در Widget Mode، گزینه Managed را انتخاب کرده و سایر گزینه‌ها را به صورت پیش‌فرض رها کنید.&lt;/li&gt;&lt;li&gt;روی دکمه Save کلیک کرده و کلید سایت (site key) و کلید مخفی (secret key) را برای استفاده در مراحل بعدی کپی کنید.&lt;/li&gt;&lt;/ol&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;حال به سراغ کدنویسی می‌رویم. در صفحه‌ای که می‌خواهید ویجت Turnstile نمایش داده شود، ابتدا اسکریپت زیر را اضافه کنید:&lt;/div&gt;&lt;pre data-language=&quot;xml&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;lt;script src=&amp;quot;https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&amp;amp;onload=onloadTurnstileCallback&amp;quot; async defer&amp;gt;&amp;lt;/script&amp;gt;&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;سپس، در داخل یک عنصر فرم (form)، یک ظرف (container) برای نمایش ویجت اضافه کنید:&lt;/div&gt;&lt;pre data-language=&quot;xml&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;lt;form ...&amp;gt;
+  &amp;lt;div id=&amp;quot;turnstile-container&amp;quot;&amp;gt;&amp;lt;/div&amp;gt;
+&amp;lt;/form&amp;gt;&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در مرحله بعد، یک فایل جاوا اسکریپت (JavaScript) ایجاد کرده و کد زیر را در آن قرار دهید:&lt;/div&gt;&lt;pre data-language=&quot;javascript&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;const captchaSolved = ref(false);
+
+window.onloadTurnstileCallback = function () {
+  turnstile.render(&amp;quot;#turnstile-container&amp;quot;, {
+    sitekey: &amp;quot;SITE_KEY&amp;quot;,
+    callback: function (token) {
+        captchaSolved.value = true;
+    },
+    &amp;#39;expired-callback&amp;#39;: function () {
+        captchaSolved.value = false;
+    }
+  });
+};&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;تابع &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;onloadTurnstileCallback&lt;/code&gt; توسط اسکریپت Turnstile فراخوانی می‌شود تا ویجت را بارگذاری کند. وقتی کاربر، چالش را با موفقیت حل کند، تابع &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;callback&lt;/code&gt; فراخوانی می‌شود. به یاد داشته باشید که &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;SITE_KEY&lt;/code&gt; را با کلید سایت Turnstile که در مرحله قبل کپی کردید، جایگزین کنید.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;هنگام ارسال فرم، باید توکن (token) تولید شده توسط ویجت Turnstile را نیز ارسال کنید. نحوه پیاده‌سازی درخواست ارسال (submit request) بستگی به فریم‌ورک (framework) مورد استفاده شما دارد. در اینجا یک مثال، با استفاده از data binding در عنصر فرم و یک متد به نام &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;onSubmit&lt;/code&gt; آورده شده است:&lt;/div&gt;&lt;pre data-language=&quot;javascript&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;const onSubmit = handleSubmit(() =&amp;gt; {
+    const token = turnstile.getResponse();
+    if (token === &amp;quot;&amp;quot; || token == undefined || token == null) {
+        return;
+    }
+
+    captchaSolved.value = false;
+    axios
+        .post(&amp;#39;/myendpoint&amp;#39;, Qs.stringify({ captcha: token }))
+        .then(response =&amp;gt; {
+            turnstile.reset(&amp;quot;#turnstile-container&amp;quot;);
+            captchaSolved.value = false;
+            
+            // Success
+        })
+        .catch(error =&amp;gt; {
+            turnstile.reset(&amp;quot;#turnstile-container&amp;quot;);
+            captchaSolved.value = false;
+
+            // Failure
+        });
+});&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;کد بالا توکن را از ویجت Turnstile دریافت کرده و به عنوان یک پارامتر (parameter) به بک‌اند (backend) ارسال می‌کند. حال باید متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;/myendpoint&lt;/code&gt; را در ASP.NET Core پیاده‌سازی کنیم:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class MyController(Captcha captcha) : ControllerBase
+{
+    [HttpPost]
+    [Route(&amp;quot;myendpoint&amp;quot;)]
+    public async Task&amp;lt;ActionResult&amp;gt; MyEndpoint(string token)
+    {
+        if (!await captcha.IsValid(token)) return BadRequest();
+        
+        // Business logic goes here
+        
+        return Ok();
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در این مثال، از یک کنترلر MVC استفاده شده است، اما می‌توان این کد را با Minimal API نیز پیاده‌سازی کرد. دقت کنید که endpoint POST توکن تولید شده در کلاینت (client) را به عنوان یک پارامتر به نام &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;token&lt;/code&gt; دریافت می‌کند و این توکن برای اعتبارسنجی (validation) به یک کلاس به نام &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Captcha&lt;/code&gt; ارسال می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;برای پیاده‌سازی اعتبارسنجی توکن، کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Captcha&lt;/code&gt; را به عنوان یک کلاینت HTTP ساده پیاده‌سازی می‌کنیم. اگرچه پکیج‌های NuGet متعددی برای این کار وجود دارند، اما پیاده‌سازی دستی آن بسیار ساده است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class Captcha(HttpClient captchaClient)
+{
+    public async Task&amp;lt;bool&amp;gt; IsValid(string token)
+    {
+        try
+        {
+            var formData = new Dictionary&amp;lt;string, string&amp;gt;
+            {
+                { &amp;quot;secret&amp;quot;, &amp;quot;SITE_SECRET&amp;quot; },
+                { &amp;quot;response&amp;quot;, token }
+            };
+
+            var content = new FormUrlEncodedContent(formData);
+            var postTask = await captchaClient.PostAsync(&amp;quot;/turnstile/v0/siteverify&amp;quot;, content);
+
+            var result = await postTask.Content.ReadAsStringAsync();
+            var resultObject = JsonSerializer.Deserialize&amp;lt;JsonElement&amp;gt;(result);
+            return resultObject.GetProperty(&amp;quot;success&amp;quot;).GetBoolean();
+        }
+        catch
+        {
+            return false;
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Captcha&lt;/code&gt; اعتبارسنجی توکن را با استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;HttpClient&lt;/code&gt; ارائه شده در سازنده (constructor) پیاده‌سازی می‌کند. متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IsValid&lt;/code&gt; یک درخواست HTTP POST به endpoint &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;/turnstile/v0/siteverify&lt;/code&gt; با کلید مخفی Turnstile و توکن تولید شده ارسال می‌کند. API Cloudflare یک مقدار بولی (boolean) را برمی‌گرداند که نشان‌دهنده معتبر بودن یا نبودن توکن است. به یاد داشته باشید که &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;SITE_SECRET&lt;/code&gt; را با کلید مخفی Turnstile که در مرحله قبل کپی کردید، جایگزین کنید.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;تنها بخش باقی‌مانده، تنظیم کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Captcha&lt;/code&gt; برای تزریق وابستگی (dependency injection) در &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Program.cs&lt;/code&gt; است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;builder.Services.AddHttpClient&amp;lt;Captcha&amp;gt;(x =&amp;gt;
+{
+    x.BaseAddress = new Uri(&amp;quot;https://challenges.cloudflare.com&amp;quot;);
+});&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;این کد کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Captcha&lt;/code&gt; را با یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;HttpClient&lt;/code&gt; ارائه شده اضافه می‌کند که با API Cloudflare ارتباط برقرار می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;با انجام این مراحل، Turnstile در ASP.NET Core پیاده‌سازی می‌شود و مقابله با ربات‌ها برای وب‌سایت شما دشوارتر می‌شود، در حالی که تجربه کاربری برای کاربران واقعی بهبود می‌یابد. اگر از خدمات Cloudflare استفاده می‌کنید، Turnstile یک گزینه عالی برای پیاده‌سازی کپچا در ASP.NET Core است.&lt;/div&gt;">
+    <meta name="twitter:card" content="&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در دنیای امروز، امنیت وب‌سایت‌ها از اهمیت بالایی برخوردار است. یکی از چالش‌های مهم در این زمینه، مقابله با ربات‌ها (bots) است که می‌توانند فعالیت‌های مخربی را مانند ارسال درخواست‌های متعدد برای بازنشانی رمز عبور انجام دهند. برای مقابله با این تهدید، از روش‌های مختلفی مانند کپچا (CAPTCHA) استفاده می‌شود. در این مقاله، به بررسی نحوه استفاده از Cloudflare Turnstile به عنوان جایگزینی برای reCAPTCHA گوگل در وب‌سایت‌های ASP.NET Core می‌پردازیم.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;تاکنون، از سرویس reCAPTCHA گوگل برای مقابله با ربات‌ها استفاده می‌شد. این سرویس عملکرد خوبی داشت، اما با انتقال آن به Google Cloud، فرصتی برای بررسی جایگزین‌های دیگر فراهم شد. با توجه به استفاده گسترده از خدمات Cloudflare، ویژگی Turnstile آن به عنوان گزینه‌ای مناسب انتخاب شد. یکی از مزایای اصلی Turnstile، سادگی استفاده‌ی از آن برای کاربران است و دیگر نیازی به انتخاب تصاویر چراغ راهنمایی نیست.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;برای شروع استفاده از Turnstile در ASP.NET Core، ابتدا باید یک حساب کاربری Cloudflare را ایجاد کنید. سپس، با دنبال کردن مراحل زیر، یک ویجت (widget) Turnstile ایجاد کنید:&lt;/div&gt;&lt;ol&gt;&lt;li&gt;در داشبورد Cloudflare، روی Turnstile در منوی سمت چپ کلیک کنید.&lt;/li&gt;&lt;li&gt;روی دکمه Add widget کلیک کنید.&lt;/li&gt;&lt;li&gt;یک نام برای ویجت انتخاب کرده و نام دامنه خود را اضافه کنید.&lt;/li&gt;&lt;li&gt;در Widget Mode، گزینه Managed را انتخاب کرده و سایر گزینه‌ها را به صورت پیش‌فرض رها کنید.&lt;/li&gt;&lt;li&gt;روی دکمه Save کلیک کرده و کلید سایت (site key) و کلید مخفی (secret key) را برای استفاده در مراحل بعدی کپی کنید.&lt;/li&gt;&lt;/ol&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;حال به سراغ کدنویسی می‌رویم. در صفحه‌ای که می‌خواهید ویجت Turnstile نمایش داده شود، ابتدا اسکریپت زیر را اضافه کنید:&lt;/div&gt;&lt;pre data-language=&quot;xml&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;lt;script src=&amp;quot;https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&amp;amp;onload=onloadTurnstileCallback&amp;quot; async defer&amp;gt;&amp;lt;/script&amp;gt;&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;سپس، در داخل یک عنصر فرم (form)، یک ظرف (container) برای نمایش ویجت اضافه کنید:&lt;/div&gt;&lt;pre data-language=&quot;xml&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;lt;form ...&amp;gt;
+  &amp;lt;div id=&amp;quot;turnstile-container&amp;quot;&amp;gt;&amp;lt;/div&amp;gt;
+&amp;lt;/form&amp;gt;&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در مرحله بعد، یک فایل جاوا اسکریپت (JavaScript) ایجاد کرده و کد زیر را در آن قرار دهید:&lt;/div&gt;&lt;pre data-language=&quot;javascript&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;const captchaSolved = ref(false);
+
+window.onloadTurnstileCallback = function () {
+  turnstile.render(&amp;quot;#turnstile-container&amp;quot;, {
+    sitekey: &amp;quot;SITE_KEY&amp;quot;,
+    callback: function (token) {
+        captchaSolved.value = true;
+    },
+    &amp;#39;expired-callback&amp;#39;: function () {
+        captchaSolved.value = false;
+    }
+  });
+};&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;تابع &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;onloadTurnstileCallback&lt;/code&gt; توسط اسکریپت Turnstile فراخوانی می‌شود تا ویجت را بارگذاری کند. وقتی کاربر، چالش را با موفقیت حل کند، تابع &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;callback&lt;/code&gt; فراخوانی می‌شود. به یاد داشته باشید که &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;SITE_KEY&lt;/code&gt; را با کلید سایت Turnstile که در مرحله قبل کپی کردید، جایگزین کنید.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;هنگام ارسال فرم، باید توکن (token) تولید شده توسط ویجت Turnstile را نیز ارسال کنید. نحوه پیاده‌سازی درخواست ارسال (submit request) بستگی به فریم‌ورک (framework) مورد استفاده شما دارد. در اینجا یک مثال، با استفاده از data binding در عنصر فرم و یک متد به نام &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;onSubmit&lt;/code&gt; آورده شده است:&lt;/div&gt;&lt;pre data-language=&quot;javascript&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;const onSubmit = handleSubmit(() =&amp;gt; {
+    const token = turnstile.getResponse();
+    if (token === &amp;quot;&amp;quot; || token == undefined || token == null) {
+        return;
+    }
+
+    captchaSolved.value = false;
+    axios
+        .post(&amp;#39;/myendpoint&amp;#39;, Qs.stringify({ captcha: token }))
+        .then(response =&amp;gt; {
+            turnstile.reset(&amp;quot;#turnstile-container&amp;quot;);
+            captchaSolved.value = false;
+            
+            // Success
+        })
+        .catch(error =&amp;gt; {
+            turnstile.reset(&amp;quot;#turnstile-container&amp;quot;);
+            captchaSolved.value = false;
+
+            // Failure
+        });
+});&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;کد بالا توکن را از ویجت Turnstile دریافت کرده و به عنوان یک پارامتر (parameter) به بک‌اند (backend) ارسال می‌کند. حال باید متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;/myendpoint&lt;/code&gt; را در ASP.NET Core پیاده‌سازی کنیم:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class MyController(Captcha captcha) : ControllerBase
+{
+    [HttpPost]
+    [Route(&amp;quot;myendpoint&amp;quot;)]
+    public async Task&amp;lt;ActionResult&amp;gt; MyEndpoint(string token)
+    {
+        if (!await captcha.IsValid(token)) return BadRequest();
+        
+        // Business logic goes here
+        
+        return Ok();
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در این مثال، از یک کنترلر MVC استفاده شده است، اما می‌توان این کد را با Minimal API نیز پیاده‌سازی کرد. دقت کنید که endpoint POST توکن تولید شده در کلاینت (client) را به عنوان یک پارامتر به نام &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;token&lt;/code&gt; دریافت می‌کند و این توکن برای اعتبارسنجی (validation) به یک کلاس به نام &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Captcha&lt;/code&gt; ارسال می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;برای پیاده‌سازی اعتبارسنجی توکن، کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Captcha&lt;/code&gt; را به عنوان یک کلاینت HTTP ساده پیاده‌سازی می‌کنیم. اگرچه پکیج‌های NuGet متعددی برای این کار وجود دارند، اما پیاده‌سازی دستی آن بسیار ساده است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class Captcha(HttpClient captchaClient)
+{
+    public async Task&amp;lt;bool&amp;gt; IsValid(string token)
+    {
+        try
+        {
+            var formData = new Dictionary&amp;lt;string, string&amp;gt;
+            {
+                { &amp;quot;secret&amp;quot;, &amp;quot;SITE_SECRET&amp;quot; },
+                { &amp;quot;response&amp;quot;, token }
+            };
+
+            var content = new FormUrlEncodedContent(formData);
+            var postTask = await captchaClient.PostAsync(&amp;quot;/turnstile/v0/siteverify&amp;quot;, content);
+
+            var result = await postTask.Content.ReadAsStringAsync();
+            var resultObject = JsonSerializer.Deserialize&amp;lt;JsonElement&amp;gt;(result);
+            return resultObject.GetProperty(&amp;quot;success&amp;quot;).GetBoolean();
+        }
+        catch
+        {
+            return false;
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Captcha&lt;/code&gt; اعتبارسنجی توکن را با استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;HttpClient&lt;/code&gt; ارائه شده در سازنده (constructor) پیاده‌سازی می‌کند. متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IsValid&lt;/code&gt; یک درخواست HTTP POST به endpoint &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;/turnstile/v0/siteverify&lt;/code&gt; با کلید مخفی Turnstile و توکن تولید شده ارسال می‌کند. API Cloudflare یک مقدار بولی (boolean) را برمی‌گرداند که نشان‌دهنده معتبر بودن یا نبودن توکن است. به یاد داشته باشید که &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;SITE_SECRET&lt;/code&gt; را با کلید مخفی Turnstile که در مرحله قبل کپی کردید، جایگزین کنید.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;تنها بخش باقی‌مانده، تنظیم کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Captcha&lt;/code&gt; برای تزریق وابستگی (dependency injection) در &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Program.cs&lt;/code&gt; است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;builder.Services.AddHttpClient&amp;lt;Captcha&amp;gt;(x =&amp;gt;
+{
+    x.BaseAddress = new Uri(&amp;quot;https://challenges.cloudflare.com&amp;quot;);
+});&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;این کد کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Captcha&lt;/code&gt; را با یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;HttpClient&lt;/code&gt; ارائه شده اضافه می‌کند که با API Cloudflare ارتباط برقرار می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;با انجام این مراحل، Turnstile در ASP.NET Core پیاده‌سازی می‌شود و مقابله با ربات‌ها برای وب‌سایت شما دشوارتر می‌شود، در حالی که تجربه کاربری برای کاربران واقعی بهبود می‌یابد. اگر از خدمات Cloudflare استفاده می‌کنید، Turnstile یک گزینه عالی برای پیاده‌سازی کپچا در ASP.NET Core است.&lt;/div&gt;">
+    <meta property="article:published_time" content="Wed, 19 Mar 2025 06:13:22 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
     <meta content='IE=edge' http-equiv='X-UA-Compatible'>
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">
-	
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
 	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
-
     <link href="vs.min.css" rel="stylesheet" type="text/css">
-    <script src="highlight.min.js" type="text/javascript"></script>
-	
+    <script src="highlight.min.js" type="text/javascript"></script>	
     <link href="styles.css" rel="stylesheet" type="text/css">	
     <style>
       @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
@@ -42,8 +424,8 @@
         }
      }
     </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
 </head>
-
 <body dir='rtl'>
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
@@ -53,7 +435,7 @@
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۳۶۹۵</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۶۹۷</span></td>
 </tr>
 <tr>
 <td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
@@ -73,7 +455,7 @@
 </tr>
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۲۲</span></td>
 </tr>
 </tbody>
 </table>
@@ -197,8 +579,5 @@ window.onloadTurnstileCallback = function () {
 
 <!-- to load custom fonts for printing -->
 <div class="useSamimFD">&nbsp;</div>
-
-<script src="SyntaxHighlighter.js" type="text/javascript"></script>
 </body>
-
 </html>

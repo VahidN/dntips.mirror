@@ -1,17 +1,59 @@
 <!DOCTYPE html>
 <html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
-
 <head>
-    <title>‫‫چاپ برچسب‌های حمل و نقل در C#: وقتی هر شرکت حمل و نقل استاندارد خاص خود را دارد</title>
+    <title>‫‫چاپ برچسب‌های حمل و نقل در C#: وقتی هر شرکت حمل و نقل استاندارد خاص خود را دارد</title>     <meta name="description" content="توسعه‌دهندگان اغلب با این چالش مواجه می‌شوند که وظایفی که در ابتدا ساده به نظر می‌رسند، به دلیل پیچیدگی‌های غیرمنتظره، زمان بیشتری را به خود اختصاص می‌دهند. در این مورد، چاپ برچسب‌های حمل و نقل از طریق APIهای مختلف شرکت‌های حمل و نقل، به دلیل فرمت‌های متفاوت PDF ارائه شده توسط هر شرکت، به یک مسئله چالش‌برانگیز تبدیل شده است. هدف، چاپ خودکار برچسب‌ها بر روی یک چاپگر واحد با فرمت استاندارد 104x152 میلی‌متر بدون دخالت دستی است.
+
+تلاش‌های اولیه برای استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PrintingOptions&lt;/code&gt; در .NET به دلیل عدم تعریف &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PaperSize.A5&lt;/code&gt; و وجود نداشتن &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ScaleType&lt;/code&gt; با شکست مواجه شد. سپس، کتابخانه &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;iText7&lt;/code&gt; به دلیل داشتن مجوز AGPL v3 که مستلزم انتشار کد پروژه در صورت استفاده تجاری است، مورد بررسی قرار گرفت. همچنین، &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PdfiumViewer&lt;/code&gt; به دلیل عدم سازگاری با &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;.NET 8&lt;/code&gt; قابل استفاده نبود.
+
+برای حل این مشکل، از ترکیب سه کتابخانه MIT-سازگار استفاده شد: &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PdfSharp 6.2.4&lt;/code&gt; برای برش و مقیاس‌بندی PDF، &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;UglyToad.PdfPig&lt;/code&gt; برای تجزیه و تحلیل محتوای صفحه و تعیین محدوده محتوا، و &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PDFtoPrinter&lt;/code&gt; برای ارسال PDF نهایی به چاپگر ویندوز. با این حال، استفاده از حاشیه‌های ثابت برای همه شرکت‌های حمل و نقل مشکل‌ساز بود، زیرا برخی از فرمت‌ها بدون حاشیه بودند.
+
+راه حل نهایی، استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PdfPig&lt;/code&gt; برای تجزیه و تحلیل پویا و تعیین موقعیت واقعی محتوا در هر PDF بود. این روش امکان برش دقیق و مناسب برچسب‌ها را برای هر شرکت حمل و نقل فراهم می‌کند، بدون اینکه محتوا از دست برود. این رویکرد به توسعه‌دهندگان اجازه می‌دهد تا با فرمت‌های متنوع PDF مقابله کنند و فرآیند چاپ را به صورت خودکار و بدون نیاز به تنظیمات دستی انجام دهند.">
+    <meta name="author" content="راویAI">
+    <meta itemprop="name" content="چاپ برچسب‌های حمل و نقل در C#: وقتی هر شرکت حمل و نقل استاندارد خاص خود را دارد">
+    <meta itemprop="description" content="توسعه‌دهندگان اغلب با این چالش مواجه می‌شوند که وظایفی که در ابتدا ساده به نظر می‌رسند، به دلیل پیچیدگی‌های غیرمنتظره، زمان بیشتری را به خود اختصاص می‌دهند. در این مورد، چاپ برچسب‌های حمل و نقل از طریق APIهای مختلف شرکت‌های حمل و نقل، به دلیل فرمت‌های متفاوت PDF ارائه شده توسط هر شرکت، به یک مسئله چالش‌برانگیز تبدیل شده است. هدف، چاپ خودکار برچسب‌ها بر روی یک چاپگر واحد با فرمت استاندارد 104x152 میلی‌متر بدون دخالت دستی است.
+
+تلاش‌های اولیه برای استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PrintingOptions&lt;/code&gt; در .NET به دلیل عدم تعریف &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PaperSize.A5&lt;/code&gt; و وجود نداشتن &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ScaleType&lt;/code&gt; با شکست مواجه شد. سپس، کتابخانه &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;iText7&lt;/code&gt; به دلیل داشتن مجوز AGPL v3 که مستلزم انتشار کد پروژه در صورت استفاده تجاری است، مورد بررسی قرار گرفت. همچنین، &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PdfiumViewer&lt;/code&gt; به دلیل عدم سازگاری با &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;.NET 8&lt;/code&gt; قابل استفاده نبود.
+
+برای حل این مشکل، از ترکیب سه کتابخانه MIT-سازگار استفاده شد: &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PdfSharp 6.2.4&lt;/code&gt; برای برش و مقیاس‌بندی PDF، &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;UglyToad.PdfPig&lt;/code&gt; برای تجزیه و تحلیل محتوای صفحه و تعیین محدوده محتوا، و &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PDFtoPrinter&lt;/code&gt; برای ارسال PDF نهایی به چاپگر ویندوز. با این حال، استفاده از حاشیه‌های ثابت برای همه شرکت‌های حمل و نقل مشکل‌ساز بود، زیرا برخی از فرمت‌ها بدون حاشیه بودند.
+
+راه حل نهایی، استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PdfPig&lt;/code&gt; برای تجزیه و تحلیل پویا و تعیین موقعیت واقعی محتوا در هر PDF بود. این روش امکان برش دقیق و مناسب برچسب‌ها را برای هر شرکت حمل و نقل فراهم می‌کند، بدون اینکه محتوا از دست برود. این رویکرد به توسعه‌دهندگان اجازه می‌دهد تا با فرمت‌های متنوع PDF مقابله کنند و فرآیند چاپ را به صورت خودکار و بدون نیاز به تنظیمات دستی انجام دهند.">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="چاپ برچسب‌های حمل و نقل در C#: وقتی هر شرکت حمل و نقل استاندارد خاص خود را دارد">
+    <meta property="og:description" content="توسعه‌دهندگان اغلب با این چالش مواجه می‌شوند که وظایفی که در ابتدا ساده به نظر می‌رسند، به دلیل پیچیدگی‌های غیرمنتظره، زمان بیشتری را به خود اختصاص می‌دهند. در این مورد، چاپ برچسب‌های حمل و نقل از طریق APIهای مختلف شرکت‌های حمل و نقل، به دلیل فرمت‌های متفاوت PDF ارائه شده توسط هر شرکت، به یک مسئله چالش‌برانگیز تبدیل شده است. هدف، چاپ خودکار برچسب‌ها بر روی یک چاپگر واحد با فرمت استاندارد 104x152 میلی‌متر بدون دخالت دستی است.
+
+تلاش‌های اولیه برای استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PrintingOptions&lt;/code&gt; در .NET به دلیل عدم تعریف &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PaperSize.A5&lt;/code&gt; و وجود نداشتن &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ScaleType&lt;/code&gt; با شکست مواجه شد. سپس، کتابخانه &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;iText7&lt;/code&gt; به دلیل داشتن مجوز AGPL v3 که مستلزم انتشار کد پروژه در صورت استفاده تجاری است، مورد بررسی قرار گرفت. همچنین، &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PdfiumViewer&lt;/code&gt; به دلیل عدم سازگاری با &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;.NET 8&lt;/code&gt; قابل استفاده نبود.
+
+برای حل این مشکل، از ترکیب سه کتابخانه MIT-سازگار استفاده شد: &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PdfSharp 6.2.4&lt;/code&gt; برای برش و مقیاس‌بندی PDF، &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;UglyToad.PdfPig&lt;/code&gt; برای تجزیه و تحلیل محتوای صفحه و تعیین محدوده محتوا، و &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PDFtoPrinter&lt;/code&gt; برای ارسال PDF نهایی به چاپگر ویندوز. با این حال، استفاده از حاشیه‌های ثابت برای همه شرکت‌های حمل و نقل مشکل‌ساز بود، زیرا برخی از فرمت‌ها بدون حاشیه بودند.
+
+راه حل نهایی، استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PdfPig&lt;/code&gt; برای تجزیه و تحلیل پویا و تعیین موقعیت واقعی محتوا در هر PDF بود. این روش امکان برش دقیق و مناسب برچسب‌ها را برای هر شرکت حمل و نقل فراهم می‌کند، بدون اینکه محتوا از دست برود. این رویکرد به توسعه‌دهندگان اجازه می‌دهد تا با فرمت‌های متنوع PDF مقابله کنند و فرآیند چاپ را به صورت خودکار و بدون نیاز به تنظیمات دستی انجام دهند.">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="چاپ برچسب‌های حمل و نقل در C#: وقتی هر شرکت حمل و نقل استاندارد خاص خود را دارد">
+    <meta name="twitter:description" content="توسعه‌دهندگان اغلب با این چالش مواجه می‌شوند که وظایفی که در ابتدا ساده به نظر می‌رسند، به دلیل پیچیدگی‌های غیرمنتظره، زمان بیشتری را به خود اختصاص می‌دهند. در این مورد، چاپ برچسب‌های حمل و نقل از طریق APIهای مختلف شرکت‌های حمل و نقل، به دلیل فرمت‌های متفاوت PDF ارائه شده توسط هر شرکت، به یک مسئله چالش‌برانگیز تبدیل شده است. هدف، چاپ خودکار برچسب‌ها بر روی یک چاپگر واحد با فرمت استاندارد 104x152 میلی‌متر بدون دخالت دستی است.
+
+تلاش‌های اولیه برای استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PrintingOptions&lt;/code&gt; در .NET به دلیل عدم تعریف &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PaperSize.A5&lt;/code&gt; و وجود نداشتن &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ScaleType&lt;/code&gt; با شکست مواجه شد. سپس، کتابخانه &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;iText7&lt;/code&gt; به دلیل داشتن مجوز AGPL v3 که مستلزم انتشار کد پروژه در صورت استفاده تجاری است، مورد بررسی قرار گرفت. همچنین، &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PdfiumViewer&lt;/code&gt; به دلیل عدم سازگاری با &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;.NET 8&lt;/code&gt; قابل استفاده نبود.
+
+برای حل این مشکل، از ترکیب سه کتابخانه MIT-سازگار استفاده شد: &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PdfSharp 6.2.4&lt;/code&gt; برای برش و مقیاس‌بندی PDF، &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;UglyToad.PdfPig&lt;/code&gt; برای تجزیه و تحلیل محتوای صفحه و تعیین محدوده محتوا، و &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PDFtoPrinter&lt;/code&gt; برای ارسال PDF نهایی به چاپگر ویندوز. با این حال، استفاده از حاشیه‌های ثابت برای همه شرکت‌های حمل و نقل مشکل‌ساز بود، زیرا برخی از فرمت‌ها بدون حاشیه بودند.
+
+راه حل نهایی، استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PdfPig&lt;/code&gt; برای تجزیه و تحلیل پویا و تعیین موقعیت واقعی محتوا در هر PDF بود. این روش امکان برش دقیق و مناسب برچسب‌ها را برای هر شرکت حمل و نقل فراهم می‌کند، بدون اینکه محتوا از دست برود. این رویکرد به توسعه‌دهندگان اجازه می‌دهد تا با فرمت‌های متنوع PDF مقابله کنند و فرآیند چاپ را به صورت خودکار و بدون نیاز به تنظیمات دستی انجام دهند.">
+    <meta name="twitter:card" content="توسعه‌دهندگان اغلب با این چالش مواجه می‌شوند که وظایفی که در ابتدا ساده به نظر می‌رسند، به دلیل پیچیدگی‌های غیرمنتظره، زمان بیشتری را به خود اختصاص می‌دهند. در این مورد، چاپ برچسب‌های حمل و نقل از طریق APIهای مختلف شرکت‌های حمل و نقل، به دلیل فرمت‌های متفاوت PDF ارائه شده توسط هر شرکت، به یک مسئله چالش‌برانگیز تبدیل شده است. هدف، چاپ خودکار برچسب‌ها بر روی یک چاپگر واحد با فرمت استاندارد 104x152 میلی‌متر بدون دخالت دستی است.
+
+تلاش‌های اولیه برای استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PrintingOptions&lt;/code&gt; در .NET به دلیل عدم تعریف &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PaperSize.A5&lt;/code&gt; و وجود نداشتن &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ScaleType&lt;/code&gt; با شکست مواجه شد. سپس، کتابخانه &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;iText7&lt;/code&gt; به دلیل داشتن مجوز AGPL v3 که مستلزم انتشار کد پروژه در صورت استفاده تجاری است، مورد بررسی قرار گرفت. همچنین، &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PdfiumViewer&lt;/code&gt; به دلیل عدم سازگاری با &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;.NET 8&lt;/code&gt; قابل استفاده نبود.
+
+برای حل این مشکل، از ترکیب سه کتابخانه MIT-سازگار استفاده شد: &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PdfSharp 6.2.4&lt;/code&gt; برای برش و مقیاس‌بندی PDF، &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;UglyToad.PdfPig&lt;/code&gt; برای تجزیه و تحلیل محتوای صفحه و تعیین محدوده محتوا، و &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PDFtoPrinter&lt;/code&gt; برای ارسال PDF نهایی به چاپگر ویندوز. با این حال، استفاده از حاشیه‌های ثابت برای همه شرکت‌های حمل و نقل مشکل‌ساز بود، زیرا برخی از فرمت‌ها بدون حاشیه بودند.
+
+راه حل نهایی، استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PdfPig&lt;/code&gt; برای تجزیه و تحلیل پویا و تعیین موقعیت واقعی محتوا در هر PDF بود. این روش امکان برش دقیق و مناسب برچسب‌ها را برای هر شرکت حمل و نقل فراهم می‌کند، بدون اینکه محتوا از دست برود. این رویکرد به توسعه‌دهندگان اجازه می‌دهد تا با فرمت‌های متنوع PDF مقابله کنند و فرآیند چاپ را به صورت خودکار و بدون نیاز به تنظیمات دستی انجام دهند.">
+    <meta property="article:published_time" content="Wed, 18 Feb 2026 18:50:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
     <meta content='IE=edge' http-equiv='X-UA-Compatible'>
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">
-	
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
 	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
-
     <link href="vs.min.css" rel="stylesheet" type="text/css">
-    <script src="highlight.min.js" type="text/javascript"></script>
-	
+    <script src="highlight.min.js" type="text/javascript"></script>	
     <link href="styles.css" rel="stylesheet" type="text/css">	
     <style>
       @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
@@ -42,8 +84,8 @@
         }
      }
     </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
 </head>
-
 <body dir='rtl'>
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
@@ -53,7 +95,7 @@
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۳۶۹۵</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۶۹۷</span></td>
 </tr>
 <tr>
 <td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
@@ -73,7 +115,7 @@
 </tr>
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۲۲</span></td>
 </tr>
 </tbody>
 </table>
@@ -129,8 +171,5 @@
 
 <!-- to load custom fonts for printing -->
 <div class="useSamimFD">&nbsp;</div>
-
-<script src="SyntaxHighlighter.js" type="text/javascript"></script>
 </body>
-
 </html>
