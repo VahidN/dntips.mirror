@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫کانال‌ها (Channels) در مقابل صف‌ها (Queues) در دات‌نت؛ چرا در سال ۲۰۲۶ باید ساختارهای سنتی را کنار بگذاریم؟</title>     <meta name="description" content=" مدیریت هم‌روندی و پردازش پس‌زمینه داده‌ها، یکی از چالش‌های همیشگی در توسعه سیستم‌های سازمانی و با ترافیک بالا است. سناریویی آشنا را تصور کنید: درخواست‌های API یا رویدادهای وب‌هوک (Webhook) با سرعتی بیش از سرعت پردازش سیستم شما از راه می‌رسند. در نگاه اول، راه‌حل ساده استفاده از یک صف سنتی مانند  Queue  به همراه یک قفل تداخلی ( lock ) یا در بهترین حالت، استفاده از مجموعه‌های نخی امن مثل  ConcurrentQueue  به همراه یک حلقه  Task.Run  است.    ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="کانال‌ها (Channels) در مقابل صف‌ها (Queues) در دات‌نت؛ چرا در سال ۲۰۲۶ باید ساختارهای سنتی را کنار بگذاریم؟">
+    <meta itemprop="description" content=" مدیریت هم‌روندی و پردازش پس‌زمینه داده‌ها، یکی از چالش‌های همیشگی در توسعه سیستم‌های سازمانی و با ترافیک بالا است. سناریویی آشنا را تصور کنید: درخواست‌های API یا رویدادهای وب‌هوک (Webhook) با سرعتی بیش از سرعت پردازش سیستم شما از راه می‌رسند. در نگاه اول، راه‌حل ساده استفاده از یک صف سنتی مانند  Queue  به همراه یک قفل تداخلی ( lock ) یا در بهترین حالت، استفاده از مجموعه‌های نخی امن مثل  ConcurrentQueue  به همراه یک حلقه  Task.Run  است.    ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="کانال‌ها (Channels) در مقابل صف‌ها (Queues) در دات‌نت؛ چرا در سال ۲۰۲۶ باید ساختارهای سنتی را کنار بگذاریم؟">
+    <meta property="og:description" content=" مدیریت هم‌روندی و پردازش پس‌زمینه داده‌ها، یکی از چالش‌های همیشگی در توسعه سیستم‌های سازمانی و با ترافیک بالا است. سناریویی آشنا را تصور کنید: درخواست‌های API یا رویدادهای وب‌هوک (Webhook) با سرعتی بیش از سرعت پردازش سیستم شما از راه می‌رسند. در نگاه اول، راه‌حل ساده استفاده از یک صف سنتی مانند  Queue  به همراه یک قفل تداخلی ( lock ) یا در بهترین حالت، استفاده از مجموعه‌های نخی امن مثل  ConcurrentQueue  به همراه یک حلقه  Task.Run  است.    ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="کانال‌ها (Channels) در مقابل صف‌ها (Queues) در دات‌نت؛ چرا در سال ۲۰۲۶ باید ساختارهای سنتی را کنار بگذاریم؟">
+    <meta name="twitter:description" content=" مدیریت هم‌روندی و پردازش پس‌زمینه داده‌ها، یکی از چالش‌های همیشگی در توسعه سیستم‌های سازمانی و با ترافیک بالا است. سناریویی آشنا را تصور کنید: درخواست‌های API یا رویدادهای وب‌هوک (Webhook) با سرعتی بیش از سرعت پردازش سیستم شما از راه می‌رسند. در نگاه اول، راه‌حل ساده استفاده از یک صف سنتی مانند  Queue  به همراه یک قفل تداخلی ( lock ) یا در بهترین حالت، استفاده از مجموعه‌های نخی امن مثل  ConcurrentQueue  به همراه یک حلقه  Task.Run  است.    ...">
+    <meta name="twitter:card" content=" مدیریت هم‌روندی و پردازش پس‌زمینه داده‌ها، یکی از چالش‌های همیشگی در توسعه سیستم‌های سازمانی و با ترافیک بالا است. سناریویی آشنا را تصور کنید: درخواست‌های API یا رویدادهای وب‌هوک (Webhook) با سرعتی بیش از سرعت پردازش سیستم شما از راه می‌رسند. در نگاه اول، راه‌حل ساده استفاده از یک صف سنتی مانند  Queue  به همراه یک قفل تداخلی ( lock ) یا در بهترین حالت، استفاده از مجموعه‌های نخی امن مثل  ConcurrentQueue  به همراه یک حلقه  Task.Run  است.    ...">
+    <meta property="article:published_time" content="Wed, 08 Jul 2026 04:55:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫کانال‌ها (Channels) در مقابل صف‌ها (Queues) در دات‌نت؛ چرا در سال ۲۰۲۶ باید ساختارهای سنتی را کنار بگذاریم؟";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-3710.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫مدیریت پیش‌دستانه عملکرد در EF Core: تبدیل هشدارها به خطاهای زمان توسعه</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-3708.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫راهنمای نصب Git و پیکربندی احراز هویت SSH در سرورهای ابونتو</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫کانال‌ها (Channels) در مقابل صف‌ها (Queues) در دات‌نت؛ چرا در سال ۲۰۲۶ باید ساختارهای سنتی را کنار بگذاریم؟</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۵/۰۴/۱۷ ۰۸:۲۵</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-3709.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">مدیریت هم‌روندی و پردازش پس‌زمینه داده‌ها، یکی از چالش‌های همیشگی در توسعه سیستم‌های سازمانی و با ترافیک بالا است. سناریویی آشنا را تصور کنید: درخواست‌های API یا رویدادهای وب‌هوک (Webhook) با سرعتی بیش از سرعت پردازش سیستم شما از راه می‌رسند. در نگاه اول، راه‌حل ساده استفاده از یک صف سنتی مانند <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Queue</code> به همراه یک قفل تداخلی (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">lock</code>) یا در بهترین حالت، استفاده از مجموعه‌های نخی امن مثل <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ConcurrentQueue</code> به همراه یک حلقه <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Task.Run</code> است. </div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">اما تجربه محیط‌های عملیاتی (Production) نشان می‌دهد که این الگوها شکنجه‌گاه‌های پنهانی هستند که تحت بار شدید، با مشکلاتی نظیر جهش ناگهانی مصرف پردازنده (CPU Spike)، قفل شدن کارها، عدم امکان خروج امن (Graceful Shutdown) و در نهایت خطای نابودکننده <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">OutOfMemoryException</code> مواجه می‌شوند. چالش اصلی در این سیستم‌ها، «هم‌روندی» نیست؛ بلکه <strong>«هماهنگی و کنترل جریان» (Backpressure)</strong> است. در این مقاله، به بررسی عمیق فضای نام <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">System.Threading.Channels</code> می‌پردازیم و بررسی می‌کنیم که چرا این ابزار، پناهگاه امن توسعه‌دهندگان دات‌نت برای الگوهای تولیدکننده-مصرف‌کننده (Producer-Consumer) است. </div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۱. چرا الگوهای سنتی برای دنیای مدرن کافی نیستند؟</strong></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>الگوی قفل و صف سنتی</strong> (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Queue + Lock</code>)</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">این ساختار هیچ درکی از مفهوم «ظرفیت» ندارد. تولیدکنندگان بدون توجه به توان مصرف‌کننده، داده‌ها را درون صف می‌ریزند و حجم حافظه مصرفی سیستم (Heap) را تا مرز انفجار پیش می‌برند. </div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>الگوی مجموعه‌های هم‌روند</strong> (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ConcurrentQueue</code>)</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">یک پیاده‌سازی متداول با صف‌های هم‌روند به صورت زیر است:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">private readonly ConcurrentQueue&lt;MyJob&gt; _queue = new();
+
+public void Enqueue(MyJob job) =&gt; _queue.Enqueue(job);
+
+public void StartWorker()
+{
+    _ = Task.Run(async () =&gt;
+    {
+        while (true)
+        {
+            if (_queue.TryDequeue(out var job))
+            {
+                await ProcessJobAsync(job);
+            }
+            else
+            {
+                await Task.Delay(100); // رویکردی ابتدایی برای جلوگیری از مشغول‌ماندن نخ
+            }
+        }
+    });
+}</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>نقاط ضعف این الگو در چیست؟</strong></div><ul><li><strong>مصرف پردازنده و تاخیر ناخواسته:</strong> استفاده از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Task.Delay(100)</code> یک توازن ناکارآمد ایجاد می‌کند؛ یا صف خالی است و نخ دائم در حال بیدار و بسته‌شدن است، یا کارها با تأخیر ۱۰۰ میلی‌ثانیه‌ای پردازش می‌شوند. </li><li><strong>عدم پشتیبانی از قابلیت کنترل جریان (Backpressure):</strong> صف به صورت نامحدود رشد می‌کند و مکانیزمی برای کند کردن متد تولیدکننده وجود ندارد. </li><li><strong>محیط غیر بومی آسنکرون:</strong> متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">TryDequeue</code> ماهیت سنکرون دارد و با زنجیره <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Async/Await</code> به خوبی ترکیب نمی‌شود. </li></ul><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>چرا</strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">BlockingCollection</code><strong>منسوخ شده است؟</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">کلاس <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">BlockingCollection</code> سال‌ها ابزار اصلی دات‌نت بود و از Backpressure نیز پشتیبانی می‌کرد، اما ریشه در دنیای سنکرون دارد. مسدود کردن نخ‌ها (Thread Blocking) در دورانی که تمام معماری‌ها بر پایه برنامه‌نویسی آسنکرون و بهره‌وری حداکثری از هسته‌های پردازنده بنا شده‌اند، هزینه‌ای بسیار سنگین به سرور تحمیل می‌کند. </div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۲. کانال</strong> (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Channel</code>) <strong>چیست؟</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">یک کانال را به عنوان یک مجرای ارتباطی هوشمند و کاملاً آسنکرون بین بخش تولیدکننده داده (Producers) و بخش مصرف‌کننده داده (Consumers) تصور کنید. کانال‌ها ساختار هماهنگی، ترتیب‌بندی و کنترل جریان را به صورت درونی مدیریت می‌کنند. </div><div class="ql-direction-rtl ql-align-right" style="text-align: right;" dir="rtl">اجزای اصلی یک کانال عبارتند از: </div><ul><li><strong>ChannelWriter:</strong> متدها و رویدادهای مربوط به نوشتن و ارسال داده‌ها را مدیریت می‌کند. </li><li><strong>ChannelReader:</strong> وظیفه خواندن و آزادسازی رویدادها را بر عهده دارد. </li></ul><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۳. انواع کانال‌ها و استراتژی‌های مدیریت بار (Backpressure)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">از طریق کلاس استاتیک <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Channel</code> می‌توان دو نوع کانال اصلی ایجاد کرد: </div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>الف) کانال‌های نامحدود (Unbounded Channels)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">این کانال‌ها محدودیت گنجایش ندارند و تا جایی که حافظه سرور اجازه دهد داده می‌پذیرند. </div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">var channel = Channel.CreateUnbounded&lt;MyEvent&gt;();</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>نکته معماری:</strong> استفاده از کانال‌های نامحدود در محیط‌های عملیاتی خطرناک است. مگر اینکه از نظر ریاضی مطمئن باشید سرعت مصرف‌کننده شما همواره از تولیدکننده بیشتر است؛ در غیر این صورت، این الگو صرفاً وقوع خطای کمبود حافظه را به تأخیر می‌اندازد. </div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>ب) کانال‌های محدود (Bounded Channels)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">این کانال‌ها ظرفیت ثابتی دارند و ابزار اصلی حفظ پایداری سیستم در زمان ترافیک‌های ناگهانی (Burst Load) هستند. </div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">var options = new BoundedChannelOptions(100)
+{
+    FullMode = BoundedChannelFullMode.Wait
+};
+var channel = Channel.CreateBounded&lt;MyEvent&gt;(options);</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>رفتار سیستم هنگام پر شدن کانال</strong> (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">BoundedChannelFullMode</code>)</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">دات‌نت ابزارهای متنوعی برای تصمیم‌گیری در زمان پر شدن ظرفیت کانال ارائه می‌دهد: </div><table class="table table-striped table-hover table-bordered table-condensed" style="max-width: 100%; width: auto; margin-left: auto; margin-right: auto; direction: rtl;" dir="rtl"><tbody><tr><td data-row="1" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>وضعیت (Mode)</strong></td><td data-row="1" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>رفتار سیستم (Behavior)</strong></td><td data-row="1" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>موارد کاربرد (Use Cases)</strong></td></tr><tr><td data-row="2" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Wait</code></td><td data-row="2" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">تولیدکننده به صورت آسنکرون منتظر می‌ماند تا فضا خالی شود. </td><td data-row="2" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">امن‌ترین حالت برای کارهای پردازشی که حذف هیچ رویدادی مجاز نیست. </td></tr><tr><td data-row="3" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">DropOldest</code></td><td data-row="3" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">قدیمی‌ترین آیتم درون صف حذف می‌شود تا جا برای داده جدید باز شود. </td><td data-row="3" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">سیستم‌های اینترنت اشیاء (IoT) و داده‌های زنده مثل وضعیت بورس یا دماسنج. </td></tr><tr><td data-row="4" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">DropNewest</code></td><td data-row="4" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">جدیدترین آیتم در حال انتظار حذف می‌شود. </td><td data-row="4" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">زمانی که داده‌های اولیه ارزش پردازشی بالاتری دارند. </td></tr><tr><td data-row="5" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">DropWrite</code></td><td data-row="5" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">آیتمی که هم‌اکنون در حال نوشتن است حذف می‌شود و متد بدون خطا برمی‌گردد. </td><td data-row="5" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">سناریوهای تلمتری با اولویت پایین که مفقود شدن جزئی داده اهمیت ندارد. </td></tr></tbody></table><blockquote class="ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>نکته مهم پیرامون رصد داده‌های حذف شده (Observability):</strong> اگر از حالت‌هایی غیر از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Wait</code> استفاده می‌کنید، حتماً باید از کالبک <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">itemDropped</code> استفاده کنید تا متوجه از دست رفتن داده‌ها در لایه مانیتورینگ شوید. این کالبک سنکرون است؛ پس عملیات داخل آن باید فوق‌العاده سریع باشد. </blockquote><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">var channel = Channel.CreateBounded&lt;MyEvent&gt;(
+    new BoundedChannelOptions(100) { FullMode = BoundedChannelFullMode.DropOldest },
+    itemDropped: droppedItem =&gt; 
+    {
+        Console.WriteLine($&quot;[Warning] Item Dropped: {droppedItem.Id}&quot;);
+    }
+);</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۴. بررسی متدهای تخصصی لایه Reader و Writer</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">یکی از مزایای شگفت‌انگیز کانال‌ها، تفکیک دقیق متدهای همگام (Synchronous) و ناهمگام (Asynchronous) است.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;">متدهای لایه Writer (تولیدکننده)</div><ul><li><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">WriteAsync(T item)</code>: آیتم را می‌نویسد. اگر صف پر باشد، به صورت غیرمسدودکننده (Non-blocking) منتظر فضا می‌ماند. </li><li><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">TryWrite(T item)</code>: تلاش می‌کند به صورت سنکرون بنویسد. اگر موفق شود <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">true</code> و در صورت پر بودن یا بسته بودن صف <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">false</code> برمی‌گرداند. </li><li><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">WaitToWriteAsync()</code>: زمانی کاربرد دارد که می‌خواهید دسته‌ای از داده‌ها (Batching) را وارد کنید؛ ابتدا منتظر فضای خالی می‌مانید و سپس به صورت سنکرون از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">TryWrite</code> استفاده می‌کنید. </li></ul><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>متدهای لایه Reader (مصرف‌کننده)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">برای خواندن داده‌ها از صف، <strong>الگوی ضد استاندارد (Anti-Pattern)</strong> زیر را اجرا نکنید:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">// اشتباه: استفاده مستقیم از ReadAsync در حلقه بی‌طایان
+while (true) {
+    var item = await reader.ReadAsync(); // با بسته شدن کانال خطای صریح پرتاب می‌کند!
+}</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در عوض، از دو الگوی استاندارد و بهینه زیر استفاده کنید:</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>روش اول:</strong> ترکیب <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">WaitToReadAsync</code> و <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">TryRead</code> (بسیار بهینه برای پردازش دسته‌ای)</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">while (await reader.WaitToReadAsync(cancellationToken))
+{
+    while (reader.TryRead(out var item))
+    {
+        await ProcessJobAsync(item); // تخلیه کاملاً سنکرون و سریع حافظه بوفربندی شده
+    }
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>روش دوم:</strong> استفاده از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ReadAllAsync</code> (سینتکس تمیز با رویکرد صریح رویدادمحور)</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">await foreach (var item in reader.ReadAllAsync(cancellationToken))
+{
+    await ProcessJobAsync(item);
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۵. پیاده‌سازی عملی: یک سیستم دریافت وب‌هوک در ASP.NET Core</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">بیایید تمام مفاهیم فوق را در یک پروژه واقعی پیاده‌سازی کنیم. ما یک سرویس اتوبوس رویداد درون‌روالی (In-Process Event Bus) ایجاد می‌کنیم که درخواست‌های وب‌هوک را با سرعت بالا دریافت، در کانال ذخیره و در یک <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">BackgroundService</code> پردازش می‌کند. </div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>گام اول: تعریف ساختار رویداد و کلاس واسط کانال</strong></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public record WebhookPayload(string Id, string EventType, string Data);
+
+public interface IEventBus
+{
+    ChannelReader&lt;WebhookPayload&gt; Reader { get; }
+    ValueTask PublishAsync(WebhookPayload payload, CancellationToken ct);
+}
+
+public sealed class ChannelEventBus : IEventBus, IDisposable
+{
+    private readonly Channel&lt;WebhookPayload&gt; _channel;
+
+    public ChannelEventBus()
+    {
+        // اعمال بهینه‌سازی‌های نخ با Hints
+        _channel = Channel.CreateBounded&lt;WebhookPayload&gt;(
+            new BoundedChannelOptions(1000)
+            {
+                FullMode = BoundedChannelFullMode.Wait,
+                SingleReader = true,  // فقط یک BackgroundService خروجی را می‌خواند
+                SingleWriter = false  // ممکن است چندین کنترلر همزمان بنویسند
+            });
+    }
+
+    public ChannelReader&lt;WebhookPayload&gt; Reader =&gt; _channel.Reader;
+
+    public async ValueTask PublishAsync(WebhookPayload payload, CancellationToken ct)
+    {
+        await _channel.Writer.WriteAsync(payload, ct); // اعمال فشار معکوس هوشمند در صورت پر بودن صف
+    }
+
+    public void Dispose() =&gt; _channel.Writer.Complete(); // بستن امن کانال هنگام اتمام کار نرم‌افزار
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>گام دوم: لایه تولیدکننده (API Controller)</strong></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">[ApiController]
+[Route(&quot;api/webhooks&quot;)]
+public class WebhookController : ControllerBase
+{
+    private readonly IEventBus _eventBus;
+
+    public WebhookController(IEventBus eventBus) =&gt; _eventBus = eventBus;
+
+    [HttpPost]
+    public async Task&lt;IActionResult&gt; Receive([FromBody] WebhookPayload payload, CancellationToken ct)
+    {
+        // کنترلر بدون درگیر شدن در منطق پردازش، بلافاصله رویداد را ثبت کرده و پاسخ داده را بازمی‌گرداند
+        await _eventBus.PublishAsync(payload, ct);
+        return Accepted();
+    }
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>گام سوم: لایه مصرف‌کننده (Background Service)</strong></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public class WebhookProcessorWorker : BackgroundService
+{
+    private readonly IEventBus _eventBus;
+    private readonly ILogger&lt;WebhookProcessorWorker&gt; _logger;
+
+    public WebhookProcessorWorker(IEventBus eventBus, ILogger&lt;WebhookProcessorWorker&gt; logger)
+    {
+        _eventBus = eventBus;
+        _logger = logger;
+    }
+
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        _logger.LogInformation(&quot;سرویس پردازش وب‌هوک‌ها کار خود را آغاز کرد.&quot;);
+
+        // پردازش کاملاً آسنکرون، بدون قفل‌شدگی و با قابلیت لغو امن
+        await foreach (var payload in _eventBus.Reader.ReadAllAsync(stoppingToken))
+        {
+            try
+            {
+                _logger.LogInformation(&quot;در حال پردازش رویداد: {Id}&quot;, payload.Id);
+                await Task.Delay(200, stoppingToken); // شبیه‌سازی کار واقعی
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, &quot;خطا در پردازش رویداد {Id}&quot;, payload.Id);
+            }
+        }
+        
+        _logger.LogInformation(&quot;تمام کارهای باقی‌مانده در کانال با موفقیت تخلیه و به پایان رسیدند.&quot;);
+    }
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>گام چهارم: ثبت خدمات در</strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Program.cs</code></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">builder.Services.AddSingleton&lt;IEventBus, ChannelEventBus&gt;();
+builder.Services.AddHostedService&lt;WebhookProcessorWorker&gt;();</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۶. مقایسه ساختارهای موازی در دات‌نت؛ چه زمانی از چه ابزاری استفاده کنیم؟</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">برای درک بهتر جایگاه کانال‌ها، جدول راهنمای زیر تفاوت ساختارهای هم‌روندی دات‌نت را به وضوح مشخص می‌کند: </div><table class="table table-striped table-hover table-bordered table-condensed" style="max-width: 100%; width: auto; margin-left: auto; margin-right: auto; direction: rtl;" dir="rtl"><tbody><tr><td data-row="1" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>ابزار</strong></td><td data-row="1" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>بومی آسنکرون؟</strong></td><td data-row="1" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>مدیریت Backpressure؟</strong></td><td data-row="1" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>موارد استفاده کلیدی</strong></td></tr><tr><td data-row="2" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Channels</code></td><td data-row="2" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>بله</strong></td><td data-row="2" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>بله (بسیار دقیق)</strong></td><td data-row="2" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">خطوط لوله درون‌برنامه‌ای با کارایی بالا، جداسازی لایه‌های تولید و مصرف. </td></tr><tr><td data-row="3" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">TPL Dataflow</code></td><td data-row="3" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">بله</td><td data-row="3" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">بله</td><td data-row="3" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">خطوط لوله بسیار پیچیده که نیاز به معماری‌های درختی، نگاشت (Mapping) و اتصال گره‌ها دارند. </td></tr><tr><td data-row="4" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ConcurrentQueue</code></td><td data-row="4" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">خیر</td><td data-row="4" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">خیر</td><td data-row="4" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">ساختارهای داده هم‌روند ساده و لوله‌های سنکرون لایه پایین بدون سیگنال‌دهی وضعیت اتمام. </td></tr><tr><td data-row="5" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Message Brokers</code></td><td data-row="5" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">بستگی به کلاینت دارد</td><td data-row="5" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">بله</td><td data-row="5" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">ارتباطات بین چندین میکروسرویس مجزا، نیاز به پایداری داده پس از ریستارت سرور (Durability). </td></tr></tbody></table><div class="ql-direction-rtl ql-align-right" style="text-align: right;" dir="rtl"><br></div><div class="ql-direction-rtl ql-align-right" style="text-align: right;" dir="rtl"><strong>۷. قوانین طلایی و تجربیات محیط عملیاتی (Best Practices)</strong></div><ul><li><strong>همواره صف‌های محدود (Bounded) را ترجیح دهید:</strong> پایداری سیستم خود را فدای سادگی ظاهری صف‌های نامحدود نکنید. </li><li><strong>از Hints برای ارتقای چشمگیر پرفورمنس استفاده کنید:</strong> اگر می‌دانید کانتکست شما تک‌خوان یا تک‌نویسنده است، حتماً <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">SingleReader = true</code> یا <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">SingleWriter = true</code> را تنظیم کنید تا کدهای لایه پایین دات‌نت از ساختارهای همگام‌سازی سبک‌تری استفاده کنند. </li><li><strong>مکانیزم خروج امن را نادیده نگیرید:</strong> همیشه در متدهای خواندن و نوشتن، <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CancellationToken</code> معتبر را پاس دهید تا فرآیند خاموش شدن سرور یا استقرار نسخه جدید (Deployment) بدون مفقود شدن داده‌ها انجام شود. </li><li><strong>بستن کانال را فراموش نکنید:</strong> تولیدکننده‌ای که کارش تمام شده، باید متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Complete()</code> را صدا بزند. در غیر این صورت، مصرف‌کننده تا ابد در وضعیت انتظار باقی مانده و نخ‌ها رها نمی‌شوند. </li><li><strong>هرگز از رویکرد Fire-and-Forget روی متدهای آسنکرون استفاده نکنید:</strong> نوشتن کد به صورت <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">_ = channel.Writer.WriteAsync(...)</code> یک باگ بزرگ است؛ زیرا نه تنها استثناها (Exceptions) بلعیده می‌شوند، بلکه فلسفه وجودی Backpressure و متوقف شدن نخ تولیدکننده کاملاً بی‌اثر می‌گردد. </li></ul><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>نتیجه‌گیری</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">کلاس <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">System.Threading.Channels</code> را می‌توان «کمک‌فنرهای معماری نرم‌افزار» نامید. این ابزار با به حداقل رساندن تخصیص حافظه (Allocation)، پشتیبانی بومی از الگوهای مدرن آسنکرون و اعمال مکانیزم‌های پیشرفته کنترل جریان، راهکاری بی‌نظیر برای پایداری سیستم‌ها در ترافیک‌های سنگین ارائه می‌دهد. اگر در پروژه‌های خود در حال توسعه رفتارهای کارگری (Worker Services)، پردازش پس‌زمینه رویدادها یا لوله‌های جابجایی داده هستید، زمان آن رسیده است که ساختارهای قدیمی را کنار بگذارید و از کارایی بومی دات‌نت لذت ببرید. </div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20336.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>جایگزینی MediatR با System.Threading.Channels </a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20391.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>کاهش کارایی به دلیل نگاشت بیش از حد اشیاء انتقال داده (DTO)</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20412.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>الگوی وب-صف-کارگر: مقیاس‌پذیری با رویکردی عمل‌گرایانه</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20789.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>کانال‌ها در سی شارپ: یک راه حل همزمان برای پردازش داده</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20449.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>چرا نادیده گرفتن CancellationToken هزینه‌ساز است؟</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3655.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مقایسه عملکرد ToListAsync و ToArrayAsync در Entity Framework: کدامیک سریع‌تر است؟</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3672.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>پشتیبانی از فشرده‌سازی Zstandard (Zstd) در NET 11.</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1814.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>انجام کارهای پس زمینه در ASP.NET 4.5.2</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3709.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>کانال‌ها (Channels) در مقابل صف‌ها (Queues) در دات‌نت؛ چرا در سال ۲۰۲۶ باید ساختارهای سنتی را کنار بگذاریم؟</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2997.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>پشتیبانی توکار از انجام کارهای پس‌زمینه در ASP.NET Core 2x</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۴۰۵/۰۴/۱۷ ۰۸:۴۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>از صف‌های سنتی تا کانال‌های مدرن دات‌نت؛ راهنمای گام‌به‌گام بازنویسی یک معماری قدیمی</strong></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl">یکی از الگوهای رایج پردازش پس‌زمینه در دات‌نت، استفاده از ترکیب <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ConcurrentQueue</code> و <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">SemaphoreSlim</code> برای مدیریت و سیگنال‌دهی کارها به یک <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">BackgroundService</code> است. این الگو اگرچه در سناریوهای ساده و بارهای کاری سبک به خوبی کار می‌کند، اما تحت بار شدید در محیط‌های عملیاتی با چالش‌های جدی مواجه می‌شود. در این مقاله آموزشی، ابتدا پیاده‌سازی سنتی مدیریت صف پس‌زمینه را کالبدشکافی کرده، معایب آن را بررسی می‌کنیم و سپس آن را با استفاده از مکانیزم بومی و پرقدرت <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">System.Threading.Channels</code> به یک پیاده‌سازی مدرن، امن و با کارایی بالا بازنویسی خواهیم کرد.</div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>بخش ۱: کالبدشکافی پیاده‌سازی قدیمی و معایب آن</strong></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl">نگاهی به پیاده‌سازی سنتی زیر بیندازیم:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public class BackgroundTaskQueue : IBackgroundTaskQueue
+{
+    private ConcurrentQueue&lt;Func&lt;CancellationToken, Task&gt;&gt; _workItems = new();
+    private SemaphoreSlim _signal = new SemaphoreSlim(0);
+
+    public void QueueBackgroundWorkItem(Func&lt;CancellationToken, Task&gt; workItem)
+    {
+        if (workItem == null) throw new ArgumentNullException(nameof(workItem));
+
+        _workItems.Enqueue(workItem);
+        _signal.Release(); // سیگنال‌دهی به نخ مصرف‌کننده
+    }
+
+    public async Task&lt;Func&lt;CancellationToken, Task&gt;&gt; DequeueAsync(CancellationToken cancellationToken)
+    {
+        await _signal.WaitAsync(cancellationToken);
+        _workItems.TryDequeue(out var workItem);
+
+        return workItem;
+    }
+}</pre><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl">چرا این پیاده‌سازی در مقیاس بالا با شکست مواجه می‌شود؟</div><ul><li><strong>فقدان مکانیزم کنترل بار یا فشار معکوس (Backpressure):</strong> صف <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ConcurrentQueue</code> در این بخش ظرفیت نامحدودی دارد. اگر نرخ تولید کارها در سیستم (مثلاً از طریق کلاینت‌های API) بسیار بیشتر از سرعت پردازش آنها توسط <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">BackgroundService</code> باشد، صف به شکل نامحدود در حافظه (Heap) رشد کرده و در نهایت منجر به کرش سرور با خطای <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">OutOfMemoryException</code> می‌شود.</li><li><strong>پیچیدگی و هزینه هماهنگیPrimitives:</strong> در این الگو شما مجبورید دو ساختار داده مستقل (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ConcurrentQueue</code> برای ذخیره و <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">SemaphoreSlim</code> برای سیگنال‌دهی) را به طور دستی هماهنگ کنید. این هماهنگی دستی هزینه‌بر است و احتمال بروز باگ‌های هم‌روندی را افزایش می‌دهد.</li><li><strong>تله‌ی نشتی حافظه به دلیل کلوژرها (Closure Memory Leak):</strong> در این طراحی، صف اقدام به پذیرش <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Func</code> (یک لامبدا یا دلیگیت) می‌کند. اگر توسعه‌دهنده‌ای هنگام ثبت کار، یک سرویس دارای طول عمر Scoped (مانند کانتکست دیتابیس یا <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IUserContext</code>) را درون این لامبدا کپچر (Capture) کند، این شیء به یک کلوژر تبدیل شده و به دلیل ذخیره در یک صف Singleton، طول عمر آن همیشگی می‌شود! این موضوع یکی از ریشه‌های پنهان و کابوس‌وار نشتی حافظه در دات‌نت است.</li></ul><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>بخش ۲: بازنویسی مدرن سیستم با استفاده از Channels</strong></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl">برای حل این مشکلات، لایه مدیریت کارها را به <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Channel</code> مجهز می‌کنیم. برای امنیت بیشتر و جلوگیری از نشتی حافظه، به جای ارسال مستقیم دلیگیت‌ها (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Func</code>)، سیستم را به ساختار <strong>«پیام‌محور یا داده‌محور» (Data-Only Messages)</strong> تغییر می‌دهیم تا نمونه‌سازی و حل وابستگی‌ها (Resolution) در لایه مصرف‌کننده و در یک Scope جدید رخ دهد.</div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>گام اول: تعریف قراردادهای جدید و پیام داده‌محور</strong></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl">فرض کنید می‌خواهیم کارهایی مانند تولید گزارش یا ارسال ایمیل را پردازش کنیم. یک قرارداد ساده تعریف می‌کنیم:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">// ساختار داده‌محور کوچک بدون کپچر کردن کانتکست‌های طول عمر کوتاه
+public record BackgroundJobMessage(Guid JobId, string JobType, string Payload);
+
+public interface IBackgroundTaskQueue
+{
+    ValueTask QueueBackgroundWorkItemAsync(BackgroundJobMessage workItem, CancellationToken cancellationToken = default);
+    ValueTask&lt;BackgroundJobMessage&gt; DequeueAsync(CancellationToken cancellationToken);
+}</pre><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>گام دوم: پیاده‌سازی صف جدید بر پایه کانال محدود (Bounded Channel)</strong></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl">با انتخاب یک کانال محدود، کنترل جریان (Backpressure) را به عنوان یک ویژگی کلیدی فعال می‌کنیم.</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">using System.Threading.Channels;
+
+public class ChannelBackgroundTaskQueue : IBackgroundTaskQueue
+{
+    private readonly Channel&lt;BackgroundJobMessage&gt; _channel;
+
+    public ChannelBackgroundTaskQueue(int capacity = 1000)
+    {
+        // ساخت یک کانال ناهمگام و محدود برای مدیریت پایداری حافظه
+        var options = new BoundedChannelOptions(capacity)
+        {
+            FullMode = BoundedChannelFullMode.Wait, // در صورت پر شدن، تولیدکننده به صورت آسنکرون منتظر می‌ماند
+            SingleReader = true,                  // بهینه‌سازی: فقط یک BackgroundService کارها را می‌خواند
+            SingleWriter = false                  // کنترلرها یا سرویس‌های متعدد می‌توانند کار تزریق کنند
+        };
+
+        _channel = Channel.CreateBounded&lt;BackgroundJobMessage&gt;(options);
+    }
+
+    public async ValueTask QueueBackgroundWorkItemAsync(BackgroundJobMessage workItem, CancellationToken cancellationToken = default)
+    {
+        if (workItem == null) throw new ArgumentNullException(nameof(workItem));
+
+        // نوشتن کاملاً آسنکرون و غیرمسدودکننده نخ در کانال
+        await _channel.Writer.WriteAsync(workItem, cancellationToken); 
+    }
+
+    public async ValueTask&lt;BackgroundJobMessage&gt; DequeueAsync(CancellationToken cancellationToken)
+    {
+        // خواندن بومی و آسنکرون
+        return await _channel.Reader.ReadAsync(cancellationToken);
+    }
+}</pre><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>گام سوم: بازنویسی سرویس پس‌زمینه (Background Worker)</strong></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl">حالا سرویس میزبانی‌شده (Hosted Service) را طوری بازنویسی می‌کنیم که خروجی کانال را با بهره‌گیری از ویژگی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ReadAllAsync</code> به شکل یک جریان آسنکرون مصرف کند و برای پردازش هر پیام، یک DI Scope مجزا بسازد:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+
+public class QueuedHostedService : BackgroundService
+{
+    private readonly Channel&lt;BackgroundJobMessage&gt; _channel; // یا تزریق مستقیم کانتکست Reader
+    private readonly IBackgroundTaskQueue _taskQueue;
+    private readonly IServiceProvider _serviceProvider;
+    private readonly ILogger&lt;QueuedHostedService&gt; _logger;
+
+    public QueuedHostedService(
+        IBackgroundTaskQueue taskQueue, 
+        IServiceProvider serviceProvider,
+        ILogger&lt;QueuedHostedService&gt; logger)
+    {
+        _taskQueue = taskQueue;
+        _serviceProvider = serviceProvider;
+        _logger = logger;
+    }
+
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        _logger.LogInformation(&quot;سرویس پردازش پس‌زمینه کانال آغاز به کار کرد.&quot;);
+
+        // با استفاده از الگوی پیشنهادی ReadAllAsync، از استثناهای ناخواسته جلوگیری می‌کنیم
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            try
+            {
+                // دریافت کار بعدی به صورت بومی و کاملاً آسنکرون
+                var workItem = await _taskQueue.DequeueAsync(stoppingToken);
+
+                // ایجاد یک Scope جدید برای حل وابستگی سرویس‌های طول عمر کوتاه (Scoped)
+                using var scope = _serviceProvider.CreateScope();
+                
+                // فرض کنید یک مفسر یا هاندر برای پردازش کارهای پس‌زمینه دارید
+                var processor = scope.ServiceProvider.GetRequiredService&lt;IJobProcessor&gt;();
+                
+                await processor.ProcessAsync(workItem, stoppingToken);
+            }
+            catch (OperationCanceledException)
+            {
+                // خروج امن سرویس در زمان درخواست لغو یا خاموشی سرور
+                _logger.LogWarning(&quot;عملیات خواندن از صف لغو شد.&quot;);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, &quot;خطایی در طول پردازش آیتم صف پس‌زمینه رخ داد.&quot;);
+            }
+        }
+    }
+}</pre><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>بخش ۳: چرا این معماری جدید برتر است؟ (تحلیل دستاوردها)</strong></div><ul><li><strong>مدیریت هوشمند لود (Backpressure):</strong> با تعیین ظرفیت ۱۰۰۰ عددی برای کانال، اگر سیستم تحت هجوم ناگهانی درخواست‌ها قرار گیرد، متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">WriteAsync</code> به طور آسنکرون اجرای متد کنترلر وب را متوقف می‌کند (پاز غیرمسدودکننده). این dam یا سد مانع از خراب شدن Heap حافظه سرور می‌شود.</li><li><strong>خروج کاملاً امن (Graceful Shutdown):</strong> دات‌نت هنگام پایان یافتن کار نرم‌افزار، توکن لغو (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">stoppingToken</code>) را فعال می‌کند. ساختار کانال به دلیل بومی بودن در بستر <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Async/Await</code> این توکن را به زیبایی در متد خواندن اعمال کرده و کارگران به سرعت و بدون نقص کارهای جاری را به اتمام رسانده و متوقف می‌شوند.</li><li><strong>امنیت مطلق در برابر نشتی حافظه:</strong> با عبور از متد دلیگیت (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Func</code>) و حرکت به سمت ساختار داده‌محور (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">BackgroundJobMessage</code>)، عملاً امکان انتقال کلوژرها و زنده نگه‌داشتن اشیاء سنگین لایه وب به صف‌های سنگین Singleton صفر شده است.</li><li><strong>کارایی فوق‌العاده بالا (Lock-Free Algorithms):</strong> کانال‌ها در دات‌نت به جای تکیه بر قفل‌های سنگین سیستم‌عاملی یا هماهنگی‌های دستیِ ساختارهایی مثل <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">SemaphoreSlim</code>، از الگوریتم‌های درونی بدون قفل (Lock-free) استفاده می‌کنند کهContention کامپیوتر را به حداقل ممکن رسانده و امکان انتقال ده‌ها هزار پیام در ثانیه را به سادگی فراهم می‌آورد.</li></ul><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>نتیجه‌گیری</strong></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl">بازنویسی سیستم‌های هم‌روندی قدیمی بر پایه مجموعه‌های هم‌روند و کلاس‌های سنتی سیگنال‌دهی، یکی از بهترین سرمایه‌گذاری‌ها برای تثبیت پایداری یا به اصطلاح صاف کردن نمودار تاخیر سیستم (Latency) در دات‌نت است. با جایگزینی ساختارهای سنتی با <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">System.Threading.Channels</code> نه تنها کد تمیزتر، خواناتر و منعطف‌تری خواهیم داشت، بلکه نرم‌افزاری تولید می‌کنیم که تحت سنگین‌ترین بارهای کاری در محیط عملیاتی، رفتاری کاملاً پیش‌بینی‌پذیر و پایدار از خود نشان می‌دهد.</div></div>
+</div></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

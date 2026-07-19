@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫تهیه خروجی RSS در برنامه‌های ASP.NET MVC</title>     <meta name="description" content="در این مطلب با کتابخانه تهیه شده جهت تولید فیدهای RSS سایت جاری آشنا خواهید شد. در این کتابخانه مسایل زیر لحاظ شده است:
+ 
+ 
+ 
+ 
+ 1) تهیه یک ActionResult جدید به نام FeedResult برای سازگاری و یکپارچگی بهتر با ASP.NET MVC
+ 
+ 
+ 
+ 
+ 2) اعمال زبان فارسی به خروجی نهایی (این مورد حداقل در IE محترم شمرده می‌شود و فید را، راست به چپ نمایش می‌دهد)
+ 
+ 
+ 
+ 
+ 3) اعمال جهت‌های rtl و ltr به متون فارسی یا انگلیسی به صورت خودکار؛ به نحوی که  ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="تهیه خروجی RSS در برنامه‌های ASP.NET MVC">
+    <meta itemprop="description" content="در این مطلب با کتابخانه تهیه شده جهت تولید فیدهای RSS سایت جاری آشنا خواهید شد. در این کتابخانه مسایل زیر لحاظ شده است:
+ 
+ 
+ 
+ 
+ 1) تهیه یک ActionResult جدید به نام FeedResult برای سازگاری و یکپارچگی بهتر با ASP.NET MVC
+ 
+ 
+ 
+ 
+ 2) اعمال زبان فارسی به خروجی نهایی (این مورد حداقل در IE محترم شمرده می‌شود و فید را، راست به چپ نمایش می‌دهد)
+ 
+ 
+ 
+ 
+ 3) اعمال جهت‌های rtl و ltr به متون فارسی یا انگلیسی به صورت خودکار؛ به نحوی که  ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="تهیه خروجی RSS در برنامه‌های ASP.NET MVC">
+    <meta property="og:description" content="در این مطلب با کتابخانه تهیه شده جهت تولید فیدهای RSS سایت جاری آشنا خواهید شد. در این کتابخانه مسایل زیر لحاظ شده است:
+ 
+ 
+ 
+ 
+ 1) تهیه یک ActionResult جدید به نام FeedResult برای سازگاری و یکپارچگی بهتر با ASP.NET MVC
+ 
+ 
+ 
+ 
+ 2) اعمال زبان فارسی به خروجی نهایی (این مورد حداقل در IE محترم شمرده می‌شود و فید را، راست به چپ نمایش می‌دهد)
+ 
+ 
+ 
+ 
+ 3) اعمال جهت‌های rtl و ltr به متون فارسی یا انگلیسی به صورت خودکار؛ به نحوی که  ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="تهیه خروجی RSS در برنامه‌های ASP.NET MVC">
+    <meta name="twitter:description" content="در این مطلب با کتابخانه تهیه شده جهت تولید فیدهای RSS سایت جاری آشنا خواهید شد. در این کتابخانه مسایل زیر لحاظ شده است:
+ 
+ 
+ 
+ 
+ 1) تهیه یک ActionResult جدید به نام FeedResult برای سازگاری و یکپارچگی بهتر با ASP.NET MVC
+ 
+ 
+ 
+ 
+ 2) اعمال زبان فارسی به خروجی نهایی (این مورد حداقل در IE محترم شمرده می‌شود و فید را، راست به چپ نمایش می‌دهد)
+ 
+ 
+ 
+ 
+ 3) اعمال جهت‌های rtl و ltr به متون فارسی یا انگلیسی به صورت خودکار؛ به نحوی که  ...">
+    <meta name="twitter:card" content="در این مطلب با کتابخانه تهیه شده جهت تولید فیدهای RSS سایت جاری آشنا خواهید شد. در این کتابخانه مسایل زیر لحاظ شده است:
+ 
+ 
+ 
+ 
+ 1) تهیه یک ActionResult جدید به نام FeedResult برای سازگاری و یکپارچگی بهتر با ASP.NET MVC
+ 
+ 
+ 
+ 
+ 2) اعمال زبان فارسی به خروجی نهایی (این مورد حداقل در IE محترم شمرده می‌شود و فید را، راست به چپ نمایش می‌دهد)
+ 
+ 
+ 
+ 
+ 3) اعمال جهت‌های rtl و ltr به متون فارسی یا انگلیسی به صورت خودکار؛ به نحوی که  ...">
+    <meta property="article:published_time" content="Mon, 10 Sep 2012 17:51:04 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫تهیه خروجی RSS در برنامه‌های ASP.NET MVC";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-1028.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫ایجاد Helper سفارشی جهت نمایش ویدئو در ASP.NET MVC</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-1026.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫Highlight کردن لینک صفحه جاری در ASP.NET MVC</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫تهیه خروجی RSS در برنامه‌های ASP.NET MVC</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۱/۰۶/۲۰ ۱۷:۵۱</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-1027.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'>در این مطلب با کتابخانه تهیه شده جهت تولید فیدهای RSS سایت جاری آشنا خواهید شد. در این کتابخانه مسایل زیر لحاظ شده است:<br>
+
+
+
+
+1) تهیه یک ActionResult جدید به نام FeedResult برای سازگاری و یکپارچگی بهتر با ASP.NET MVC<br>
+
+
+
+
+2) اعمال زبان فارسی به خروجی نهایی (این مورد حداقل در IE محترم شمرده می‌شود و فید را، راست به چپ نمایش می‌دهد)<br>
+
+
+
+
+3) اعمال جهت‌های rtl و ltr به متون فارسی یا انگلیسی به صورت خودکار؛ به نحوی که خروجی نهایی در تمام فیدخوان‌ها یکسان به نظر می‌رسد.<br>
+
+
+
+
+4) اعمال کاراکتر یونیکد RLE به صورت خودکار به عناوین فارسی (این مساله سبب می‌شود تا عنوان‌های ترکیبی متشکل از حروف و کلمات فارسی و انگلیسی، در فیدخوان‌هایی که متون را، راست به چپ نمایش نمی‌دهند، صحیح و بدون مشکل نمایش داده شود.)<br>
+
+
+
+
+5) نیازی به کتابخانه اضافی خاصی ندارد و پایه آن فضای نام System.ServiceModel.Syndication دات نت است.<br>
+
+
+
+
+6) تنظیم صحیح ContentEncoding و ContentType جهت نمایش بدون مشکل متون فارسی<br>
+
+
+
+
+<br>
+
+
+
+
+سورس کامل این کتابخانه به همراه یک مثال استفاده از آن را از اینجا می‌توانید دریافت کنید:<br>
+
+
+
+
+<div align="center"><a href="https://www.dntips.ir/File/UserFile?name=MvcRssApplication.zip">MvcRssApplication.zip</a><br>
+
+
+</div>
+
+
+
+
+<br>
+
+
+
+
+<b>توضیحاتی در مورد نحوه استفاده از آن</b><br>
+
+
+
+
+<br>
+
+
+
+
+کتابخانه کمکی MvcRssHelper به صورت یک پروژه Class library جدا تهیه شده است. بنابراین تنها کافی است ارجاعی را به اسمبلی آن به پروژه خود اضافه کنید. البته این پروژه برای MVC4 کامپایل شده است؛ اما با MVC3 هم قابل کامپایل است. فقط باید ارجاع به اسمبلی System.Web.Mvc.dll را حذف و نمونه MVC3 آن‌را جایگزین کنید.<br>
+
+
+
+
+پس از اضافه کردن ارجاعی به اسمبلی آن، اکشن متد فید شما یک چنین امضایی را باید بازگشت دهد:<br>
+
+
+<div dir="ltr" align="left">
+
+
+<pre language="CSharp" name="code"> FeedResult(string feedTitle, IList&lt;FeedItem&gt; rssItems, string language = "fa-IR")</pre>
+
+
+</div>
+
+
+آیتم اول، نام فید است. مورد دوم، لیست عناوینی است که قرار است در فید ظاهر شوند. برای مثال، هر بار 20 آیتم آخر مطالب سایت را گزارش‌گیری کرده و به فرمت لیستی از FeedItemها باید ارائه دهید. FeedItem هم یک چنین ساختاری دارد و در اسمبلی MvcRssHelper قرار گرفته:<br>
+
+
+<div dir="ltr" align="left">
+
+
+<pre language="CSharp" name="code">using System;
+
+namespace MvcRssHelper
+{
+    public class FeedItem
+    {
+        public string Title { set; get; }
+        public string AuthorName { set; get; }
+        public string Content { set; get; }
+        public string Url { set; get; }
+        public DateTime LastUpdatedTime { set; get; }
+    }
+}</pre>
+
+
+</div>
+
+
+دو نکته در اینجا حائز اهمیت است:<br>
+
+
+
+
+الف) تاریخ استاندارد یک فید <a href="www.dntips.ir-posts-39.html">میلادی است</a>  نه شمسی. به همین جهت DateTime در اینجا ظاهر شده است.<br>
+
+
+
+
+ب) Url آدرسی است به مطلب متناظر در سایت و باید یک آدرس مطلق مثلا شروع شده با http باشد.<br>
+
+
+
+
+<br>
+
+
+<br>
+
+
+<b>
+
+یک مثال از استفاده آن</b><br>
+
+
+
+
+<br>
+
+
+
+
+فرض کنید مدل مطالب سایت ما به نحو زیر است:<br>
+
+
+<div dir="ltr" align="left">
+
+
+<pre language="CSharp" name="code">using System;
+
+namespace MvcRssApplication.Models
+{
+    public class Post
+    {
+        public int Id { set; get; }
+        public string Title { set; get; }
+        public string AuthorName { set; get; }
+        public string Body { set; get; }
+        public DateTime Date { set; get; }
+    }
+}</pre>
+
+
+</div>
+
+
+و یک منبع داده فرضی (کوئری از بانک اطلاعاتی یا استفاده از یک ORM یا ... موارد دیگر) نهایتا تعدادی رکورد را در اختیار ما خواهد گذاشت:<br>
+
+
+<div dir="ltr" align="left">
+
+
+<pre language="CSharp" name="code">using System;
+using System.Collections.Generic;
+using MvcRssApplication.Models;
+
+namespace MvcRssApplication.DataSource
+{
+    public static class BlogItems
+    {
+        public static IList&lt;Post&gt; GetLastBlogPostsList()
+        {
+            var results = new List&lt;Post&gt;();
+            for (int i = 1; i &lt; 21; i++)
+            {
+                results.Add(new Post
+                {
+                     AuthorName = "شخص " + i,
+                     Body = "مطلب " + i,
+                     Date = DateTime.Now.AddDays(-i),
+                     Id = i,
+                     Title = "عنوان "+i
+                });
+            }
+            return results;
+        }
+    }
+}</pre>
+
+
+</div>
+
+
+اکنون برای نمایش این اطلاعات به صورت یک فید، تنها کافی است به صورت زیر عمل کنیم:<br>
+
+
+<div dir="ltr" align="left">
+
+
+<pre language="CSharp" name="code">using System.Collections.Generic;
+using System.Web.Mvc;
+using MvcRssApplication.DataSource;
+using MvcRssApplication.Models;
+using MvcRssHelper;
+
+namespace MvcRssApplication.Controllers
+{
+    public class HomeController : Controller
+    {
+        const int Min15 = 900;
+
+        [OutputCache(Duration = Min15)]
+        public ActionResult Index()
+        {
+            var list = BlogItems.GetLastBlogPostsList();
+            var feedItemsList = mapPostsToFeedItems(list);
+            return new FeedResult("فید مطالب سایت ما", feedItemsList);
+        }
+
+        private List&lt;FeedItem&gt; mapPostsToFeedItems(IList&lt;Post&gt; list)
+        {
+            var feedItemsList = new List&lt;FeedItem&gt;();
+            foreach (var item in list)
+            {
+                feedItemsList.Add(new FeedItem
+                {
+                    AuthorName = item.AuthorName,
+                    Content = item.Body,
+                    LastUpdatedTime = item.Date,
+                    Title = item.Title,
+                    //این آدرس باید مطلق باشد به نحو زیر
+                    Url = this.Url.Action(actionName: "Details", controllerName: "Post", routeValues: new { id = item.Id }, protocol: "http")
+                });
+            }
+            return feedItemsList;
+        }
+    }
+}</pre>
+
+
+</div>
+
+
+<b>توضیحات</b><br>
+
+
+
+
+BlogItems.GetLastBlogPostsList منبع داده فرضی ما است. در ادامه باید این اطلاعات را به صورت لیستی از FeedItemها در آوریم. می‌توانید از <a href="https://www.dntips.ir/search/label/AuoMapper">AutoMapper</a>  استفاده کنید یا در این مثال ساده، نحوه انجام کار را در متد mapPostsToFeedItems ملاحظه می‌کنید.<br>
+
+
+
+
+نکته مهم بکارگرفته شده در متد mapPostsToFeedItems، استفاده از <a href="www.dntips.ir-posts-891.html">Url.Action</a>  برای تولید آدرس‌هایی مطلق متناظر با کنترلر نمایش مطالب سایت است.<br>
+
+
+
+
+پس از اینکه feedItemsList نهایی به صورت پویا تهیه شد، تنها کافی است&nbsp; return new FeedResult را به نحوی که ملاحظه می‌کنید فراخوانی کنیم تا خروجی حاصل به صورت یک فید RSS نمایش داده شود و قابل استفاده باشد. ضمنا جهت کاهش بار سرور می‌توان از <a href="www.dntips.ir-posts-823.html">OutputCache</a>  نیز به مدتی مشخص استفاده کرد.<br></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-101.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>خواندن اطلاعات API فیدبرنر</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2542.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مقایسه سرعت نگاشت AutoMapper</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1286.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Globalization در ASP.NET MVC - قسمت دوم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1133.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>نمایش تقویم ماهیانه شمسی توسط PdfReport</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3140.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>React 16x - قسمت 22 - ارتباط با سرور - بخش 1 - برپایی تنظیمات</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1906.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با Saltarelle کامپایلر قدرتمند #C به جاوااسکریپت</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1027.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>تهیه خروجی RSS در برنامه‌های ASP.NET MVC</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-831.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>EF Code First #1</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2069.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>طراحی افزونه پذیر با ASP.NET MVC 4.x/5.x - قسمت سوم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1803.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>چگونگی گزارشگیری از  Business Objects مانند List توسط StimulSoft</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>علیرضا اسم‌رام</strong>  در  <span dir='ltr'>۱۳۹۱/۰۶/۲۰ ۱۹:۸</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام. بسیار کاربردی و عالی. سپاس.</div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>احمدعلی شفیعی</strong>  در  <span dir='ltr'>۱۳۹۱/۰۶/۲۱ ۰:۳۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>یک‌سری از وبگاه‌ها عادت دارن از description به‌جای content استفاده کنند.آیا این کتابخانه این قابلیت رو داره؟<br></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۱/۰۶/۲۱ ۰:۴۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>خروجی کتابخانه فوق، <a href="http://en.wikipedia.org/wiki/RSS">RSS استاندارد</a>  است و description دارد. مقادیر خواص کلاس FeedItem نهایتا به این خروجی نگاشت می‌شود.<br>
+برای نمونه این خروجی رو می‌تونید در سورس نهایی <a href="https://www.dntips.ir/feeds/posts">فید سایت</a>  مشاهده کنید.<br></div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>محمد صافدل</strong>  در  <span dir='ltr'>۱۳۹۱/۰۶/۲۱ ۱۰:۳۰</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>ممنون آقای نصیری. بسیار عالی بود و ابهامات زیادی در مورد Rss برای من برطرف شد. <br>
+
+<br></div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>محمد صافدل</strong>  در  <span dir='ltr'>۱۳۹۱/۰۶/۲۳ ۱۵:۲۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>در صورت امکان در مورد نحوه استفاده از کتابخانه MvcRssHelper در پروژه‌های
+ ASP.NET و تغییراتی که باید در این کتابخانه انجام شود، راهنمایی کنید. با
+ تشکر<span>&nbsp;</span></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۱/۰۶/۲۳ ۱۶:۲۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>آنچنان تفاوتی نداره. فقط اینبار باید از فایل‌های ashx استفاده کنید. روال ProcessRequest<span> آن معادل روال </span>ExecuteResult<span> </span>موجود در فایل FeedResult.cs<span> </span>است.<br></div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>امیرحسین مرجانی</strong>  در  <span dir='ltr'>۱۳۹۱/۰۷/۲۲ ۱۹:۹</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام<div>ممنوم بابت مطلب خوبتون</div>
+<div>ولی فایل که برای دانلود گذاشتید مشکل داره</div>
+<div>پروژه ام وی سی توش نیست ... ممنونم می‌شم اگر اصلاح کنید</div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۱/۰۷/۲۲ ۱۹:۴۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>داخل فایل <a href="https://www.dntips.ir/File/UserFile?name=MvcRssApplication.zip">MvcRssApplication.zip</a> <span> فوق این موارد هست:<br>
+پوشه MvcRssApplication<span> </span>: یک پروژه مثال<br>
+پوشه MvcRssHelper<span> </span>: کتابخانه اصلی<br>
+
+
+
+
+</span></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهدی پایروند</strong>  در  <span dir='ltr'>۱۳۹۱/۰۷/۲۳ ۱۵:۲۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام، من هم توی لود پروژه مشکل دارم، البته همه نسخه‌های mvc رو نصب شده داشتم ولی:<br>
+<div align="center"><p><img style="display:block; margin-left: auto; margin-right: auto;" src="data:image/PNG;base64,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"></p>
+</div>
+<br>
+
+<div align="center"><p><img style="display:block; margin-left: auto; margin-right: auto;" src="data:image/PNG;base64,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"></p>
+
+</div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۱/۰۷/۲۳ ۱۶:۲۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>- این یک پروژه <a href="http://download.microsoft.com/download/2/F/6/2F63CCD8-9288-4CC8-B58C-81D109F8F5A3/AspNetMVC4Setup.exe">MVC4</a>  است. همچنین فرض هم بر این است که&nbsp;<a href="http://www.microsoft.com/en-us/download/details.aspx?id=1038">IIS Express</a>  بر روی سیستم شما نصب است (<a href="www.dntips.ir-posts-538.html">^</a>).<br></div>
+</div></li></ul></li></ul></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۱/۰۷/۳۰ ۰:۱۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>نسخه به روز شده این پروژه:<br>
+<a href="https://www.dntips.ir/File/UserFile?name=MvcRssApplication-75e688866d6e4e93bc39e110c95ff247.zip">MvcRssApplication.zip</a><br>
+<br>
+تغییرات:<br>
+پیشتر فقط تاریخ به روز رسانی را داشت:<br>
+<div dir="ltr" align="left">
+<pre language="XML" name="code">&lt;a10:updated&gt;2012-10-20T16:09:13+03:30&lt;/a10:updated&gt;</pre>
+</div>
+الان تاریخ انتشار هم به آن اضافه شده:<br>
+<div dir="ltr" align="left">
+<pre language="XML" name="code">&lt;pubDate&gt;Sat, 30 Jan 2010 02:26:32 -0800&lt;/pubDate&gt;</pre>
+</div>
+<br>
+<br></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۱/۰۸/۰۲ ۲۳:۷</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>به روز رسانی سوم:<br>
+
+
+<a href="https://www.dntips.ir/File/UserFile?name=MvcRssApplication3.zip">MvcRssApplication3.zip</a><br>
+
+
+<br>
+
+
+تغییرات (بر اساس نظرات&nbsp; <a href="http://validator.w3.org/appc/">W3C Feed Validation Service</a>&nbsp;<span></span>):<br>
+
+
+- channel link به آن اضافه شد.<br>
+
+
+- فضای نام a10 ایی که تولید می‌شد با atom جایگزین شد.<br></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>امیرحسین مرجانی</strong>  در  <span dir='ltr'>۱۳۹۱/۰۸/۱۳ ۱۷:۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام<div><br>
+<div>از این روش می‌شه برای ساخت sitemap &nbsp;هم استفاده کرد؟</div>
+
+<div>اگر نه چطور؟</div>
+</div></div>
+</div></li></ul></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۴/۰۱/۱۰ ۱:۵۵</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><b>یک نکته‌ی تکمیلی</b> <br>
+فید سایت امروز از کار افتاده بود. علت آن وجود یک سری کاراکتر غیرمجاز XML در متن بود که باید به نحو ذیل پاک شوند:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">        private static readonly Regex _matchHexadecimalSymbols =
+            new Regex("[\x00-\x08\x0B\x0C\x0E-\x1F]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+        /// &lt;summary&gt;
+        /// there are a lot of symbols which can't be in xml code.
+        /// &lt;/summary&gt;
+        public static string RemoveHexadecimalSymbols(this string txt)
+        {
+            return string.IsNullOrWhiteSpace(txt) ?
+                string.Empty : _matchHexadecimalSymbols.Replace(txt, string.Empty);
+        }</pre> </div>
+در کدهای مطلب فوق، مقادیر content و title باید پیش از استفاده، توسط این متد پاکسازی شوند.</div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>سانی</strong>  در  <span dir='ltr'>۱۳۹۴/۰۱/۳۰ ۲۳:۲۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>خیلی متشکر، کدها بسیار کار امد بود و بدون دردسر در پروژه جواب داد&nbsp;<div>فقط این که مثلا باید ادرس http://localhost:40252/feed/rss<span>&nbsp; را وارد کرد ، حال این شکل rss &nbsp;(مربع نارنجی قرمز بالا چپ ادرس بار در گوگل کروم)که در نوار ابزار نمایش داده میشود رو چه تغییراتی باید انجام بدهم تا در ادرس بار نمایش داده شود ؟</span> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۴/۰۱/۳۱ ۰:۲۷</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>به هدر صفحه باید این مورد جهت فعال سازی auto discovery اضافه شود:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">&lt;link title="فید آخرین تغییرات سایت" href="/rss.xml" type="application/rss+xml" rel="alternate" /&gt;</pre> </div>
+محدودیتی هم ندارد. هر تعدادی که نیاز است.</div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۷/۰۱/۲۹ ۱۳:۵۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><b>معادل این مطلب در برنامه‌های ASP.NET Core</b> <br> <br>
+ابتدا بسته‌ی نیوگت <b> <a data-pjax="#js-repo-pjax-container" href="https://github.com/VahidN/DNTCommon.Web.Core">DNTCommon.Web.Core</a> </b> را نصب کنید: <br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">PM&gt; Install-Package DNTCommon.Web.Core</pre> </div>
+
+
+
+
+
+سپس مثالی از FeedResult آن‌را <a href="https://github.com/VahidN/DNTCommon.Web.Core/blob/master/src/DNTCommon.Web.Core.TestWebApp/Controllers/FeedResultController.cs">در اینجا</a>  می‌توانید مشاهده کنید.</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهران علویان</strong>  در  <span dir='ltr'>۱۳۹۷/۰۸/۱۰ ۱۸:۴۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>منظور از دو فیلد زیر چیه و چه کاربردی دارن؟ مثالی از نحوه مقداردهی این دو فیلد میشه ارائه بدید<br>   <div> <div align="left" dir="ltr" style="direction: ltr;"> <pre language="CSharp" name="code">                FeedImageContentPath = "",
+                FeedImageTitle = "",</pre> </div> <br> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۷/۰۸/۱۰ ۱۹:۵۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div> <a href="https://www.w3schools.com/xml/rss_tag_image.asp">جهت نمایش</a> لوگوی سایت شما در یک فید خوان است. FeedImageContentPath<span>، مسیر نسبی به یک تصویر در سایت شما است (content/logo.jpg<span>/~</span>) و FeedImageTitle<span> توضیحات آن. این مسیر نسبی به صورت خودکار به مسیر مطلق تبدیل می‌شود.<br> </span> </span> </div></div>
+</div></li></ul></li></ul></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

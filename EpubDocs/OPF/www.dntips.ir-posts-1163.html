@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫آشنایی با Window Function ها در SQL Server بخش چهارم</title>     <meta name="description" content="برای مطالعه این بخش لازم است، به Syntax مربوط به Over آشنا باشیم، در بخش اول بطور کامل به Syntax مربوط به Over پرداختیم.در این بخش دو فانکشن دیگر از توابع تحلیلی (Analytic functions) به نامهای First_Value و Last_Value را بررسی می‌نماییم.
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 	First_Value
+ 
+ 
+ 
+ 
+ 
+ 
+       این فانکشن نیز همانند دیگر فانکشنهای تحلیلی در نسخه SQL Server 2012 ارائه گردیده است. و اولین مقدار از ی ...">
+    <meta name="author" content="فرهاد فرهمندخواه">
+    <meta itemprop="name" content="آشنایی با Window Function ها در SQL Server بخش چهارم">
+    <meta itemprop="description" content="برای مطالعه این بخش لازم است، به Syntax مربوط به Over آشنا باشیم، در بخش اول بطور کامل به Syntax مربوط به Over پرداختیم.در این بخش دو فانکشن دیگر از توابع تحلیلی (Analytic functions) به نامهای First_Value و Last_Value را بررسی می‌نماییم.
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 	First_Value
+ 
+ 
+ 
+ 
+ 
+ 
+       این فانکشن نیز همانند دیگر فانکشنهای تحلیلی در نسخه SQL Server 2012 ارائه گردیده است. و اولین مقدار از ی ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="آشنایی با Window Function ها در SQL Server بخش چهارم">
+    <meta property="og:description" content="برای مطالعه این بخش لازم است، به Syntax مربوط به Over آشنا باشیم، در بخش اول بطور کامل به Syntax مربوط به Over پرداختیم.در این بخش دو فانکشن دیگر از توابع تحلیلی (Analytic functions) به نامهای First_Value و Last_Value را بررسی می‌نماییم.
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 	First_Value
+ 
+ 
+ 
+ 
+ 
+ 
+       این فانکشن نیز همانند دیگر فانکشنهای تحلیلی در نسخه SQL Server 2012 ارائه گردیده است. و اولین مقدار از ی ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="آشنایی با Window Function ها در SQL Server بخش چهارم">
+    <meta name="twitter:description" content="برای مطالعه این بخش لازم است، به Syntax مربوط به Over آشنا باشیم، در بخش اول بطور کامل به Syntax مربوط به Over پرداختیم.در این بخش دو فانکشن دیگر از توابع تحلیلی (Analytic functions) به نامهای First_Value و Last_Value را بررسی می‌نماییم.
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 	First_Value
+ 
+ 
+ 
+ 
+ 
+ 
+       این فانکشن نیز همانند دیگر فانکشنهای تحلیلی در نسخه SQL Server 2012 ارائه گردیده است. و اولین مقدار از ی ...">
+    <meta name="twitter:card" content="برای مطالعه این بخش لازم است، به Syntax مربوط به Over آشنا باشیم، در بخش اول بطور کامل به Syntax مربوط به Over پرداختیم.در این بخش دو فانکشن دیگر از توابع تحلیلی (Analytic functions) به نامهای First_Value و Last_Value را بررسی می‌نماییم.
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 	First_Value
+ 
+ 
+ 
+ 
+ 
+ 
+       این فانکشن نیز همانند دیگر فانکشنهای تحلیلی در نسخه SQL Server 2012 ارائه گردیده است. و اولین مقدار از ی ...">
+    <meta property="article:published_time" content="Sun, 23 Dec 2012 23:30:04 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫آشنایی با Window Function ها در SQL Server بخش چهارم";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-1164.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫فشرده سازی فایل ها در NET 4.5.</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-1162.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫مروری بر Open Data Protocol و کاربردهای آن</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫آشنایی با Window Function ها در SQL Server بخش چهارم</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>فرهاد فرهمندخواه<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۱/۱۰/۰۳ ۲۳:۳۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-1163.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'>برای مطالعه این بخش لازم است، به Syntax مربوط به Over آشنا باشیم، در&nbsp;<a href="www.dntips.ir-posts-1142.html">بخش اول</a>&nbsp;بطور کامل به Syntax مربوط به Over پرداختیم.<div>در این بخش دو فانکشن دیگر از توابع تحلیلی (<span style="color: rgb(42, 42, 42);">Analytic functions</span>) به نامهای First_Value و Last_Value را بررسی می‌نماییم.</div>
+
+
+
+
+
+
+<div>
+
+
+
+
+
+
+<ul>
+
+
+
+
+
+
+	<li><b>First_Value</b></li></ul>
+
+
+
+
+
+
+<div><b>&nbsp; &nbsp; &nbsp; </b>این فانکشن نیز همانند دیگر فانکشنهای تحلیلی در نسخه SQL Server 2012 ارائه گردیده است. و اولین مقدار از یک مجموعه مقادیر را بر می‌گرداند. و Syntax آن بصورت ذیل می‌باشد:</div>
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+<div><div align="left" dir="ltr">
+
+
+
+
+
+
+<pre language="CSharp" name="code">FIRST_VALUE ( [scalar_expression ) 
+    OVER ( [ partition_by_clause ] order_by_clause [ rows_range_clause ] ) </pre>
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+<div>
+
+
+
+
+
+
+<blockquote><span style="color: #000000;"><span style="font-style: normal;">شرح Syntax:</span></span></blockquote>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<blockquote style="text-align: justify; margin: 0px 0px 0px 40px; border: none; padding: 0px;"><span style="color: #000000;"><span style="font-style: normal;">1-&nbsp;</span></span><span style="background-color: rgb(252, 252, 250);"><span style="font-style: normal;"><span style="color: #000000;">Scalar_expression</span><span style="color: #4e443c;">: </span><span style="color: #000000;">مقدار آن می‌تواند نام یک فیلد یا Subquery باشد.</span></span></span></blockquote>
+
+
+
+
+
+
+
+
+
+<blockquote style="text-align: justify; margin: 0px 0px 0px 40px; border: none; padding: 0px;"><span style="background-color: rgb(252, 252, 250);"><span style="font-style: normal;"><span style="color: #000000;">2- Over : در&nbsp;</span></span></span><a href="www.dntips.ir-posts-1142.html" style="font-style: normal;">بخش اول</a><span style="color: rgb(0, 0, 0); font-style: normal; background-color: rgb(252, 252, 250);">&nbsp;بطور مفصل آن را بررسی نمودیم.</span></blockquote>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<blockquote style="text-align: justify; margin: 0px 0px 0px 40px; border: none; padding: 0px;"><span style="color: #000000;"><span style="font-style: normal;">قبل از بررسی تابع First_Value،ابتدا Script زیر را اجرا نمایید، که شامل یک جدول و درج چند رکورد در آن است.</span></span></blockquote>
+
+
+
+
+
+
+
+
+
+<blockquote style="text-align: justify; margin: 0px 0px 0px 40px; border: none; padding: 0px;"><div align="left" dir="ltr">
+
+
+
+
+<pre language="Sql" name="code">Create Table Test_First_Last_Value
+(SalesOrderID int not null,
+ SalesOrderDetailID int not null ,
+ OrderQty smallint not null);
+ GO
+Insert Into Test_First_Last_Value
+       Values (43662,49,1),(43662,50,3),(43662,51,1),
+          (43663,52,1),(43664,53,1),(43664,54,1),
+  (43667,77,3),(43667,78,1),(43667,79,1),
+          (43667,80,1),(43668,81,3),(43669,110,1),
+          (43670,111,1),(43670,112,2),(43670,113,2),
+          (43670,114,1),(43671,115,1),(43671,116,2)</pre>
+
+
+
+
+</div>
+
+
+
+
+</blockquote>
+
+
+
+
+
+
+
+
+
+<blockquote style="text-align: justify; margin: 0px 0px 0px 40px; border: none; padding: 0px;"><span style="color: #000000;"><span style="font-style: normal;">مثال: ابتدا Scriptی ایجاد می‌نماییم،بطوریکه جدول Test_Firts_Last_Value را براساس فیلد SalesOrderID گروه بندی نموده و اولین مقدار فیلد SalesOrderDetailID در هرگروه را مشخص نماید.</span></span></blockquote>
+
+
+
+
+
+
+
+
+
+<blockquote style="text-align: justify; margin: 0px 0px 0px 40px; border: none; padding: 0px;"><div align="left" dir="ltr">
+
+
+
+
+<pre language="CSharp" name="code">SELECT s.SalesOrderID,s.SalesOrderDetailID,s.OrderQty,
+       FIRST_VALUE(SalesOrderDetailID) OVER (PARTITION BY SalesOrderID
+       ORDER BY SalesOrderDetailID) FstValue
+FROM Test_First_Last_Value s
+     WHERE SalesOrderID IN (43670, 43669, 43667, 43663)
+     ORDER BY s.SalesOrderID,s.SalesOrderDetailID,s.OrderQty</pre>
+
+
+
+
+</div>
+
+
+
+
+</blockquote>
+
+
+
+
+
+
+
+
+
+<blockquote style="text-align: justify; margin: 0px 0px 0px 40px; border: none; padding: 0px;"><span style="color: #000000;"><span style="font-style: normal;">خروجی:</span></span></blockquote>
+
+
+
+
+
+
+
+
+
+<blockquote style="text-align: justify; margin: 0px 0px 0px 40px; border: none; padding: 0px;"><img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/png;base64,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"><br>
+
+
+
+
+</blockquote>
+
+
+
+
+
+
+
+
+
+<blockquote><span style="color: #000000;"><span style="font-style: normal;">&nbsp; &nbsp; &nbsp;مطابق Script چهار گروه در خروجی ایجاد شده است و در فیلد FstValue ، اولین مقدار هر گروه نمایش داده می‌شود. اگر بخش‌های قبلی Window Function‌ها را مطالعه کرده باشید، تحلیل این تابع کار بسیار ساده ای است.&nbsp;</span></span></blockquote>
+
+
+
+
+
+
+
+
+
+<blockquote style="text-align: justify; margin: 0px 0px 0px 40px; border: none; padding: 0px;"><span style="color: #000000;"><span style="font-style: normal;"><br>
+
+
+
+
+</span></span></blockquote>
+
+
+
+
+
+
+
+
+
+<blockquote style="text-align: justify; margin: 0px 0px 0px 40px; border: none; padding: 0px;">
+
+
+
+
+<ul>
+
+
+
+
+	<li><span style="color: #000000;"><span style="font-style: normal;"><b>Last_Value</b></span></span></li></ul>
+
+
+
+
+<div><span style="color: #000000;"><span style="font-style: normal;">&nbsp; &nbsp; &nbsp; این تابع نیز در نسخه SQL Server 2012 ارائه گردیده است. و آخرین مقدار از یک مجموعه مقادیر را بر می‌گرداند، به عبارتی فانکشن Last_Value عکس فانکشن First_Value عمل می‌نماید و Syntax آن به شرح ذیل میباشد:</span></span></div>
+
+
+
+
+<div><div align="left" dir="ltr">
+
+
+
+
+<pre language="CSharp" name="code">LAST_VALUE ( [scalar_expression ) 
+    OVER ( [ partition_by_clause ] order_by_clause rows_range_clause ) </pre>
+
+
+
+
+</div>
+
+
+
+
+</div>
+
+
+
+
+<div><span style="color: #000000;"><span style="font-style: normal;">شرح Syntax تابع Last_Value شبیه به تابع First_Value می‌باشد.</span></span></div>
+
+<div><span style="color: #000000;"><span style="font-style: normal;"><br>
+
+</span></span></div>
+
+
+
+
+<div><span style="color: #000000;"><span style="font-style: normal;">مثال:&nbsp;</span></span><span style="color: rgb(0, 0, 0); font-style: normal;">همانند مثال قبل Scriptی ایجاد می‌نماییم،بطوریکه جدول Test_Firts_Last_Value را براساس فیلد SalesOrderID گروه بندی نموده و آخرین مقدار فیلد SalesOrderDetailID در هرگروه را مشخص نماید.</span><span style="color: rgb(0, 0, 0); font-style: normal;">&nbsp;</span></div>
+
+
+<div><div align="left" dir="ltr">
+
+
+<pre language="Sql" name="code">SELECT s.SalesOrderID,s.SalesOrderDetailID,s.OrderQty,
+       LAST_VALUE(SalesOrderDetailID) OVER (PARTITION BY SalesOrderID
+       ORDER BY SalesOrderDetailID RANGE BETWEEN UNBOUNDED PRECEDING  AND UNBOUNDED FOLLOWING)  LstValue
+FROM Test_First_Last_Value s
+     WHERE SalesOrderID IN (43670, 43669, 43667, 43663)
+     ORDER BY s.SalesOrderID,s.SalesOrderDetailID,s.OrderQty</pre>
+
+
+</div>
+
+
+</div>
+
+
+<div><span style="color: rgb(0, 0, 0); font-style: normal;">خروجی:</span></div>
+
+
+<div><img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/png;base64,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"><br>
+
+
+</div>
+
+
+<div><span style="color: rgb(0, 0, 0); font-style: normal;">خروجی جدول،به چهار گروه تقسیم،و آخرین مقدار هر گروه،در فیلد LstValue نمایش داده شده است. در این مثال نیز تحلیلی نخواهیم داشت، چون فرض بر آن است که بخش‌های قبلی را مطالعه نموده ایم.</span></div>
+
+<div><span style="color: rgb(0, 0, 0); font-style: normal;"><br>
+
+</span></div>
+
+<div><span style="color: rgb(0, 0, 0); font-style: normal;">موفق باشید.</span></div>
+
+</blockquote>
+
+
+
+
+
+
+</div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1156.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با Window Function ها در SQL Server بخش سوم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1284.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با Window Function ها در SQL Server بخش پنجم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-968.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با Row_Number،Rank،Dense_Rank،NTILE</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1142.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با Window Function ها در SQL Server بخش اول</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1163.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>آشنایی با Window Function ها در SQL Server بخش چهارم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1163.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>آشنایی با Window Function ها در SQL Server بخش چهارم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1163.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>آشنایی با Window Function ها در SQL Server بخش چهارم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1156.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>آشنایی با Window Function ها در SQL Server بخش سوم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1163.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>آشنایی با Window Function ها در SQL Server بخش چهارم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1163.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>آشنایی با Window Function ها در SQL Server بخش چهارم</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۹۱/۱۰/۲۸ ۱۰:۳۹</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام،<br>مطلب اول: قسمت order by در ماده over در هر دو کوئری به چه جهت آمده است؟<br>مطلب دوم: first_value چه مزیتی نسبت به min() over داره، منظورم اینه که میشه خروجی کوئری اولتون رو با این کوئری بدست آورد:<br><div dir="ltr" align="left"><pre language="Sql" name="code">SELECT s.SalesOrderID,s.SalesOrderDetailID,s.OrderQty,
+       MIN(SalesOrderDetailID) OVER (PARTITION BY SalesOrderID) FstValue
+FROM Test_First_Last_Value s
+WHERE SalesOrderID IN (43670, 43669, 43667, 43663)
+ORDER BY s.SalesOrderID,s.SalesOrderDetailID,s.OrderQty</pre></div><br>&nbsp;</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>فرهاد فرهمندخواه</strong>  در  <span dir='ltr'>۱۳۹۱/۱۰/۲۹ ۱۱:۵۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام<div>جواب سئوال اول: در Syntax تابع First_value استفاده از Order by اجباری می‌باشد.</div><div style="text-align: justify;">جواب سئوال دوم:</div><div style="text-align: justify;">First_Value اولین مقدار یا اولین Row در یک گروه را مشخص می‌کند و به مفهوم کوچکترین مقدار نمی‌باشد، شاید، مثالی که در مقاله زدم شما را به اشتباه انداخت، در زیر با یک مثال ،First_value و Min را مقایسه می‌کنیم.</div><div style="text-align: justify;">ابتدا یک جدول و چند رکورد، در آن درج می‌کنیم:</div><div style="text-align: justify;"><div align="left" dir="ltr"><pre language="Sql" name="code">CREATE TABLE Employees (
+    EmployeeId INT IDENTITY PRIMARY KEY,
+    Name VARCHAR(50),
+    HireDate DATE NOT NULL,
+    Salary INT NOT NULL
+    )
+GO
+INSERT INTO Employees (Name, HireDate, Salary)
+VALUES
+    ('Alice', '2011-01-01', 20000),
+    ('Brent', '2011-01-15', 19000),
+    ('Carlos', '2011-02-01', 22000),
+    ('Donna', '2011-03-01', 25000),
+    ('Evan', '2011-04-01', 18500)
+GO</pre></div>در ادامه Script زیر را اجرا می‌کنیم:</div><div style="text-align: justify;"><div align="left" dir="ltr"><pre language="Sql" name="code">Select EmployeeId,Name,Salary,HireDate,
+   First_VALUE(HireDate) OVER(ORDER BY Salary RANGE BETWEEN UNBOUNDED PRECEDING
+                              AND UNBOUNDED FOLLOWING) AS First,
+   Min(HireDate) OVER(ORDER BY Salary
+                     RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS Min
+FROM Employees
+ORDER BY EmployeeId
+GO</pre></div>خروجی بصورت زیر می‌شود:</div><div style="text-align: justify;"><p><img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/png;base64,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"></p></div><div style="text-align: justify;">&nbsp; &nbsp; &nbsp; در شکل بالا تفاوت Min و First_Value بطور کامل مشخص است، اگر به Query دقت نمایید، Sort براساس Salary انجام شده است، برای حالت First_value ،مقدار فیلد HireDate در اولین رکورد، برابر است با 01-04-2011 ، بنابراین سورت روی نمایش First_value تاثیر گذار است، بطوریکه Sort برای حالت Min، تاثیر گذار نمی‌باشد، و تابع Min ، کوچکترین مقدار، از مقادیر ستون HireDate را بدست می‌آورد، به بیان ساده‌تر در حالت استفاده از Min، عملیات Sort بیهوده می‌باشد. چون تابع MIN روی کل مقادیر یک گروه یا ستون تاثیر می‌گذارد.</div><div style="text-align: justify;"><br></div><div style="text-align: justify;"><br></div><div style="text-align: justify;"><br></div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۹۱/۱۰/۲۹ ۱۳:۲۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>ممنون از پاسختون، الان متوجه تفاوتشون شدم.<br>ستون older_method باید مقادیرش دقیقا مشابه با first_value شما باشد:<br><div dir="ltr" align="left"><pre language="Sql" name="code">Select EmployeeId,Name,Salary,HireDate,
+       First_VALUE(HireDate) OVER(ORDER BY Salary RANGE BETWEEN UNBOUNDED PRECEDING
+                               AND UNBOUNDED FOLLOWING) AS First,   
+   D.HireDate AS older_method
+FROM Employees
+CROSS APPLY (SELECT TOP 1 HireDate
+   FROM Employees 
+  --WHERE E1.EmployeeId = E2.EmployeeId
+  ORDER BY Salary ASC) AS D
+ORDER BY EmployeeId;</pre></div><br><br></div>
+</div></li></ul></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۹۱/۱۰/۲۸ ۱۲:۱۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام،<br>من SQL Server 2012 ندارم، ولی تا اونجایی که متوجه شدم بر اساس شواهد دو کوئری زیر باید یک نتیجه رو برگردانند. منظورم اینکه که با first_value میشه last_value هم شبیه سازی کرد، فقط کافیه که در ماده order by از کلید واژه DESC استفاده بشه. اگه من اشتباه میکنم لطفا راهنمایی بفرمایید.<br><div dir="ltr" align="left"><pre language="Sql" name="code">SELECT s.SalesOrderID,s.SalesOrderDetailID,s.OrderQty,
+       LAST_VALUE(SalesOrderDetailID) OVER (PARTITION BY SalesOrderID
+       ORDER BY SalesOrderDetailID)  LstValue
+FROM Test_First_Last_Value s
+     WHERE SalesOrderID IN (43670, 43669, 43667, 43663)
+     ORDER BY s.SalesOrderID,s.SalesOrderDetailID,s.OrderQty     
+
+SELECT s.SalesOrderID,s.SalesOrderDetailID,s.OrderQty,
+       FITST_VALUE(SalesOrderDetailID) OVER (PARTITION BY SalesOrderID
+       ORDER BY SalesOrderDetailID DESC) FstValue
+FROM Test_First_Last_Value s
+     WHERE SalesOrderID IN (43670, 43669, 43667, 43663)
+     ORDER BY s.SalesOrderID,s.SalesOrderDetailID,s.OrderQty</pre></div><br><br></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>فرهاد فرهمندخواه</strong>  در  <span dir='ltr'>۱۳۹۱/۱۰/۲۹ ۱۲:۵۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام<div style="text-align: justify;">شما می‌توانید، با دستکاری Query‌ها خروجی‌های یکسانی را ایجاد نمایید، دو Query که ایجاد نمودید، خروجی یکسانی ندارند. Query دوم شما با خروجی Last_Value،مقاله یکسان است، اما باید بگویم که مفهوم Last_Value این است که آخرین سطر در یک گروه را بر می‌گرداند. بهتر است&nbsp;<a href="www.dntips.ir-posts-1142.html">بخش اول</a> را مطالعه نمایید.</div><div style="text-align: justify;">علت یکسان نبودن نتیجه دو Query شما در نحوه Sort و مفهوم First_value و Last_Value می‌باشد:</div><div style="text-align: justify;"><span style="color: rgb(78, 68, 60); background-color: rgb(216, 216, 216);">نکنه: اگر در Over Clause شرط Order by را اعمال نماییم، اما از Row یا Range استفاده نکنیم، SQL Server بصورت پیش فرض از قالب زیر استفاده می‌نماید:&nbsp;</span><br></div><div style="text-align: justify;"><div align="left" dir="ltr"><pre language="Sql" name="code">RANGE UNBOUNDED PRECEDING AND CURRENT ROW</pre></div><br></div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۹۱/۱۰/۲۹ ۱۳:۳۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>ممنون از شما، من مطالب بخش اول رو مطالعه کردم.<br>عبارت RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING<span> به معنای تمام سطرهای جدول هست دیگه درسته. </span>یعنی تمام سطرهای جدول از اولین گرفته، جاری گرفته و آخرین رو پوشش میده.<br><br>با این توضیحات باید دو کوئری زیر اینبار جواب یکسانی بدهند:<br><div dir="ltr" align="left"><pre language="Sql" name="code">SELECT s.SalesOrderID,s.SalesOrderDetailID,s.OrderQty,
+       FIRST_VALUE(SalesOrderDetailID) OVER (PARTITION BY SalesOrderID
+       ORDER BY SalesOrderDetailID RANGE BETWEEN UNBOUNDED PRECEDING  AND UNBOUNDED FOLLOWING)  LstValue
+FROM Test_First_Last_Value s
+     WHERE SalesOrderID IN (43670, 43669, 43667, 43663)
+     ORDER BY s.SalesOrderID,s.SalesOrderDetailID,s.OrderQty
+     
+SELECT s.SalesOrderID,s.SalesOrderDetailID,s.OrderQty,
+       LAST_VALUE(SalesOrderDetailID) OVER (PARTITION BY SalesOrderID
+       ORDER BY SalesOrderDetailID DESC RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)  LstValue
+FROM Test_First_Last_Value s
+     WHERE SalesOrderID IN (43670, 43669, 43667, 43663)
+     ORDER BY s.SalesOrderID,s.SalesOrderDetailID,s.OrderQty</pre></div><br>دو کوئری کاملا یکسان هستند به غیر از اینکه در کوئری دوم یک DESC اضافه شده و نام تابع از first به last تغییر کرده است.<br></div>
+</div></li></ul></li></ul></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

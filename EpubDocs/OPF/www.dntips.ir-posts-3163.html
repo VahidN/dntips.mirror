@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫مدیریت پیشرفته‌ی حالت در React با Redux و Mobx - قسمت پنجم - Redux Hooks</title>     <meta name="description" content="تا اینجا الگوی Redux را در برنامه‌های React بررسی کردیم که شامل این موارد است: 
+ 
+ 
+ 
+ - با استفاده از Redux، یک شیء سراسری state، کار مدیریت state تمام برنامه را به عهده می‌گیرد که به آن «single source of truth» نیز گفته می‌شود. البته هرچند می‌توان کامپوننت‌هایی را هم در این بین داشت که state خاص خودشان را داشته باشند و آن‌را در این شیء سراسری ذخیره نکنند. 
+ 
+ 
+ 
+ - در حین کار با Redux، تنها راه تغییر شیء سراسری state آن، صدور رخ‌ ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="مدیریت پیشرفته‌ی حالت در React با Redux و Mobx - قسمت پنجم - Redux Hooks">
+    <meta itemprop="description" content="تا اینجا الگوی Redux را در برنامه‌های React بررسی کردیم که شامل این موارد است: 
+ 
+ 
+ 
+ - با استفاده از Redux، یک شیء سراسری state، کار مدیریت state تمام برنامه را به عهده می‌گیرد که به آن «single source of truth» نیز گفته می‌شود. البته هرچند می‌توان کامپوننت‌هایی را هم در این بین داشت که state خاص خودشان را داشته باشند و آن‌را در این شیء سراسری ذخیره نکنند. 
+ 
+ 
+ 
+ - در حین کار با Redux، تنها راه تغییر شیء سراسری state آن، صدور رخ‌ ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="مدیریت پیشرفته‌ی حالت در React با Redux و Mobx - قسمت پنجم - Redux Hooks">
+    <meta property="og:description" content="تا اینجا الگوی Redux را در برنامه‌های React بررسی کردیم که شامل این موارد است: 
+ 
+ 
+ 
+ - با استفاده از Redux، یک شیء سراسری state، کار مدیریت state تمام برنامه را به عهده می‌گیرد که به آن «single source of truth» نیز گفته می‌شود. البته هرچند می‌توان کامپوننت‌هایی را هم در این بین داشت که state خاص خودشان را داشته باشند و آن‌را در این شیء سراسری ذخیره نکنند. 
+ 
+ 
+ 
+ - در حین کار با Redux، تنها راه تغییر شیء سراسری state آن، صدور رخ‌ ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="مدیریت پیشرفته‌ی حالت در React با Redux و Mobx - قسمت پنجم - Redux Hooks">
+    <meta name="twitter:description" content="تا اینجا الگوی Redux را در برنامه‌های React بررسی کردیم که شامل این موارد است: 
+ 
+ 
+ 
+ - با استفاده از Redux، یک شیء سراسری state، کار مدیریت state تمام برنامه را به عهده می‌گیرد که به آن «single source of truth» نیز گفته می‌شود. البته هرچند می‌توان کامپوننت‌هایی را هم در این بین داشت که state خاص خودشان را داشته باشند و آن‌را در این شیء سراسری ذخیره نکنند. 
+ 
+ 
+ 
+ - در حین کار با Redux، تنها راه تغییر شیء سراسری state آن، صدور رخ‌ ...">
+    <meta name="twitter:card" content="تا اینجا الگوی Redux را در برنامه‌های React بررسی کردیم که شامل این موارد است: 
+ 
+ 
+ 
+ - با استفاده از Redux، یک شیء سراسری state، کار مدیریت state تمام برنامه را به عهده می‌گیرد که به آن «single source of truth» نیز گفته می‌شود. البته هرچند می‌توان کامپوننت‌هایی را هم در این بین داشت که state خاص خودشان را داشته باشند و آن‌را در این شیء سراسری ذخیره نکنند. 
+ 
+ 
+ 
+ - در حین کار با Redux، تنها راه تغییر شیء سراسری state آن، صدور رخ‌ ...">
+    <meta property="article:published_time" content="Wed, 08 Jan 2020 08:05:02 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫مدیریت پیشرفته‌ی حالت در React با Redux و Mobx - قسمت پنجم - Redux Hooks";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-3164.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫مدیریت پیشرفته‌ی حالت در React با Redux و Mobx - قسمت ششم - MobX چیست؟</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-3162.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫مدیریت پیشرفته‌ی حالت در React با Redux و Mobx - قسمت چهارم - انجام اعمال async با Redux</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫مدیریت پیشرفته‌ی حالت در React با Redux و Mobx - قسمت پنجم - Redux Hooks</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۸/۱۰/۱۸ ۸:۵</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-3163.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'>تا اینجا الگوی Redux را در برنامه‌های React بررسی کردیم که شامل این موارد است:<br>
+
+
+
+- با استفاده از Redux، یک شیء سراسری state، کار مدیریت state تمام برنامه را به عهده می‌گیرد که به آن «single source of truth» نیز گفته می‌شود. البته هرچند می‌توان کامپوننت‌هایی را هم در این بین داشت که state خاص خودشان را داشته باشند و آن‌را در این شیء سراسری ذخیره نکنند.<br>
+
+
+
+- در حین کار با Redux، تنها راه تغییر شیء سراسری state آن، صدور رخ‌دادهایی هستند که در اینجا اکشن نامیده می‌شوند. یک اکشن شیءای است که بیان می‌کند چه چیزی قرار است تغییر کند. <br>
+
+
+
+- برای ساده سازی ساخت این اشیاء می‌توان متدهایی را به نام action creators ایجاد کرد.<br>
+
+
+
+- اگر این متدهای action creator را توسط متد store.dispatch فراخوانی کنیم، سبب dispatch شیء اکشن، به یک تابع Reducer متناظری خواهند شد. این تابع Reducer است که قسمتی از state را که متناظر با نوع اکشن رسیده‌است، تغییر می‌دهد. در این حالت اگر اکشن رسیده، نوع مدنظری را نداشته باشد، خروجی تابع Reducer، همان state اصلی و بدون تغییر خواهد بود.<br>
+
+
+
+- Reducerها توابعی خالص هستند و نباید به همراه اثرات جانبی باشند (هر نوع تعاملی با دنیای خارج از تابع جاری) و همچنین نباید شیء state را نیز مستقیما تغییر دهند. این توابع باید یک کپی تغییر یافته‌ی از state را در صورت نیاز بازگشت دهند.<br>
+
+
+
+- برای مدیریت بهتر برنامه می‌توان چندین تابع Reducer را بر اساس نوع‌های اکشن‌های ویژه‌ای، پیاده سازی کرد. سپس با ترکیب آن‌ها، یک شیء rootReducer ایجاد می‌شود.<br>
+
+
+
+- در نهایت در الگوی Redux، یک مخزن یا store تعریف خواهد شد که تمام این اجزاء را مانند rootReducer و میان‌افزارهای تعریف شده مانند Thunk، در کنار هم قرار می‌دهد و امکان dispatch اکشن‌ها را میسر می‌کند.<br>
+
+
+
+- اکنون برای استفاده‌ی از Redux در یک برنامه‌ی React، نیاز است کامپوننت ریشه‌ی برنامه را توسط کامپوننت Provider آن محصور کرد تا قسمت‌های مختلف برنامه بتوانند با امکانات مخزن Redux، کار کرده و با آن ارتباط برقرار کنند.<br>
+
+
+
+- قسمت آخر این اتصال جائی است که کامپوننت‌های اصلی برنامه، توسط یک کامپوننت دربرگیرنده که Container نامیده می‌شود، توسط متد connect کتابخانه‌ی react-redux محصور می‌شوند. به این ترتیب این کامپوننت‌ها می‌توانند state و خواص مورد نیاز خود را از طریق props دریافت کرده (mapStateToProps) و یا رویدادها را به سمت store، ارسال کنند (mapDispatchToProps).<br> <br>
+
+
+
+از زمان React 16.8، مفهوم جدیدی به نام React Hooks معرفی شد که تعدادی از مهم‌ترین‌های آن‌ها را در سری «<a href="https://www.dntips.ir/learningpaths/details/91">React 16x</a>» بررسی کردیم. توسط Hooks، کامپوننت‌های تابعی React اکنون می‌توانند به local state خود دسترسی پیدا کنند و یا با دنیای خارج ارتباط برقرار کنند. پس از آن سایر کتابخانه‌های نوشته شده‌ی برای React نیز شروع به انطباق خود با این الگوی جدید کرده‌اند؛ برای مثال کتابخانه‌ی react-redux v1.7 نیز به همراه تعدادی Hook، جهت ساده سازی آخرین قسمتی است که در اینجا بیان شد، تا بتوانند راه حل دومی برای اتصال کامپوننت‌ها و دربرگیری آن‌ها باشند که در ادامه جزئیات آن‌ها را بررسی خواهیم کرد.<br> <br> <br> <b>
+
+بررسی useSelector Hook</b> <br> <br>
+
+
+
+useSelector Hook که توسط کتابخانه‌ی react-redux ارائه می‌شود، معادل بسیار نزدیک تابع mapStateToProps مورد استفاده‌ی در متد connect است. برای مثال در <a href="www.dntips.ir-posts-3162.html">قسمت قبل</a>، دربرگیرنده‌ی کامپوننت Posts در فایل src\containers\Posts.js، یک چنین محتوایی را دارد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="JScript" name="code">import { connect } from "react-redux";
+
+import Posts from "../components/Posts";
+
+const mapStateToProps = state =&gt; {
+  console.log("PostsContainer-&gt;mapStateToProps", state);
+  return {
+    ...state.postsReducer
+  };
+};
+
+export default connect(mapStateToProps)(Posts);</pre> </div>
+
+اینبار اگر بخواهیم کل این container را حذف کرده و از useSelector Hook استفاده کنیم، به این ترتیب عمل خواهیم کرد:<br>
+
+
+
+پیشتر امضای کامپوننت تابعی Posts واقع در فایل src\components\Posts.jsx، به صورت زیر تعریف شده بود که سه خاصیت را از طریق props دریافت می‌کرد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="JScript" name="code">const Posts = ({ posts, loading, error }) =&gt; {
+  return (
+  // ...</pre> </div>
+
+و این سه خاصیت دقیقا از متد mapStateToProps فوق که ملاحظه می‌کنید، تامین می‌شود. این متد خواص شیء state.postsReducer را به صورت props به کامپوننت Posts از طریق متد connect، ارسال می‌کند. کار postsReducer، فراهم آوردن و مدیریت سه خاصیت { loading: false, posts: [], error: null } است.<br> <br>
+
+
+
+اکنون فایل جدید src\components\HooksPosts.jsx را ایجاد کرده و ابتدا و امضای کامپوننت تابعی Posts را به صورت زیر تغییر می‌دهیم:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="JScript" name="code">import { useSelector } from "react-redux";
+
+// ...
+
+const HooksPosts = () =&gt; {
+  const { posts, loading, error } = useSelector(state =&gt; state.postsReducer);
+  return (
+  // ...</pre> </div>
+
+متد useSelector، امکان دسترسی به state ذخیره شده‌ی در مخزن redux را میسر می‌کند. سپس باید همانند متد mapStateToProps، خواصی را که از آن نیاز داریم، دریافت کنیم که در اینجا کل خواص postsReducer دریافت شده (کل state دریافت شده و سپس خاصیت state.postsReducer آن بازگشت داده شده‌است) و در ادامه توسط Object Destructuring، به سه متغیری که پیشتر از طریق props تامین می‌شدند، انتساب داده می‌شود. <br> <br> <b>یک نکته:</b> خروجی تابع mapStateToProps همواره باید یک شیء باشد، اما چنین محدودیتی در مورد تابع useSelector وجود ندارد و در صورت نیاز می‌توان تنها مقدار یک خاصیت از یک شیء را نیز بازگشت داد.<br> <br>
+
+
+
+این کامپوننت، هیچ تغییر دیگری را نیاز ندارد و اگر اکنون به فایل src\App.js مراجعه کنیم، می‌توان دربرگیرنده‌ی کامپوننت Posts را:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="JScript" name="code">import PostsContainer from "./containers/Posts";
+
+function App() {
+  return (
+    &lt;main className="container"&gt;
+      &lt;PostsContainer /&gt;
+    &lt;/main&gt;
+  );
+}</pre> </div>
+
+با کامپوننت جدید HooksPosts جایگزین کرد و دیگر نیازی به نوشتن متد connect و ساخت یک container مخصوص آن، نیست:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="JScript" name="code">import HooksPosts from "./components/HooksPosts";
+
+function App() {
+  return (
+    &lt;main className="container"&gt;
+      &lt;HooksPosts /&gt;
+    &lt;/main&gt;
+  );
+}</pre> </div> <br> <br> <b>
+
+بررسی useDispatch Hook</b> <br> <br>
+
+
+
+تا اینجا موفق شدیم متد mapStateToProps را با useSelector Hook جایگزین کنیم. مرحله‌ی بعد، جایگزین کردن mapDispatchToProps با هوک دیگری به نام useDispatch است. برای مثال در <a href="www.dntips.ir-posts-3162.html">قسمت قبل</a>، دربرگیرنده‌ی کامپوننت FetchPosts در فایل src\containers\FetchPosts.js، چنین تعریفی را دارد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="JScript" name="code">import { connect } from "react-redux";
+
+import { fetchPostsAsync } from "../actions";
+import FetchPosts from "../components/FetchPosts";
+
+const mapDispatchToProps = {
+  fetchPostsAsync
+};
+
+export default connect(null, mapDispatchToProps)(FetchPosts);</pre> </div>
+
+کار این تامین کننده، اتصال action creator ای به نام fetchPostsAsync به props کامپوننت FetchPosts است که در فایل src\components\FetchPosts.jsx به این صورت تعریف شده‌است:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="JScript" name="code">const FetchPosts = ({ fetchPostsAsync }) =&gt; {</pre> </div>
+
+اکنون برای جایگزین کردن mapDispatchToProps با useDispatch Hook، نگارش دیگری از این کامپوننت تابعی را به نام HooksFetchPosts در فایل src\components\HooksFetchPosts.jsx ایجاد می‌کنیم:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="JScript" name="code">import React from "react";
+import { useDispatch } from "react-redux";
+
+import { fetchPostsAsync } from "../actions";
+
+const HooksFetchPosts = () =&gt; {
+  const dispatch = useDispatch();
+  return (
+    &lt;section className="card mt-5"&gt;
+      &lt;div className="card-header text-center"&gt;
+        &lt;button
+          className="btn btn-primary"
+          onClick={() =&gt; dispatch(fetchPostsAsync())}
+        &gt;
+          Fetch Posts
+        &lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/section&gt;
+  );
+};
+
+export default HooksFetchPosts;</pre> </div>
+
+عملکر آن نیز بسیار ساده‌است. متد useDispatch، به ما امکان دسترسی به متد store.dispatch را می‌دهد (ارجاعی به آن‌را در اختیار ما قرار می‌دهد). اکنون اگر مانند رخ‌داد onClick تعریف شده، سبب dispatch یک action creator به نام fetchPostsAsync شویم (که اینبار باید به صورت صریح از ماژول مربوطه import شود؛ چون دیگر از طریق props تامین نمی‌شود)، سبب ارسال نتیجه‌ی آن به reducer متناظری می‌شود.<br> <br>
+
+
+
+با این تغییر نیز می‌توان به فایل src\App.js مراجعه کرد و المان قبلی FetchPostsContainer را که از ماژول containers/FetchPosts تامین می‌شد، به نحو متداولی با همان کامپوننت جدید HooksFetchPosts، تعویض کرد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="JScript" name="code">import HooksFetchPosts from "./components/HooksFetchPosts";
+import HooksPosts from "./components/HooksPosts";
+
+// ...
+
+function App() {
+  return (
+    &lt;main className="container"&gt;
+      &lt;HooksFetchPosts /&gt;
+      &lt;HooksPosts /&gt;
+    &lt;/main&gt;
+  );
+}</pre> </div> <div> <br> </div> <div> <br> </div> <b>یک مثال تکمیلی: بازنویسی src\components\counter.jsx با redux hooks</b> <br> <br>
+
+
+
+کامپوننت شمارشگر را در <a href="www.dntips.ir-posts-3161.html">قسمت سوم</a>  این سری بررسی و تکمیل کردیم. اکنون قصد داریم فایل تامین کننده‌ی آن‌را که به صورت زیر در فایل src\containers\Counter.js تعریف شده:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="JScript" name="code">import { connect } from "react-redux";
+
+import { decrementValue, incrementValue } from "../actions";
+import Counter from "../components/counter";
+
+const mapStateToProps = (state, ownProps) =&gt; {
+  console.log("CounterContainer-&gt;mapStateToProps", { state, ownProps });
+  return {
+    count: state.counterReducer.count
+  };
+};
+
+const mapDispatchToProps = {
+  incrementValue,
+  decrementValue
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Counter);</pre> </div>
+
+حذف کرده و با redux hooks جایگزین کنیم. برای این منظور فایل جدید src\components\HooksCounter.jsx را ایجاد می‌کنیم و سپس در ابتدا برای جایگزین کردن قسمت دریافت اطلاعات از this.pros آن:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="JScript" name="code">class Counter extends Component {
+  render() {
+    console.log("Counter-&gt;props", this.props);
+    const {
+      //counterReducer: { count },
+      count,
+      incrementValue,
+      decrementValue
+    } = this.props;</pre> </div>
+
+به صورت زیر عمل می‌کنیم:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="JScript" name="code">import React from "react";
+import { useDispatch, useSelector } from "react-redux";
+
+import { decrementValue, incrementValue } from "../actions";
+
+const HooksCounter = ({ prop1 }) =&gt; {
+  const { count } = useSelector(state =&gt; {
+    console.log("HooksCounter-&gt;useSelector", { state, prop1 });
+    return {
+      count: state.counterReducer.count
+    };
+  });
+  const dispatch = useDispatch();
+  return (
+  // ...</pre> </div>
+
+- متغیر count را با استفاده از useSelector، از شیء state استخراج کرده و با نام خاصیت count بازگشت می‌دهیم.<br>
+
+
+
+- اینبار دو action creator مورد استفاده‌ی در متدهای + و - را از ماژول action دریافت کرده‌ایم تا توسط useDispatch مورد استفاده قرار گیرند.<br>
+
+
+
+- همچنین دیگر نیازی به ذکر (state, ownProps) نیست. مقدار ownProps، همان props معمولی است که به کامپوننت ارسال می‌شود که برای مثال اینبار نام prop1 را دارد؛ چون هنگامیکه المان کامپوننت HooksCounter را درج و معرفی می‌کنیم، توسط کامپوننت دیگری محصور نشده‌است. تامین آن نیز در فایل src\App.js با درج متداول نام المان کامپوننت HooksCounter و ذکر ویژگی سفارشی prop1 صورت می‌گیرد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="JScript" name="code">import HooksCounter from "./components/HooksCounter";
+
+//...
+
+function App() {
+  const prop1 = 123;
+  return (
+    &lt;main className="container"&gt;
+     &lt;HooksCounter prop1={prop1} /&gt;
+    &lt;/main&gt;
+  );
+}</pre> </div>
+
+با این تغییرات، کدهای کامل src\components\HooksCounter.jsx به صورت زیر تکمیل می‌شود که قسمت‌های استفاده از متغیر count و همچنین dispatch دو action creator دریافت شده، در آن مشخص هستند:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="JScript" name="code">import React from "react";
+import { useDispatch, useSelector } from "react-redux";
+
+import { decrementValue, incrementValue } from "../actions";
+
+const HooksCounter = ({ prop1 }) =&gt; {
+  const { count } = useSelector(state =&gt; {
+    console.log("HooksCounter-&gt;useSelector", { state, prop1 });
+    return {
+      count: state.counterReducer.count
+    };
+  });
+  const dispatch = useDispatch();
+  return (
+    &lt;section className="card mt-5"&gt;
+      &lt;div className="card-body text-center"&gt;
+        &lt;span className="badge m-2 badge-primary"&gt;{count}&lt;/span&gt;
+      &lt;/div&gt;
+      &lt;div className="card-footer"&gt;
+        &lt;div className="d-flex justify-content-center align-items-center"&gt;
+          &lt;button
+            className="btn btn-secondary btn-sm"
+            onClick={() =&gt; dispatch(incrementValue())}
+          &gt;
+            +
+          &lt;/button&gt;
+          &lt;button
+            className="btn btn-secondary btn-sm m-2"
+            onClick={() =&gt; dispatch(decrementValue())}
+          &gt;
+            -
+          &lt;/button&gt;
+          &lt;button className="btn btn-danger btn-sm"&gt;Reset&lt;/button&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/section&gt;
+  );
+};
+
+export default HooksCounter;</pre> </div> <br> <br> <b>مشکل! با استفاده از useSelector، تعداد رندرهای مجدد کامپوننت‌های برنامه افزایش یافته‌است!</b> <br> <br>
+
+
+
+برنامه‌ی جاری را پس از این تغییرات&nbsp; اجرا کنید. با هر بار کلیک بر روی دکمه‌ی fetch posts، حتی کامپوننت شمارشگر درج شده‌ی در صفحه که ربطی به آن ندارد نیز رندر مجدد می‌شود! چرا؟ (این مورد را با مشاهده‌ی کنسول توسعه دهندگان مرورگر می‌توانید مشاهده کنید. در ابتدای متد رندر هر کدام از کامپوننت‌ها، یک console.log قرار داده شده‌است)<br>
+
+
+
+زمانیکه اکشنی dispatch می‌شود، useSelector hook با استفاده از مقایسه‌ی ارجاعات اشیاء (strict === reference check)، کار مقایسه‌ی مقدار قبلی و مقدار جدید را انجام می‌دهد. اگر این‌ها متفاوت باشند، کامپوننت را مجبور به رندر مجدد می‌کند. این مورد مهم‌ترین تفاوت بین useSelector hook و متد connect است. متد connect از روش shallow equality checks برای مقایسه‌ی نتایج حاصل از mapStateToProps و تصمیم در مورد رندر مجدد استفاده می‌کند. اما این مقایسه‌ها چه تفاوتی با هم دارند؟<br>
+
+
+
+در حالت mapStateToProps، مهم نیست که شیء بازگشت داده شده، دارای یک ارجاع جدید است یا خیر؟ shallow equality checks فقط به معنای مقایسه‌ی خاصیت به خاصیت شیء بازگشت داده شده‌، با نمونه‌ی قبلی است. اما زمانیکه از useSelector hook استفاده می‌کنیم، با بازگشت یک شیء جدید، یعنی یک ارجاع جدید را خواهیم داشت و ... این یعنی اجبار به رندر مجدد کامپوننت‌ها. به همین جهت در این حالت تعداد بار رندر کامپوننت‌ها افزایش یافته‌است، چون خروجی reducerهای تعریف شده‌ی در برنامه، همیشه یک شیء جدید را بازگشت می‌دهند.<br>
+
+
+
+برای رفع این مشکل می‌توان از پارامتر دوم متد useSelector که روش مقایسه‌ی اشیاء را مشخص می‌کند، استفاده کرد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="JScript" name="code">import React from "react";
+import { shallowEqual, useSelector } from "react-redux";
+
+import Post from "./Post";
+
+const HooksPosts = () =&gt; {
+  const { posts, loading, error } = useSelector(
+    state =&gt; state.postsReducer,
+    shallowEqual
+  );
+  console.log("render HooksPosts");
+  return (
+  // ...</pre> </div>
+
+استفاده از shallowEqual در اینجا سبب خواهد شد تا بجای مقایسه‌ی ارجاعات اشیاء (که همیشه متفاوت خواهند بود؛ چون هربار شیء جدیدی را بازگشت می‌دهیم)، مقادیر تک تک خواص آن‌ها با هم مقایسه شوند. <br>
+
+
+
+با اضافه کردن پارامتر shallowEqual به کامپوننت‌های HooksPosts و HooksCounter، دیگر با کلیک بر روی دکمه‌ی fetch posts، کار رندر مجدد کامپوننت شمارشگر، رخ نمی‌دهد.<br> <br> <b>یک نکته:</b> روش دیگر مشاهده‌ی تعداد بار رندر شدن کامپوننت‌ها، استفاده از افزونه‌ی react dev tools و مراجعه به برگه‌ی profiler آن است. روی دکمه‌ی record آن کلیک کرده و سپس اندکی با برنامه کار کنید. اکنون کار ضبط را متوقف نمائید، تا نتیجه‌ی نهایی نمایش داده شود.<br> <br>
+
+
+
+کدهای کامل این قسمت را می‌توانید از اینجا دریافت کنید: <a href="https://www.dntips.ir/file/userfile?name=state-management-redux-mobx-part05.zip">state-management-redux-mobx-part05.zip</a></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3162.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مدیریت پیشرفته‌ی حالت در React با Redux و Mobx - قسمت چهارم - انجام اعمال async با Redux</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3161.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مدیریت پیشرفته‌ی حالت در React با Redux و Mobx - قسمت سوم - روش اتصال Redux به برنامه‌های React</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3177.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>استفاده از قالب مخصوص Redux Toolkit جهت ایجاد پروژه‌های React/Redux</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3166.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مدیریت پیشرفته‌ی حالت در React با Redux و Mobx - قسمت هفتم - بررسی مفاهیم Mobx</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3168.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مدیریت پیشرفته‌ی حالت در React با Redux و Mobx - قسمت نهم - مثالی از کتابخانه‌ی mobx-react</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3156.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>React 16x - قسمت 32 - React Hooks - بخش 3 - نکات ویژه‌ی برقراری ارتباط با سرور</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3155.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>React 16x - قسمت 31 - React Hooks - بخش 2 - مقایسه حالت‌های مختلف مدیریت حالت با useState Hook</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3134.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>React 16x - قسمت 16 - مسیریابی - بخش 2 - پارامترهای مسیریابی</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3170.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>ساخت یک مثال Todo با MobX و React</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3208.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>پیاده سازی پروژه‌های React با TypeScript - قسمت پنجم - تعیین نوع هوک useReducer</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

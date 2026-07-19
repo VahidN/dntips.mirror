@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫بهترین روش اعتبارسنجی در ASP.NET Core: استفاده از یک اعتبارسنج برای هر درخواست</title>     <meta name="description" content="در APIهای مدرن .NET Web، اعتبارسنجی فقط بررسی مقادیر null یا محدوده‌ها نیست. بلکه بخشی از قرارداد API شما و یکی از حیاتی‌ترین لایه‌ها برای محافظت از سیستم در برابر داده‌های نامعتبر است. FluentValidation به عنوان استاندارد صنعتی برای مدیریت اعتبارسنجی به روشی تمیز، قابل آزمایش و قابل نگهداری ظاهر شده است.
+
+این مقاله به بررسی موارد زیر می‌پردازد: FluentValidation چیست؟ چگونه می‌توان آن را در ASP.NET Core پیاده‌سازی کرد؟ چرا یک اعتبارسنج عمومی ایده بدی است؟ و چرا الگوی &quot;یک درخواست = یک اعتبارسنج&quot; صحیح است. FluentValidation یک کتابخانه .NET محبوب است که به شما امکان می‌دهد قوانین اعتبارسنجی را با استفاده از نحو قوی و با نوع مشخص (fluent) تعریف کنید، به جای استفاده از ویژگی‌ها یا منطق کنترلر.
+
+به جای استفاده از ویژگی‌های اعتبارسنجی در مدل‌ها، قوانین را در یک کلاس اعتبارسنج جداگانه تعریف می‌کنید. این کار مدل‌های API شما را تمیز نگه می‌دارد و اعتبارسنجی را به یک لایه اعتبارسنجی اختصاصی منتقل می‌کند. قرار دادن اعتبارسنجی در کنترلرها منجر به منطق تکراری، کد غیرقابل آزمایش، کنترلرهای سنگین و نشت قوانین تجاری به لایه API می‌شود. FluentValidation مستقیماً در خط لوله ASP.NET Core ادغام می‌شود، بنابراین اعتبارسنجی به طور خودکار اجرا می‌شود.
+
+استفاده از یک اعتبارسنج برای هر درخواست، انعطاف‌پذیری بیشتری را برای سناریوهای پیچیده فراهم می‌کند. این رویکرد به شما امکان می‌دهد اعتبارسنجی‌های خاصی را برای هر درخواست ایجاد کنید، که می‌تواند به بهبود عملکرد و خوانایی کد کمک کند. در نهایت، پیروی از این الگو به شما کمک می‌کند تا APIهای .NET Core قوی‌تر، قابل نگهداری‌تر و مقیاس‌پذیرتری ایجاد کنید.">
+    <meta name="author" content="راویAI">
+    <meta itemprop="name" content="بهترین روش اعتبارسنجی در ASP.NET Core: استفاده از یک اعتبارسنج برای هر درخواست">
+    <meta itemprop="description" content="در APIهای مدرن .NET Web، اعتبارسنجی فقط بررسی مقادیر null یا محدوده‌ها نیست. بلکه بخشی از قرارداد API شما و یکی از حیاتی‌ترین لایه‌ها برای محافظت از سیستم در برابر داده‌های نامعتبر است. FluentValidation به عنوان استاندارد صنعتی برای مدیریت اعتبارسنجی به روشی تمیز، قابل آزمایش و قابل نگهداری ظاهر شده است.
+
+این مقاله به بررسی موارد زیر می‌پردازد: FluentValidation چیست؟ چگونه می‌توان آن را در ASP.NET Core پیاده‌سازی کرد؟ چرا یک اعتبارسنج عمومی ایده بدی است؟ و چرا الگوی &quot;یک درخواست = یک اعتبارسنج&quot; صحیح است. FluentValidation یک کتابخانه .NET محبوب است که به شما امکان می‌دهد قوانین اعتبارسنجی را با استفاده از نحو قوی و با نوع مشخص (fluent) تعریف کنید، به جای استفاده از ویژگی‌ها یا منطق کنترلر.
+
+به جای استفاده از ویژگی‌های اعتبارسنجی در مدل‌ها، قوانین را در یک کلاس اعتبارسنج جداگانه تعریف می‌کنید. این کار مدل‌های API شما را تمیز نگه می‌دارد و اعتبارسنجی را به یک لایه اعتبارسنجی اختصاصی منتقل می‌کند. قرار دادن اعتبارسنجی در کنترلرها منجر به منطق تکراری، کد غیرقابل آزمایش، کنترلرهای سنگین و نشت قوانین تجاری به لایه API می‌شود. FluentValidation مستقیماً در خط لوله ASP.NET Core ادغام می‌شود، بنابراین اعتبارسنجی به طور خودکار اجرا می‌شود.
+
+استفاده از یک اعتبارسنج برای هر درخواست، انعطاف‌پذیری بیشتری را برای سناریوهای پیچیده فراهم می‌کند. این رویکرد به شما امکان می‌دهد اعتبارسنجی‌های خاصی را برای هر درخواست ایجاد کنید، که می‌تواند به بهبود عملکرد و خوانایی کد کمک کند. در نهایت، پیروی از این الگو به شما کمک می‌کند تا APIهای .NET Core قوی‌تر، قابل نگهداری‌تر و مقیاس‌پذیرتری ایجاد کنید.">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="بهترین روش اعتبارسنجی در ASP.NET Core: استفاده از یک اعتبارسنج برای هر درخواست">
+    <meta property="og:description" content="در APIهای مدرن .NET Web، اعتبارسنجی فقط بررسی مقادیر null یا محدوده‌ها نیست. بلکه بخشی از قرارداد API شما و یکی از حیاتی‌ترین لایه‌ها برای محافظت از سیستم در برابر داده‌های نامعتبر است. FluentValidation به عنوان استاندارد صنعتی برای مدیریت اعتبارسنجی به روشی تمیز، قابل آزمایش و قابل نگهداری ظاهر شده است.
+
+این مقاله به بررسی موارد زیر می‌پردازد: FluentValidation چیست؟ چگونه می‌توان آن را در ASP.NET Core پیاده‌سازی کرد؟ چرا یک اعتبارسنج عمومی ایده بدی است؟ و چرا الگوی &quot;یک درخواست = یک اعتبارسنج&quot; صحیح است. FluentValidation یک کتابخانه .NET محبوب است که به شما امکان می‌دهد قوانین اعتبارسنجی را با استفاده از نحو قوی و با نوع مشخص (fluent) تعریف کنید، به جای استفاده از ویژگی‌ها یا منطق کنترلر.
+
+به جای استفاده از ویژگی‌های اعتبارسنجی در مدل‌ها، قوانین را در یک کلاس اعتبارسنج جداگانه تعریف می‌کنید. این کار مدل‌های API شما را تمیز نگه می‌دارد و اعتبارسنجی را به یک لایه اعتبارسنجی اختصاصی منتقل می‌کند. قرار دادن اعتبارسنجی در کنترلرها منجر به منطق تکراری، کد غیرقابل آزمایش، کنترلرهای سنگین و نشت قوانین تجاری به لایه API می‌شود. FluentValidation مستقیماً در خط لوله ASP.NET Core ادغام می‌شود، بنابراین اعتبارسنجی به طور خودکار اجرا می‌شود.
+
+استفاده از یک اعتبارسنج برای هر درخواست، انعطاف‌پذیری بیشتری را برای سناریوهای پیچیده فراهم می‌کند. این رویکرد به شما امکان می‌دهد اعتبارسنجی‌های خاصی را برای هر درخواست ایجاد کنید، که می‌تواند به بهبود عملکرد و خوانایی کد کمک کند. در نهایت، پیروی از این الگو به شما کمک می‌کند تا APIهای .NET Core قوی‌تر، قابل نگهداری‌تر و مقیاس‌پذیرتری ایجاد کنید.">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="بهترین روش اعتبارسنجی در ASP.NET Core: استفاده از یک اعتبارسنج برای هر درخواست">
+    <meta name="twitter:description" content="در APIهای مدرن .NET Web، اعتبارسنجی فقط بررسی مقادیر null یا محدوده‌ها نیست. بلکه بخشی از قرارداد API شما و یکی از حیاتی‌ترین لایه‌ها برای محافظت از سیستم در برابر داده‌های نامعتبر است. FluentValidation به عنوان استاندارد صنعتی برای مدیریت اعتبارسنجی به روشی تمیز، قابل آزمایش و قابل نگهداری ظاهر شده است.
+
+این مقاله به بررسی موارد زیر می‌پردازد: FluentValidation چیست؟ چگونه می‌توان آن را در ASP.NET Core پیاده‌سازی کرد؟ چرا یک اعتبارسنج عمومی ایده بدی است؟ و چرا الگوی &quot;یک درخواست = یک اعتبارسنج&quot; صحیح است. FluentValidation یک کتابخانه .NET محبوب است که به شما امکان می‌دهد قوانین اعتبارسنجی را با استفاده از نحو قوی و با نوع مشخص (fluent) تعریف کنید، به جای استفاده از ویژگی‌ها یا منطق کنترلر.
+
+به جای استفاده از ویژگی‌های اعتبارسنجی در مدل‌ها، قوانین را در یک کلاس اعتبارسنج جداگانه تعریف می‌کنید. این کار مدل‌های API شما را تمیز نگه می‌دارد و اعتبارسنجی را به یک لایه اعتبارسنجی اختصاصی منتقل می‌کند. قرار دادن اعتبارسنجی در کنترلرها منجر به منطق تکراری، کد غیرقابل آزمایش، کنترلرهای سنگین و نشت قوانین تجاری به لایه API می‌شود. FluentValidation مستقیماً در خط لوله ASP.NET Core ادغام می‌شود، بنابراین اعتبارسنجی به طور خودکار اجرا می‌شود.
+
+استفاده از یک اعتبارسنج برای هر درخواست، انعطاف‌پذیری بیشتری را برای سناریوهای پیچیده فراهم می‌کند. این رویکرد به شما امکان می‌دهد اعتبارسنجی‌های خاصی را برای هر درخواست ایجاد کنید، که می‌تواند به بهبود عملکرد و خوانایی کد کمک کند. در نهایت، پیروی از این الگو به شما کمک می‌کند تا APIهای .NET Core قوی‌تر، قابل نگهداری‌تر و مقیاس‌پذیرتری ایجاد کنید.">
+    <meta name="twitter:card" content="در APIهای مدرن .NET Web، اعتبارسنجی فقط بررسی مقادیر null یا محدوده‌ها نیست. بلکه بخشی از قرارداد API شما و یکی از حیاتی‌ترین لایه‌ها برای محافظت از سیستم در برابر داده‌های نامعتبر است. FluentValidation به عنوان استاندارد صنعتی برای مدیریت اعتبارسنجی به روشی تمیز، قابل آزمایش و قابل نگهداری ظاهر شده است.
+
+این مقاله به بررسی موارد زیر می‌پردازد: FluentValidation چیست؟ چگونه می‌توان آن را در ASP.NET Core پیاده‌سازی کرد؟ چرا یک اعتبارسنج عمومی ایده بدی است؟ و چرا الگوی &quot;یک درخواست = یک اعتبارسنج&quot; صحیح است. FluentValidation یک کتابخانه .NET محبوب است که به شما امکان می‌دهد قوانین اعتبارسنجی را با استفاده از نحو قوی و با نوع مشخص (fluent) تعریف کنید، به جای استفاده از ویژگی‌ها یا منطق کنترلر.
+
+به جای استفاده از ویژگی‌های اعتبارسنجی در مدل‌ها، قوانین را در یک کلاس اعتبارسنج جداگانه تعریف می‌کنید. این کار مدل‌های API شما را تمیز نگه می‌دارد و اعتبارسنجی را به یک لایه اعتبارسنجی اختصاصی منتقل می‌کند. قرار دادن اعتبارسنجی در کنترلرها منجر به منطق تکراری، کد غیرقابل آزمایش، کنترلرهای سنگین و نشت قوانین تجاری به لایه API می‌شود. FluentValidation مستقیماً در خط لوله ASP.NET Core ادغام می‌شود، بنابراین اعتبارسنجی به طور خودکار اجرا می‌شود.
+
+استفاده از یک اعتبارسنج برای هر درخواست، انعطاف‌پذیری بیشتری را برای سناریوهای پیچیده فراهم می‌کند. این رویکرد به شما امکان می‌دهد اعتبارسنجی‌های خاصی را برای هر درخواست ایجاد کنید، که می‌تواند به بهبود عملکرد و خوانایی کد کمک کند. در نهایت، پیروی از این الگو به شما کمک می‌کند تا APIهای .NET Core قوی‌تر، قابل نگهداری‌تر و مقیاس‌پذیرتری ایجاد کنید.">
+    <meta property="article:published_time" content="Wed, 04 Feb 2026 02:35:41 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫بهترین روش اعتبارسنجی در ASP.NET Core: استفاده از یک اعتبارسنج برای هر درخواست";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-news-23528.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫به‌ینه‌سازی صفحات برای عامل‌های هوش مصنوعی با استفاده از Content Negotiation</span>
+   </h6>
+</a><a href='www.dntips.ir-news-23526.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫بررسی دوره‌های عمر وابستگی‌ها در .NET: فراتر از Singleton، Scoped و Transient</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫بهترین روش اعتبارسنجی در ASP.NET Core: استفاده از یک اعتبارسنج برای هر درخواست</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>راویAI<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۴/۱۱/۱۵ ۰۶:۰۵</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-news-23527.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>در APIهای مدرن .NET Web، اعتبارسنجی فقط بررسی مقادیر null یا محدوده‌ها نیست. بلکه بخشی از قرارداد API شما و یکی از حیاتی‌ترین لایه‌ها برای محافظت از سیستم در برابر داده‌های نامعتبر است. FluentValidation به عنوان استاندارد صنعتی برای مدیریت اعتبارسنجی به روشی تمیز، قابل آزمایش و قابل نگهداری ظاهر شده است.
+
+این مقاله به بررسی موارد زیر می‌پردازد: FluentValidation چیست؟ چگونه می‌توان آن را در ASP.NET Core پیاده‌سازی کرد؟ چرا یک اعتبارسنج عمومی ایده بدی است؟ و چرا الگوی "یک درخواست = یک اعتبارسنج" صحیح است. FluentValidation یک کتابخانه .NET محبوب است که به شما امکان می‌دهد قوانین اعتبارسنجی را با استفاده از نحو قوی و با نوع مشخص (fluent) تعریف کنید، به جای استفاده از ویژگی‌ها یا منطق کنترلر.
+
+به جای استفاده از ویژگی‌های اعتبارسنجی در مدل‌ها، قوانین را در یک کلاس اعتبارسنج جداگانه تعریف می‌کنید. این کار مدل‌های API شما را تمیز نگه می‌دارد و اعتبارسنجی را به یک لایه اعتبارسنجی اختصاصی منتقل می‌کند. قرار دادن اعتبارسنجی در کنترلرها منجر به منطق تکراری، کد غیرقابل آزمایش، کنترلرهای سنگین و نشت قوانین تجاری به لایه API می‌شود. FluentValidation مستقیماً در خط لوله ASP.NET Core ادغام می‌شود، بنابراین اعتبارسنجی به طور خودکار اجرا می‌شود.
+
+استفاده از یک اعتبارسنج برای هر درخواست، انعطاف‌پذیری بیشتری را برای سناریوهای پیچیده فراهم می‌کند. این رویکرد به شما امکان می‌دهد اعتبارسنجی‌های خاصی را برای هر درخواست ایجاد کنید، که می‌تواند به بهبود عملکرد و خوانایی کد کمک کند. در نهایت، پیروی از این الگو به شما کمک می‌کند تا APIهای .NET Core قوی‌تر، قابل نگهداری‌تر و مقیاس‌پذیرتری ایجاد کنید.</div><br><br><a href='https://dev.to/kphere/fluentvalidation-in-aspnet-core-why-one-validator-per-request-is-the-real-best-practice-18m4'>مشاهده مطلب اصلی</a></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-21865.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>اعتبارسنجی API در .NET 10: یک به‌روزرسانی مهم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-23849.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>معماری تمیز در .NET 10: لایه API - کنترلرها در برابر APIهای مینیمال</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20309.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>پشتیبانی از اعتبارسنجی در APIهای حداقلی (Minimal APIs) در ASP.NET Core 10</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20378.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>تاریخچه اعتبارسنجی اطلاعات در Minimal API‌ها</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-23980.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>آزمایش واحد و یکپارچه در معماری پاک در .NET 10</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20766.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>بررسی به‌روزرسانی‌های API در .NET 10: بهبودهای واقعی</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3215.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>استفاده از Fluent Validation در برنامه‌های ASP.NET Core - قسمت چهارم - اعتبارسنجی Async سمت کلاینت و یا همان Remote Client Side Validation</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3214.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>استفاده از Fluent Validation در برنامه‌های ASP.NET Core - قسمت سوم - اعتبارسنجی سمت کلاینت</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3630.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>هنر استثناهای سفارشی در توسعه نرم‌افزار با NET.: رویکردی بر پایه طراحی دامنه محور (DDD)</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3213.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>استفاده از Fluent Validation در برنامه‌های ASP.NET Core - قسمت دوم - اجرای قواعد اعتبارسنجی تعریف شده</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

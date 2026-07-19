@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫ارتقاء به ASP.NET Core 1.0 - قسمت 11 - بررسی بهبودهای Razor</title>     <meta name="description" content="زبان Razor نیز در ASP.NET Core به همراه بهبودها و اضافات قابل توجهی است که در این قسمت تعدادی از آن‌ها را مانند امکان ارث بری و تزریق وابستگی‌ها، بررسی خواهیم کرد.     
+ 
+ نحوه‌ی سفارشی سازی کلاس پایه‌ی تمام Viewهای برنامه و معرفی inherits@     
+ 
+ 
+ در نگارش‌های پیشین ASP.NET MVC، امکان تعویض کلاس پایه‌ی Viewها، در فایل web.config واقع در پوشه‌ی ریشه‌ی Views وجود داشت.  با حذف این فایل   و ساده سازی و محول کردن مسئولیت‌های آن به فایل ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="ارتقاء به ASP.NET Core 1.0 - قسمت 11 - بررسی بهبودهای Razor">
+    <meta itemprop="description" content="زبان Razor نیز در ASP.NET Core به همراه بهبودها و اضافات قابل توجهی است که در این قسمت تعدادی از آن‌ها را مانند امکان ارث بری و تزریق وابستگی‌ها، بررسی خواهیم کرد.     
+ 
+ نحوه‌ی سفارشی سازی کلاس پایه‌ی تمام Viewهای برنامه و معرفی inherits@     
+ 
+ 
+ در نگارش‌های پیشین ASP.NET MVC، امکان تعویض کلاس پایه‌ی Viewها، در فایل web.config واقع در پوشه‌ی ریشه‌ی Views وجود داشت.  با حذف این فایل   و ساده سازی و محول کردن مسئولیت‌های آن به فایل ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="ارتقاء به ASP.NET Core 1.0 - قسمت 11 - بررسی بهبودهای Razor">
+    <meta property="og:description" content="زبان Razor نیز در ASP.NET Core به همراه بهبودها و اضافات قابل توجهی است که در این قسمت تعدادی از آن‌ها را مانند امکان ارث بری و تزریق وابستگی‌ها، بررسی خواهیم کرد.     
+ 
+ نحوه‌ی سفارشی سازی کلاس پایه‌ی تمام Viewهای برنامه و معرفی inherits@     
+ 
+ 
+ در نگارش‌های پیشین ASP.NET MVC، امکان تعویض کلاس پایه‌ی Viewها، در فایل web.config واقع در پوشه‌ی ریشه‌ی Views وجود داشت.  با حذف این فایل   و ساده سازی و محول کردن مسئولیت‌های آن به فایل ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="ارتقاء به ASP.NET Core 1.0 - قسمت 11 - بررسی بهبودهای Razor">
+    <meta name="twitter:description" content="زبان Razor نیز در ASP.NET Core به همراه بهبودها و اضافات قابل توجهی است که در این قسمت تعدادی از آن‌ها را مانند امکان ارث بری و تزریق وابستگی‌ها، بررسی خواهیم کرد.     
+ 
+ نحوه‌ی سفارشی سازی کلاس پایه‌ی تمام Viewهای برنامه و معرفی inherits@     
+ 
+ 
+ در نگارش‌های پیشین ASP.NET MVC، امکان تعویض کلاس پایه‌ی Viewها، در فایل web.config واقع در پوشه‌ی ریشه‌ی Views وجود داشت.  با حذف این فایل   و ساده سازی و محول کردن مسئولیت‌های آن به فایل ...">
+    <meta name="twitter:card" content="زبان Razor نیز در ASP.NET Core به همراه بهبودها و اضافات قابل توجهی است که در این قسمت تعدادی از آن‌ها را مانند امکان ارث بری و تزریق وابستگی‌ها، بررسی خواهیم کرد.     
+ 
+ نحوه‌ی سفارشی سازی کلاس پایه‌ی تمام Viewهای برنامه و معرفی inherits@     
+ 
+ 
+ در نگارش‌های پیشین ASP.NET MVC، امکان تعویض کلاس پایه‌ی Viewها، در فایل web.config واقع در پوشه‌ی ریشه‌ی Views وجود داشت.  با حذف این فایل   و ساده سازی و محول کردن مسئولیت‌های آن به فایل ...">
+    <meta property="article:published_time" content="Sat, 16 Jul 2016 12:40:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫ارتقاء به ASP.NET Core 1.0 - قسمت 11 - بررسی بهبودهای Razor";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-2460.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫ارتقاء به ASP.NET Core 1.0 - قسمت 12 - معرفی Tag Helpers</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-2458.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='ltr'>Feature Toggle</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫ارتقاء به ASP.NET Core 1.0 - قسمت 11 - بررسی بهبودهای Razor</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۵/۰۴/۲۶ ۱۲:۴۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-2459.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'>زبان Razor نیز در ASP.NET Core به همراه بهبودها و اضافات قابل توجهی است که در این قسمت تعدادی از آن‌ها را مانند امکان ارث بری و تزریق وابستگی‌ها، بررسی خواهیم کرد.<br> <br> <b>
+
+نحوه‌ی سفارشی سازی کلاس پایه‌ی تمام Viewهای برنامه و معرفی inherits@</b> <br> <br>
+
+
+در نگارش‌های پیشین ASP.NET MVC، امکان تعویض کلاس پایه‌ی Viewها، در فایل web.config واقع در پوشه‌ی ریشه‌ی Views وجود داشت. <a href="www.dntips.ir-posts-2456.html">با حذف این فایل</a>  و ساده سازی و محول کردن مسئولیت‌های آن به فایل جدید view imports، اینبار برای تعریف کلاس پایه‌ی viewها می‌توان به صورت ذیل عمل کرد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">using&nbsp;System.Threading.Tasks;
+using&nbsp;Microsoft.AspNetCore.Mvc.Razor;
+ 
+namespace&nbsp;Core1RtmEmptyTest.StartupCustomizations
+{
+&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;abstract&nbsp;class&nbsp;MyCustomBaseView&lt;TModel&gt;&nbsp;:&nbsp;RazorPage&lt;TModel&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;bool&nbsp;IsAuthenticated()
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;Context.User.Identity.IsAuthenticated;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+ 
+#pragma&nbsp;warning&nbsp;disable&nbsp;1998
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;override&nbsp;async&nbsp;Task&nbsp;ExecuteAsync()
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+#pragma&nbsp;warning&nbsp;restore&nbsp;1998
+&nbsp;&nbsp;&nbsp;&nbsp;}
+}</pre> </div>
+به صورت پیش فرض تمام viewهای برنامه از کلاس &lt;RazorPage&lt;T ارث بری می‌کنند؛ که در اینجا T، نوع مدلی است که توسط model@ تنظیم می‌شود. اگر نیاز به سفارشی سازی این کلاس وجود داشت، برای مثال بجای اینکه هربار در viewها مقدار Context.User.Identity.IsAuthenticated را جهت نمایش قسمتی از صفحه، به کاربران اعتبارسنجی شده بررسی کنیم، می‌توان این قطعه کد را به یک کلاس پایه‌ی سفارشی منتقل و از آن در تمام Viewها استفاده کرد که نمونه‌ای از آن‌را در کدهای فوق مشاهده می‌کنید.<br>
+
+
+پس از تعریف این کلاس، برای ثبت و معرفی آن به فایل ViewImports.cshtml_ مراجعه کنید و این یک سطر را به ابتدای آن اضافه نمائید:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">@inherits Core1RtmEmptyTest.StartupCustomizations.MyCustomBaseView&lt;TModel&gt;</pre> </div>
+inherits@ از تازه‌های razor بوده و جهت تعریف ارث بری‌ها کاربرد دارد. البته ممکن است در حین تعریف فوق، TModel را قرمز رنگ مشاهده کنید که مهم نیست و بیشتر مشکل ReSharper است و برنامه بدون مشکل اجرا می‌شود.<br>
+
+
+برای نمونه پس از سفارشی سازی صفحه‌ی پایه‌ی تمام Viewها، اکنون یک سطر ذیل را در هر view ایی می‌توان تعریف و استفاده کرد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code"> Is Current User Authenticated? @IsAuthenticated()</pre> </div> <br> <br> <b>
+
+معرفی functions@</b> <br> <br>
+
+
+دایرکتیو جدید functions@، بسیار شبیه است به دایرکتیو قدیمی و حذف شده‌ی helper@، که در نگارش‌های پیشین Razor معرفی شده بود:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">@functions
+&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;string&nbsp;Test()
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;message;
+&nbsp;&nbsp;&nbsp;&nbsp;}
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;readonly&nbsp;string&nbsp;message&nbsp;=&nbsp;"test";
+}</pre> </div>
+ASP.NET Core در حین پردازش یک View، کدهای آن‌را تبدیل به یک کلاس می‌کند و در اینجا تمام کدهای داخل بدنه‌ی functions@ را نیز به صورت اعضای این کلاس تعریف خواهد کرد. به این ترتیب یک چنین فراخوانی‌هایی در View میسر می‌شوند:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code"> @Test()
+&lt;br /&gt;
+@message</pre> </div> <br> <br> <b>
+
+معرفی inject@</b> <br> <br>
+
+
+توسط دایرکتیو جدید inject@، یک خاصیت عمومی به ASP.NET Core اعلام می‌شود و سپس مقدار دهی آن بر اساس تنظیمات <a href="www.dntips.ir-posts-2448.html">IoC Container</a>  برنامه به صورت خودکار صورت خواهد گرفت. برای مثال زمانیکه می‌خواهیم به سرویس توکار HostingEnvironment در یک&nbsp; View دسترسی پیدا کنیم، می‌توان در ابتدای آن نوشت:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code"> @inject Microsoft.AspNetCore.Hosting.IHostingEnvironment Host;</pre> </div>
+در این حالت کد فوق از دیدگاه ASP.NET Core به صورت ذیل تفسیر می‌شود:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code"> [Microsoft.AspNetCore.Mvc.Razor.Internal.RazorInjectAttribute]
+public Microsoft.AspNetCore.Hosting.IHostingEnvironment Host { get; private set; }</pre> </div>
+این خاصیت عمومی نیز با توجه به از پیش ثبت شده بودن سرویس IHostingEnvironment&nbsp; و مشخص شدن توسط RazorInjectAttribute، توسط IoC Container آن شناسایی شده و تامین می‌شود. <br>
+
+
+اکنون برای استفاده‌ی از آن خواهیم داشت:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="XML" name="code"> &lt;div&gt;
+ Running in @Host.EnvironmentName
+&lt;/div&gt;</pre> </div> </div>
+البته استفاده‌ی از inject@ شاید به نوعی سؤ استفاده‌ی از الگوی MVC به شما رود؛ از این جهت که اطلاعات مورد نیاز یک View، باید از طریق کنترلر آن تامین شود و خود View نباید به صورت مستقیم درخواست تامین آ‌ن‌ها را بدهد. اما باید دقت داشت که در نهایت View نیاز دارد تا کدها را اجرا کرده و خروجی را تولید کند و برای این منظور، در پشت صحنه سرویس‌های زیادی مانند IUrlHelper ، IViewComponentHelper ، IHtmlHelper و غیره به همین ترتیب در اختیار آن قرار می‌گیرند. به علاوه استفاده‌ی از تزریق وابستگی‌ها بهتر است از روش ارث بری صفحات پایه، از این جهت که انتخاب composition همواره مقدم است بر inheritance و سبب انعطاف پذیری بیشتری نسبت به قبل می‌گردد. داشتن یک صفحه‌ی پایه که بتواند تمام نیازهای انواع و اقسام Viewها را تامین کند، دور از انتظار و گاهی از اوقات، سبب سنگینی بیش از حد پردازش تمام Viewها خواهد شد. اما تزریق سرویس‌هایی اینچنینی جهت تامین نیازهای اولیه و تکراری یک یا چند View خاص، کل برنامه را سنگین نکرده و همچنین انعطاف پذیری بیشتری را در جهت تامین آن‌ها فراهم می‌کند.<br>
+به علاوه باید دقت داشت اگر تعریف inject@ فوق را در فایل view import قرار دهیم، این سرویس در اختیار تمام Viewهای برنامه قرار خواهد گرفت و دیگر نیازی به قرار دادن آن در یک کلاس پایه‌ی سفارشی نیست.<br>
+
+
+یکی از مفیدترین استفاده‌های از قابلیت تزریق سرویس‌ها در Viewها می‌تواند دسترسی به سرویس تامین تنظیمات برنامه باشد (که در مورد نحوه‌ی تامین آن در مطلب «<a href="www.dntips.ir-posts-2451.html">ارتقاء به ASP.NET Core 1.0 - قسمت 7 - کار با فایل‌های config</a>» بیشتر بحث شد):<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code"> @inject IOptions&lt;SmtpConfig&gt; Settings;</pre> </div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/learning-paths/details/46'><span class='badge bg-danger rounded-pill me-2'>مسیرراه‌ها</span>ASP.NET Core</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2461.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>ارتقاء به ASP.NET Core 1.0 - قسمت 13 - معرفی View Components</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2564.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>تهیه قالب برای ارسال ایمیل‌ها در ASP.NET Core توسط Razor Viewها</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2839.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>کار با Razor در ASP.NET Core 2.0</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2787.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>تزریق وابستگی‌ها فراتر از کلاس‌ها در برنامه‌های Angular</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2456.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>ارتقاء به ASP.NET Core 1.0 - قسمت 10 - بررسی تغییرات Viewها</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2469.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>ارتقاء به ASP.NET Core 1.0 - قسمت 19 - بومی سازی</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2456.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>ارتقاء به ASP.NET Core 1.0 - قسمت 10 - بررسی تغییرات Viewها</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2469.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>ارتقاء به ASP.NET Core 1.0 - قسمت 19 - بومی سازی</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2469.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>ارتقاء به ASP.NET Core 1.0 - قسمت 19 - بومی سازی</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۶/۱۱/۲۱ ۹:۳۷</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><b>یک نکته‌ی تکمیلی</b> <br>
+
+
+
+
+
+&nbsp;<br>
+
+
+
+
+
+پردازش Razor در ASP.NET Core کاملا Async است. بنابراین در اینجا فقط از متدهای Html.xyx<b>Asyc</b> برای رندر محتوا استفاده کنید و یا از <a href="www.dntips.ir-posts-2460.html">تگ‌هلپر جدید partial</a>  که به ASP.NET Core 2.1 اضافه شده‌است. اجرای synchronous و یا همزمان views/partials/view components در ASP.NET Core امن نیست و حتما باید به صورت async فراخوانی شوند. تمام متدهای synchronous مربوط به Razor در ASP.NET Core 3.0 حذف خواهند شد.<br> <a href="https://github.com/aspnet/Mvc/issues/7083"> Html.Partial causes deadlocks and should be marked obsolete</a></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۶/۱۱/۲۳ ۱۳:۱۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><b>یک نکته:</b> برای تشخیص کدهای blocking در ASP.NET Core می‌توان از افزونه‌ی «<strong> <a href="https://github.com/benaadams/Ben.BlockingDetector" data-pjax="#js-repo-pjax-container">Ben.BlockingDetector</a> </strong>»
+
+
+
+
+
+    <span>استفاده کرد.<br> </span></div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۷/۰۲/۰۱ ۱۳:۳۰</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><b>یک نکته‌ی تکمیلی: خطایابی خودکار فایل‌های Razor در نگارش 2.1</b> <br> <br>
+
+
+
+از نگارش ASP.NET Core 2.1 preview 2 به بعد، کامپایلر ASP.NET Core، فایل‌های Razor را هم در حین کامپایل برنامه به صورت خودکار بررسی می‌کند (Razor compilation on build). برای نمونه اگر model@ تعریف شده‌ی در یک فایل razor حاوی خاصیت مورد استفاده نباشد، در حین کامپایل برنامه، خطای مرتبط با آن فایل cshtml را می‌توان مشاهده کرد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">Views\UploadFileExtensions\Index.cshtml(25,135): 
+error CS1061: 'UserFileViewModel' does not contain a definition for 'UserFile' 
+and no extension method 'UserFile' accepting a first argument of type 'UserFileViewModel' could be found 
+(are you missing a using directive or an assembly reference?)</pre> </div> </div></div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۷/۰۲/۱۹ ۱۰:۳۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><b>یک نکته‌ی تکمیلی: دریافت خطای «Error RZ3007: Targeted tag name cannot be null or whitespace» پس از نصب SDK جدید</b> <br> <br>
+اگر SDK جدیدی را نصب کنید و بلافاصله سعی در اجرای برنامه‌ای که با SDK قبلی کامپایل شده‌است داشته باشید، ممکن است خطای فوق را دریافت کنید. برای رفع آن، ابتدای پوشه‌های bin و obj را حذف کنید. سپس دستور dotnet restore را صادر کنید. اکنون برنامه بدون مشکل اجرا می‌شود.</div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>ابوالفضل روشن ضمیر</strong>  در  <span dir='ltr'>۱۳۹۷/۰۵/۲۵ ۱۷:۱۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><b>جهت جلوگیری از Encoding&nbsp; مدل ارسالی به ویو در View page source<span>&nbsp;</span> </b> <br> <div> <p style="margin-left: auto; margin-right: auto;"> <img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/png;base64,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"> </p> </div> <div>کانفیگ زیر را به کلاس استارتاپ اضافه کنید</div> <div>فضا‌های نامی :&nbsp;</div> <div> <div align="left" dir="ltr" style="direction: ltr;"> <pre language="CSharp" name="code">using System.Text.Encodings.Web;
+using System.Text.Unicode;
+using Microsoft.Extensions.WebEncoders;</pre> </div> <br> </div> <div> <div align="left" dir="ltr" style="direction: ltr;"> <pre language="CSharp" name="code">services.Configure&lt;WebEncoderOptions&gt; (options =&gt; {
+    options.TextEncoderSettings = new TextEncoderSettings (UnicodeRanges.All);
+});</pre> </div> <br> </div></div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>میثم سلی</strong>  در  <span dir='ltr'>۱۴۰۰/۰۸/۱۰ ۲۲:۳۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام معادل&nbsp;<div> <div align="left" dir="ltr" style="direction: ltr;"> <pre language="CSharp" name="code">@using Menu.Helper
+@model IEnumerable&lt;.Models.Entities.Category&gt;
+@ShowTree(Model)
+
+@helper ShowTree(IEnumerable&lt;Menu.Models.Entities.Category&gt; categories)
+{
+    foreach (var item in categories)
+    {
+    &lt;lidropdown-submenu" : "")"&gt;
+
+        @Html.ActionLink(item.Name, actionName: "Category", controllerName: "Product", routeValues: new { Id = item.Id, productName = item.Name.ToSeoUrl() }, htmlAttributes: null)
+        @if (item.Children.Any())
+        {
+            &lt;ul&gt;
+                @ShowTree(item.Children)
+            &lt;/ul&gt;
+                }
+    &lt;/li&gt;
+
+        }
+}</pre> </div>
+
+
+
+
+با استفاده از @function امکان پذیر هست؟&nbsp;<span style="text-align: -webkit-left;">&nbsp;</span> </div> <div> <div align="left" dir="ltr" style="direction: ltr;"> <pre language="CSharp" name="code">@model IEnumerable&lt;TR_Mahmodabad.Context.Entities.Navbar&gt;
+
+@functions
+{
+    public void ShowTree(IEnumerable&lt;Navbar&gt; navbars)
+    {
+        foreach (var item in navbars)
+        {
+            &lt;lidropdown-submenu" : "")"&gt;
+                @Html.ActionLink(item.Title, actionName: "", controllerName: "Product", routeValues: new {Id = item.Id, title = item.Title},htmlAttributes:null)
+                @if (item.HasChiled)
+                {
+                    &lt;ul&gt;
+                        @ShowTree(item.Children) // خطا
+                    &lt;/ul&gt;
+                }
+            &lt;/li&gt;
+        }
+    }
+}</pre> </div> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۴۰۰/۰۸/۱۱ ۱۱:۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div>چون ShowTree خروجی void دارد، باید نحوه‌ی فراخوانی آن داخل حلقه به صورت زیر باشد:<br> </div> <div> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">@{
+    ShowTree(item.Children);
+}</pre> </div>
+
+و یا هنگام فراخوانی نهایی:</div> <div> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">@{
+  ShowTree(Model);
+}</pre> </div> </div></div>
+</div></li></ul></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫مدیریت وضعیت (State Management) در Blazor</title>     <meta name="description" content="  چکیده (TL;DR):  آیا با چالش‌هایی مانند از دست رفتن داده‌ها پس از رفرش صفحه، ارتباطات پیچیده و درهم‌تنیده میان کامپوننت‌ها، یا نشت غیرمنتظره داده‌ها (State Leaks) در اپلیکیشن Blazor خود دست‌وپنجه نرم می‌کنید؟ مشکل معمولاً از خود Blazor نیست، بلکه به نحوه مدیریت وضعیت (State) مربوط می‌شود. این راهنما به بررسی عمیق و کاربردی مؤثرترین الگوهای مدیریت وضعیت در Blazor — از وضعیت محلی کامپوننت و تزریق وابستگی (DI) گرفته تا حافظه مرورگر و پایداری ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="مدیریت وضعیت (State Management) در Blazor">
+    <meta itemprop="description" content="  چکیده (TL;DR):  آیا با چالش‌هایی مانند از دست رفتن داده‌ها پس از رفرش صفحه، ارتباطات پیچیده و درهم‌تنیده میان کامپوننت‌ها، یا نشت غیرمنتظره داده‌ها (State Leaks) در اپلیکیشن Blazor خود دست‌وپنجه نرم می‌کنید؟ مشکل معمولاً از خود Blazor نیست، بلکه به نحوه مدیریت وضعیت (State) مربوط می‌شود. این راهنما به بررسی عمیق و کاربردی مؤثرترین الگوهای مدیریت وضعیت در Blazor — از وضعیت محلی کامپوننت و تزریق وابستگی (DI) گرفته تا حافظه مرورگر و پایداری ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="مدیریت وضعیت (State Management) در Blazor">
+    <meta property="og:description" content="  چکیده (TL;DR):  آیا با چالش‌هایی مانند از دست رفتن داده‌ها پس از رفرش صفحه، ارتباطات پیچیده و درهم‌تنیده میان کامپوننت‌ها، یا نشت غیرمنتظره داده‌ها (State Leaks) در اپلیکیشن Blazor خود دست‌وپنجه نرم می‌کنید؟ مشکل معمولاً از خود Blazor نیست، بلکه به نحوه مدیریت وضعیت (State) مربوط می‌شود. این راهنما به بررسی عمیق و کاربردی مؤثرترین الگوهای مدیریت وضعیت در Blazor — از وضعیت محلی کامپوننت و تزریق وابستگی (DI) گرفته تا حافظه مرورگر و پایداری ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="مدیریت وضعیت (State Management) در Blazor">
+    <meta name="twitter:description" content="  چکیده (TL;DR):  آیا با چالش‌هایی مانند از دست رفتن داده‌ها پس از رفرش صفحه، ارتباطات پیچیده و درهم‌تنیده میان کامپوننت‌ها، یا نشت غیرمنتظره داده‌ها (State Leaks) در اپلیکیشن Blazor خود دست‌وپنجه نرم می‌کنید؟ مشکل معمولاً از خود Blazor نیست، بلکه به نحوه مدیریت وضعیت (State) مربوط می‌شود. این راهنما به بررسی عمیق و کاربردی مؤثرترین الگوهای مدیریت وضعیت در Blazor — از وضعیت محلی کامپوننت و تزریق وابستگی (DI) گرفته تا حافظه مرورگر و پایداری ...">
+    <meta name="twitter:card" content="  چکیده (TL;DR):  آیا با چالش‌هایی مانند از دست رفتن داده‌ها پس از رفرش صفحه، ارتباطات پیچیده و درهم‌تنیده میان کامپوننت‌ها، یا نشت غیرمنتظره داده‌ها (State Leaks) در اپلیکیشن Blazor خود دست‌وپنجه نرم می‌کنید؟ مشکل معمولاً از خود Blazor نیست، بلکه به نحوه مدیریت وضعیت (State) مربوط می‌شود. این راهنما به بررسی عمیق و کاربردی مؤثرترین الگوهای مدیریت وضعیت در Blazor — از وضعیت محلی کامپوننت و تزریق وابستگی (DI) گرفته تا حافظه مرورگر و پایداری ...">
+    <meta property="article:published_time" content="Wed, 17 Jun 2026 06:40:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫مدیریت وضعیت (State Management) در Blazor";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-3686.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫مدیریت مسیر پایه (Base Path) در برنامه‌های Blazor: از چالش‌های استقرار تا راهکار دات‌نت ۱۱</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-3684.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫بررسی تاثیر تبدیل ضمنی نوع‌های داده‌ی رشته‌ای بر روی کارآیی کوئری‌ها</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫مدیریت وضعیت (State Management) در Blazor</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۵/۰۳/۲۷ ۱۰:۱۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-3685.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>چکیده (TL;DR):</strong> آیا با چالش‌هایی مانند از دست رفتن داده‌ها پس از رفرش صفحه، ارتباطات پیچیده و درهم‌تنیده میان کامپوننت‌ها، یا نشت غیرمنتظره داده‌ها (State Leaks) در اپلیکیشن Blazor خود دست‌وپنجه نرم می‌کنید؟ مشکل معمولاً از خود Blazor نیست، بلکه به نحوه مدیریت وضعیت (State) مربوط می‌شود. این راهنما به بررسی عمیق و کاربردی مؤثرترین الگوهای مدیریت وضعیت در Blazor — از وضعیت محلی کامپوننت و تزریق وابستگی (DI) گرفته تا حافظه مرورگر و پایداری داده‌ها در زمان Pre-rendering — می‌پردازد تا بتوانید برنامه‌هایی مقیاس‌پذیر، قابل اعتماد و با رفتار پیش‌بینی‌پذیر توسعه دهید.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>مقدمه</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">تصور کنید اپلیکیشن Blazor شما به خوبی کار می‌کند، تا اینکه ارائه‌ی یک رفتار غیرمنتظره همه چیز را خراب می‌کند: کاربر صفحه را رفرش می‌کند و تمام داده‌های فرم ناپدید می‌شوند؛ یک تغییر کوچک در یک کامپوننت، وضعیت کامپوننت‌های دیگر را مختل می‌کند؛ یا در بدترین سناریوی ممکن، یک کاربر داده‌های حساس کاربر دیگری را مشاهده می‌کند!</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">این چالش‌ها در دنیای واقعی Blazor نادر نیستند، بلکه از رایج‌ترین مشکلاتی هستند که در صورت عدم اتخاذ یک استراتژی مشخص، پایداری برنامه را به شدت کاهش می‌دهند. واقعیت این است که برنامه شما خراب نیست، بلکه معماری مدیریت وضعیت آن نیاز به بازنگری دارد. Blazor انعطاف‌پذیری بالایی در اختیار شما قرار می‌دهد، اما اگر مرزهای مشخصی برای محل نگهداری و طول عمر وضعیت (State) تعیین نکنید، این انعطاف‌پذیری به آشفتگی تبدیل خواهد شد. با انتخاب الگوی درست، از شر چالش‌هایی مانند پراکندگی داده‌ها (Prop Drilling)، باگ‌های هم‌پوشانی داده‌های کاربران و سردرگمی در ردیابی تغییرات خلاص خواهید شد.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در این مقاله، الگوهای عملی مدیریت وضعیت در Blazor را همراه با نمونه کدهای ساده و بهینه بررسی می‌کنیم تا برنامه‌های شما پایدار، پیش‌بینی‌پذیر و آماده‌ی مقیاس‌پذیری باشند.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>مدیریت وضعیت (State Management) چیست؟</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">پروتکل وب ذاتاً بدون وضعیت (Stateless) است. در یک اپلیکیشن وب، هر داده‌ای که به طور فعال و آگاهانه ذخیره نشود، با وقوع رویدادهای زیر از بین خواهد رفت:</div><ul><li>رفرش کردن صفحه توسط کاربر (F5) یا بستن تب مرورگر.</li><li>ناوبری (Navigation) به یک صفحه دیگر.</li><li>قطع و وصل شدن کانال ارتباطی SignalR (در Blazor Server).</li><li>سوئیچ کردن اپلیکیشن از حالت پیش‌رندر شده (Prerendered HTML) به حالت تعاملی (Interactive Mode) در معماری جدید Blazor Web App.</li></ul><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">بنابراین، <strong>مدیریت وضعیت</strong> یعنی تصمیم‌گیری مهندسی‌شده در این باره که داده‌ها کجا و با چه طول عمری (Lifetime) ذخیره شوند تا در مواجهه با رویدادهای فوق حفظ شده و در عین حال، به شکلی ایمن ایزوله بمانند و بین کاربران مختلف نشت نکنند.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>مکانیسم مدیریت وضعیت در مدل‌های مختلف میزبانی Blazor</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">اگرچه Blazor مدل کامپوننت‌محور یکسانی را در معماری‌های مختلف ارائه می‌دهد، اما محل فیزیکی ذخیره‌سازی و طول عمر وضعیت در هر مدل به شدت متفاوت است:</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۱. Blazor WebAssembly (اجرای کامل سمت کلاینت)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در این مدل، تمام ران‌تایم .NET و کد اپلیکیشن درون مرورگر کاربر (واسطه WebAssembly) اجرا می‌شوند. بنابراین وضعیت کاملاً در <strong>حافظه RAM مرورگر کلاینت</strong> قرار دارد:</div><ul><li>مقادیر فیلدها و پراپرتی‌ها در رفرنس‌های کامپوننت.</li><li>ساختار درختی کامپوننت‌ها و آخرین خروجی رندر شده (Render Tree).</li><li>سرویس‌های ثبت شده در کانتینر DI (که در این مدل معمولاً به صورت <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Singleton</code> رفتار می‌کنند، چرا که کل برنامه محدود به یک تب مرورگر است).</li><li>داده‌های ذخیره شده از طریق جاوااسکریپت (JS Interop) در حافظه مرورگر (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">localStorage</code> یا <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">sessionStorage</code>).</li></ul><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۲. Blazor Server (اجرای سمت سرور با SignalR)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در این معماری، کامپوننت‌ها و منطق برنامه روی سرور اجرا شده و تغییرات UI از طریق یک اتصال زنده تحت وب‌سوکت (SignalR Circuit) به کلاینت فرستاده می‌شوند. وضعیت در اینجا به <strong>طول عمر این Circuit روی سرور</strong> وابسته است:</div><ul><li>نمونه‌های کامپوننت و فیلدهای درون حافظه آن‌ها روی سرور ایجاد و نگهداری می‌شوند.</li><li>سرویس‌های DI با طول عمر <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Scoped</code> به ازای هر اتصال (Circuit) کاربر زنده می‌مانند.</li></ul><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۳. Blazor Web App (مدل یکپارچه .NET 8/9/10)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">این مدل ترکیبی از رندرینگ ایستا سمت سرور (Static SSR) و حالت‌های تعاملی (Interactive Server یا WebAssembly) است. چالش اصلی در اینجا، انتقال روان وضعیت از مرحله پیش‌رندر (Prerendering) روی سرور به مرحله تعاملی روی کلاینت است. برای این منظور از قابلیت‌هایی مانند <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">PersistentComponentState</code> و ویژگی جدید ویژگی‌های دکلراتیو برای هیدراته کردن (Hydration) خودکار داده‌ها استفاده می‌شود.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>انتخاب الگوی مناسب بر اساس نیازمندی‌ها</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">برای یک انتخاب هوشمندانه، می‌توانید از چک‌لیست معمارانه زیر استفاده کنید:</div><ul><li><strong>وضعیت‌های قابل اشتراک‌گذاری یا بوکمارک شدن (مانند فیلترها):</strong> پارامترهای آدرس (URL Route / Query Parameters)</li><li><strong>وضعیت‌های صرفاً گرافیکی و محدود به یک کامپوننت:</strong> فیلدهای محلی کُد (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">@code</code>)</li><li><strong>ارتباط مستقیم و گام‌به‌گام والد و فرزند:</strong> خواص <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">[Parameter]</code> به همراه <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">EventCallback</code></li><li><strong>اشتراک داده در لایه‌های عمیق یک درختواره:</strong> مقادیر آبشاری (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CascadingValue</code> / <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CascadingParameter</code>)</li><li><strong>ارتباط میان کامپوننت‌های غیرهمزاد یا صفحات مجزا:</strong> سرویس‌های تزریق وابستگی (DI Services)</li><li><strong>وضعیت‌های اشتراکی واکنش‌گرا (Reactive):</strong> کانتینرهای وضعیت مجهز به رویداد اعلان تغییرات (State Containers)</li><li><strong>حفظ پیوستگی داده از پیش‌رندر به حالت تعاملی:</strong> ویژگی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">[PersistentState]</code> یا سرویس <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">PersistentComponentState</code></li><li><strong>ذخیره‌سازی امن و ماندگار در مرورگر (فقط سمت سرور):</strong> سرویس‌های <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ProtectedLocalStorage</code> یا <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ProtectedSessionStorage</code></li></ul><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>بررسی عمیق الگوهای مدیریت وضعیت همراه با کد</strong></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۱. پارامترهای URL و Query String</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">بهترین انتخاب برای حالاتی است که وضعیت باید با کپی کردن لینک (Bookmark) حفظ شود یا مستقیماً روی کنترل خروجی صفحه تأثیر دارد (مانند صفحه‌بندی یا سرچ).</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>نمونه پیاده‌سازی (.NET 10):</strong></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">@page &quot;/products/{Category}&quot;
+@inject NavigationManager NavManager
+
+&lt;h3&gt;دسته بندی: @Category&lt;/h3&gt;
+&lt;p&gt;عبارت جستجو: @SearchTerm&lt;/p&gt;
+
+&lt;input @bind=&quot;tempSearch&quot; placeholder=&quot;جستجو...&quot; /&gt;
+&lt;button @onclick=&quot;ApplySearch&quot;&gt;اعمال فیلتر&lt;/button&gt;
+
+@code {
+    [Parameter] public string? Category { get; set; }
+
+    // اتصال خودکار به Query String با قابلیت تعامل کلاینت و سرور
+    [SupplyParameterFromQuery(Name = &quot;searchTerm&quot;)]
+    public string? SearchTerm { get; set; }
+
+    private string? tempSearch;
+
+    protected override void OnParametersSet()
+    {
+        tempSearch = SearchTerm;
+    }
+
+    private void ApplySearch()
+    {
+        // بازسازی آدرس برای ثبت در تاریخچه مرورگر بدون از دست رفتن وضعیت
+        var targetUri = NavManager.GetUriWithQueryParameter(&quot;searchTerm&quot;, tempSearch);
+        NavManager.NavigateTo(targetUri);
+    }
+}</pre><blockquote class="ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>مزیت:</strong> هماهنگی کامل با دکمه‌های Back/Forward مرورگر و سئو (SEO) عالی در حالت SSR.</blockquote><blockquote class="ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>محدودیت:</strong> صرفاً برای داده‌های ساده (رشته، عدد و تاریخ) مناسب است و برای اشیاء پیچیده کاربرد ندارد.</blockquote><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۲. وضعیت محلی کامپوننت (Local Component State)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">ساده‌ترین شکل مدیریت وضعیت است. هر فیلد یا پراپرتی خصوصی در بلوک <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">@code</code> یک وضعیت محلی است که کپسوله‌سازی کامل را فراهم می‌کند.</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">&lt;button class=&quot;btn btn-primary&quot; @onclick=&quot;ToggleDetails&quot;&gt;
+    @(isExpanded ? &quot;پنهان‌سازی جزئیات&quot; : &quot;نمایش جزئیات&quot;)
+&lt;/button&gt;
+
+@if (isExpanded)
+{
+    &lt;div class=&quot;alert alert-info mt-2&quot;&gt;این یک وضعیت کاملاً محلی است.&lt;/div&gt;
+}
+
+@code {
+    private bool isExpanded; // State محلی
+
+    private void ToggleDetails() =&gt; isExpanded = !isExpanded;
+}</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><em>نکته ارتقاء:</em> اگر نیاز شد این وضعیت با کامپوننت همزاد (Sibling) به اشتراک گذاشته شود، باید وضعیت را به یک سطح بالاتر (والد مشترک) منتقل کنید (State Lifting).</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۳. ارتباط والد-فرزند (Parameters &amp; EventCallbacks)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">رویکرد استاندارد برای جریان داده در یک ساختار درختی مستقیم. والد داده را با <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">[Parameter]</code> پایین می‌فرستد و فرزند با <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">EventCallback</code> رویدادها را بالا می‌فرستد.</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">&lt;ChildComponent Title=&quot;وضعیت فعلی شمارنده&quot; 
+                CurrentValue=&quot;parentCounter&quot; 
+                OnIncrement=&quot;HandleIncrement&quot; /&gt;
+
+@code {
+    private int parentCounter = 10;
+    private void HandleIncrement(int step) =&gt; parentCounter += step;
+}</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">&lt;div class=&quot;card p-3&quot;&gt;
+    &lt;h5&gt;@Title&lt;/h5&gt;
+    &lt;p&gt;مقدار: @CurrentValue&lt;/p&gt;
+    &lt;button @onclick=&quot;() =&gt; OnIncrement.InvokeAsync(1)&quot;&gt;افزایش در والد&lt;/button&gt;
+&lt;/div&gt;
+
+@code {
+    [Parameter] public string Title { get; set; } = string.Empty;
+    [Parameter] public int CurrentValue { get; set; }
+    [Parameter] public EventCallback&lt;int&gt; OnIncrement { get; set; }
+}</pre><blockquote class="ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>نکته معماری:</strong> اگر تعداد لایه‌های میانی درختواره زیاد شود، این الگو منجر به پدیده‌ی کثیف <strong>Prop Drilling</strong> (پاس دادن اجباری پارامترها از لایه‌هایی که خودشان به آن نیاز ندارند) می‌شود. در چنین شرایطی باید به سراغ الگوی بعدی رفت.</blockquote><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۴. تزریق مقادیر در عمق درختواره (Cascading Parameters)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">برای به اشتراک‌گذاری داده‌های سراسری زیرشاخه (مانند تم گرافیکی، اطلاعات هویتی کاربر یا تنظیمات عمومی تکست) بدون نیاز به پاس دادن لایه به لایه پارامترها استفاده می‌شود. در .NET 10 توصیه می‌شود برای بهینه‌سازی رندرینگ و مدیریت رویدادها از کلاس مدرن <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CascadingValueSource</code> استفاده کنید.</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">&lt;CascadingValue Value=&quot;currentTheme&quot;&gt;
+    &lt;div class=&quot;@currentTheme&quot;&gt;
+        @Body
+    &lt;/div&gt;
+&lt;/CascadingValue&gt;
+
+@code {
+    private string currentTheme = &quot;dark-theme&quot;;
+}</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">@code {
+    [CascadingParameter] public string? ActiveTheme { get; set; }
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۵. مدیریت وضعیت سراسری با سرویس‌های DI (State Containers)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">زمانی که کامپوننت‌های غیرهمزاد یا صفحات مختلف (مثلاً سبد خرید در صفحه محصولات و هدر سایت) نیاز به یک دیتای مشترک دارند، بهترین کار استفاده از یک کلاس ساده‌ی C# (اصطلاحاً State Container) است که در کانتینر DI ثبت می‌شود.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>الف) مدیریت طول عمر (Lifetime Scopes) در سرویس‌ها:</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">انتخاب طول عمر مناسب حیاتی است، در غیر این صورت با نشت حافظه یا اشتراک ناخواسته دیتای کاربران مواجه می‌شوید:</div><ul><li><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">AddScoped</code><strong>:</strong> در Blazor Server به ازای هر اتصال (هر کاربر/تب) یک نمونه مجزا می‌سازد (مناسب برای سبد خرید). در Blazor WebAssembly معادل کلاینت رفتار کرده و به ازای هر تب مرورگر تفکیک می‌شود.</li><li><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">AddSingleton</code><strong>:</strong> در Blazor Server <strong>خطرناک</strong> است؛ چون یک نمونه واحد برای <strong>تمام کاربران سیستم</strong> به اشتراک گذاشته می‌شود (نشت شدید داده!). اما در Blazor WebAssembly امن است چون کل ران‌تایم ایزوله در مرورگر یک فرد است.</li></ul><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>ب) پیاده‌سازی یک کانتینر وضعیت واکنش‌گرا (Reactive State Container):</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">کلاس‌های معمولی DI در صورت تغییر پراپرتی، به کامپوننت‌ها اعلان رندر مجدد نمی‌فرستند. برای حل این مشکل، رویدادها را به کانتینر اضافه می‌کنیم:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">// CounterStateContainer.cs
+public class CounterStateContainer
+{
+    private int _count;
+
+    public int Count
+    {
+        get =&gt; _count;
+        set
+        {
+            if (_count != value)
+            {
+                _count = value;
+                NotifyStateChanged();
+            }
+        }
+    }
+
+    // رویدادی که تغییر وضعیت را به گوش شنوندگان می‌رساند
+    public event Action? OnChange;
+
+    private void NotifyStateChanged() =&gt; OnChange?.Invoke();
+}</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>نحوه مصرف در کامپوننت والد (نکته مهم: حتماً لغو اشتراک کنید):</strong></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">@page &quot;/reactive-demo&quot;
+@implements IDisposable
+@inject CounterStateContainer StateContainer
+
+&lt;h3&gt;مدیریت وضعیت واکنش‌گرا&lt;/h3&gt;
+&lt;p&gt;مقدار فعلی: &lt;strong&gt;@StateContainer.Count&lt;/strong&gt;&lt;/p&gt;
+&lt;button class=&quot;btn btn-success&quot; @onclick=&quot;Increment&quot;&gt;افزایش وضعیت&lt;/button&gt;
+
+&lt;div class=&quot;mt-3&quot;&gt;
+    &lt;NestedChildComponent /&gt;
+&lt;/div&gt;
+
+@code {
+    protected override void OnInitialized()
+    {
+        // subscribe به رویداد تغییر برای به‌روزرسانی UI کامپوننت
+        StateContainer.OnChange += StateHasChanged;
+    }
+
+    private void Increment() =&gt; StateContainer.Count++;
+
+    public void Dispose()
+    {
+        // جلوگیری از نشت حافظه (Memory Leak) با لغو اشتراک
+        StateContainer.OnChange -= StateHasChanged;
+    }
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۶. پایداری وضعیت پیش‌رندر (Prerendered State Persistence)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در Blazor Web App یا حالت‌های Pre-rendering، کامپوننت ابتدا یک‌بار روی سرور رندر شده تا خروجی HTML ایستا بسازد (برای سرعت لود اولیه بالاتر)، سپس بار دیگر روی کلاینت (WASM یا SignalR) هیدراته و تعاملی می‌شود. این رفتار دوگانه باعث می‌شود متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">OnInitializedAsync</code> دو بار اجرا شود که نتیجه آن <strong>فلیکر (Flicker) یا چشمک زدن ناخوشایند UI</strong> و اجرای دوباره کوئری‌های سنگین دیتابیس است.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در <strong>.NET 10</strong>، ویژگی دکلراتیو <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">[PersistentState]</code> این مشکل را به زیباترین شکل ممکن حل کرده است.</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">@page &quot;/weather&quot;
+@rendermode InteractiveWebAssembly
+
+&lt;h3&gt;پیش‌بینی آب و هوا&lt;/h3&gt;
+
+@if (forecasts == null)
+{
+    &lt;p&gt;در حال بارگذاری...&lt;/p&gt;
+}
+else
+{
+    }
+
+@code {
+    // ران‌تایم دیتای این پراپرتی را در اولین رندر (سرور) سریالایز کرده
+    // و در رندر دوم (کلاینت) بدون اجرای مجدد منطق متد، بازگردانی می‌کند.
+    [PersistentState]
+    public WeatherForecast[]? forecasts { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (forecasts == null)
+        {
+            // این بلاک فقط یک‌بار روی سرور اجرا می‌شود
+            forecasts = await WeatherService.GetForecastsAsync();
+        }
+    }
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>کنترل پیشرفته رفتار بازگردانی داده با</strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">RestoreBehavior</code></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در .NET 10 می‌توانید رفتار دقیق بازیابی وضعیت را کنترل کنید:</div><ul><li><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">RestoreBehavior.SkipInitialValue</code><strong>:</strong> در رندر اولیه از حالت پیش‌رندر شده استفاده نمی‌کند.</li><li><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">RestoreBehavior.SkipLastSnapshot</code><strong>:</strong> وضعیت ذخیره شده قبلی را در زمان Reconnectهای ناگهانی نادیده گرفته و به روز رسانی جدید انجام می‌دهد.</li></ul><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۷. حافظه امن مرورگر (Protected Browser Storage)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">برای داده‌هایی که باید در برابر رفرش‌های سخت (Hard Refresh) یا بستن مرورگر مقاومت کنند اما حاوی اطلاعات حساسی (مانند تنظیمات کاربری یا توکن‌های موقت غیر بحرانی) هستند، از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ProtectedLocalStorage</code> استفاده می‌شود. این سرویس داده‌ها را با استفاده از فرآیند <strong>ASP.NET Core Data Protection</strong> سمت سرور رمزنگاری کرده و سپس در مرورگر می‌نویسد.</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">@inject ProtectedLocalStorage ProtectedStorage
+
+&lt;button @onclick=&quot;SavePreferences&quot;&gt;ذخیره تم کاربری&lt;/button&gt;
+
+@code {
+    private async Task SavePreferences()
+    {
+        // داده‌ها قبل از ذخیره در لایه کلاینت به طور کامل و امن رمزنگاری می‌شوند
+        await ProtectedStorage.SetAsync(&quot;UserTheme&quot;, &quot;Dark-Fluid&quot;);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // دسترسی به جاوااسکریپت و حافظه مرورگر فقط پس از رندر کلاینت ممکن است
+            var result = await ProtectedStorage.GetAsync&lt;string&gt;(&quot;UserTheme&quot;);
+            if (result.Success)
+            {
+                var theme = result.Value;
+                // اعمال تم...
+                StateHasChanged();
+            }
+        }
+    }
+}</pre><blockquote class="ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>قانون طلایی امنیت:</strong> هرگز توکن‌های JWT بسیار حساس یا اطلاعات هویتی کلیدی (PII) را بدون لایه‌های امنیتی تکمیلی درون <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">localStorage</code> کلاینت (به خصوص در WASM) ذخیره نکنید. حملات XSS می‌توانند دسترسی به حافظه عادی مرورگر را به مخاطره اندازند.</blockquote><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>جدول مقایسه و جمع‌بندی الگوهای مدیریت وضعیت</strong></div><table class="table table-striped table-hover table-bordered table-condensed" style="max-width: 100%; width: auto; margin-left: auto; margin-right: auto; direction: rtl;" dir="rtl"><tbody><tr><td data-row="1" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>ابزار مدیریت وضعیت</strong></td><td data-row="1" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>بهترین سناریوی کاربرد</strong></td><td data-row="1" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>طول عمر و قلمرو (Scope)</strong></td><td data-row="1" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>پایداری در برابر F5 (Refresh)</strong></td></tr><tr><td data-row="2" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>URL / Query String</strong></td><td data-row="2" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">فیلترها، سرچ، صفحه‌بندی صفحات</td><td data-row="2" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">وابسته به آدرس مرورگر</td><td data-row="2" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>بله</strong> (صد در صد پایدار و قابل اشتراک)</td></tr><tr><td data-row="3" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>Local Component State</strong></td><td data-row="3" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">رفتارهای گرافیکی درون یک کامپوننت</td><td data-row="3" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">طول عمر نمونه کامپوننت</td><td data-row="3" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">خیر</td></tr><tr><td data-row="4" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>Parameters &amp; EventCallback</strong></td><td data-row="4" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">ارتباطات مستقیم بالا به پایین</td><td data-row="4" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">محدود به لایه کامپوننت والد-فرزند</td><td data-row="4" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">خیر</td></tr><tr><td data-row="5" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>Cascading Values</strong></td><td data-row="5" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">تنظیمات و ویژگی‌های ساختاری سراسری درختواره</td><td data-row="5" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">زیردرخت مشخص شده</td><td data-row="5" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">خیر</td></tr><tr><td data-row="6" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>DI Services (Scoped)</strong></td><td data-row="6" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">داده‌های مشترک صفحات (مانند سبد خرید)</td><td data-row="6" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">طول عمر زنده بودن Session / Circuit</td><td data-row="6" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">خیر (در رفرش سرور پاک می‌شود)</td></tr><tr><td data-row="7" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">[PersistentState]</code></td><td data-row="7" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">انتقال دیتا از پیش‌رندر به حالت کلاینت</td><td data-row="7" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">بازه زمانی Hydration اولیه</td><td data-row="7" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">خیر (مختص جابجایی حالت رندر)</td></tr><tr><td data-row="8" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>Protected Browser Storage</strong></td><td data-row="8" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">ترجیحات کاربر، تنظیمات امن هیدرتیشن</td><td data-row="8" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">حافظه ماندگار مرورگر (رمزگذاری شده)</td><td data-row="8" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>بله</strong> (کاملاً ماندگار)</td></tr></tbody></table><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>ملاحظات عملکردی (Performance) و امنیتی</strong></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">۱. <strong>مدیریت Render Tree و ترافیک پردازنده:</strong> فراخوانی بی‌رویه متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">StateHasChanged()</code> به خصوص در الگوهای واکنش‌گرا (State Containers)، می‌تواند کل زیردرخت کامپوننت‌ها را وادار به رندر مجدد کند. این امر در برنامه‌های بزرگ باعث افزایش شدید مصرف پردازنده (CPU Spike) می‌شود. برای جلوگیری از این مشکل، تغییر وضعیت‌ها را بهینه‌سازی کرده و متدها را به صورت هوشمند و تنها در صورت تغییر واقعی مقادیر صدا بزنید.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">۲. <strong>نخ‌کشی و رویدادهای ناهمگام:</strong> هر زمان که به روز رسانی وضعیت از طریق رویدادهای خارجی نظیر تردها، تایمرها یا کانال‌های SignalR بک‌اند رخ می‌دهد، کُد به‌روزرسانی را حتماً در متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">InvokeAsync</code> کپسوله کنید:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">await InvokeAsync(StateHasChanged);</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">۳. <strong>کلیدهای حفاظت از داده (Data Protection API):</strong> سرویس‌های <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ProtectedBrowserStorage</code> از کلیدهای رمزنگاری سرور استفاده می‌کنند. در صورت ری‌استارت شدن سرور یا توزیع برنامه روی کلاسترهای چندگانه (Web Farm)، اگر کلیدها را روی یک دیسک یا سیستم مشترک (مانند Redis یا Azure Key Vault) ماندگار نکرده باشید، کلیدها منقضی شده و داده‌های ذخیره شده در مرورگر کاربران دیگر قابل رمزگشایی نخواهند بود.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>نتیجه‌گیری</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">Blazor ابزاری فوق‌العاده منعطف و قدرتمند برای توسعه اپلیکیشن‌های مدرن سازمانی است، اما مدیریت وضعیت در آن نیازمند درک دقیق طول عمر داده‌ها و رفتار لایه‌های مختلف سرور و کلاینت است. برای داده‌های ساده و فیلترها از <strong>URL</strong> استفاده کنید، برای روابط مستقیم کامپوننت‌ها از الگوهای <strong>والد-فرزند</strong>، برای داده‌های مشترک صفحات از <strong>Scoped DI Containers</strong> مجهز به رویداد، و در نهایت برای مهاجرت بی‌نقص از سرور به کلاینت بدون افکت چشمک‌زدن، از ویژگی جدید و کارآمد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">[PersistentState]</code> بهره ببرید. </div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20664.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>بلیزر در دات‌نت ۱۰: خداحافظی با باگ‌های آزاردهنده و سلام به سرعت</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20257.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>بهینه‌سازی رندر در Blazor</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20297.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>طراحی صفحات 404 سفارشی در برنامه‌های وب Blazor نسخه .NET 8 و جدیدتر</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3493.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بررسی تغییرات Blazor 8x - قسمت هشتم - مدیریت انتقال اطلاعات Pre-Rendering سمت سرور، به جزایر تعاملی</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3327.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مدیریت حالت در برنامه‌های Blazor توسط الگوی Observer - قسمت اول</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3291.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Blazor 5x - قسمت سوم - مبانی Razor</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3489.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بررسی تغییرات Blazor 8x - قسمت چهارم - معرفی فرم‌های جدید تعاملی</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3323.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Blazor 5x - قسمت 31 - احراز هویت و اعتبارسنجی کاربران Blazor WASM - بخش 1 - انجام تنظیمات اولیه</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3488.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بررسی تغییرات Blazor 8x - قسمت سوم - روش ارتقاء برنامه‌های Blazor Server قدیمی به دات نت 8</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3685.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>مدیریت وضعیت (State Management) در Blazor</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۴۰۵/۰۳/۲۷ ۱۰:۲۰</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>بخش تکمیلی: تحول مدیریت وضعیت در Blazor با انتشار NET 11.</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">با انتشار <strong>.NET 11</strong>، مایکروسافت تمرکز ویژه‌ای روی بهبود تجربه توسعه در حالت <strong>Static SSR (رندر ایستا سمت سرور)</strong> گذاشته است. تا پیش از این، مدیریت وضعیت‌های کوتاه‌مدت یا فرار (Ephemeral State) در معماری Static SSR چالش‌برانگیز بود و توسعه‌دهندگان مجبور بودند به کوکی‌های سفارشی یا کدهای پیچیده متوسل شوند.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در .NET 11، سه قابلیت کلیدی و دکلراتیو معرفی شده‌اند که مدیریت وضعیت را در الگوهایی مانند <strong>POST-Redirect-GET</strong> و فرم‌های چندمرحله‌ای به شدت ساده و استاندارد می‌کنند. در ادامه به بررسی این ویژگی‌ها می‌پردازیم.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۱. پشتیبانی بومی از TempData در Blazor SSR</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">مکانیزم <strong>TempData</strong> که سال‌ها در ASP.NET Core MVC و Razor Pages ابزار محبوب توسعه‌دهندگان برای ذخیره‌سازی داده‌های موقت (با طول عمر تا درخواست HTTP بعدی) بود، اکنون به طور بومی به Blazor SSR اضافه شده است. این قابلیت برای سناریوهایی مانند نمایش پیام‌های موفقیت‌آمیز (Flash Messages) پس از ثبت فرم و انتقال داده در زمان ریدایرکت، فوق‌العاده کاربردی است.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>ویژگی‌های کلیدی:</strong></div><ul><li><strong>ثبت خودکار:</strong> با فراخوانی متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">AddRazorComponents</code> در فایل <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Program.cs</code>، مکانیزم TempData به صورت خودکار ثبت شده و به عنوان یک <strong>Cascading Value</strong> در دسترس کامپوننت‌ها قرار می‌گیرد.</li><li><strong>امنیت بالا:</strong> ارائه‌دهنده پیش‌فرض کوکی (Cookie Provider) از سیستم <strong>ASP.NET Core Data Protection</strong> برای رمزنگاری داده‌ها استفاده می‌کند.</li><li><strong>مدیریت طول عمر هوشمند:</strong> متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Get</code> پس از خواندن مقدار، آن را از حافظه پاک می‌کند (استفاده یک‌باره). واسط <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ITempData</code> متدهای <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Peek</code> و <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Keep</code> را برای کنترل دقیق‌تر طول عمر داده ارائه می‌دهد.</li></ul><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>نمونه کُد پیاده‌سازی:</strong></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">@page &quot;/my-form&quot;
+@inject NavigationManager NavigationManager
+
+&lt;p class=&quot;alert alert-info&quot;&gt;@_message&lt;/p&gt;
+
+&lt;form @onsubmit=&quot;HandleSubmit&quot; method=&quot;post&quot;&gt;
+    &lt;button type=&quot;submit&quot; class=&quot;btn btn-primary&quot;&gt;ثبت فرم&lt;/button&gt;
+&lt;/form&gt;
+
+@code {
+    [CascadingParameter]
+    public ITempData? TempData { get; set; }
+
+    private string? _message;
+
+    protected override void OnInitialized()
+    {
+        // خواندن مقدار و حذف خودکار آن از TempData برای درخواست‌های بعدی
+        _message = TempData?.Get(&quot;Message&quot;) as string ?? &quot;پیامی وجود ندارد&quot;;
+    }
+
+    private void HandleSubmit()
+    {
+        // ذخیره پیام موقت قبل از ریدایرکت
+        TempData![&quot;Message&quot;] = &quot;فرم با موفقیت ثبت شد!&quot;;
+        NavigationManager.NavigateTo(&quot;/my-form&quot;, forceLoad: true);
+    }
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۲. ویژگی دکلراتیو</strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">[SupplyParameterFromTempData]</code></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">مایکروسافت برای حذف کدهای تکراری (Boilerplate) جهت خواندن و نوشتن در TempData، ویژگی دکلراتیو <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">[SupplyParameterFromTempData]</code> را معرفی کرده است. این ویژگی دقیقاً از همان الگوی آشنای <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">[SupplyParameterFromQuery]</code> پیروی می‌کند.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>نحوه کارکرد و کاربرد اصلی:</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">زمانیکه این ویژگی را روی یک Property قرار می‌دهید، ران‌تایم به طور خودکار مقدار را از TempData می‌خواند و در آن Property تزریق می‌کند. نکته جذاب این است که <strong>مقداردهی به این Property، به طور خودکار آن را در TempData می‌نویسد</strong> تا در درخواست بعدی (بعد از ریدایرکت) قابل خواندن باشد.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">یک نمونه عینی از اهمیت این ویژگی، <strong>بازنویسی کامل قالب آماده Blazor Identity</strong> در .NET 11 است؛ مایکروسافت در این قالب، کوکی سفارشی مدیریت پیام‌های وضعیت (Status Message Cookie) را حذف و این ویژگی دکلراتیو را جایگزین آن کرده است.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>نمونه کُد پیاده‌سازی:</strong></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">@page &quot;/account/manage&quot;
+
+@if (!string.IsNullOrEmpty(StatusMessage))
+{
+    &lt;div class=&quot;alert alert-success&quot;&gt;@StatusMessage&lt;/div&gt;
+}
+
+@code {
+    // اتصال خودکار دوطرفه به TempData
+    [SupplyParameterFromTempData]
+    public string? StatusMessage { get; set; }
+}</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong><em>نکته تخصصی:</em></strong>اگر نام Property با کلید ذخیره شده در TempData همخوانی ندارد، می‌توانید نام کلید دلخواه را از طریق پارامتر <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Name</code> مشخص کنید: <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">[SupplyParameterFromTempData(Name = &quot;CustomKey&quot;)]</code></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۳. ویژگی دکلراتیو</strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">[SupplyParameterFromSession]</code></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">یکی دیگر از چالش‌های بزرگ در Blazor SSR، حفظ وضعیت‌های پیچیده‌تر مانند &quot;سبد خرید&quot; یا &quot;مراحل طی شده در یک فرم چندمرحله‌ای (Wizard)&quot; بدون فعال کردن حالت تعاملی (Interactive WebAssembly/Server) بود. در .NET 11، ویژگی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">[SupplyParameterFromSession]</code> معرفی شده است تا ارتباط مستقیمی بین پراپرتی‌های کامپوننت و <strong>HTTP Session</strong> برقرار کند.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>نحوه کارکرد:</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">داده‌ها با استفاده از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">System.Text.Json</code> سریالایز شده و درست قبل از ارسال پاسخ HTTP به کلاینت، درون Session مربوط به کاربر بازنویسی می‌شوند.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>پیکربندی در فایل Program.cs:</strong></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">builder.Services.AddDistributedMemoryCache(); // نیاز به حافظه برای ذخیره سشن
+builder.Services.AddSession();
+builder.Services.AddRazorComponents();
+
+var app = builder.Build();
+
+app.UseSession(); // فعال‌سازی میان‌افزار سشن</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>نمونه کُد پیاده‌سازی در کامپوننت:</strong></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">@page &quot;/checkout&quot;
+
+&lt;div class=&quot;card p-4&quot;&gt;
+    &lt;p&gt;مرحله فعلی خرید: &lt;strong&gt;@CurrentStep&lt;/strong&gt;&lt;/p&gt;
+
+    &lt;EditForm Model=&quot;Input&quot; FormName=&quot;checkout&quot; OnSubmit=&quot;NextStep&quot;&gt;
+        &lt;button type=&quot;submit&quot; class=&quot;btn btn-success&quot;&gt;مرحله بعدی&lt;/button&gt;
+    &lt;/EditForm&gt;
+&lt;/div&gt;
+
+@code {
+    // خواندن و نوشتن مستقیم و خودکار در HTTP Session کاربر
+    [SupplyParameterFromSession(Name = &quot;checkout-step&quot;)]
+    public int CurrentStep { get; set; }
+
+    private object Input { get; } = new();
+
+    private void NextStep()
+    {
+        // با افزایش این مقدار، تغییرات به طور خودکار در سشن ذخیره می‌شوند
+        CurrentStep++;
+    }
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>جمع‌بندی ابزارهای جدید .NET 11</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">جدول زیر دیدگاهی معمارانه برای انتخاب از میان ابزارهای جدید دات‌نت 11 به شما می‌دهد:</div><table class="table table-striped table-hover table-bordered table-condensed" style="max-width: 100%; width: auto; margin-left: auto; margin-right: auto; direction: rtl;" dir="rtl"><tbody><tr><td data-row="1" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>ابزار جدید</strong></td><td data-row="1" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>منبع ذخیره‌سازی اصلی</strong></td><td data-row="1" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>طول عمر وضعیت (Lifetime)</strong></td><td data-row="1" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>بهترین سناریوی مصرف</strong></td></tr><tr><td data-row="2" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ITempData</code><strong> (مستقیم)</strong></td><td data-row="2" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">Cookie (رمزنگاری شده با Data Protection)</td><td data-row="2" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">فقط تا درخواست HTTP بعدی (حذف پس از خواندن)</td><td data-row="2" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">پیام‌های فلش سفارشی و مدیریت منطق‌های پیچیده حذف/حفظ داده</td></tr><tr><td data-row="3" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">[SupplyParameterFromTempData]</code></td><td data-row="3" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">Cookie / TempData Provider</td><td data-row="3" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">فقط تا درخواست HTTP بعدی (با مدیریت خودکار)</td><td data-row="3" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">پیام‌های وضعیت سیستم، هشدارها پس از عملیات ریدایرکت (POST-Redirect-GET)</td></tr><tr><td data-row="4" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">[SupplyParameterFromSession]</code></td><td data-row="4" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">Server Session (Memory/Redis)</td><td data-row="4" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">تا زمانی که Session کاربر زنده است (ماندگاری طولانی‌تر)</td><td data-row="4" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">سبد خرید در حالت SSR، فرم‌های چندمرحله‌ای پیچیده، حفظ فیلترهای پیشرفته کاربر</td></tr></tbody></table><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>یک نکته معماری:</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">در پلتفرم‌های توزیع‌شده و بزرگ (Web Farms)، به یاد داشته باشید که ارائه‌دهنده پیش‌فرض TempData (کوکی‌محور) حجم کوکی‌های ارسالی را افزایش می‌دهد (محدودیت ۴ کیلوبایت مرورگر). همچنین سرویس Session به صورت پیش‌فرض از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">DistributedMemoryCache</code> استفاده می‌کند که دیتای سشن را در حافظه همان سرور نگه می‌دارد. اگر برنامه‌ی Blazor SSR خود را روی چند سرور یا داکر پاد (Pod) مختلف مستقر می‌کنید، حتماً از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">SessionStorageTempDataProvider</code> یا یک کش توزیع‌شده مانند <strong>Redis</strong> استفاده کنید تا کاربران با پدیده از دست رفتن سشن در اثر جابجایی بین سرورها مواجه نشوند.</div></div>
+</div></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

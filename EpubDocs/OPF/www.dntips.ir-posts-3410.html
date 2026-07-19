@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫مدیریت استثناءها در Blazor Server - قسمت اول</title>     <meta name="description" content="همانطور که می‌دانید Blazor Server یک فریم ورک stateful است. هنگامیکه کاربران در حال تعامل با برنامه هستند، یک ارتباط پیوسته را با سرور حفظ می‌کنند که به آن، به اصطلاح مدار می‌گویند. این مدارها، کامپوننت‌های فعال را به انضمام حالت‌های آنها که شامل موارد زیر است نگهداری می‌کند: 1- جدیدترین خروجی رندر شده‌ی کامپوننت.   2- مجموعه Event Handling‌های جاری که می‌توانند توسط کاربر صدا زده شوند.   اگر کاربری یک برنامه را در چندین تب مرورگر باز کند، ...">
+    <meta name="author" content="علیرضا آرانی">
+    <meta itemprop="name" content="مدیریت استثناءها در Blazor Server - قسمت اول">
+    <meta itemprop="description" content="همانطور که می‌دانید Blazor Server یک فریم ورک stateful است. هنگامیکه کاربران در حال تعامل با برنامه هستند، یک ارتباط پیوسته را با سرور حفظ می‌کنند که به آن، به اصطلاح مدار می‌گویند. این مدارها، کامپوننت‌های فعال را به انضمام حالت‌های آنها که شامل موارد زیر است نگهداری می‌کند: 1- جدیدترین خروجی رندر شده‌ی کامپوننت.   2- مجموعه Event Handling‌های جاری که می‌توانند توسط کاربر صدا زده شوند.   اگر کاربری یک برنامه را در چندین تب مرورگر باز کند، ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="مدیریت استثناءها در Blazor Server - قسمت اول">
+    <meta property="og:description" content="همانطور که می‌دانید Blazor Server یک فریم ورک stateful است. هنگامیکه کاربران در حال تعامل با برنامه هستند، یک ارتباط پیوسته را با سرور حفظ می‌کنند که به آن، به اصطلاح مدار می‌گویند. این مدارها، کامپوننت‌های فعال را به انضمام حالت‌های آنها که شامل موارد زیر است نگهداری می‌کند: 1- جدیدترین خروجی رندر شده‌ی کامپوننت.   2- مجموعه Event Handling‌های جاری که می‌توانند توسط کاربر صدا زده شوند.   اگر کاربری یک برنامه را در چندین تب مرورگر باز کند، ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="مدیریت استثناءها در Blazor Server - قسمت اول">
+    <meta name="twitter:description" content="همانطور که می‌دانید Blazor Server یک فریم ورک stateful است. هنگامیکه کاربران در حال تعامل با برنامه هستند، یک ارتباط پیوسته را با سرور حفظ می‌کنند که به آن، به اصطلاح مدار می‌گویند. این مدارها، کامپوننت‌های فعال را به انضمام حالت‌های آنها که شامل موارد زیر است نگهداری می‌کند: 1- جدیدترین خروجی رندر شده‌ی کامپوننت.   2- مجموعه Event Handling‌های جاری که می‌توانند توسط کاربر صدا زده شوند.   اگر کاربری یک برنامه را در چندین تب مرورگر باز کند، ...">
+    <meta name="twitter:card" content="همانطور که می‌دانید Blazor Server یک فریم ورک stateful است. هنگامیکه کاربران در حال تعامل با برنامه هستند، یک ارتباط پیوسته را با سرور حفظ می‌کنند که به آن، به اصطلاح مدار می‌گویند. این مدارها، کامپوننت‌های فعال را به انضمام حالت‌های آنها که شامل موارد زیر است نگهداری می‌کند: 1- جدیدترین خروجی رندر شده‌ی کامپوننت.   2- مجموعه Event Handling‌های جاری که می‌توانند توسط کاربر صدا زده شوند.   اگر کاربری یک برنامه را در چندین تب مرورگر باز کند، ...">
+    <meta property="article:published_time" content="Mon, 19 Sep 2022 15:10:02 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫مدیریت استثناءها در Blazor Server - قسمت اول";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-3411.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫استفاده از postgres در برنامه‌های ASP.NET Core - قسمت اول</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-3409.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫استفاده از چند دکمه با عملکردهای مختلف برای ارسال یک EditForm در Blazor</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫مدیریت استثناءها در Blazor Server - قسمت اول</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>علیرضا آرانی<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۱/۰۶/۲۸ ۱۵:۱۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-3410.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'>همانطور که می‌دانید Blazor Server یک فریم ورک stateful است. هنگامیکه کاربران در حال تعامل با برنامه هستند، یک ارتباط پیوسته را با سرور حفظ می‌کنند که به آن، به اصطلاح مدار می‌گویند. این مدارها، کامپوننت‌های فعال را به انضمام حالت‌های آنها که شامل موارد زیر است نگهداری می‌کند:<div>1- جدیدترین خروجی رندر شده‌ی کامپوننت.</div> <div>2- مجموعه Event Handling‌های جاری که می‌توانند توسط کاربر صدا زده شوند.</div> <div>اگر کاربری یک برنامه را در چندین تب مرورگر باز کند، در واقع چندین مدار مستقل را ایجاد کرده‌است. بنابراین اگر در یکی از تب‌های مرورگر استثنایی رخ دهد، مابقی تب‌های مرورگر متاثر نخواهند شد.</div> <div>Blazor&nbsp;<span style="color: rgb(37, 37, 37);">با اکثریت استثناءهای کنترل نشده در&nbsp;</span> <span style="color: rgb(37, 37, 37);">مداری که در آن رخ می‌دهد</span>، <span style="color: rgb(37, 37, 37);">خیلی بد رفتار می‌کند. چرا؟</span> </div> <div> <span style="color: rgb(37, 37, 37);">پاسخ: زیرا&nbsp;</span> <span style="color: rgb(37, 37, 37);">کاربر فقط می‌تواند با بارگذاری مجدد آن تب مرورگر (برای ایجاد یک مدار جدید) به تعامل با برنامه ادامه دهد.</span> </div> <div> <span style="color: rgb(37, 37, 37);">حال برای رفع این مشکل چکار باید کرد؟ آیا راه حل سراسری برای مدیریت استثناها وجود دارد؟</span> </div> <div> <span style="color: rgb(37, 37, 37);">پاسخ: بله.&nbsp;</span> </div> <h4 style="box-sizing: inherit; outline-color: inherit; margin: 32px 0px 12px -1.875rem; padding: 0px 0px 0px 1.875rem; position: relative; color: rgb(23, 23, 23);Segoe UI&quot;, SegoeUI, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif;">Error boundary</h4> <div> <span style="color: rgb(37, 37, 37);">یک کامپوننت از پیش تعریف شده‌ی Blazor است که رویکرد آسان آن برای مدیریت استثناءها&nbsp;به شکل زیر است: </span> <br> </div> <div> <ul> <li> <span style="color: rgb(37, 37, 37);"> <div style="display: inline; margin: 5px auto; padding: 5px 0px;">هنگامیکه خطایی رخ نداده است، محتوای فرزند خود را رندر می‌کند.&nbsp; </div> <br> </span> </li> <li> <span style="color: rgb(37, 37, 37);"> <div style="display: inline; margin: 5px auto; padding: 5px 0px;"> <div style="display: inline; margin: 5px auto; padding: 5px 0px;">هنگامیکه یک استثناء کنترل نشده رخ می‌دهد، صفحه‌ی خطای پیش فرضی را رندر می‌کند.&nbsp; </div> <br> </div> </span> </li> </ul> <div> <span style="color: #252525;">برای استفاده از این کامپوننت، فقط کافی است محتوای مورد نظر خود را داخل آن بگذارید. برای مثال می‌توان، برای سراسری تعریف کردن Error boundary، به شکل زیر در فایل&nbsp;</span> <span style="background-color: rgb(230, 230, 230); color: rgb(23, 23, 23);Liberation Mono&quot;, Menlo, Courier, monospace;">Shared/MainLayout.razor&nbsp; </span> <span style="color: rgb(37, 37, 37);">&nbsp;آن را تعریف نمود:</span> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">&lt;div&gt;
+    &lt;div&gt;
+        &lt;ErrorBoundary&gt;
+            @Body
+        &lt;/ErrorBoundary&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</pre> </div>
+
+
+
+
+
+
+
+
+در این حالت هر استثنای کنترل نشده‌ای که در کل برنامه رخ دهد، توسط Error boundaries کنترل شده و خطایی در صفحه نشان داده می‌شود. به صورت پیش فرض کامپوننت Error boundary یک div خالی را با یک کلاس css که در site.css وجود دارد، به نام&nbsp;<span style="background-color: rgb(230, 230, 230); color: rgb(23, 23, 23);Liberation Mono&quot;, Menlo, Courier, monospace;">blazor-error-boundary&nbsp; </span>&nbsp;به عنوان صفحه خطا نشان می‌دهد که می‌توان آن را سفارشی سازی نمود. همچنین می‌توان به شکل زیر نیز برای سفارشی سازی بیشتر صفحه‌ی خطا عمل کرد:</div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">&lt;ErrorBoundary&gt;
+    &lt;ChildContent&gt;
+        @Body
+    &lt;/ChildContent&gt;
+    &lt;ErrorContent&gt;
+        &lt;p class="errorUI"&gt;متاسفانه خطایی رخ داده است!&lt;/p&gt;
+    &lt;/ErrorContent&gt;
+&lt;/ErrorBoundary&gt;</pre> </div>
+
+
+
+به دلیل اینکه ما در این مثال Error boundary را در MainLayout تعریف کردیم، صفحه‌ی نمایش خطا صرفنظر از اینکه کاربر به کدام صفحه رفته‌است، نمایش داده می‌شود. پیشنهاد مایکروسافت این است که حوزه استفاده را محدودتر کنیم.</div> <div>خوب تا اینجای کار توانستیم استثنای کنترل نشده را کنترل کنیم و پیغام خطایی را نشان دهیم؛ اما همچنان صفحه در حالت خطا مانده و بازهم نیاز است که صفحه بارگذاری مجدد شود تا بتوان به صفحات دیگر برنامه رفت. آیا راه حلی وجود دارد؟</div> <div>پاسخ: بله خوشبختانه. کافی است با استفاده از متد Recover کامپوننت Error boundary به شکل زیر صفحه را به حالت قبل از خطا برد:</div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">...
+
+&lt;ErrorBoundary @ref="errorBoundary"&gt;
+    @Body
+&lt;/ErrorBoundary&gt;
+
+...
+
+@code {
+    private ErrorBoundary? errorBoundary;
+
+    protected override void OnParametersSet()
+    {
+        errorBoundary?.Recover();
+    }
+}</pre> </div>
+
+
+
+در قسمت بعدی به این موضوع می‌پردازیم که چگونه می‌توان یک کامپوننت خطای سفارشی سراسری ایجاد کرد تا علاوه بر کنترل استثناءها بتواند خطاها را نیز لاگ کند.</div> </div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3412.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مدیریت استثناءها در Blazor Server - قسمت دوم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3452.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>وظیفه app.UseExceptionHandler("/Error") در Blazor Server</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3488.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بررسی تغییرات Blazor 8x - قسمت سوم - روش ارتقاء برنامه‌های Blazor Server قدیمی به دات نت 8</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3290.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Blazor 5x - قسمت دوم - بررسی ساختار اولیه‌ی پروژه‌های Blazor</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3318.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Blazor 5x - قسمت 26 - برنامه‌ی Blazor WASM - ایجاد و تنظیمات اولیه</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3490.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بررسی تغییرات Blazor 8x - قسمت پنجم - امکان تعریف جزیره‌های تعاملی Blazor Server</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3487.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بررسی تغییرات Blazor 8x - قسمت دوم - بررسی حالت رندر سمت سرور</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3116.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>React 16x - قسمت 1 - معرفی و شروع به کار</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3163.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مدیریت پیشرفته‌ی حالت در React با Redux و Mobx - قسمت پنجم - Redux Hooks</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3337.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>نمایش پیام هشدار در Blazor با استفاده از کامپوننت Alert بوت استرپ ۵</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

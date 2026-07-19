@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Roslyn #4</title>     <meta name="description" content="بررسی API کامپایل Roslyn     
+ 
+ 
+ Compilation API، یک abstraction سطح بالا از فعالیت‌های کامپایل Roslyn است. برای مثال در اینجا می‌توان یک اسمبلی را از Syntax tree موجود، تولید کرد و یا جایگزین‌هایی را برای APIهای قدیمی  CodeDOM   و  Reflection Emit   ارائه داد. به علاوه این API امکان دسترسی به گزارشات خطاهای کامپایل را میسر می‌کند؛ به همراه دسترسی به اطلاعات Semantic analysis. در مورد تفاوت Syntax tree و Semantics  در قسمت قبل   بیشت ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="Roslyn #4">
+    <meta itemprop="description" content="بررسی API کامپایل Roslyn     
+ 
+ 
+ Compilation API، یک abstraction سطح بالا از فعالیت‌های کامپایل Roslyn است. برای مثال در اینجا می‌توان یک اسمبلی را از Syntax tree موجود، تولید کرد و یا جایگزین‌هایی را برای APIهای قدیمی  CodeDOM   و  Reflection Emit   ارائه داد. به علاوه این API امکان دسترسی به گزارشات خطاهای کامپایل را میسر می‌کند؛ به همراه دسترسی به اطلاعات Semantic analysis. در مورد تفاوت Syntax tree و Semantics  در قسمت قبل   بیشت ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="Roslyn #4">
+    <meta property="og:description" content="بررسی API کامپایل Roslyn     
+ 
+ 
+ Compilation API، یک abstraction سطح بالا از فعالیت‌های کامپایل Roslyn است. برای مثال در اینجا می‌توان یک اسمبلی را از Syntax tree موجود، تولید کرد و یا جایگزین‌هایی را برای APIهای قدیمی  CodeDOM   و  Reflection Emit   ارائه داد. به علاوه این API امکان دسترسی به گزارشات خطاهای کامپایل را میسر می‌کند؛ به همراه دسترسی به اطلاعات Semantic analysis. در مورد تفاوت Syntax tree و Semantics  در قسمت قبل   بیشت ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="Roslyn #4">
+    <meta name="twitter:description" content="بررسی API کامپایل Roslyn     
+ 
+ 
+ Compilation API، یک abstraction سطح بالا از فعالیت‌های کامپایل Roslyn است. برای مثال در اینجا می‌توان یک اسمبلی را از Syntax tree موجود، تولید کرد و یا جایگزین‌هایی را برای APIهای قدیمی  CodeDOM   و  Reflection Emit   ارائه داد. به علاوه این API امکان دسترسی به گزارشات خطاهای کامپایل را میسر می‌کند؛ به همراه دسترسی به اطلاعات Semantic analysis. در مورد تفاوت Syntax tree و Semantics  در قسمت قبل   بیشت ...">
+    <meta name="twitter:card" content="بررسی API کامپایل Roslyn     
+ 
+ 
+ Compilation API، یک abstraction سطح بالا از فعالیت‌های کامپایل Roslyn است. برای مثال در اینجا می‌توان یک اسمبلی را از Syntax tree موجود، تولید کرد و یا جایگزین‌هایی را برای APIهای قدیمی  CodeDOM   و  Reflection Emit   ارائه داد. به علاوه این API امکان دسترسی به گزارشات خطاهای کامپایل را میسر می‌کند؛ به همراه دسترسی به اطلاعات Semantic analysis. در مورد تفاوت Syntax tree و Semantics  در قسمت قبل   بیشت ...">
+    <meta property="article:published_time" content="Sun, 20 Sep 2015 14:40:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "Roslyn #4";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-2223.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='ltr'>Roslyn #5</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-2221.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='ltr'>Roslyn #3</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='ltr'>Roslyn #4</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۴/۰۶/۲۹ ۱۴:۴۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-2222.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><b>بررسی API کامپایل Roslyn</b> <br> <br>
+
+
+Compilation API، یک abstraction سطح بالا از فعالیت‌های کامپایل Roslyn است. برای مثال در اینجا می‌توان یک اسمبلی را از Syntax tree موجود، تولید کرد و یا جایگزین‌هایی را برای APIهای قدیمی <a href="www.dntips.ir-posts-322.html">CodeDOM</a>  و <a href="https://www.dntips.ir/courses/details/9">Reflection Emit</a>  ارائه داد. به علاوه این API امکان دسترسی به گزارشات خطاهای کامپایل را میسر می‌کند؛ به همراه دسترسی به اطلاعات Semantic analysis. در مورد تفاوت Syntax tree و Semantics <a href="www.dntips.ir-posts-2221.html">در قسمت قبل</a>  بیشتر بحث شد. <br>
+
+
+با ارائه‌ی Roslyn، اینبار کامپایلرهای خط فرمان تولید شده مانند csc.exe، صرفا یک پوسته بر فراز Compilation API آن هستند. بنابراین دیگر نیازی به فراخوانی Process.Start بر روی فایل اجرایی csc.exe مانند یک سری کتابخانه‌های قدیمی نیست. در اینجا با کدنویسی، به تمام اجزاء و تنظیمات کامپایلر، دسترسی وجود دارد.<br> <br> <br> <b>
+
+کامپایل پویای کد توسط Roslyn</b> <br> <br>
+
+
+برای کار با API کامپایل، سورس کد، به صورت یک رشته در اختیار کامپایلر قرار می‌گیرد؛ به همراه تنظیمات ارجاعاتی به اسمبلی‌هایی که نیاز دارد. سپس کار کامپایلر شروع خواهد شد و شامل مواردی است مانند تبدیل متن دریافتی به Syntax tree و همچنین تبدیل مواردی که اصطلاحا به آن‌ها Syntax sugars گفته می‌شود مانند خواص get و set دار به معادل‌های اصلی آن‌ها. در اینجا کار Semantic analysis هم انجام می‌شود و شامل تشخیص حوزه‌ی دید متغیرها، تشخیص overloadها و بررسی نوع‌های بکار رفته‌است. در نهایت کار تولید فایل باینری اسمبلی، از اطلاعات آنالیز شده صورت می‌گیرد. البته خروجی کامپایلر می‌تواند اسمبلی‌های exe یا dll، فایل XML مستندات اسمبلی و یا فایل‌های .netmudule و .winmdobj مخصوص WinRT هم باشد.<br>
+
+
+در ادامه، اولین مثال کار با Compilation API را مشاهده می‌کنید. پیشنیاز اجرای آن همان مواردی هستند که <a href="www.dntips.ir-posts-2221.html">در قسمت قبل</a>  بحث شدند. یک برنامه‌ی کنسول ساده‌ی .NET 4.6 را آغاز کرده و سپس بسته‌ی نیوگت Microsoft.CodeAnalysis را در آن نصب کنید. در ادامه کدهای ذیل را به پروژه‌ی آماده شده اضافه کنید:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">static&nbsp;void&nbsp;firstCompilation()
+{
+&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;tree&nbsp;=&nbsp;CSharpSyntaxTree.ParseText("class&nbsp;Foo&nbsp;{&nbsp;void&nbsp;Bar(int&nbsp;x)&nbsp;{}&nbsp;}");
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;mscorlibReference&nbsp;=&nbsp;MetadataReference.CreateFromFile(typeof&nbsp;(object).Assembly.Location);
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;compilationOptions&nbsp;=&nbsp;new&nbsp;CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary);
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;comp&nbsp;=&nbsp;CSharpCompilation.Create("Demo")
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.AddSyntaxTrees(tree)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.AddReferences(mscorlibReference)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.WithOptions(compilationOptions);
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;res&nbsp;=&nbsp;comp.Emit("Demo.dll");
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(!res.Success)
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;foreach&nbsp;(var&nbsp;diagnostic&nbsp;in&nbsp;res.Diagnostics)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Console.WriteLine(diagnostic.GetMessage());
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;}
+}</pre> </div>
+در اینجا نحوه‌ی کامپایل پویای یک قطعه کد متنی سی‌شارپ را به DLL معادل آن مشاهده می‌کنید. مرحله‌ی اول اینکار، تولید Syntax tree از رشته‌ی متنی دریافتی است. سپس متد CSharpCompilation.Create یک وهله از Compilation API مخصوص #C را آغاز می‌کند. این API به صورت Fluent طراحی شده‌است و می‌توان سایر قسمت‌های آن‌را به همراه یک دات پس از ذکر متد، به طول زنجیره‌ی فراخوانی، اضافه کرد. برای نمونه در این مثال، نحوه‌ی افزودن ارجاعی را به اسمبلی mscorlib که System.Object در آن قرار دارد و همچنین ذکر نوع خروجی DLL یا DynamicallyLinkedLibrary را ملاحظه می‌کنید. اگر این تنظیم ذکر نشود، خروجی پیش فرض از نوع .exe خواهد بود و اگر mscorlib را اضافه نکنیم، نوع int سورس کد ورودی، شناسایی نشده و برنامه کامپایل نمی‌شود.<br>
+
+
+متدهای تعریف شده توسط Compilation API به یک s جمع، ختم می‌شوند؛ به این معنا که در اینجا در صورت نیاز، چندین Syntax tree یا ارجاع را می‌توان تعریف کرد.<br>
+
+
+پس از وهله سازی Compilation API و تنظیم آن، اکنون با فراخوانی متد Emit، کار تولید فایل اسمبلی نهایی صورت می‌گیرد. در اینجا اگر خطایی وجود داشته باشد، استثنایی را دریافت نخواهید کرد. بلکه باید خاصیت Success نتیجه‌ی آن‌را بررسی کرده و درصورت موفقیت آمیز نبودن عملیات، خطاهای دریافتی را از مجموعه‌ی Diagnostics آن دریافت کرد. کلاس Diagnostic، شامل اطلاعاتی مانند محل سطر و ستون وقوع مشکل و یا پیام متناظر با آن است.<br> <br> <br> <b>
+
+معرفی مقدمات Semantic analysis</b> <br> <br>
+
+
+Compilation API به اطلاعات Semantics نیز دسترسی دارد. برای مثال آیا Type A قابل تبدیل به Type B هست یا اصلا نیازی به تبدیل ندارد و به صورت مستقیم قابل انتساب هستند؟ برای درک بهتر این مفهوم نیاز است یک مثال را بررسی کنیم:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;static&nbsp;void&nbsp;semanticQuestions()
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;tree&nbsp;=&nbsp;CSharpSyntaxTree.ParseText(@"
+using&nbsp;System;
+ 
+class&nbsp;Foo
+{
+&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;static&nbsp;explicit&nbsp;operator&nbsp;DateTime(Foo&nbsp;f)
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;throw&nbsp;new&nbsp;NotImplementedException();
+&nbsp;&nbsp;&nbsp;&nbsp;}
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;void&nbsp;Bar(int&nbsp;x)
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;}
+}");
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;mscorlib&nbsp;=&nbsp;MetadataReference.CreateFromFile(typeof&nbsp;(object).Assembly.Location);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;options&nbsp;=&nbsp;new&nbsp;CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;comp&nbsp;=&nbsp;CSharpCompilation.Create("Demo").AddSyntaxTrees(tree).AddReferences(mscorlib).WithOptions(options);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//&nbsp;var&nbsp;res&nbsp;=&nbsp;comp.Emit("Demo.dll");
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//&nbsp;boxing
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;conv1&nbsp;=&nbsp;comp.ClassifyConversion(
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;comp.GetSpecialType(SpecialType.System_Int32),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;comp.GetSpecialType(SpecialType.System_Object)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;);
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//&nbsp;unboxing
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;conv2&nbsp;=&nbsp;comp.ClassifyConversion(
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;comp.GetSpecialType(SpecialType.System_Object),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;comp.GetSpecialType(SpecialType.System_Int32)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;);
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//&nbsp;explicit&nbsp;reference&nbsp;conversion
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;conv3&nbsp;=&nbsp;comp.ClassifyConversion(
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;comp.GetSpecialType(SpecialType.System_Object),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;comp.GetTypeByMetadataName("Foo")
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;);
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//&nbsp;explicit&nbsp;user-supplied&nbsp;conversion
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;conv4&nbsp;=&nbsp;comp.ClassifyConversion(
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;comp.GetTypeByMetadataName("Foo"),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;comp.GetSpecialType(SpecialType.System_DateTime)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</pre> </div>
+تا سطر CSharpCompilation.Create این مثال، مانند قبل است و تا اینجا به Compilation API دسترسی پیدا کرده‌ایم. پس از آن می‌خواهیم یک Semantic analysis مقدماتی را انجام دهیم. برای این منظور می‌توان از متد ClassifyConversion استفاده کرد. این متد یک نوع مبداء و یک نوع مقصد را دریافت می‌کند و بر اساس اطلاعاتی که از Compilation API بدست می‌آورد، می‌تواند مشخص کند که برای مثال آیا نوع کلاس Foo قابل تبدیل به DateTime هست یا خیر و اگر هست چه نوع تبدیلی را نیاز دارد؟<br> <br> <p style="display:block; margin-left: auto; margin-right: auto;"> <img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/png;base64,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"> </p> <br>
+
+
+برای مثال نتیجه‌ی بررسی آخرین تبدیل انجام شده در تصویر فوق مشخص است. با توجه به تعریف <a href="www.dntips.ir-posts-1368.html">public static explicit operator DateTime</a>  در سورس کد مورد آنالیز، این تبدیل explicit بوده و همچنین user defined. به علاوه متدی هم که این تبدیل را انجام می‌دهد، مشخص کرده‌است.<span> </span></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-9438.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>سری Learn Roslyn Now</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/learning-paths/details/31'><span class='badge bg-danger rounded-pill me-2'>مسیرراه‌ها</span>Roslyn</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2223.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Roslyn #5</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2218.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Roslyn #1</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2226.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Roslyn #7</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2221.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Roslyn #3</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3405.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بررسی Source Generators در #C - قسمت پنجم - نوشتن آزمون‌های واحد</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2659.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>ویژگی های کمتر استفاده شده در NET. - بخش هفتم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2225.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Roslyn #6</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3400.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بررسی Source Generators در #C - قسمت دوم - یک مثال</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

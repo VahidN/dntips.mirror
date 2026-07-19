@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫بررسی Source Generators در #C - قسمت سوم - بهبود کارآیی برنامه با تبدیل عملیات Reflection به تولید کد خودکار</title>     <meta name="description" content="همانطور که در  قسمت اول   این سری نیز عنوان شد، انجام عملیات Reflection عموما به همراه سربار محاسبه‌ی هرباره‌ی اطلاعات مورد نیاز آن است و اکنون می‌توان یک چنین محاسباتی را توسط Source generators، در زمان کامپایل برنامه، تامین و جزئی از خروجی نهایی کامپل شده‌ی آن کرد تا کارآیی برنامه به شدت افزایش یابد. یک نمونه مثال آن، استفاده از ویژگی Display بر روی عناصر یک enum است تا بتوان توضیحات بیشتری را جهت نمایش در UI، ارائه داد:     using System ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="بررسی Source Generators در #C - قسمت سوم - بهبود کارآیی برنامه با تبدیل عملیات Reflection به تولید کد خودکار">
+    <meta itemprop="description" content="همانطور که در  قسمت اول   این سری نیز عنوان شد، انجام عملیات Reflection عموما به همراه سربار محاسبه‌ی هرباره‌ی اطلاعات مورد نیاز آن است و اکنون می‌توان یک چنین محاسباتی را توسط Source generators، در زمان کامپایل برنامه، تامین و جزئی از خروجی نهایی کامپل شده‌ی آن کرد تا کارآیی برنامه به شدت افزایش یابد. یک نمونه مثال آن، استفاده از ویژگی Display بر روی عناصر یک enum است تا بتوان توضیحات بیشتری را جهت نمایش در UI، ارائه داد:     using System ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="بررسی Source Generators در #C - قسمت سوم - بهبود کارآیی برنامه با تبدیل عملیات Reflection به تولید کد خودکار">
+    <meta property="og:description" content="همانطور که در  قسمت اول   این سری نیز عنوان شد، انجام عملیات Reflection عموما به همراه سربار محاسبه‌ی هرباره‌ی اطلاعات مورد نیاز آن است و اکنون می‌توان یک چنین محاسباتی را توسط Source generators، در زمان کامپایل برنامه، تامین و جزئی از خروجی نهایی کامپل شده‌ی آن کرد تا کارآیی برنامه به شدت افزایش یابد. یک نمونه مثال آن، استفاده از ویژگی Display بر روی عناصر یک enum است تا بتوان توضیحات بیشتری را جهت نمایش در UI، ارائه داد:     using System ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="بررسی Source Generators در #C - قسمت سوم - بهبود کارآیی برنامه با تبدیل عملیات Reflection به تولید کد خودکار">
+    <meta name="twitter:description" content="همانطور که در  قسمت اول   این سری نیز عنوان شد، انجام عملیات Reflection عموما به همراه سربار محاسبه‌ی هرباره‌ی اطلاعات مورد نیاز آن است و اکنون می‌توان یک چنین محاسباتی را توسط Source generators، در زمان کامپایل برنامه، تامین و جزئی از خروجی نهایی کامپل شده‌ی آن کرد تا کارآیی برنامه به شدت افزایش یابد. یک نمونه مثال آن، استفاده از ویژگی Display بر روی عناصر یک enum است تا بتوان توضیحات بیشتری را جهت نمایش در UI، ارائه داد:     using System ...">
+    <meta name="twitter:card" content="همانطور که در  قسمت اول   این سری نیز عنوان شد، انجام عملیات Reflection عموما به همراه سربار محاسبه‌ی هرباره‌ی اطلاعات مورد نیاز آن است و اکنون می‌توان یک چنین محاسباتی را توسط Source generators، در زمان کامپایل برنامه، تامین و جزئی از خروجی نهایی کامپل شده‌ی آن کرد تا کارآیی برنامه به شدت افزایش یابد. یک نمونه مثال آن، استفاده از ویژگی Display بر روی عناصر یک enum است تا بتوان توضیحات بیشتری را جهت نمایش در UI، ارائه داد:     using System ...">
+    <meta property="article:published_time" content="Wed, 20 Jul 2022 10:40:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫بررسی Source Generators در #C - قسمت سوم - بهبود کارآیی برنامه با تبدیل عملیات Reflection به تولید کد خودکار";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-3402.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫نگه‌داری ساده‌تر نرم‌افزار با معماری Vertical Slices - قسمت اول</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-3400.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫بررسی Source Generators در #C - قسمت دوم - یک مثال</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫بررسی Source Generators در #C - قسمت سوم - بهبود کارآیی برنامه با تبدیل عملیات Reflection به تولید کد خودکار</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۱/۰۴/۲۹ ۱۰:۴۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-3401.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'>همانطور که در <a href="www.dntips.ir-posts-3399.html">قسمت اول</a>  این سری نیز عنوان شد، انجام عملیات Reflection عموما به همراه سربار محاسبه‌ی هرباره‌ی اطلاعات مورد نیاز آن است و اکنون می‌توان یک چنین محاسباتی را توسط Source generators، در زمان کامپایل برنامه، تامین و جزئی از خروجی نهایی کامپل شده‌ی آن کرد تا کارآیی برنامه به شدت افزایش یابد. یک نمونه مثال آن، استفاده از ویژگی Display بر روی عناصر یک enum است تا بتوان توضیحات بیشتری را جهت نمایش در UI، ارائه داد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">using System.ComponentModel.DataAnnotations;
+
+namespace NotifyPropertyChangedGenerator.Demo;
+
+public enum Gender
+{
+    NotSpecified,
+    [Display(Name = "مرد")] Male,
+    [Display(Name = "زن")] Female
+}</pre> </div>
+
+
+روش متداول جهت دسترسی به اطلاعات ویژگی Display، استفاده از Reflection به صورت زیر است:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">public static class Extensions
+{
+    public static string GetDisplayName(this Enum value)
+    {
+        if (value is null)
+            throw new ArgumentNullException(nameof(value));
+
+        var attribute = value.GetType().GetField(value.ToString())?
+            .GetCustomAttributes&lt;DisplayAttribute&gt;(false).FirstOrDefault();
+
+        if (attribute is null)
+            return value.ToString();
+
+        return attribute.GetType().GetProperty("Name")?.GetValue(attribute, null)?.ToString();
+    }
+}</pre> </div>
+
+
+یعنی هرجائی که در برنامه نیاز باشد تا برای مثال نام نمایشی Gender.Female محاسبه شود، باید یکبار عملیات فوق در زمان اجرا، تکرار گردد با محاسبه‌ی تمام ویژگی‌های یک عنصر enum، بررسی وجود DisplayAttribute در این بین و در صورت وجود، محاسبه‌ی مقدار خاصیت Name آن.<br>
+
+
+
+
+یعنی در اصل متد کمکی که برای اینکار نیاز داریم، چنین خروجی را دارد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">namespace NotifyPropertyChangedGenerator.Demo
+{
+  public static class GenderExtensions
+  {
+      public static string GetDisplayName(this Gender @enum)
+      {
+          return @enum switch
+            {
+                Gender.NotSpecified =&gt; "NotSpecified",
+                Gender.Male =&gt; "مرد",
+                Gender.Female =&gt; "زن",
+                _ =&gt; throw new ArgumentOutOfRangeException(nameof(@enum))
+            };
+      }
+  }
+}</pre> </div>
+
+
+مزیت این روش نسبت به Reflection، از پیش محاسبه شده بودن و سرعت بالای کار با آن است؛ اما ... باید به ازای هر enum نوشته شده، یکبار به صورت اختصاصی، تکرار شود و همچنین اگر اطلاعات enum متناظر با آن تغییر کرد، نیاز است تا این کلاس‌ها و متدهای کمکی نیز اصلاح شوند. به همین جهت است که عموما کار با Reflection ترجیح داده می‌شود؛ چون حجم کدنویسی کمتری را به همراه دارد و همچنین می‌تواند انواع و اقسام enum را پوشش دهد و عمومی است.<br>
+
+
+
+
+با ارائه‌ی Source Generators، مشکلات یاد شده دیگر وجود ندارند. یعنی کار تولید متدهای اختصاصی برای هر enum، خودکار است و همچنین به روز رسانی آنی آن‌ها با هر تغییری در enum‌ها نیز پیش‌بینی شده‌است.<br> <br> <br> <b>تهیه‌ی تولید کننده‌ی خودکار کدی که نام نمایشی enumها را به صورت از پیش محاسبه شده ارائه می‌دهد</b> <br> <br>
+
+
+
+
+در <a href="www.dntips.ir-posts-3400.html">قسمت قبل</a>، با روش تهیه و استفاده از Source Generators آشنا شدیم. در اینجا نیز از همان قالب، در جهت تولید کد متد الحاقی GetDisplayName فوق، استفاده خواهیم کرد. یعنی هدف رسیدن به کلاس GenderExtensions فوق و متد GetDisplayName آن، در زمان کامپایل برنامه و به صورت خودکار است:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">[Generator]
+public class EnumExtensionsGenerator : ISourceGenerator
+{
+    public void Initialize(GeneratorInitializationContext context)
+    {}
+
+    public void Execute(GeneratorExecutionContext context)
+    {
+        var compilation = context.Compilation;
+        foreach (var syntaxTree in compilation.SyntaxTrees)
+        {
+            var semanticModel = compilation.GetSemanticModel(syntaxTree);
+            var immutableHashSet = syntaxTree.GetRoot()
+                .DescendantNodesAndSelf()
+                .OfType&lt;EnumDeclarationSyntax&gt;()
+                .Select(enumDeclarationSyntax =&gt; semanticModel.GetDeclaredSymbol(enumDeclarationSyntax))
+                .OfType&lt;ITypeSymbol&gt;()
+                /*.Where(typeSymbol =&gt; typeSymbol.GetAttributes().Any(
+                    attributeData =&gt; string.Equals(attributeData.AttributeClass?.Name, "GenerateExtensions",
+                        StringComparison.Ordinal)
+                ))*/
+                .ToImmutableHashSet();
+
+            foreach (var typeSymbol in immutableHashSet)
+            {
+                var source = GenerateEnumExtensions(typeSymbol);
+                context.AddSource($"{typeSymbol.Name}Extensions.cs", source);
+            }
+        }
+    }</pre> </div>
+
+
+کار را با ایجاد یک کلاس عمومی جدید که پیاده سازی کننده‌ی اینترفیس ISourceGenerator و مزین به ویژگی Generator است، شروع می‌کنیم. در مورد وابستگی‌های مورد نیاز یک چنین پروژه‌ای، در <a href="www.dntips.ir-posts-3400.html">قسمت قبل</a>  توضیحات کافی ارائه شد.<br>
+
+
+
+
+در اینجا در متد Execute، دسترسی کاملی را به اطلاعات تهیه شده‌ی توسط کامپایلر داریم. توسط آن تمام Enumهای برنامه را یا همان EnumDeclarationSyntax را در اینجا، یافته و سپس حلقه‌ای را بر روی اطلاعات آن‌ها تشکیل داده و برای تک تک آن‌ها، توسط متد GenerateEnumExtensions، کد معادل کلاس GenderExtensions را که در این مطلب معرفی شد، تولید می‌کنیم. در پایان کار نیز این کد را توسط متد AddSource، به کامپایلر معرفی خواهیم کرد تا بلافاصله در IDE ظاهر شده و قابلیت استفاده را پیدا کند.<br> <br> <b>یک نکته:</b> اگر می‌خواهید صرفا enumهای خاصی در این بین بررسی شوند، می‌توانید کدهای یک Attribute سفارشی را مثلا با نام فرضی [GenerateExtensions] در همینجا توسط متد context.AddSource به مجموعه سورس‌ها اضافه کنید و سپس بر اساس نام آن، در قسمت Where ایی که کامنت شده‌است، تنها اطلاعات مدنظر را فیلتر و پردازش کنید.<br> <br>
+
+
+
+
+متدی هم که ابتدا کلاس Extensions را بر اساس نام هر Enum موجود تولید و سپس بدنه‌ی متد GetDisplayName اختصاصی آن‌را تکمیل می‌کند، به صورت زیر است:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">    private string GenerateEnumExtensions(ITypeSymbol typeSymbol)
+    {
+        return $@"namespace {typeSymbol.ContainingNamespace}
+{{
+  public static class {typeSymbol.Name}Extensions
+  {{
+      public static string GetDisplayName(this {typeSymbol.Name} @enum)
+      {{
+          {GenerateExtensionMethodBody(typeSymbol)}
+      }}
+  }}
+}}";
+    }
+
+    private static string GenerateExtensionMethodBody(ITypeSymbol typeSymbol)
+    {
+        var sb = new StringBuilder();
+        sb.Append(@"return @enum switch
+            {
+");
+
+        foreach (var fieldSymbol in typeSymbol.GetMembers().OfType&lt;IFieldSymbol&gt;())
+        {
+            var displayAttribute = fieldSymbol.GetAttributes()
+                .FirstOrDefault(attributeData =&gt;
+                    string.Equals(attributeData.AttributeClass?.Name, "DisplayAttribute", StringComparison.Ordinal));
+            if (displayAttribute is null)
+            {                
+                sb.AppendLine(
+                    $@"                {typeSymbol.Name}.{fieldSymbol.Name} =&gt; ""{fieldSymbol.Name}"",");
+            }
+            else
+            {
+                var displayAttributeName = displayAttribute.NamedArguments
+                    .FirstOrDefault(x =&gt; string.Equals(x.Key, "Name", StringComparison.Ordinal))
+                    .Value;
+                sb.AppendLine(
+                    $@"                {typeSymbol.Name}.{fieldSymbol.Name} =&gt; ""{displayAttributeName.Value}"",");
+            }
+        }
+
+        sb.Append(
+            @"                _ =&gt; throw new ArgumentOutOfRangeException(nameof(@enum))
+            };");
+
+        return sb.ToString();
+    }</pre> </div>
+
+
+در مورد روش استفاده‌ی از این source generator نیز در <a href="www.dntips.ir-posts-3400.html">قسمت قبل</a>  بحث شد و فقط کافی است ارجاعی را به اسمبلی آن به پروژه‌ی مدنظر افزود و OutputItemType را به آنالایزر تنظیم کرد.<br> <br> <b>
+
+کدهای کامل این مثال را از اینجا می‌توانید دریافت کنید: <a href="https://www.dntips.ir/file/userfile?name=SourceGeneratorTests-part3.zip">SourceGeneratorTests-part3.zip</a> </b> <br> <br> <br> <b>
+
+سؤال: چگونه می‌توان کدهای تولید شده‌ی توسط یک Source Generator را ذخیره کرد؟</b> <br> <br>
+
+
+
+
+Source Generators به صورت پیش‌فرض هیچ فایلی را بر روی دیسک سخت ذخیره نمی‌کنند و تمام عملیات آن‌ها در حافظه انجام می‌شود. اگر علاقمند به مطالعه‌ی این خروجی‌های خودکار، به صورت فایل‌های واقعی هستید، نیاز به انجام تغییرات زیر در فایل csproj پروژه‌ی مصرف کننده‌ی Source Generator است:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="XML" name="code">&lt;Project Sdk="Microsoft.NET.Sdk"&gt;
+
+  &lt;PropertyGroup&gt;
+    &lt;OutputType&gt;Exe&lt;/OutputType&gt;
+    &lt;TargetFramework&gt;net6.0&lt;/TargetFramework&gt;
+    &lt;ImplicitUsings&gt;enable&lt;/ImplicitUsings&gt;
+    &lt;Nullable&gt;enable&lt;/Nullable&gt;
+
+    &lt;EmitCompilerGeneratedFiles&gt;true&lt;/EmitCompilerGeneratedFiles&gt;
+    &lt;CompilerGeneratedFilesOutputPath&gt;Generated&lt;/CompilerGeneratedFilesOutputPath&gt;
+  &lt;/PropertyGroup&gt;
+  
+  &lt;Target Name="CleanSourceGeneratedFiles" BeforeTargets="BeforeBuild" DependsOnTargets="$(BeforeBuildDependsOn)"&gt;
+    &lt;RemoveDir Directories="$(CompilerGeneratedFilesOutputPath)" /&gt;
+  &lt;/Target&gt;  
+  &lt;ItemGroup&gt;
+    &lt;!-- Exclude the output of source generators from the compilation --&gt;
+    &lt;Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" /&gt;
+&lt;Content Include="$(CompilerGeneratedFilesOutputPath)/**" /&gt;
+  &lt;/ItemGroup&gt;
+
+  &lt;ItemGroup&gt;
+    &lt;ProjectReference Include="..\NotifyPropertyChangedGenerator\NotifyPropertyChangedGenerator.csproj" 
+OutputItemType="Analyzer" ReferenceOutputAssembly="false" /&gt;
+  &lt;/ItemGroup&gt;
+&lt;/Project&gt;</pre> </div> <b>توضیحات:</b> <br>
+
+
+
+
+- EmitCompilerGeneratedFiles سبب ثبت فایل‌های خودکار تولید شده، بر روی دیسک سخت می‌شود که قالب مسیر پیش‌فرض ذخیره سازی آن به صورت زیر است:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">{BaseIntermediateOutpath}/generated/{Assembly}/{SourceGeneratorName}/{GeneratedFile}</pre> </div>
+
+
+- اگر می‌خواهید نام پوشه‌ی generated را تغییر دهید، می‌توان از ویژگی CompilerGeneratedFilesOutputPath استفاده کرد. <br>
+
+
+
+
+- چون این فایل‌های cs. جدید ثبت شده‌ی بر روی دیسک سخت، مجددا وارد پروسه‌ی کامپایل می‌شوند و خود Source Generator هم یک نمونه‌ی از آن‌ها‌را پیش‌تر به کامپایلر معرفی کرده‌است، برنامه دیگر به علت وجود اطلاعات تکراری، کامپایل نخواهد شد. به همین جهت نیاز است تا قسمت Compile Remove فوق را نیز معرفی کرد تا کامپایلر از پوشه‌ی Generated تنظیمی، صرفنظر کند.<br>
+
+
+
+
+- اطلاعات موجود در پوشه‌ی Generated، فقط یکبار تولید می‌شوند؛ صرفنظر از اطلاعات موجود در حافظه که همیشه به روز است. به همین جهت اگر می‌خواهید نمونه‌های به روز شده‌ی آن‌ها را نیز بر روی دیسک سخت داشته باشید، نیاز به قسمت RemoveDir تنظیمی وجود دارد.</div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20239.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>روش‌هایی برای بهینه‌سازی استفاده از Reflection در #C</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-17959.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>بهبود قابل ملاحظه (30 برابری) کارآیی استفاده از Enums با استفاده از Source Generators</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3400.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بررسی Source Generators در #C - قسمت دوم - یک مثال</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3370.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>تغییرات Logging در ASP.NET Core 6x</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3399.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بررسی Source Generators در #C - قسمت اول - معرفی</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3405.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بررسی Source Generators در #C - قسمت پنجم - نوشتن آزمون‌های واحد</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-830.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>RadioButtonList در ASP.NET MVC</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3371.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بهبود کارآیی استفاده از JSON در دات نت 6 با معرفی Source generators آن</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1825.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>فعال سازی و پردازش جستجوی پویای jqGrid در ASP.NET MVC</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3303.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>Blazor 5x - قسمت 14 - کار با فرم‌ها - بخش 2 - تعریف فرم‌ها و اعتبارسنجی آن‌ها</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۴۰۱/۰۴/۳۱ ۱۲:۳۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><b>یک نکته‌ی تکمیلی: روش دیباگ پروژه‌های Source Generator در Visual Studio</b> <br> <br>
+
+
+برای اینکار اولین تغییر مورد نیاز، افزودن تنظیم زیر به فایل csproj پروژه‌ی Source Generator است:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="XML" name="code">&lt;PropertyGroup&gt;
+   &lt;TargetFramework&gt;netstandard2.0&lt;/TargetFramework&gt;
+   &lt;IsRoslynComponent&gt;true&lt;/IsRoslynComponent&gt;</pre> </div>
+سپس در Solution explorer به خواص پروژه‌ی source generator مراجعه کرده و در برگه‌ی Debug آن، دراپ‌داون Launch را انتخاب و گزینه‌ی IsRoslynComponent تنظیمی را انتخاب کنید.<br>
+
+
+در ادامه در هر قسمتی از کدهای Source generator که نیاز به دیباگ هست، برای مثال ابتدای متد Execute، باید چندسطر زیر را اضافه کرد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">#if DEBUG
+if (!Debugger.IsAttached)
+{
+   Debugger.Launch();
+}
+#endif</pre> </div>
+این کدها فقط در حالت دیباگ اضافه شده و با کامپایل برنامه و یا فشردن دکمه‌ی F5، سبب نمایش پنجره‌ی جدید choose just-in-time debugger می‌شوند. در اینجا می‌توانید یک وهله‌ی جدید از ویژوال استودیو را برای دیباگ انتخاب کنید و یا می‌توان همان وهله‌ی جاری را نیز انتخاب کرد تا سبب اجرای مجدد ویژوال استودیو نشود. در این حالت debugger به پروژه متصل شده و امکان دیباگ آن میسر می‌شود. ابتدا ویژوال استودیو بر روی سطر Debugger.Launch، متوقف می‌شود. سپس break-pointهای مدنظر خود را قرار داده و با فشردن دکمه‌ی F5 می‌توان به آن‌ها رسید و آن‌ها را دیباگ کرد.<span> </span></div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۴۰۱/۰۵/۱۶ ۱۳:۳۰</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div> <b>یک نکته‌ی تکمیلی:<span>&nbsp;</span> </b>امکان مشاهده‌ی کدهای تولیدی توسط Source Generators، به آخرین نگارش Rider هم ذیل قسمت مشاهده‌ی Dependencies، اضافه شده‌است:</div> <div> <br> </div> <div> <p style="display:block; margin-left: auto; margin-right: auto;"> <img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/png;base64,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"> </p> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۴۰۲/۰۴/۲۳ ۷:۱۶</span>
+  </div>
+  <div style='text-align: left; font-family:inherit; font-size:inherit;' dir='ltr'><a href="https://blog.jetbrains.com/dotnet/2023/07/13/debug-source-generators-in-jetbrains-rider/">Debug Source Generators in JetBrains Rider </a></div>
+</div></li></ul></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

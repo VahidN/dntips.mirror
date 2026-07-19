@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫بررسی تغییرات Blazor 8x - قسمت چهاردهم - امکان استفاده از کامپوننت‌های Blazor در برنامه‌های ASP.NET Core 8x</title>     <meta name="description" content="ASP.NET Core 8x به همراه یک IResult جدید به‌نام RazorComponentResult است که توسط آن می‌توان در Endpoint‌های Minimal-API و همچنین اکشن متدهای MVC، از کامپوننت‌های Blazor، خروجی گرفت. این خروجی نه فقط static یا به عبارتی SSR، بلکه حتی می‌تواند تعاملی هم باشد. در این مطلب، جزئیات فعالسازی و استفاده از این IResult جدید را در یک برنامه‌ی Minimal-API بررسی می‌کنیم.       
+ 
+ ایجاد یک برنامه‌ی Minimal-API جدید در دات نت 8     
+ 
+ 
+ پروژه‌ای  ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="بررسی تغییرات Blazor 8x - قسمت چهاردهم - امکان استفاده از کامپوننت‌های Blazor در برنامه‌های ASP.NET Core 8x">
+    <meta itemprop="description" content="ASP.NET Core 8x به همراه یک IResult جدید به‌نام RazorComponentResult است که توسط آن می‌توان در Endpoint‌های Minimal-API و همچنین اکشن متدهای MVC، از کامپوننت‌های Blazor، خروجی گرفت. این خروجی نه فقط static یا به عبارتی SSR، بلکه حتی می‌تواند تعاملی هم باشد. در این مطلب، جزئیات فعالسازی و استفاده از این IResult جدید را در یک برنامه‌ی Minimal-API بررسی می‌کنیم.       
+ 
+ ایجاد یک برنامه‌ی Minimal-API جدید در دات نت 8     
+ 
+ 
+ پروژه‌ای  ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="بررسی تغییرات Blazor 8x - قسمت چهاردهم - امکان استفاده از کامپوننت‌های Blazor در برنامه‌های ASP.NET Core 8x">
+    <meta property="og:description" content="ASP.NET Core 8x به همراه یک IResult جدید به‌نام RazorComponentResult است که توسط آن می‌توان در Endpoint‌های Minimal-API و همچنین اکشن متدهای MVC، از کامپوننت‌های Blazor، خروجی گرفت. این خروجی نه فقط static یا به عبارتی SSR، بلکه حتی می‌تواند تعاملی هم باشد. در این مطلب، جزئیات فعالسازی و استفاده از این IResult جدید را در یک برنامه‌ی Minimal-API بررسی می‌کنیم.       
+ 
+ ایجاد یک برنامه‌ی Minimal-API جدید در دات نت 8     
+ 
+ 
+ پروژه‌ای  ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="بررسی تغییرات Blazor 8x - قسمت چهاردهم - امکان استفاده از کامپوننت‌های Blazor در برنامه‌های ASP.NET Core 8x">
+    <meta name="twitter:description" content="ASP.NET Core 8x به همراه یک IResult جدید به‌نام RazorComponentResult است که توسط آن می‌توان در Endpoint‌های Minimal-API و همچنین اکشن متدهای MVC، از کامپوننت‌های Blazor، خروجی گرفت. این خروجی نه فقط static یا به عبارتی SSR، بلکه حتی می‌تواند تعاملی هم باشد. در این مطلب، جزئیات فعالسازی و استفاده از این IResult جدید را در یک برنامه‌ی Minimal-API بررسی می‌کنیم.       
+ 
+ ایجاد یک برنامه‌ی Minimal-API جدید در دات نت 8     
+ 
+ 
+ پروژه‌ای  ...">
+    <meta name="twitter:card" content="ASP.NET Core 8x به همراه یک IResult جدید به‌نام RazorComponentResult است که توسط آن می‌توان در Endpoint‌های Minimal-API و همچنین اکشن متدهای MVC، از کامپوننت‌های Blazor، خروجی گرفت. این خروجی نه فقط static یا به عبارتی SSR، بلکه حتی می‌تواند تعاملی هم باشد. در این مطلب، جزئیات فعالسازی و استفاده از این IResult جدید را در یک برنامه‌ی Minimal-API بررسی می‌کنیم.       
+ 
+ ایجاد یک برنامه‌ی Minimal-API جدید در دات نت 8     
+ 
+ 
+ پروژه‌ای  ...">
+    <meta property="article:published_time" content="Sat, 18 Nov 2023 10:05:02 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫بررسی تغییرات Blazor 8x - قسمت چهاردهم - امکان استفاده از کامپوننت‌های Blazor در برنامه‌های ASP.NET Core 8x";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-3500.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='ltr'>C# 12.0 - Using aliases for any type</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-3498.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫بررسی تغییرات Blazor 8x - قسمت سیزدهم - امکان تعریف Sections</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫بررسی تغییرات Blazor 8x - قسمت چهاردهم - امکان استفاده از کامپوننت‌های Blazor در برنامه‌های ASP.NET Core 8x</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۲/۰۸/۲۷ ۱۰:۵</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-3499.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'>ASP.NET Core 8x به همراه یک IResult جدید به‌نام RazorComponentResult است که توسط آن می‌توان در Endpoint‌های Minimal-API و همچنین اکشن متدهای MVC، از کامپوننت‌های Blazor، خروجی گرفت. این خروجی نه فقط static یا به عبارتی SSR، بلکه حتی می‌تواند تعاملی هم باشد. در این مطلب، جزئیات فعالسازی و استفاده از این IResult جدید را در یک برنامه‌ی Minimal-API بررسی می‌کنیم.<br> <br> <br> <b>
+
+ایجاد یک برنامه‌ی Minimal-API جدید در دات نت 8</b> <br> <br>
+
+
+پروژه‌ای را که در اینجا پیگیری می‌کنیم، بر اساس قالب استاندارد تولید شده‌ی توسط دستور dotnet new webapi تکمیل می‌شود.<br> <br> <br> <b>
+
+ایجاد یک صفحه‌ی Blazor 8x به همراه مسیریابی و دریافت پارامتر</b> <br> <br>
+
+
+در ادامه قصد داریم که یک کامپوننت جدید را به نام SsrTest.razor در پوشه‌ی جدید Components\Tests ایجاد کرده و برای آن مسیریابی از نوع page@ هم تعریف کنیم. یعنی نه‌فقط قصد داریم آن‌را توسط RazorComponentResult رندر کنیم، بلکه می‌خواهیم اگر آدرس آن‌را در مرورگر هم وارد کردیم، قابل دسترسی باشد.<br>
+
+
+به همین جهت یک پوشه‌ی جدید را به نام Components در ریشه‌ی پروژه‌ی Web API جاری ایجاد می‌کنیم، با این محتوا:<br>
+
+
+برای ایده گرفتن از محتوای مورد نیاز، به «معرفی قالب‌های جدید شروع پروژه‌های Blazor در دات نت 8»&nbsp;<a href="www.dntips.ir-posts-3487.html">قسمت دوم</a>  این سری مراجعه کرده و برای مثال قالب ساده‌ترین حالت ممکن را توسط دستور زیر تولید می‌کنیم (در یک پروژه‌ی مجزا، خارج از پروژه‌ی جاری):<br> <div align="left" dir="ltr" style="direction:ltr;text-align:left;"> <pre language="Bash" name="code">dotnet new blazor --interactivity None</pre> </div>
+پس از اینکار، محتویات پوشه‌ی Components آن‌را مستقیما داخل پوشه‌ی پروژه‌ی Minimal-API جاری کپی می‌کنیم. یعنی در نهایت در این پروژه‌ی جدید Web API، به فایل‌های زیر می‌رسیم:<br>
+
+
+- فایل Imports.razor_ ساده شده برای سهولت کار با فضاهای نام در کامپوننت‌های Blazor (فضاهای نامی را که در آن وجود ندارند و مرتبط با پروژه‌ی دوم هستند، حذف می‌کنیم). <br>
+
+
+- فایل App.razor، برای تشکیل نقطه‌ی آغازین برنامه‌ی Blazor.<br>
+
+
+- فایل Routes.razor برای معرفی مسیریابی صفحات Blazor تعریف شده.<br>
+
+
+- پوشه‌ی Layout برای معرفی فایل MainLayout.razor که در Routes.razor استفاده شده‌است.<br> <br>
+
+
+و ... یک فایل آزمایشی جدید به نام Components\Tests\SsrTest.razor با محتوای زیر:<br> <div align="left" dir="ltr" style="direction:ltr;text-align:left;"> <pre language="XML" name="code">@page "/ssr-page/{Data:int}"
+
+&lt;PageTitle&gt;An SSR component&lt;/PageTitle&gt;
+
+&lt;h1&gt;An SSR component rendered by a Minimal-API!&lt;/h1&gt;
+
+&lt;div&gt;
+    Data: @Data
+&lt;/div&gt;
+
+@code {
+
+    [Parameter]
+    public int Data { get; set; }
+
+}</pre> </div>
+این فایل، می‌تواند پارامتر Data را از طریق فراخوانی مستقیم آدرس فرضی http://localhost:5227/ssr-page/2 دریافت کند و یا ... از طریق خروجی جدید RazorComponentResult که توسط یک Endpoint سفارشی ارائه می‌شود:<br> <br> <p style="display:block; margin-left: auto; margin-right: auto;"> <img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/png;base64,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"> </p> <br> <p style="display:block; margin-left: auto; margin-right: auto;"> <img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/png;base64,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"> </p> <br> <br> <b>تغییرات مورد نیاز در فایل Program.cs برنامه‌ی Web-API برای فعالسازی رندر سمت سرور Blazor</b> <br> <br>
+
+
+در ادامه کل تغییرات مورد نیاز جهت اجرای این برنامه را مشاهده می‌کنید:<br> <div align="left" dir="ltr" style="direction:ltr;text-align:left;"> <pre language="CSharp" name="code">var builder = WebApplication.CreateBuilder(args);
+
+// ...
+
+builder.Services.AddRazorComponents();
+
+// ...
+
+// http://localhost:5227/ssr-component?data=2
+// or it can be called directly http://localhost:5227/ssr-page/2
+app.MapGet("/ssr-component",
+           (int data = 1) =&gt;
+           {
+               var parameters = new Dictionary&lt;string, object?&gt;
+                                {
+                                    { nameof(SsrTest.Data), data },
+                                };
+               return new RazorComponentResult&lt;SsrTest&gt;(parameters);
+           });
+
+app.UseStaticFiles();
+app.UseAntiforgery();
+
+app.MapRazorComponents&lt;App&gt;();
+app.Run();
+
+// ...</pre> </div> <b>توضیحات:</b> <br>
+
+
+- همین اندازه تغییر در جهت فعالسازی رندر سمت سرور کامپوننت‌های Blazor در یک برنامه‌ی ASP.NET Core کفایت می‌کند. یعنی اضافه شدن:<br>
+
+
+AddRazorComponents ،UseAntiforgery و MapRazorComponents<br>
+
+
+- در اینجا نحوه‌ی ارسال پارامترها را به یک RazorComponentResult نیز مشاهده می‌کنید.<br>
+
+
+- در حالت فراخوانی از طریق مسیر endpoint (یعنی فراخوانی مسیر http://localhost:5227/ssr-component در مثال فوق)، خود کامپوننت فراخوانی شده، بدون layout تعریف شده‌ی در فایل App.razor، رندر می‌شود. علت اینجا است که layout برنامه به همراه کامپوننت Router و RouteView آن فعال می‌شود که این دو هم مختص به صفحات دارای مسیریابی Blazor هستند و برای رندر کامپوننت‌های خالص آن بکار گرفته نمی‌شوند. خروجی RazorComponentResult تنها یک static SSR خالص است؛ مگر اینکه فایل blazor.web.js را نیز بارگذاری کند.<br> <br> <b>
+
+یک نکته:</b> اگر در حالت رندر توسط RazorComponentResult، علاقمند به استفاده‌ی از layout هستید، می‌توان از کامپوننت LayoutView داخل یک کامپوننت فرضی به صورت زیر استفاده کرد؛ اما این مورد هم شامل اطلاعات فایل App.razor نمی‌شود:<br> <div align="left" dir="ltr" style="direction:ltr;text-align:left;"> <pre language="XML" name="code">&lt;LayoutView Layout="@typeof(MainLayout)"&gt;
+    &lt;PageTitle&gt;Home&lt;/PageTitle&gt;
+
+    &lt;h2&gt;Welcome to your new app.&lt;/h2&gt;
+&lt;/LayoutView&gt;</pre> </div> <br> <br> <b>سؤال: آیا در این حالت کامپوننت‌های تعاملی هم کار می‌کنند؟</b> <br> <br>
+
+
+پاسخ: بله. فقط برای ایده گرفتن، یک نمونه پروژه‌ی تعاملی Blazor 8x را در ابتدا ایجاد کنید و قسمت‌های اضافی AddRazorComponents و MapRazorComponents آن‌را در اینجا کپی کنید؛ یعنی برای مثال جهت فعالسازی کامپوننت‌های تعاملی Blazor Server، به این دو تغییر زیر نیاز است:<br> <div align="left" dir="ltr" style="direction:ltr;text-align:left;"> <pre language="CSharp" name="code">// ...
+
+builder.Services.AddRazorComponents()
+       .AddInteractiveServerComponents();
+
+// ...
+
+app.MapRazorComponents&lt;App&gt;().AddInteractiveServerRenderMode();
+
+// ...</pre> </div>
+همچنین باید دقت داشت که امکانات تعاملی، به دلیل وجود و دسترسی به یک سطر ذیل که در فایل Components\App.razor واقع شده، اجرایی می‌شوند:<br> <div align="left" dir="ltr" style="direction:ltr;text-align:left;"> <pre language="XML" name="code">&lt;script src="_framework/blazor.web.js"&gt;&lt;/script&gt;</pre> </div>
+و همانطور که عنوان شد، اگر از روش new RazorComponentResult استفاده می‌شود، باید این سطر را به صورت دستی اضافه‌کرد؛ چون به همراه رندر layout تعریف شده‌ی در فایل App.razor نیست. برای مثال فرض کنید کامپوننت معروف Counter را به صورت زیر داریم که حالت رندر آن به InteractiveServer تنظیم شده‌است:<br> <div align="left" dir="ltr" style="direction:ltr;text-align:left;"> <pre language="CSharp" name="code">@rendermode InteractiveServer
+
+&lt;h1&gt;Counter&lt;/h1&gt;
+
+&lt;p role="status"&gt;Current count: @_currentCount&lt;/p&gt;
+
+&lt;button class="btn btn-primary" @onclick="IncrementCount"&gt;Click me&lt;/button&gt;
+
+@code {
+    private int _currentCount;
+
+    private void IncrementCount()
+    {
+        _currentCount++;
+    }
+
+}</pre> </div>
+در این حالت پس از تعریف endpoint زیر، خروجی آن فقط یک صفحه‌ی استاتیک SSR خواهد بود و دکمه‌ی Click me آن کار نمی‌کند:<br> <div align="left" dir="ltr" style="direction:ltr;text-align:left;"> <pre language="CSharp" name="code">// http://localhost:5227/server-interactive-component
+app.MapGet("/server-interactive-component", () =&gt; new RazorComponentResult&lt;Counter&gt;());</pre> </div>
+علت اینجا است که اگر به سورس HTML رندر شده مراجعه کنیم، خبری از درج اسکریپت blazor.web.js در انتهای آن نیست. به همین جهت برای مثال فایل جدید CounterInteractive.razor را به صورت زیر اضافه می‌‌کنیم که ساختار آن شبیه به فایل App.razor است:<br> <div align="left" dir="ltr" style="direction:ltr;text-align:left;"> <pre language="XML" name="code">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;Interactive server component&lt;/title&gt;
+    &lt;base href="/"/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+   &lt;h1&gt;Interactive server component&lt;/h1&gt;
+
+   &lt;Counter/&gt;
+
+  &lt;script src="_framework/blazor.web.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre> </div>
+و هدف اصلی از آن، تشکیل یک قالب و درج اسکریپت blazor.web.js در انتهای آن است.<br>
+
+
+سپس تعریف endpoint متناظر را به صورت زیر تغییر می‌دهیم:<br> <div align="left" dir="ltr" style="direction:ltr;text-align:left;"> <pre language="CSharp" name="code">// http://localhost:5227/server-interactive-component
+app.MapGet("/server-interactive-component", () =&gt; new RazorComponentResult&lt;CounterInteractive&gt;());</pre> </div>
+اینبار به علت بارگذاری فایل blazor.web.js، امکانات تعاملی کامپوننت Counter فعال شده و قابل استفاده می‌شوند.<br> <br> <br> <b>سؤال: آیا می‌توان این خروجی static SSR کامپوننت‌های بلیزر را در سرویس‌های یک برنامه ASP.NET Core هم دریافت کرد؟</b> <br> <br>
+
+
+منظور این است که آیا می‌توان از یک کامپوننت Blazor، به همراه تمام پیشرفت‌های Razor در آن که در Viewهای MVC قابل دسترسی نیستند، به‌شکل یک رشته‌ی خالص، خروجی گرفت و برای مثال از آن به‌عنوان قالب پویای محتوای ایمیل‌ها استفاده کرد؟<br>
+
+
+پاسخ: بله! زیر ساخت RazorComponentResult که از سرویس HtmlRenderer استفاده می‌کند، بدون نیاز به برپایی یک endpoint هم قابل دسترسی است:<br> <div align="left" dir="ltr" style="direction:ltr;text-align:left;"> <pre language="CSharp" name="code">using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
+
+namespace WebApi8x.Services;
+
+public class BlazorStaticRendererService
+{
+    private readonly HtmlRenderer _htmlRenderer;
+
+    public BlazorStaticRendererService(HtmlRenderer htmlRenderer) =&gt; _htmlRenderer = htmlRenderer;
+
+    public Task&lt;string&gt; StaticRenderComponentAsync&lt;T&gt;() where T : IComponent
+        =&gt; RenderComponentAsync&lt;T&gt;(ParameterView.Empty);
+
+    public Task&lt;string&gt; StaticRenderComponentAsync&lt;T&gt;(Dictionary&lt;string, object?&gt; dictionary) where T : IComponent
+        =&gt; RenderComponentAsync&lt;T&gt;(ParameterView.FromDictionary(dictionary));
+
+    private Task&lt;string&gt; RenderComponentAsync&lt;T&gt;(ParameterView parameters) where T : IComponent =&gt;
+        _htmlRenderer.Dispatcher.InvokeAsync(async () =&gt;
+                                             {
+                                                 var output = await _htmlRenderer.RenderComponentAsync&lt;T&gt;(parameters);
+                                                 return output.ToHtmlString();
+                                             });
+}</pre> </div>
+برای کار با آن، ابتدا باید سرویس فوق را به صورت زیر ثبت و معرفی کرد:<br> <div align="left" dir="ltr" style="direction:ltr;text-align:left;"> <pre language="CSharp" name="code">builder.Services.AddScoped&lt;HtmlRenderer&gt;();
+builder.Services.AddScoped&lt;BlazorStaticRendererService&gt;();</pre> </div>
+و سپس یک نمونه مثال فرضی نحوه‌ی تزریق و فراخوانی سرویس BlazorStaticRendererService به صورت زیر است که در آن روش ارسال پارامترها هم بررسی شده‌است:<br> <div align="left" dir="ltr" style="direction:ltr;text-align:left;"> <pre language="CSharp" name="code">app.MapGet("/static-renderer-service-test",
+           async (BlazorStaticRendererService renderer, int data = 1) =&gt;
+           {
+               var parameters = new Dictionary&lt;string, object?&gt;
+                                {
+                                    { nameof(SsrTest.Data), data },
+                                };
+               var html = await renderer.StaticRenderComponentAsync&lt;SsrTest&gt;(parameters);
+               return Results.Content(html, "text/html");
+           });</pre> </div> <br> <b>
+
+کدهای کامل این مطلب را می‌توانید از اینجا دریافت کنید: <a href="https://www.dntips.ir/file/userfile?name=WebApi8x.zip">WebApi8x.zip</a> </b></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20297.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>طراحی صفحات 404 سفارشی در برنامه‌های وب Blazor نسخه .NET 8 و جدیدتر</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3488.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بررسی تغییرات Blazor 8x - قسمت سوم - روش ارتقاء برنامه‌های Blazor Server قدیمی به دات نت 8</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3487.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بررسی تغییرات Blazor 8x - قسمت دوم - بررسی حالت رندر سمت سرور</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3486.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بررسی تغییرات Blazor 8x - قسمت اول - معرفی SSR</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3496.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بررسی تغییرات Blazor 8x - قسمت یازدهم - قالب جدید پیاده سازی اعتبارسنجی و احراز هویت - بخش اول</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3490.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بررسی تغییرات Blazor 8x - قسمت پنجم - امکان تعریف جزیره‌های تعاملی Blazor Server</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3494.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بررسی تغییرات Blazor 8x - قسمت نهم - معرفی حالت رندر تعاملی خودکار</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3492.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بررسی تغییرات Blazor 8x - قسمت هفتم - امکان تعریف جزیره‌های تعاملی Blazor WASM</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3488.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>بررسی تغییرات Blazor 8x - قسمت سوم - روش ارتقاء برنامه‌های Blazor Server قدیمی به دات نت 8</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3290.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>Blazor 5x - قسمت دوم - بررسی ساختار اولیه‌ی پروژه‌های Blazor</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۴۰۳/۰۶/۰۵ ۲۲:۰۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><p class="ql-direction-rtl ql-align-right"><strong>یک نکته‌ی تکمیلی: استفاده از BlazorStaticRendererService جهت تولید یک کامپوننت کش کردن قسمتی از محتوای صفحه در برنامه‌های Blazor SSR</strong></p><p class="ql-direction-rtl ql-align-right"></p><p class="ql-direction-rtl ql-align-right">فرض کنید هر کدام از آیتم‌های منوی سمت راست صفحه، به همراه آماری مرتبط هم هستند که باید جداگانه محاسبه شوند. اگر قرار باشد به‌ازای هر کاربر و هر بازدید صفحه‌ای، این اطلاعات دوباره محاسبه شوند، بار قابل توجهی به برنامه و سرور وارد خواهد شد و همچنین مرور صفحات هم به‌شدت کند می‌شوند؛ چون قسمت منوی سمت راست صفحه، هربار باید از ابتدا رندر شود. در این مطلب، با سرویس BlazorStaticRendererService آشنا شدیم که کار آن، رندر کردن محتوای یک کامپوننت و بازگشت رشته‌ی نهایی معادل آن است. اگر این مورد را به همراه IMemoryCache‌ توکار دات‌نت، ترکیب کنیم، به کامپوننتی شبیه به <a href="www.dntips.ir-posts-2465.html" rel="noopener noreferrer" target="_blank">cache tag helper</a> توکار ASP.NET Core می‌رسیم:</p><pre data-language="xml" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left;">&lt;cache expires-after=&quot;@TimeSpan.FromMinutes(10)&quot;&gt;
+    @Html.Partial(&quot;_WhatsNew&quot;)
+    *last updated  @DateTime.Now.ToLongTimeString()
+&lt;/cache&gt;</pre><p class="ql-direction-rtl ql-align-right">کدهای کامل آن‌را در اینجا (<a href="https://github.com/VahidN/DntSite/blob/main/src/DntSite.Web.Common.BlazorSsr/Components/DntCacheComponent.razor" rel="noopener noreferrer" target="_blank">^</a> و <a href="https://github.com/VahidN/DntSite/blob/main/src/DntSite.Web.Common.BlazorSsr/Components/DntCacheComponent.razor.cs" rel="noopener noreferrer" target="_blank">^</a>) می‌توانید مطالعه کنید که <a href="https://github.com/VahidN/DntSite/blob/fbd82383921c406f69c0073f6f6914d29b637c68/src/DntSite.Web/Features/Layout/MainLayout.razor#L8" rel="noopener noreferrer" target="_blank">به این صورت</a> مورد استفاده قرار گرفته‌است تا فقط قسمتی از صفحه را کش کند و نه کل آن‌را. </p><p class="ql-direction-rtl ql-align-right"></p><p class="ql-direction-rtl ql-align-right">جالب توجه‌است که <a href="https://learn.microsoft.com/en-us/aspnet/core/performance/caching/output?view=aspnetcore-8.0" rel="noopener noreferrer" target="_blank">OutputCache</a> مخصوص ASP.NET Core، در Blazor SSR هم کار می‌کند. برای استفاده‌ی از آن در Blazor SSR، پس از انجام تنظیمات ابتدایی میان‌افزار مخصوص آن که ترتیب افزودن آن باید به صورت زیر باشد: </p><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left;">app.UseStaticFiles();
+app.UseSession();
+app.UseRouting();
+app.UseAntiforgery();
+
+app.UseOutputCache();
+
+app.MapRazorComponents&lt;App&gt;();
+app.MapControllers();
+app.Run();</pre><p class="ql-direction-rtl ql-align-right"> فقط کافی است ویژگی OutputCache را به نحو زیر به فایل razor. خود اضافه کنید:</p><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left;">@attribute [OutputCache(Duration = 1000)]</pre><p class="ql-direction-rtl ql-align-right">که البته کار آن، کش کردن محتوای کل یک صفحه‌است و نه فقط قسمتی از آن.</p></div>
+</div></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫راهکار لاگ متناسب با Cloud و On-Premise</title>     <meta name="description" content="Application Insights  راهکار ارائه شده توسط Microsoft است که در سه بخش به ما کمک می‌کند تا سیستم لاگ مؤثر و کارآمدی داشته باشیم:         ۱- متدهای پایه Log که به صورت  دستی  فراخوانی می‌شوند، مانند TrackEvent برای ثبت یک رویداد بیزینسی که این متدها فراتر از متدهای معمول loggerهای متداول هستند.         ۲- به صورت  خودکار ، Application Insights خطاهای سیستم را لاگ نموده و همچنین در زمان کار کردن با Http Client، دیتابیس و سایر  Dependency  ...">
+    <meta name="author" content="یاسر مرادی">
+    <meta itemprop="name" content="راهکار لاگ متناسب با Cloud و On-Premise">
+    <meta itemprop="description" content="Application Insights  راهکار ارائه شده توسط Microsoft است که در سه بخش به ما کمک می‌کند تا سیستم لاگ مؤثر و کارآمدی داشته باشیم:         ۱- متدهای پایه Log که به صورت  دستی  فراخوانی می‌شوند، مانند TrackEvent برای ثبت یک رویداد بیزینسی که این متدها فراتر از متدهای معمول loggerهای متداول هستند.         ۲- به صورت  خودکار ، Application Insights خطاهای سیستم را لاگ نموده و همچنین در زمان کار کردن با Http Client، دیتابیس و سایر  Dependency  ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="راهکار لاگ متناسب با Cloud و On-Premise">
+    <meta property="og:description" content="Application Insights  راهکار ارائه شده توسط Microsoft است که در سه بخش به ما کمک می‌کند تا سیستم لاگ مؤثر و کارآمدی داشته باشیم:         ۱- متدهای پایه Log که به صورت  دستی  فراخوانی می‌شوند، مانند TrackEvent برای ثبت یک رویداد بیزینسی که این متدها فراتر از متدهای معمول loggerهای متداول هستند.         ۲- به صورت  خودکار ، Application Insights خطاهای سیستم را لاگ نموده و همچنین در زمان کار کردن با Http Client، دیتابیس و سایر  Dependency  ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="راهکار لاگ متناسب با Cloud و On-Premise">
+    <meta name="twitter:description" content="Application Insights  راهکار ارائه شده توسط Microsoft است که در سه بخش به ما کمک می‌کند تا سیستم لاگ مؤثر و کارآمدی داشته باشیم:         ۱- متدهای پایه Log که به صورت  دستی  فراخوانی می‌شوند، مانند TrackEvent برای ثبت یک رویداد بیزینسی که این متدها فراتر از متدهای معمول loggerهای متداول هستند.         ۲- به صورت  خودکار ، Application Insights خطاهای سیستم را لاگ نموده و همچنین در زمان کار کردن با Http Client، دیتابیس و سایر  Dependency  ...">
+    <meta name="twitter:card" content="Application Insights  راهکار ارائه شده توسط Microsoft است که در سه بخش به ما کمک می‌کند تا سیستم لاگ مؤثر و کارآمدی داشته باشیم:         ۱- متدهای پایه Log که به صورت  دستی  فراخوانی می‌شوند، مانند TrackEvent برای ثبت یک رویداد بیزینسی که این متدها فراتر از متدهای معمول loggerهای متداول هستند.         ۲- به صورت  خودکار ، Application Insights خطاهای سیستم را لاگ نموده و همچنین در زمان کار کردن با Http Client، دیتابیس و سایر  Dependency  ...">
+    <meta property="article:published_time" content="Sun, 10 May 2020 00:30:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫راهکار لاگ متناسب با Cloud و On-Premise";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-3193.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫پیاده سازی Full-Text Search با SQLite و EF Core - قسمت دوم - کوئری گرفتن از جدول مجازی FTS</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-3191.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫پیاده سازی Full-Text Search با SQLite و EF Core - قسمت اول - ایجاد و به روز رسانی جدول مجازی FTS</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫راهکار لاگ متناسب با Cloud و On-Premise</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>یاسر مرادی<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۹/۰۲/۲۱ ۰:۳۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-3192.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><div style="text-align: justify;"> <a href="https://docs.microsoft.com/en-us/azure/azure-monitor/app/app-insights-overview">Application Insights</a>&nbsp;راهکار ارائه شده توسط Microsoft است که در سه بخش به ما کمک می‌کند تا سیستم لاگ مؤثر و کارآمدی داشته باشیم:</div> <div style="text-align: justify;"> <br> </div> <div style="text-align: justify;">۱- متدهای پایه Log که به صورت <b>دستی</b>&nbsp;فراخوانی می‌شوند، مانند TrackEvent برای ثبت یک رویداد بیزینسی که این متدها فراتر از متدهای معمول loggerهای متداول هستند.</div> <div style="text-align: justify;"> <br> </div> <div style="text-align: justify;">۲- به صورت <b>خودکار</b>، Application Insights خطاهای سیستم را لاگ نموده و همچنین در زمان کار کردن با Http Client، دیتابیس و سایر <b>Dependency</b>ها، میزان طول کشیدن آنها را به همراه آدرس Request یا متن Sql Command و سایر اطلاعات مفید را نیز ذخیره می‌کند که این خود منجر به جمع شدن دیتایی بسیار ارزشمند در سیستم می‌شود.</div> <div style="text-align: justify;">البته اگر یک Dependency به صورت خودکار شناسایی نشود، مانند Redis، شما می‌توانید خودتان با متد TrackDependency اطلاعات آن‌را به AppInsights بدهید.</div> <div style="text-align: justify;"> <br> </div> <div style="text-align: justify;">۳- <b>داشبورد </b>App Insights در Azure این امکان را می‌دهد که به سریع‌ترین شکل ممکن در لاگ‌ها جستجو نمود و برای مثال تمامی کارهای انجام شده توسط یک کاربر خاص را به صورت یک‌جا مشاهده و بررسی کرد.</div> <div style="text-align: justify;">فرضا اگر کاربر درخواست گرفتن خروجی Excel از لیست محصولات را داشته و این ۱ ثانیه طول کشیده، چقدر آن در انتظار دیتابیس بوده و ...</div> <div style="text-align: justify;"> به علاوه از Power BI نیز می‌توانید برای بیرون کشیدن نکات مهم استفاده کنید.</div> <div style="text-align: justify;"> <br> </div> <div style="text-align: justify;">البته شاید App Insights برای کسانی که Azure Account نداشته باشند، مناسب به نظر نرسد، ولی اگر راهکاری برای ذخیره سازی&nbsp;On-Premise&nbsp;اطلاعات لاگ شده وجود داشته باشد چه؟ مثلا اطلاعات آن را در Elastic موجود در سرورهای شرکت، داخل ایران ذخیره نمود، بدون الزام به این‌که حتی آن سرور دسترسی به اینترنت داشته باشد. </div> <div style="text-align: justify;"> <br> </div> <div style="text-align: justify;">بله، این امکان وجود دارد و با کمک&nbsp; <a href="https://github.com/Azure/diagnostics-eventflow">Microsoft Diagnostics EventFlow</a>&nbsp;می‌توان اطلاعات App Insights را در هر جایی از جمله Elastic ذخیره نمود و بدین طریق از عمده مزایای App Insights بدون داشتن Azure Account بهره مند شد. </div> <div style="text-align: justify;"> <br> </div> <div style="text-align: justify;">برای این منظور به شکل زیر عمل کنید: (آموزش برای ASP.NET Core 3.1 بوده، ولی برای سایر پروژه‌ها نیز قابل استفاده است)</div> <div style="text-align: justify;"> <br> </div> <div style="text-align: right;">۱- ابتدا Application Insights را به پروژه خود اضافه کنید.بدین منظور لازم است Packageهای&nbsp;Microsoft.Extensions.Logging.ApplicationInsights&nbsp;و&nbsp;Microsoft.ApplicationInsights.AspNetCore&nbsp;را نصب کنید.&nbsp;</div> <div style="text-align: justify;"> <br> </div> <div style="text-align: justify;">۲-&nbsp;در Program.cs بعد از </div> <div style="text-align: justify;"> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">Host.CreateDefaultBuilder(args)</pre> </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+کد زیر را قرار دهید</div> <div style="text-align: justify;"> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">.ConfigureLogging(loggingBuilder&nbsp; =&gt;
+{
+    loggingBuilder.ClearProviders();
+    loggingBuilder.AddApplicationInsights();&nbsp;
+})
+</pre> </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+این باعث می‌شود تا Loggerهای پیش فرض Console و Debug حذف شوند و البته اگر کتابخانه 3rd party ای از Microsoft.Extensions.Logging استفاده کرده باشد، اطلاعات لاگ آن به AppInsights نیز داده شود و در نهایت شما با کمک&nbsp;<a href="https://github.com/Azure/diagnostics-eventflow">Microsoft Diagnostics EventFlow</a>،&nbsp;آن اطلاعات را در Elastic و Console و سایر Outputها خواهید داشت.</div> <div style="text-align: justify;"> <br> </div> <div style="text-align: justify;">۳- اگر جایی قصد لاگ کردن یک Event را دارید، یا در مثال استفاده از Redis میخواهید اطلاعات زمان طول کشیدن رفت و برگشت به Redis را لاگ کنید یا یک try/catch دارید که در catch آن خطا را مجدد throw نمی‌کنید، ولی قصد لاگ کردن exception را دارید، ابتدا TelemetryClient را inject نموده و از متدهای آن مانند TrackException استفاده کنید.</div> <div style="text-align: justify;">توجه داشته باشید که اگر از ILogger ارائه شده توسط MS.Ext.Logging استفاده کنید نیز کار خواهد کرد.</div> <div style="text-align: justify;"> <br> </div> <div style="text-align: justify;">۴- پکیج&nbsp;<a href="https://www.nuget.org/packages/Microsoft.Diagnostics.EventFlow.Inputs.ApplicationInsights/">Microsoft.Diagnostics.EventFlow.Inputs.ApplicationInsights</a>&nbsp;را در پروژه نصب کنید و سپس از بین Output‌های معرفی شده نیز یکی را انتخاب و پکیج آن را نیز نصب کنید. شما می‌توانید دیتایی را که AppInsights به صورت خودکار جمع نموده را + دیتای ارائه شده توسط خودتان را به Elastic، Splunk و ... بفرستید. </div> <div style="text-align: justify;">ما در این مثال <b>برای سادگی</b> Std Out - Console Output را انتخاب می‌کنیم و پکیج&nbsp;<a href="https://www.nuget.org/packages/Microsoft.Diagnostics.EventFlow.Outputs.StdOutput/">Microsoft.Diagnostics.EventFlow.Outputs.StdOutput</a>&nbsp;را نصب می‌کنیم. </div> <div style="text-align: justify;"> <br> </div> <div style="text-align: justify;">۵- فایل&nbsp;eventFlowConfig.json&nbsp;را به پروژه اضافه کنید و موارد زیر را در آن قرار دهید: </div> <div style="text-align: justify;"> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="JScript" name="code"> {
+  "inputs": [
+    {
+      "type": "ApplicationInsights"
+    }
+  ],
+  "outputs": [
+    {
+      "type": "StdOutput" // console output
+    }
+  ],
+  "schemaVersion": "2016-08-11"
+}&nbsp; </pre> </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+در این فایل، inputs شامل ApplicationInsights بوده و البته موارد جالبی چون PerformanceCounters را نیز میتوانید در آن بگنجانید و outputs بسته به نیاز شما برابر با Elastic و ... است که در این صورت باید اطلاعات اتصال به Elastic شامل آدرس سرور و ... را نیز ارائه کنید. توجه داشته باشید که ما در حال استفاده از ApplicationInsights <b>SDK </b>هستیم، به عنوان کتابخانه Logging و در نهایت دیتا نه به ApplicationInsights در سرورهای Microsoft Azure، که به output یا outputهایی که در فایل eventFlowConfig.json می‌گوییم ارسال می‌شود.</div> <div style="text-align: justify;"> <br> </div> <div style="text-align: justify;">۶- در Program.cs متد Main را به شکل زیر در بیاورید:</div> <div style="text-align: justify;"> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">using (var pipeline = DiagnosticPipelineFactory.CreatePipeline("eventFlowConfig.json"))
+{
+    CreateHostBuilder(args, pipeline)
+        .Build()
+        .Run();
+}&nbsp; </pre> </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+و CreateHostBuilder نیز به شکل زیر باشد:</div> <div style="text-align: justify;"> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">public static IHostBuilder CreateHostBuilder(string[] args, DiagnosticPipeline pipeline) =&gt;
+    Host.CreateDefaultBuilder(args)
+        .ConfigureServices(services =&gt; services.AddSingleton&lt;ITelemetryProcessorFactory&gt;(sp =&gt; new EventFlowTelemetryProcessorFactory(pipeline)))
+        .ConfigureLogging(logginBuilder =&gt;
+        {
+            logginBuilder.ClearProviders();
+            loggingBuilder.AddApplicationInsights();<span>&nbsp;</span>
+        })
+        .ConfigureWebHostDefaults(webBuilder =&gt;
+        {
+            webBuilder.UseStartup&lt;Startup&gt;();
+        });&nbsp; </pre> </div> <br> </div> <div style="text-align: justify;">همه چیز آماده است. هم اکنون اگر Azure Account داشته باشید، می‌توانید با دادن&nbsp;instrumentationKey در appsetting.json از داشبورد فوق العاده ApplicationInsights استفاده کنید و اگر نه هم در سرورهای داخلی خودتان Splunk و ... را راه اندازی و در&nbsp;فایل&nbsp;eventFlowConfig.json، در قسمت outputs، اطلاعات آدرس آنها را بدهید و لاگ‌های مفصل و کاربردی ای که به صورت خودکار جمع آوری شده را به همراه اطلاعاتی که خودتان دستی ارائه کرده اید، یکجا تحویل بگیرید.</div> <div style="text-align: justify;"> <br> </div> <div style="text-align: justify;"> <a href="https://github.com/ysmoradi/AppInsightsSdkWithoutAzureAccount">لینک</a>&nbsp;پروژه در GitHub که حاوی مثال Elastic است.</div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-15364.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>روش های اندازه گیری پرفرمنس وبسایت</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-19250.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>پیاده سازی full text search به کمک Elastic Search در دات‌نت</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3221.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>راهکار راه‌اندازی Infrastructure as a code</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3088.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بررسی اجمالی Redis</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-8643.html'><span class='badge bg-warning-subtle text-warning-emphasis bg-gradient rounded-pill me-2'>نظرات اشتراک‌ها</span>Elasticsearch 2 منتشر شد</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3192.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>راهکار لاگ متناسب با Cloud و On-Premise</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2467.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>ارتقاء به ASP.NET Core 1.0 - قسمت 17 - بررسی فریم ورک Logging</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1736.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>انجام کارهای زمانبندی شده در برنامه‌های ASP.NET توسط DNT Scheduler</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2467.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>ارتقاء به ASP.NET Core 1.0 - قسمت 17 - بررسی فریم ورک Logging</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/surveys/details/87#comment-305'><span class='badge bg-dark bg-gradient rounded-pill me-2'>نظرات نظرسنجی‌ها</span>چگونه خطاهای برنامه‌ی خود را لاگ می‌کنید؟</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>حامد حاجیلو</strong>  در  <span dir='ltr'>۱۳۹۹/۰۲/۲۲ ۴:۴۵</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>خیلی گشتم ولی گزینه&nbsp;<span style="color: rgb(51, 51, 51); text-align: justify;">&nbsp;Application Insights Sdk Local<span>&nbsp; رو ندیدم . بقیه هم این مشکل رو دارن ؟ نظری دارید ؟</span> </span></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>یاسر مرادی</strong>  در  <span dir='ltr'>۱۳۹۹/۰۲/۲۲ ۱۱:۳۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>ممنون که بازخورد دادید. احتمالا به خاطر نبود Azure workload باشد، یا چون vs من 16.6 هست. برای ساده‌تر شدن قضیه، app insights را به صورت دستی اضافه نمودم و پروژه را در github نیز قرار دادم.</div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>ستاره غفاری</strong>  در  <span dir='ltr'>۱۴۰۰/۰۲/۰۴ ۱۶:۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>باتشکر از مطالب خوبی که اریه دادید<div>اگر فرض بر این باشد که اپلیکیشنی از قبل نوشته شده و قرار است لاگ فعالیت یک کاربر را track کنیم و از Ilogger خود دات نت استفاده کرده باشیم در این صورت ایا به تنظیمات&nbsp;<span style="color: rgb(51, 51, 51); text-align: justify;">TelemetryClient</span> <span style="color: rgb(51, 51, 51); text-align: justify;">&nbsp;<span>&nbsp;نیاز است؟</span> </span> </div></div>
+</div></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

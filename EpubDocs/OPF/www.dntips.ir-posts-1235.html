@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫بررسی تفصیلی رابطه Many-to-Many در EF Code first</title>     <meta name="description" content="رابطه چند به چند در مطالب EF Code first سایت جاری، در حد تعریف نگاشت‌های آن  بررسی شده، اما نیاز به جزئیات بیشتری برای کار با آن وجود دارد که در ادامه به بررسی آن‌ها خواهیم پرداخت:
+ 
+ 1) پیش فرض‌های EF Code first در تشخیص روابط چند به چند
+ تشخیص اولیه روابط چند به چند، مانند یک مطلب موجود در سایت و برچسب‌های آن؛ که در این حالت یک برچسب می‌تواند به چندین مطلب مختلف اشاره کند و یا برعکس، هر مطلب می‌تواند چندین برچسب داشته باشد، نیازی به ت ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="بررسی تفصیلی رابطه Many-to-Many در EF Code first">
+    <meta itemprop="description" content="رابطه چند به چند در مطالب EF Code first سایت جاری، در حد تعریف نگاشت‌های آن  بررسی شده، اما نیاز به جزئیات بیشتری برای کار با آن وجود دارد که در ادامه به بررسی آن‌ها خواهیم پرداخت:
+ 
+ 1) پیش فرض‌های EF Code first در تشخیص روابط چند به چند
+ تشخیص اولیه روابط چند به چند، مانند یک مطلب موجود در سایت و برچسب‌های آن؛ که در این حالت یک برچسب می‌تواند به چندین مطلب مختلف اشاره کند و یا برعکس، هر مطلب می‌تواند چندین برچسب داشته باشد، نیازی به ت ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="بررسی تفصیلی رابطه Many-to-Many در EF Code first">
+    <meta property="og:description" content="رابطه چند به چند در مطالب EF Code first سایت جاری، در حد تعریف نگاشت‌های آن  بررسی شده، اما نیاز به جزئیات بیشتری برای کار با آن وجود دارد که در ادامه به بررسی آن‌ها خواهیم پرداخت:
+ 
+ 1) پیش فرض‌های EF Code first در تشخیص روابط چند به چند
+ تشخیص اولیه روابط چند به چند، مانند یک مطلب موجود در سایت و برچسب‌های آن؛ که در این حالت یک برچسب می‌تواند به چندین مطلب مختلف اشاره کند و یا برعکس، هر مطلب می‌تواند چندین برچسب داشته باشد، نیازی به ت ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="بررسی تفصیلی رابطه Many-to-Many در EF Code first">
+    <meta name="twitter:description" content="رابطه چند به چند در مطالب EF Code first سایت جاری، در حد تعریف نگاشت‌های آن  بررسی شده، اما نیاز به جزئیات بیشتری برای کار با آن وجود دارد که در ادامه به بررسی آن‌ها خواهیم پرداخت:
+ 
+ 1) پیش فرض‌های EF Code first در تشخیص روابط چند به چند
+ تشخیص اولیه روابط چند به چند، مانند یک مطلب موجود در سایت و برچسب‌های آن؛ که در این حالت یک برچسب می‌تواند به چندین مطلب مختلف اشاره کند و یا برعکس، هر مطلب می‌تواند چندین برچسب داشته باشد، نیازی به ت ...">
+    <meta name="twitter:card" content="رابطه چند به چند در مطالب EF Code first سایت جاری، در حد تعریف نگاشت‌های آن  بررسی شده، اما نیاز به جزئیات بیشتری برای کار با آن وجود دارد که در ادامه به بررسی آن‌ها خواهیم پرداخت:
+ 
+ 1) پیش فرض‌های EF Code first در تشخیص روابط چند به چند
+ تشخیص اولیه روابط چند به چند، مانند یک مطلب موجود در سایت و برچسب‌های آن؛ که در این حالت یک برچسب می‌تواند به چندین مطلب مختلف اشاره کند و یا برعکس، هر مطلب می‌تواند چندین برچسب داشته باشد، نیازی به ت ...">
+    <meta property="article:published_time" content="Fri, 22 Feb 2013 08:05:02 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫بررسی تفصیلی رابطه Many-to-Many در EF Code first";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-1236.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫ایجاد ServiceLocator با استفاده از Ninject</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-1234.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫آشنایی با قابلیت جدید ASP.NET Web Forms Scaffolding</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫بررسی تفصیلی رابطه Many-to-Many در EF Code first</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۱/۱۲/۰۴ ۸:۵</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-1235.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'>رابطه چند به چند در مطالب EF Code first سایت جاری، در حد<a href="www.dntips.ir-posts-837.html"> تعریف نگاشت‌های آن</a>  بررسی شده، اما نیاز به جزئیات بیشتری برای کار با آن وجود دارد که در ادامه به بررسی آن‌ها خواهیم پرداخت:<br><br><br><b>
+
+1) پیش فرض‌های EF Code first در تشخیص روابط چند به چند</b><br><br>
+تشخیص اولیه روابط چند به چند، مانند یک مطلب موجود در سایت و برچسب‌های آن؛ که در این حالت یک برچسب می‌تواند به چندین مطلب مختلف اشاره کند و یا برعکس، هر مطلب می‌تواند چندین برچسب داشته باشد، نیازی به تنظیمات خاصی ندارد. همینقدر که دو طرف رابطه توسط یک ICollection به یکدیگر اشاره کنند، مابقی مسایل توسط EF Code first به صورت خودکار حل و فصل خواهند شد:<br><div dir="ltr" align="left"><pre language="CSharp" name="code">using System;
+using System.Linq;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Data.Entity;
+using System.Data.Entity.Migrations;
+using System.Data.Entity.ModelConfiguration;
+
+namespace Sample
+{
+    public class BlogPost
+    {
+        public int Id { set; get; }
+
+        [StringLength(maximumLength: 450, MinimumLength = 1), Required]
+        public string Title { set; get; }
+
+        [MaxLength]
+        public string Body { set; get; }
+
+        public virtual ICollection&lt;Tag&gt; Tags { set; get; } // many-to-many
+
+        public BlogPost()
+        {
+            Tags = new List&lt;Tag&gt;();
+        }
+    }
+
+    public class Tag
+    {
+        public int Id { set; get; }
+
+        [StringLength(maximumLength: 450), Required]
+        public string Name { set; get; }
+
+        public virtual ICollection&lt;BlogPost&gt; BlogPosts { set; get; } // many-to-many
+
+        public Tag()
+        {
+            BlogPosts = new List&lt;BlogPost&gt;();
+        }
+    }
+
+    public class MyContext : DbContext
+    {
+        public DbSet&lt;BlogPost&gt; BlogPosts { get; set; }
+        public DbSet&lt;Tag&gt; Tags { get; set; }
+    }
+
+    public class Configuration : DbMigrationsConfiguration&lt;MyContext&gt;
+    {
+        public Configuration()
+        {
+            AutomaticMigrationsEnabled = true;
+            AutomaticMigrationDataLossAllowed = true;
+        }
+
+        protected override void Seed(MyContext context)
+        {
+            var tag1 = new Tag { Name = "Tag1" };
+            context.Tags.Add(tag1);
+
+            var post1 = new BlogPost { Title = "Title...1", Body = "Body...1" };
+            context.BlogPosts.Add(post1);
+
+            post1.Tags.Add(tag1);
+
+            base.Seed(context);
+        }
+    }
+
+    public static class Test
+    {
+        public static void RunTests()
+        {
+            Database.SetInitializer(new MigrateDatabaseToLatestVersion&lt;MyContext, Configuration&gt;());
+
+            using (var ctx = new MyContext())
+            {
+                var post1 = ctx.BlogPosts.Find(1);
+                if (post1 != null)
+                {
+                    Console.WriteLine(post1.Title);
+                }
+            }
+        }
+    }
+}</pre></div>
+در این مثال، رابطه بین مطالب ارسالی در یک سایت و برچسب‌های آن به صورت many-to-many تعریف شده است و همینقدر که دو طرف رابطه توسط یک ICollection به هم اشاره می‌کنند، رابطه زیر تشکیل خواهد شد:<br><br><p><img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/png;base64,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"></p><br>
+
+
+در اینجا تمام تنظیمات صورت گرفته بر اساس یک سری از پیش فرض‌ها است. برای مثال نام جدول واسط تشکیل شده، بر اساس تنظیم پیش فرض کنار هم قرار دادن نام دو جدول مرتبط تهیه شده است.<br>
+
+
+همچنین بهتر است بر روی نام برچسب‌ها، یک ایندکس منحصربفرد نیز تعیین شود: (<a href="www.dntips.ir-posts-1021.html">^</a>  و <a href="www.dntips.ir-posts-1153.html">^</a>)<br><br><br><b>
+
+2) تنظیم ریز جزئیات روابط چند به چند در EF Code first</b><br><br>
+
+
+تنظیمات پیش فرض انجام شده آنچنان نیازی به تغییر ندارند و منطقی به نظر می‌رسند. اما اگر به هر دلیلی نیاز داشتید کنترل بیشتری بر روی جزئیات این مسایل داشته باشید، باید از Fluent API جهت اعمال آن‌ها استفاده کرد:<br><div dir="ltr" align="left"><pre language="CSharp" name="code">    public class TagMap : EntityTypeConfiguration&lt;Tag&gt;
+    {
+        public TagMap()
+        {
+            this.HasMany(x =&gt; x.BlogPosts)
+                .WithMany(x =&gt; x.Tags)
+                .Map(map =&gt;
+                    {
+                        map.MapLeftKey("TagId");
+                        map.MapRightKey("BlogPostId");
+                        map.ToTable("BlogPostsJoinTags");
+                    });
+        }
+    }
+
+    public class MyContext : DbContext
+    {
+        public DbSet&lt;BlogPost&gt; BlogPosts { get; set; }
+        public DbSet&lt;Tag&gt; Tags { get; set; }
+
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            modelBuilder.Configurations.Add(new TagMap());
+            base.OnModelCreating(modelBuilder);
+        }
+    }</pre></div>
+در اینجا توسط متد Map، نام کلیدهای تعریف شده و همچنین جدول واسط تغییر داده شده‌اند:<br><p><img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/png;base64,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"></p><br><b>
+
+3) حذف اطلاعات چند به چند</b><br><br>
+
+
+برای حذف تگ‌های یک مطلب، کافی است تک تک آن‌ها را یافته و توسط متد Remove جهت حذف علامتگذاری کنیم. نهایتا با فراخوانی متد SaveChanges، حذف نهایی انجام و اعمال خواهد شد.<br><div dir="ltr" align="left"><pre language="CSharp" name="code">            using (var ctx = new MyContext())
+            {
+                var post1 = ctx.BlogPosts.Find(1);
+                if (post1 != null)
+                {
+                    Console.WriteLine(post1.Title);
+                    foreach (var tag in post1.Tags.ToList())
+                        post1.Tags.Remove(tag);
+                    ctx.SaveChanges();
+                }
+            }</pre></div>
+در اینجا تنها اتفاقی که رخ می‌دهد، حذف اطلاعات ثبت شده در جدول واسط BlogPostsJoinTags است. Tag1 ثبت شده در متد Seed فوق، حذف نخواهد شد. به عبارتی اطلاعات جداول Tags و BlogPosts بدون تغییر باقی خواهند ماند. فقط یک رابطه بین آن‌ها که در جدول واسط تعریف شده است، حذف می‌گردد.<br><br>
+
+
+در ادامه اینبار اگر خود post1 را حذف کنیم:<br><div dir="ltr" align="left"><pre language="CSharp" name="code">                var post1 = ctx.BlogPosts.Find(1);
+                if (post1 != null)
+                {
+                    ctx.BlogPosts.Remove(post1);
+                    ctx.SaveChanges();
+                }</pre></div>
+علاوه بر حذف post1، رابطه تعریف شده آن در جدول BlogPostsJoinTags نیز حذف می‌گردد؛ اما Tag1 حذف نخواهد شد.<br>
+
+
+بنابراین دراینجا cascade delete ایی که به صورت پیش فرض وجود دارد، تنها به معنای حذف تمامی ارتباطات موجود در جدول میانی است و نه حذف کامل طرف دوم رابطه. اگر مطلبی حذف شد، فقط آن مطلب و روابط برچسب‌های متعلق به آن از جدول میانی حذف می‌شوند و نه برچسب‌های تعریف شده برای آن.<br>
+
+
+البته این تصمیم هم منطقی است. از این لحاظ که اگر قرار بود دو طرف یک رابطه چند به چند با هم حذف شوند، ممکن بود با حذف یک مطلب، کل بانک اطلاعاتی خالی شود! فرض کنید یک مطلب دارای سه برچسب است. این سه برچسب با 20 مطلب دیگر هم رابطه دارند. اکنون مطلب اول را حذف می‌کنیم. برچسب‌های متناظر آن نیز باید حذف شوند. با حذف این برچسب‌ها طرف دوم رابطه آن‌ها که چندین مطلب دیگر است نیز باید حذف شوند!<br><br><br><b>
+
+4) ویرایش و یا افزودن اطلاعات چند به چند</b><br><br>
+
+
+در مثال فوق فرض کنید که می‌خواهیم به اولین مطلب ثبت شده، تعدادی تگ جدید را اضافه کنیم:<br><div dir="ltr" align="left"><pre language="CSharp" name="code">                var post1 = ctx.BlogPosts.Find(1);
+                if (post1 != null)
+                {
+                    var tag2 = new Tag { Name = "Tag2" };                    
+                    post1.Tags.Add(tag2);
+                    ctx.SaveChanges();
+                }</pre></div>
+در اینجا به صورت خودکار، ابتدا tag2 ذخیره شده و سپس ارتباط آن با post1 در جدول رابط ذخیره خواهد شد.<br><br>
+
+
+در مثالی دیگر اگر یک برنامه ASP.NET را درنظر بگیریم، در هربار ویرایش یک مطلب، تعدادی Tag به سرور ارسال می‌شوند. در ابتدای امر هم مشخص نیست کدامیک جدید هستند، چه تعدادی در لیست تگ‌های قبلی مطلب وجود دارند، یا اینکه کلا از لیست برچسب‌ها حذف شده‌اند:<br><div dir="ltr" align="left"><pre language="CSharp" name="code">                //نام تگ‌های دریافتی از کاربر  
+                var tagsList = new[] { "Tag1", "Tag2", "Tag3" };
+
+                //بارگذاری یک مطلب به همراه تگ‌های آن
+                var post1 = ctx.BlogPosts.Include(x =&gt; x.Tags).FirstOrDefault(x =&gt; x.Id == 1);
+                if (post1 != null)
+                {
+                    //ابتدا کلیه تگ‌های موجود را حذف خواهیم کرد
+                    if (post1.Tags != null &amp;&amp; post1.Tags.Any())
+                        post1.Tags.Clear();
+
+                    //سپس در طی فقط یک کوئری بررسی می‌کنیم کدامیک از موارد ارسالی موجود هستند
+                    var listOfActualTags = ctx.Tags.Where(x =&gt; tagsList.Contains(x.Name)).ToList();
+                    var listOfActualTagNames = listOfActualTags.Select(x =&gt; x.Name.ToLower()).ToList();
+
+                    //فقط موارد جدید به تگ‌ها و ارتباطات موجود اضافه می‌شوند
+                    foreach (var tag in tagsList)
+                    {
+                        if (!listOfActualTagNames.Contains(tag.ToLowerInvariant().Trim()))
+                        {
+                            ctx.Tags.Add(new Tag { Name = tag.Trim() });
+                        }
+                    }
+                    ctx.SaveChanges(); // ثبت موارد جدید
+
+                    //موارد قبلی هم حفظ می‌شوند
+                    foreach (var item in listOfActualTags)
+                    {
+                        post1.Tags.Add(item);
+                    }
+                    ctx.SaveChanges();
+                }</pre></div>
+در این مثال فقط تعدادی رشته از کاربر دریافت شده است، بدون Id آن‌ها. ابتدا مطلب متناظر، به همراه تگ‌های آن توسط متد Include دریافت می‌شود. سپس نیاز داریم به سیستم ردیابی EF اعلام کنیم که اتفاقاتی قرار است رخ دهد. به همین جهت تمام تگ‌های مطلب یافت شده را خالی خواهیم کرد. سپس در یک کوئری، بر اساس نام تگ‌های دریافتی، معادل آن‌ها را از بانک اطلاعاتی دریافت خواهیم کرد؛ کوئری tagsList.Contains به where in در طی یک رفت و برگشت، ترجمه می‌شود:<br><div dir="ltr" align="left"><pre language="Sql" name="code">SELECT
+[Extent1].[Id] AS [Id],
+[Extent1].[Name] AS [Name]
+FROM [dbo].[Tags] AS [Extent1]
+WHERE [Extent1].[Name] IN (N'Tag1',N'Tag2',N'Tag3')</pre></div>
+&nbsp;آن‌هایی که جدید هستند به بانک اطلاعاتی اضافه شده (بدون نیاز به تعریف قبلی آن‌ها)، آن‌هایی که در لیست قبلی برچسب‌های مطلب بوده‌اند، حفظ خواهند شد. <br>
+
+
+لازم است لیست موارد موجود را (listOfActualTags) از بانک اطلاعاتی دریافت کنیم، زیرا به این ترتیب سیستم ردیابی EF آن‌ها را به عنوان رکوردی جدید و تکراری ثبت نخواهد کرد.<br><br><br><b>
+
+5) تهیه کوئری‌های LINQ بر روی روابط چند به چند</b><br><br>
+
+
+الف) دریافت یک مطلب خاص به همراه تمام تگ‌های آن:<br><div dir="ltr" align="left"><pre language="CSharp" name="code"> ctx.BlogPosts.Where(p =&gt; p.Id == 1).Include(p =&gt; p.Tags).FirstOrDefault()</pre></div>
+ب) دریافت کلیه مطالبی که شامل Tag1 هستند:<br><br><div dir="ltr" align="left"><pre language="CSharp" name="code">var posts = from p in ctx.BlogPosts
+                 from t in p.Tags
+                 where t.Name == "Tag1"
+                 select p;</pre></div>
+و یا :<br><div dir="ltr" align="left"><pre language="CSharp" name="code"> var posts = ctx.Tags.Where(x =&gt; x.Name == "Tag1").SelectMany(x =&gt; x.BlogPosts);</pre></div><span></span></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1860.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>به روز رسانی ساده‌تر اجزاء ارتباطات در EF Code first به کمک GraphDiff</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2498.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>شروع به کار با EF Core 1.0 - قسمت 8 - بررسی رابطه‌ی Many-to-Many</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3237.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>پیاده سازی SoftDelete در EF Core</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1227.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بررسی خطای cycles or multiple cascade paths و یا cyclical reference در EF Code first</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2304.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>توسعه سیستم مدیریت محتوای DNTCms - قسمت اول</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1811.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>پردازش‌های Async در Entity framework 6</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1817.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>روش‌هایی برای بهبود سرعت برنامه‌های مبتنی بر Entity framework</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1235.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>بررسی تفصیلی رابطه Many-to-Many در EF Code first</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2498.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>شروع به کار با EF Core 1.0 - قسمت 8 - بررسی رابطه‌ی Many-to-Many</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1235.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>بررسی تفصیلی رابطه Many-to-Many در EF Code first</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهراد</strong>  در  <span dir='ltr'>۱۳۹۱/۱۲/۰۴ ۱۳:۲۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>با سلام؛ اگر بخواهیم به جدول tagblogpost یک آیتم دیگه اضافه کنیم مثلا تاریخ رو به این جدول اضافه کنیم باید به چه شکل این کار رو انجام دهیم؟<br></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۱/۱۲/۰۴ ۱۳:۵۷</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>پشتیبانی نمی‌شود. این جدول واسط در رابطه many-to-many به صورت داخلی توسط EF مدیریت می‌شود و از دسترس برنامه نویس خارج است.<br>
+
+
+البته یک راه حل برای آن <a href="http://stackoverflow.com/questions/7050404/create-code-first-many-to-many-with-additional-fields-in-association-table/7053393#7053393">در اینجا</a>  مطرح شده. رابطه دیگر many-to-many نیست. دو رابطه one-to-many تشکیل شده به جدول واسط.<br></div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>حسین</strong>  در  <span dir='ltr'>۱۳۹۱/۱۲/۰۵ ۱۳:۵۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام . یه سوالی که به نظرم رسید و شما نگفتین رو می‌خوام بپرسم. الان توی این مثال اگه ما بخوایم به یه پست جدید تگی رو که موجوده اختصاص بدیم باید چی کار کنیم چون اگه به این صورت عمل کنیم <br><div dir="ltr" align="left"><pre language="CSharp" name="code">post1.Tags.Add(tag);</pre></div>
+
+
+
+باید مشخص بشه این تگ یه new object&nbsp; هستش یا خیر یا تگی هست که یبار از طریق context انتخاب شده و داخل حافظه موجوده . اگه این تگ قبلا از طریق context آورده شده باشه آیا به صورت تگی که ازقبل در دیتابیس موجوده به پست مورد نظر تخصیص داده میشه؟<br><br></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۱/۱۲/۰۵ ۱۴:۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>توضیح دادم با مثال:&nbsp; «... در مثالی دیگر اگر یک برنامه ASP.NET را درنظر بگیریم&nbsp; ...»<br>
+
+
+
+
+
+
+
+
+
+
+
+
+listOfActualTags از بانک اطلاعاتی دریافت شده؛ بر اساس مواردی که موجود بوده. <br>
+
+
+
+
+
+
+به این ترتیب چون این تگ‌ها به سیستم ردیابی EF وارد می‌شوند و همچنین post1.Tags.Clear در ابتدای کار فراخوانی شده، استفاده از متد (post1.Tags.Add(item سبب ثبت مورد تکراری نخواهد شد. <br>
+
+
+
+کلا EF هر آیتمی رو که Id آن‌را از طریق دریافت اطلاعات از بانک اطلاعاتی در سیستم ردیابی خودش داشته باشه، جدید و تکراری ثبت نمی‌کنه. برای نمونه در حالت new Tag استفاده شده، این موارد جدید ثبت می‌شوند چون Id از قبل ثبت شده‌ای ندارند.<br>
+
+برای توضیحات بیشتر مراجعه کنید به مطلب <a href="www.dntips.ir-posts-926.html">نحوه استفاده از کلیدهای خارجی در EF</a>. (حتی می‌شود یک شیء را بدون واکشی از دیتابیس به سیستم ردیابی وارد کرد؛ البته اگر Id آن‌را داشته باشید)</div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۹۱/۱۲/۲۸ ۲۳:۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام آقای نصیری بنده یه سوال داشتم بهترین روش برای پیاده سازی رابطه n به m برای طراحی صفحه ادمین چیه؟ببنید بنده&nbsp; تویه قسمت ادمین سایت یک صفحه برای هر جدول طراحی میکنم که از طریق اون بتونم اطلاعات جدول رو حذف و یا بروزرسانی و یا رکورد جدید وارد کنم حالا برای طراحی صفحه ای که جداول اون رابطه n به m دارن دچار مشکل شدم .مثلا فرض بکنید که جدول پست 1000 رکورد داره و جدول tags هم 500 رکورد .حالا برای وارد کردن یک رکورد در داخل جدول رابط باید ID یک رکورد پست و همچنین ID یک رکورد tags رو تویه جدول رابط قرار بدیم بنده خودم از dropdownlist استفاده کردم برای اینکار که چون تعداد رکورد‌های خیلی زیاده این روش جواب گو نیست به نظر شما بهترین روش چیه؟ اگه منظورم رو متوجه نشدید بگید&nbsp; توضیح بیشتری بدم.ممنون<br></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۱/۱۲/۲۸ ۲۳:۹</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>من در سایت جاری برای تعریف روابط چند به چند از <a href="https://github.com/hailwood/jQuery-Tagit">افزونه TagIt</a>  استفاده کردم.<br></div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>ناصر طاهری</strong>  در  <span dir='ltr'>۱۳۹۲/۰۳/۱۸ ۱:۲۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام <br>
+
+
+
+در قسمت :<br><div dir="ltr" align="left"><pre language="CSharp" name="code">//فقط موارد جدید به تگ‌ها و ارتباطات موجود اضافه می‌شوند
+foreach (var tag in data.Tags)
+{
+     if (!listOfActualTagNames.Contains(tag.ToLowerInvariant().Trim()))
+     {
+            _tag.Add(new Tag { Title = tag.Trim() });
+      }
+}
+ _uow.SaveChanges(); // ثبت موارد جدید</pre></div><br>
+
+
+
+فقط تگ‌ها در جدول خودشون ذخیره میشن و ارتباطی با پست مربوطه ایجاد نمیشه.<br>
+
+
+
+آیا نباید به کد زیر تغییر داد؟<br><div dir="ltr" align="left"><pre language="CSharp" name="code">if (!listOfActualTagNames.Contains(tag.ToLowerInvariant().Trim()))
+ {
+      var tags = new Tag { Title = tag.Trim() };
+       _tag.Add(tags);
+       posts.Tags.Add(tags);
+  }</pre></div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۲/۰۳/۱۸ ۱۰:۷</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>درسته. اصلاحیه کدهای مطلب فوق:<br><div dir="ltr" align="left"><pre language="CSharp" name="code">var newTag = ctx.Tags.Add(new Tag { Name = tag.Trim() });
+post1.Tags.Add(newTag);</pre></div></div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مسعود</strong>  در  <span dir='ltr'>۱۳۹۲/۰۹/۲۳ ۱۷:۱۹</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div> <div>فرض کنید من لازم دارم در یک برنامه مدیریت آزمایشگاه؛ کاربر بتونه ساختار تستها رو تعریف کنه و بگه اون تست چه پارامترهایی داره و مقادیر مجاز هر پارامتر چی‌ها هست و بعدش بر اساس این ساختار تعریف شده، مقادیر مشاهده شده در آزمایش واقعی رو برای این تست ثبت کنه بنابر این من این کلاسها رو طراحی کرده ام:</div> <div> <img src="data:image/JPG;base64,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b9X1D5dP0/7FGeRdaiM5HUFYVbcc9w5jK5HBIK1ZsdD03Tp2uLa0QXTLse6kJkndcg4aViXYcDqTjAHYVoUBzQjsr+v+Rkw+H7fz459QubjVJ4mDRPeFSsZByCsaKqBgc4fbu5Izjitaq99dfYrOS4FvPcMuAsMCbndiQAB2GSRySFHUkAEivoWp/wBt+HtM1byfJ+3WkVz5W7ds3oG25wM4zjOBQTKTluaFFFFBIUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAZOqwy2k/8AbVpG8stvCyT28aktcxZ3YUDrIpBKZyPmdeN+5dOGaK4gjngkSWKRQ6SIwZWUjIII6gin1jSf8SPUWn6abeSIjIv/ACwuHfG/HpIzKDjo3zYO92AaL31br/Wn9enY2aKKKDMKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAxvC//ACCZ/wDsI33/AKVS1s1jeF/+QTP/ANhG+/8ASqWtmg0rfxJerCiiigzCiiigAooooAKKKKACiiigAooooAKKKhu7y2sLZ7m8uYba3TG6WZwirk4GSeByQKBpNuyJqZNNFbwSTzyJFFGpd5HYKqqBkkk9ABWT/aOp6lxpdn9mhP8Ay96jEy5/3YMq55BB3mPGQRvFPh8PWgnjuL2W41G5jYOsl5JvVXB+V1jGI0YdAyqD15ySSF8ij8b/AK/r5+Qz+3nvfl0axmvSf+W8oa3t8diJGUlwRnBjVx0zgEGj+xbm+/5DWofao+n2W2jNvAw/213Mz5yQVLbCCMpkZrZooD2lvgVvz/r0sQ2lnbWFsltZ20NtbpnbFCgRVycnAHA5JNTUUUENtu7CiiigQVj+E7G40zwbodheR+XdWun28MybgdrrGoYZHBwQelbFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFMmhiuIJIJ40likUo8bqGVlIwQQeoIp9FADHmiieNJJERpW2RhmALtgtgepwCfoD6U+quoWMWo2bW0rOoLI6uhG5HRgyMM5GQyg4IIOOQRxUOl30tyktveKkd/bsVmjUEBlyQkig5+VwMjk4OVJJVqCuW8bo0KKKKCQooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAMbwv8A8gmf/sI33/pVLWrPI0NvLKkMk7ohZYoyoZyB90biBk9OSB6kVleF/wDkEz/9hG+/9Kpa2aDSt/El6s5/wp4nPiizuLj+zJ7JYpTGpknhkEgySpBjduqbH5ABEilS6kMegoooMwooooAKKKKACiiigAoorPvtbsNOnW3nmd7krvFvbxPPLsyRv8tAWC5GN2MZ4zk0DjFydkjQqlf6vp+l+WL28hheXPlRs3zykY4RPvOeRwoJJIHeqf8AxO9U/wCoNbH/AHJrpv8A0KOPkf8ATTcD/AauWGk2WmeYbWDbJLjzZndpJZcZxvkYlmxkgZJwOBxQXyxj8T+7/P8A4cp/aNX1Ti0h/sy0P/LxcrunceqRdEyCCGkOQQQ0dTWmgafa3KXjw/ar9c4vbr95MMjB2sfuA5PyptUbjgDNadFAOo7WjogooooMwooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKK5a50jTdV8a3/wDaOnWl55enWmz7RCsm3MlxnG4HGcD8qicuSPMXCCle72OporA/4RHw1/0L2k/+AUf/AMTR/wAIj4a/6F7Sf/AKP/4msPrS7F8lPu/u/wCCb9FYH/CI+Gv+he0n/wAAo/8A4mj/AIRHw1/0L2k/+AUf/wATR9aXYOSn3f3f8E36z9TsZbh7e7tGRb20YtFvJCyKRho3I5CtweM4ZUbDbcGh/wAIj4a/6F7Sf/AKP/4mj/hEfDX/AEL2k/8AgFH/APE0fWl2HFQi7pv7v+CLZ+NfDd48EH9tafBfTFU+wzXUa3CSHjymj3ZDg/KV654rer5+/wCFF61/wsT+2vN0X+x/7W+1/Zdz58jzd+zZ5e37vGM47dK9i/4RHw1/0L2k/wDgFH/8TVSxEVtqQowd7u39epv0Vgf8Ij4a/wChe0n/AMAo/wD4mj/hEfDX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31rqd5f397b3MtxDDCBb2zQqqxtIe7vknzD6dK167KcXGKTIqtOWjvt+QUUUVZmFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAf/9k=" alt="" style=" display: block; margin-left: auto; margin-right: auto; cursor: default;"> </div> <div> <div>تا اینجا ساختار تست که شامل چند پارامتر با مقادیر مجازشون هست رو میشه با این کلاسها تعریف کرد.</div> <div>حالا فرض کنید برای یک تست تعریف شده با این ساختار میخواهیم مقادیر مشاهده شده واقعی رو ثبت کنیم(ActualTest,ActualParameterValue). وقتی بخوام رنگ خون رو از لیست رنگهای مجاز تعریف شده برای این پارامتر انتخاب کنم، قاعدتا بایستی id مربوط به جدول واسط(TestAcceptableValueInTestParameter) به عنوان id رنگ انتخاب شده در جدول مقدار واقعی پارامتر ثبت بشه. به عبارت دیگه من با id کلاسی کار دارم که اگر با روش many-to-many &nbsp;ذکر شده برای EF کار کنم، همچین کلاسی جزو مدلهای من نیست. آیا EF راهکاری برای این موارد داره؟</div> <div>ممنون.</div> </div> <div> <span>&nbsp;</span> <br> </div> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۲/۰۹/۲۳ ۱۸:۲۹</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>چرا رابطه TestParameter&nbsp; و TestAcceptedValue به صورت many-to-many تعریف شده؟ رنگ خون چندین مقدار دارد، اما عکس آن صادق نیست. یعنی یک رنگ خون را نمی‌شود به چندین TestParameter مختلف مانند قند خون یا سطح فلان هورمون انتساب داد. <br>
+
+
+
+مثال ساده آن کاربر و نقش‌های او است. یک کاربر می‌تواند چندین نقش داشته باشد (نویسنده، ادیتور و غیره). یک نقش می‌تواند به چندین کاربر منتسب شود (مثلا نقش ادیتور را می‌شود به ده‌ها کاربر انتساب داد). یعنی می‌شود از هر طرف این رابطه، یک رکورد را به چندین رکورد طرف دیگر ربط منطقی داد. اما در حالت مداخل یک آزمایش و مقادیر مجاز جهت یک مدخل، اینچنین نیست و رابطه one-to-many است.  <br></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مسعود</strong>  در  <span dir='ltr'>۱۳۹۲/۰۹/۲۳ ۱۹:۵۹</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>فرض کنید آزمایش دیگری غیر از آزمایش خون تعریف شود، مثلا آزمایش ادرار؛ اونوقت این رنگ(و نه رنگ خون) در اونجا هم مورد استفاده پیدا میکند. بنابر این رابطه بایستی many-to-many باشد. &nbsp;یا حتی میتوان برای TestParameter واحد اندازه گیری(UOM) در نظر گرفت که برای آن هم همین مساله رخ میدهد(چون هر پارامتر تست میتواند چندین واحد اندازه گیری داشته باشد و هر واحد اندازه گیری در مورد چندین پارامتر تست استفاده شود).</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۲/۰۹/۲۳ ۲۱:۵</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>- در مورد واحدهای اندازه‌گیری منطقی است.<br>
+- « آیا EF راهکاری برای این موارد داره؟&nbsp;» مراجعه کنید به <a href="www.dntips.ir-posts-1235.html">پاسخ اولین نظر</a>   مطرح شده. کمی بالاتر.<br></div>
+</div></li></ul></li></ul></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>احمدعلی شفیعی</strong>  در  <span dir='ltr'>۱۳۹۳/۰۹/۱۹ ۰:۱۹</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام. من ساختاری شبیه به این دارم:<div> <div align="left" dir="ltr"> <pre language="CSharp" name="code">public class Person
+{
+        //...
+        public virtual IList&lt;Center&gt; PreferedCenters { get; set; }
+        public virtual IList&lt;Center&gt; ActiveCenters { get; set; }
+
+        public Person()
+        {
+            PreferedCenters = new List&lt;Center&gt;();
+            ActiveCenters = new List&lt;Center&gt;();
+        }
+}</pre> </div>
+
+
+
+
+
+
+و کلا Center هم به شکل زیره:</div> <div> <div align="left" dir="ltr"> <pre language="CSharp" name="code">public class Center
+{
+    //...
+    public virtual IList&lt;Person&gt; Persons { get; set; }
+
+    public Center()
+    {
+        Persons = new List&lt;Person&gt;();
+    }
+}</pre> </div>
+
+
+
+
+
+
+مشکلی که دارم اینه که منطقا باید دوتا رابطه‌ی Many-to-many تشکیل بشه: ActiveCenters و&nbsp;PreferedCenters. ولی توی جدول خروجی EF، فقط ستونی به اسم Center_ID ساخته می‌شه و وقتی هم که می‌خوام به سیستم چیزی اضافه کنم اروری شبیه به این می‌گیرم:&nbsp;</div> <div align="left" dir="ltr"> <pre language="CSharp" name="code">An unhandled exception of type 'System.InvalidOperationException' occurred in EntityFramework.dll
+
+Additional information: Multiplicity constraint violated. The role 'Center_Persons_Source' of the relationship 'Yarigaran.DataLayer.Center_Persons' has multiplicity 1 or 0..1.</pre> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۳/۰۹/۱۹ ۰:۵۵</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>- به ازای هر سر رابطه‌ی چند به چند، باید یک ICollection در دو طرف وجود داشته باشد (ICollection حالت پیش‌فرض EF است و نه IList). در حالت شما، 2 مورد در کلاس شخص و دو مورد در کلاس مرکز. در غیر اینصورت رابطه‌ها یک به چند تفسیر می‌شوند. به علاوه در این حالت مشخص نیست که هر خاصیت به کدام خاصیت باید متصل شود چون InverseProperty ذکر نشده‌است. <br>
+- زمانیکه بیش از یک ستون یک جدول قرار است با یک جدول خاص دیگر رابطه‌ی چند به چند داشته باشند، نیاز به چندین جدول واسط خواهد بود <a href="http://stackoverflow.com/a/9439052">که باید به صورت صریح مشخص شوند</a>:<br> <div dir="ltr" align="left"> <div dir="ltr" align="left"> <pre language="CSharp" name="code">modelBuilder.Entity&lt;Person&gt;()
+    .HasMany(u =&gt; u.PreferedCenters)
+    .WithMany(t =&gt; t.Persons)
+    .Map(x =&gt;
+    {
+        x.MapLeftKey("PersonId");
+        x.MapRightKey("CenterId");
+        x.ToTable("Center_Persons1"); // جدول واسط یک
+    });
+
+modelBuilder.Entity&lt;Person&gt;()
+    .HasMany(u =&gt; u.ActiveCenters)
+    .WithMany(t =&gt; t.Persons)
+    .Map(x =&gt;
+    {
+        x.MapLeftKey("PersonId");
+        x.MapRightKey("CenterId");
+        x.ToTable("Center_Persons2"); // جدول واسط دو
+    });</pre> </div> </div></div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>بالازاده</strong>  در  <span dir='ltr'>۱۳۹۴/۰۳/۰۲ ۱۸:۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>با توجه به مطالب بیان شده در پیاده سازی واحد کار در&nbsp;<a href="www.dntips.ir-posts-842.html">اینجا</a>&nbsp;و مطالب بیان شده در این قسمت، آیا سرویس‌های ایجاد شده می‌توانند در لایه سرویس به یکدیگر دسترسی داشته باشند؟ به صورت زیر:<div> <div align="left" dir="ltr" style="direction: ltr;"> <pre language="CSharp" name="code">    public class EfTagService : ITagService
+    {
+        IUnitOfWork _uow;
+        readonly IDbSet&lt;Tag&gt; _tags;
+
+        public EfTagService(IUnitOfWork uow)
+        {
+            _uow = uow;
+            _tags = _uow.Set&lt;Tag&gt;();
+        }
+
+        public bool CreateTag(Tag tag)
+        {
+            // ...
+        }
+
+        public List&lt;Tag&gt; GetTagsByName(string[] tagNames)
+        {
+            // return ...
+        }
+
+    }</pre> </div>
+و استفاده از آن در EfPostService به صورت زیر:</div> <div> <div align="left" dir="ltr" style="direction: ltr;"> <pre language="CSharp" name="code">public class EfPostService : IPostService
+{
+        IUnitOfWork _uow;
+        readonly IDbSet&lt;Post&gt; _posts;
+      
+         //این قسمت
+        private EfTagService _tagService;
+
+
+        public EfPostService(IUnitOfWork uow)
+        {
+            _uow = uow;
+            _posts = uow.Set&lt;Post&gt;();
+
+             //این قسمت
+            _tagService = new EfTagService(_uow);
+        }
+
+        public void AddTagsToPost(Post post, string[] tagsList)
+        {
+            if (post.Tags != null &amp;&amp; post.Tags.Any())
+                post.Tags.Clear();
+
+             //این قسمت
+            var listOfActualTags = _tagService.GetTagsByName(tagsList);
+            var listOfActualTagNames = listOfActualTags.Select(x =&gt; x.Name.ToLower()).ToList();
+
+            foreach (var tag in tagsList)
+            {
+                if (!listOfActualTagNames.Contains(tag.ToLowerInvariant().Trim()))
+                {
+                    Tag newTag = new Tag() { Name = tag };
+                 
+                      //این قسمت
+                    _tagService.CreateTag(newTag);
+
+                    post.Tags.Add(newTag);
+                }
+            }
+            // ...
+         
+        }
+}</pre> </div>
+آیا پیاده سازی فوق صحیح است؟</div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۴/۰۳/۰۲ ۱۹:۵۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>- در مطلب «<a href="https://www.dntips.ir/courses/topic/5/ec4e34e9-1ccf-4791-aa33-4e7bec09d674">مراحل Refactoring یک قطعه کد برای اعمال تزریق وابستگی‌ها</a>» این موضوع بهتر بررسی شده‌است.<br>
+
+
+-
+        <span> </span>new EfTagService<span> </span>را حذف کنید. سپس سازنده‌ی کلاس را به نحو ذیل تغییر دهید:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">public EfPostService(IUnitOfWork uow, ITagService tagService)</pre> </div>
+
+
+IoC Container مورد استفاده، بر اساس تنظیمات اولیه‌ی خودش، وهله‌ی مورد نیاز ITagService<span> </span>را تامین خواهد کرد.</div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهدی پایروند</strong>  در  <span dir='ltr'>۱۳۹۴/۰۶/۲۷ ۱۹:۴۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>در صورتی که بخواهیم در جدول واسط یک مقداری را نگهداریم طرز مپ کردن به چه شکل است:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">public class AA
+{
+     public virtual ICollection&lt;CC&gt; Cs { get; set; }
+}
+
+public class BB
+{
+    public virtual ICollection&lt;CC&gt; Cs { get; set; }
+}
+
+public class CC
+{
+        public virtual AA AA { get; set; }
+        public virtual long AAId { get; set; }
+
+        public virtual BB BB { get; set; }
+        public virtual long BBId { get; set; }
+
+        public virtual string Value{get;set}
+}</pre> </div> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۴/۰۶/۲۷ ۱۹:۵۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>«<a href="www.dntips.ir-posts-1235.html">پشتیبانی نمی‌شود.</a>»</div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>هادی خزایی</strong>  در  <span dir='ltr'>۱۳۹۸/۰۳/۰۶ ۱۱:۳۰</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>با سلام؛ با توجه به تصویر ارسالی بنده، یک ارتباط چند به چند بین جدول کاربران و واحد‌ها دارم و می‌خواستم یک پرس و جو بنویسم که تمام کاربرانی را که <b>هیچ واحدی ندارند (هنوز ارتباط به وجود نیومده)</b> برگرداند (در entity framwork core).<p style="margin-left: auto; margin-right: auto;"> <img style="display: block; margin-left: auto; margin-right: auto; cursor: nw-resize;" src="data:image/png;base64,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"> </p></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۸/۰۳/۰۶ ۱۱:۵۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div>در EF Core دسترسی به جدول join وجود دارد: «<a href="www.dntips.ir-posts-2498.html">شروع به کار با EF Core 1.0 - قسمت 8 - بررسی رابطه‌ی Many-to-Many</a>»</div> <div> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">var usersWithoutUnits = ctx.Users.Where(x =&gt; !x.UsersJoinUnits.Any(y =&gt; y.UserId == x.UserId)).ToList();</pre> </div> </div></div>
+</div></li></ul></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

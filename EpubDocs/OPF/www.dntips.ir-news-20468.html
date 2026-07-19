@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫مدیریت لغو عملیات در برنامه‌نویسی ناهمگام با Task.FromCanceled</title>     <meta name="description" content="&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در برنامه‌نویسی ناهمگام (Asynchronous Programming) در سی‌شارپ (#C)، مدیریت صحیح لغو عملیات (Cancellation) از اهمیت ویژه‌ای برخوردار است. بسیاری از توسعه‌دهندگان با مفهوم &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; و الگوهای پایه لغو آشنا هستند، اما &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; ابزاری کمتر شناخته شده ولی قدرتمند است که می‌تواند به بهبود چشمگیر کدهای ناهمگام شما کمک کند. این مقاله به بررسی عمیق &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt;، کاربردهای آن و بهترین روش‌های استفاده از آن برای توسعه‌دهندگان می‌پردازد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt;&lt;strong&gt;چیست؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; یک متد استاتیک (Static Method) در کتابخانه موازی وظایف (Task Parallel Library - TPL) است که به شما امکان می‌دهد یک شیء &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task&lt;/code&gt; را در وضعیت لغو شده (Canceled State) ایجاد کنید. این متد به طور خاص برای سناریوهایی طراحی شده است که نیاز به ایجاد صریح یک تسک لغو شده دارید، بدون اینکه یک عملیات واقعی شروع شده و سپس لغو شود. دو نسخه از این متد وجود دارد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static Task FromCanceled(CancellationToken cancellationToken)&lt;/code&gt;&lt;/li&gt;&lt;li&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static Task&amp;lt;TResult&amp;gt; FromCanceled&amp;lt;TResult&amp;gt;(CancellationToken cancellationToken)&lt;/code&gt;&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;نسخه اول برای تسک‌هایی استفاده می‌شود که مقداری را برنمی‌گردانند، در حالی که نسخه دوم برای تسک‌هایی است که نوع خاصی از نتیجه را برمی‌گردانند. &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;cancellationToken&lt;/code&gt; که به این متد پاس داده می‌شود، توکنی است که علت لغو را نشان می‌دهد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;کاربردهای پایه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یکی از متداول‌ترین سناریوها برای &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt;، بررسی زودهنگام لغو قبل از شروع یک عملیات پرهزینه یا پیچیده است. این رویکرد به شما امکان می‌دهد از انجام کارهای غیرضروری جلوگیری کرده و منابع سیستم را آزاد کنید. به عنوان مثال، در یک متد ناهمگام، می‌توانید وضعیت &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; را در ابتدای کار بررسی کنید و در صورت درخواست لغو، یک تسک لغو شده را برگردانید:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task ProcessDataAsync(CancellationToken cancellationToken)
+{
+    if (cancellationToken.IsCancellationRequested)
+    {
+        return Task.FromCanceled(cancellationToken);
+    }
+    
+    // ادامه با پردازش عادی
+    return await DoWorkAsync();
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همین الگو برای تسک‌هایی که یک نتیجه خاص را برمی‌گردانند نیز قابل استفاده است. در این حالت، شما باید نوع نتیجه را مشخص کنید:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;string&amp;gt; GetDataAsync(CancellationToken cancellationToken)
+{
+    if (cancellationToken.IsCancellationRequested)
+    {
+        return Task.FromCanceled&amp;lt;string&amp;gt;(cancellationToken);
+    }
+    
+    return await FetchDataAsync();
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;با استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;await Task.FromCanceled(...)&lt;/code&gt;، کد فراخواننده (Caller) می‌تواند لغو را به درستی مدیریت کند و یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;OperationCanceledException&lt;/code&gt; را دریافت نماید.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;موارد استفاده رایج&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; در سناریوهای مختلفی می‌تواند مفید باشد:&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;بررسی لغو زودهنگام (Early Cancellation Check):&lt;/strong&gt; همانطور که پیشتر اشاره شد، این یک الگوی قدرتمند برای جلوگیری از شروع عملیات‌های سنگین است. به عنوان مثال، قبل از بارگذاری یک مجموعه داده بزرگ، می‌توانید بررسی کنید که آیا درخواست لغو وجود دارد یا خیر:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;DataResult&amp;gt; ProcessLargeDatasetAsync(CancellationToken cancellationToken)
+{
+    if (cancellationToken.IsCancellationRequested)
+    {
+        return await Task.FromCanceled&amp;lt;DataResult&amp;gt;(cancellationToken);
+    }
+
+    var data = await LoadLargeDatasetAsync();
+    return new DataResult(data);
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;پردازش مشروط (Conditional Processing):&lt;/strong&gt; در مواقعی که نیاز به پردازش مشروط داده‌ها بر اساس معیارهای خاصی دارید و در صورت عدم برآورده شدن شرایط، باید یک لغو را اعلام کنید، این متد کارآمد است. به عنوان مثال، اگر نوع گزارش پشتیبانی نشود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Report&amp;gt; GenerateReportAsync(ReportType type, CancellationToken cancellationToken)
+{
+    if (!IsReportTypeSupported(type))
+    {
+        return await Task.FromCanceled&amp;lt;Report&amp;gt;(cancellationToken);
+    }
+
+    return await GenerateReportInternalAsync(type);
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;سناریوهای اعتبارسنجی (Validation Scenarios):&lt;/strong&gt; هنگام اعتبارسنجی پارامترهای ورودی، اگر ورودی نامعتبر باشد، می‌توانید یک تسک لغو شده را برگردانید. این روش یک راه تمیز برای مدیریت خطاهای اعتبارسنجی است که به صورت مفهومی به لغو عملیات جاری نزدیک هستند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;ValidationResult&amp;gt; ValidateDataAsync(DataModel data, CancellationToken cancellationToken)
+{
+    if (data == null)
+    {
+        return await Task.FromCanceled&amp;lt;ValidationResult&amp;gt;(cancellationToken);
+    }
+
+    return await PerformValidationAsync(data);
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الگوهای پیشرفته&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; می‌تواند در کنار الگوهای پیچیده‌تر برنامه‌نویسی ناهمگام نیز استفاده شود:&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;زنجیره‌سازی تسک‌ها (Chaining Tasks):&lt;/strong&gt; در سناریوهایی که یک عملیات اولیه ممکن است لغو شود و شما نیاز به ارائه یک پاسخ لغو شده دارید، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; راهکاری مناسب است. این در بلوک‌های &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;catch&lt;/code&gt; برای مدیریت &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;OperationCanceledException&lt;/code&gt; مفید است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ProcessWithFallbackAsync(CancellationToken cancellationToken)
+{
+    try
+    {
+        return await PrimaryOperationAsync();
+    }
+    catch (OperationCanceledException)
+    {
+        return await Task.FromCanceled&amp;lt;Result&amp;gt;(cancellationToken);
+    }
+    catch (Exception)
+    {
+        return await FallbackOperationAsync();
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;فکتوری تسک سفارشی (Custom Task Factory):&lt;/strong&gt; می‌توانید یک فکتوری سفارشی برای ایجاد تسک‌ها طراحی کنید که به طور خودکار &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; را در صورت لغو &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; استفاده کند. این به ایجاد کدی تمیزتر و قابل استفاده مجدد کمک می‌کند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class CustomTaskFactory
+{
+    public static async Task&amp;lt;T&amp;gt; CreateTaskAsync&amp;lt;T&amp;gt;(
+        Func&amp;lt;Task&amp;lt;T&amp;gt;&amp;gt; operation,
+        CancellationToken cancellationToken)
+    {
+        if (cancellationToken.IsCancellationRequested)
+        {
+            return await Task.FromCanceled&amp;lt;T&amp;gt;(cancellationToken);
+        }
+        try
+        {
+            return await operation();
+        }
+        catch (OperationCanceledException)
+        {
+            return await Task.FromCanceled&amp;lt;T&amp;gt;(cancellationToken);
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;الگوی تایم‌اوت (Timeout Pattern):&lt;/strong&gt; با ترکیب &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationTokenSource&lt;/code&gt; و &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; می‌توان یک الگوی تایم‌اوت قدرتمند پیاده‌سازی کرد. &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationTokenSource&lt;/code&gt; می‌تواند برای لغو خودکار پس از یک مدت زمان مشخص پیکربندی شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ExecuteWithTimeoutAsync(
+    Func&amp;lt;Task&amp;lt;Result&amp;gt;&amp;gt; operation,
+    TimeSpan timeout)
+{
+    using var cts = new CancellationTokenSource(timeout);
+
+    try
+    {
+        return await operation();
+    }
+    catch (OperationCanceledException)
+    {
+        return await Task.FromCanceled&amp;lt;Result&amp;gt;(cts.Token);
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;بهترین روش‌ها&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای استفاده مؤثر از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; و اطمینان از عملکرد صحیح مدیریت لغو، رعایت بهترین روش‌ها ضروری است:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;همیشه &lt;/strong&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt;&lt;strong&gt; را ارسال کنید:&lt;/strong&gt; همواره همان &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; را که برای ایجاد تسک لغو شده استفاده شده است، به متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; ارسال کنید. ارسال یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; جدید یا خالی، می‌تواند منجر به رفتار غیرمنتظره و عدم ردیابی صحیح لغو شود. این کار به سیستم لغو امکان می‌دهد که به درستی تشخیص دهد کدام عملیات لغو شده است.&lt;/li&gt;&lt;/ul&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// خوب
+return Task.FromCanceled(cancellationToken);
+
+// بد
+return Task.FromCanceled(new CancellationToken());&lt;/pre&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;مدیریت graceful لغو:&lt;/strong&gt; هنگام وقوع لغو، پیام‌های خطا یا لاگ‌های (Log) معنی‌دار ارائه دهید. این کار به اشکال‌زدایی (Debugging) و درک وضعیت برنامه در زمان لغو کمک می‌کند. لاگ‌کردن اطلاعات در مورد لغو، به تیم توسعه‌دهنده کمک می‌کند تا الگوهای لغو را شناسایی کرده و رفتار برنامه را در سناریوهای مختلف لغو بهبود بخشد.&lt;/li&gt;&lt;/ul&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ProcessWithMessageAsync(CancellationToken cancellationToken)
+{
+    if (cancellationToken.IsCancellationRequested)
+    {
+        _logger.LogInformation(&amp;quot;Operation canceled by user&amp;quot;);
+        return await Task.FromCanceled&amp;lt;Result&amp;gt;(cancellationToken);
+    }
+
+    return await ProcessAsync();
+}&lt;/pre&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;استفاده با &lt;/strong&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.WhenAll&lt;/code&gt;&lt;strong&gt;:&lt;/strong&gt; هنگام کار با چندین تسک به صورت همزمان (مثلاً با &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.WhenAll&lt;/code&gt;)، استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; می‌تواند به شما کمک کند تا در صورت لغو یکی از تسک‌ها، کل مجموعه تسک‌ها را لغو شده اعلام کنید. این تضمین می‌کند که حتی اگر یک تسک لغو شود، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.WhenAll&lt;/code&gt; نیز به درستی با یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;OperationCanceledException&lt;/code&gt; تکمیل شود.&lt;/li&gt;&lt;/ul&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result[]&amp;gt; ProcessMultipleAsync(CancellationToken cancellationToken)
+{
+    var tasks = new List&amp;lt;Task&amp;lt;Result&amp;gt;&amp;gt;();
+
+    foreach (var item in items)
+    {
+        if (cancellationToken.IsCancellationRequested)
+        {
+            return await Task.FromCanceled&amp;lt;Result[]&amp;gt;(cancellationToken);
+        }
+
+        tasks.Add(ProcessItemAsync(item));
+    }
+
+    return await Task.WhenAll(tasks);
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مثال کاربردی در دنیای واقعی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای درک بهتر، یک مثال عملی از خط لوله پردازش داده (Data Processing Pipeline) را در نظر بگیرید. در این سناریو، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; می‌تواند در مراحل مختلف برای مدیریت اعتبارسنجی (Validation) و لغو عملیات استفاده شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class DataProcessingPipeline
+{
+    private readonly ILogger&amp;lt;DataProcessingPipeline&amp;gt; _logger;
+    
+    public async Task&amp;lt;ProcessedData&amp;gt; ProcessDataAsync(
+        RawData data,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            // اعتبارسنجی ورودی
+            if (!IsValid(data))
+            {
+                _logger.LogWarning(&amp;quot;Invalid data received&amp;quot;);
+                return await Task.FromCanceled&amp;lt;ProcessedData&amp;gt;(cancellationToken);
+            }
+            
+            // پردازش داده
+            var result = await TransformDataAsync(data);
+            
+            // اعتبارسنجی خروجی
+            if (!IsValid(result))
+            {
+                _logger.LogError(&amp;quot;Invalid result generated&amp;quot;);
+                return await Task.FromCanceled&amp;lt;ProcessedData&amp;gt;(cancellationToken);
+            }
+            
+            return result;
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogInformation(&amp;quot;Operation canceled&amp;quot;);
+            return await Task.FromCanceled&amp;lt;ProcessedData&amp;gt;(cancellationToken);
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این مثال، اگر داده‌های ورودی نامعتبر باشند یا داده‌های خروجی پس از پردازش نامعتبر شوند، یک تسک لغو شده برگردانده می‌شود. همچنین، در بلوک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;catch&lt;/code&gt;، هر &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;OperationCanceledException&lt;/code&gt; گرفته شده و یک تسک لغو شده مجدداً برگردانده می‌شود، که نشان‌دهنده لغو عملیات توسط سیستم یا کاربر است. این رویکرد به شما امکان می‌دهد تا یک مدل یکپارچه و قابل پیش‌بینی برای مدیریت لغو در سراسر خط لوله پردازش خود داشته باشید.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; ابزاری قدرتمند و انعطاف‌پذیر در جعبه ابزار برنامه‌نویسی ناهمگام در سی‌شارپ است. این متد راهی تمیز و صریح برای مدیریت سناریوهای لغو و ایجاد تسک‌های لغو شده فراهم می‌کند. گرچه ممکن است در هر عملیات ناهمگام ضروری نباشد، اما درک زمان و نحوه استفاده از آن می‌تواند به ایجاد کدی مقاوم‌تر، قابل نگهداری‌تر و با مدیریت خطای بهتر منجر شود. با استفاده صحیح از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt;، توسعه‌دهندگان می‌توانند تجربه کاربری بهتری ارائه دهند، زیرا برنامه‌ها می‌توانند به درخواست‌های لغو به طور مؤثر پاسخ دهند و از هدر رفتن منابع جلوگیری کنند. به خاطر داشته باشید که همیشه &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; اصلی را ارسال کنید، لغو را به صورت graceful مدیریت کنید و این ابزار را در سناریوهای اعتبارسنجی و خروج زودهنگام در نظر بگیرید.&lt;/div&gt;">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="مدیریت لغو عملیات در برنامه‌نویسی ناهمگام با Task.FromCanceled ">
+    <meta itemprop="description" content="&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در برنامه‌نویسی ناهمگام (Asynchronous Programming) در سی‌شارپ (#C)، مدیریت صحیح لغو عملیات (Cancellation) از اهمیت ویژه‌ای برخوردار است. بسیاری از توسعه‌دهندگان با مفهوم &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; و الگوهای پایه لغو آشنا هستند، اما &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; ابزاری کمتر شناخته شده ولی قدرتمند است که می‌تواند به بهبود چشمگیر کدهای ناهمگام شما کمک کند. این مقاله به بررسی عمیق &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt;، کاربردهای آن و بهترین روش‌های استفاده از آن برای توسعه‌دهندگان می‌پردازد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt;&lt;strong&gt;چیست؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; یک متد استاتیک (Static Method) در کتابخانه موازی وظایف (Task Parallel Library - TPL) است که به شما امکان می‌دهد یک شیء &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task&lt;/code&gt; را در وضعیت لغو شده (Canceled State) ایجاد کنید. این متد به طور خاص برای سناریوهایی طراحی شده است که نیاز به ایجاد صریح یک تسک لغو شده دارید، بدون اینکه یک عملیات واقعی شروع شده و سپس لغو شود. دو نسخه از این متد وجود دارد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static Task FromCanceled(CancellationToken cancellationToken)&lt;/code&gt;&lt;/li&gt;&lt;li&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static Task&amp;lt;TResult&amp;gt; FromCanceled&amp;lt;TResult&amp;gt;(CancellationToken cancellationToken)&lt;/code&gt;&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;نسخه اول برای تسک‌هایی استفاده می‌شود که مقداری را برنمی‌گردانند، در حالی که نسخه دوم برای تسک‌هایی است که نوع خاصی از نتیجه را برمی‌گردانند. &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;cancellationToken&lt;/code&gt; که به این متد پاس داده می‌شود، توکنی است که علت لغو را نشان می‌دهد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;کاربردهای پایه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یکی از متداول‌ترین سناریوها برای &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt;، بررسی زودهنگام لغو قبل از شروع یک عملیات پرهزینه یا پیچیده است. این رویکرد به شما امکان می‌دهد از انجام کارهای غیرضروری جلوگیری کرده و منابع سیستم را آزاد کنید. به عنوان مثال، در یک متد ناهمگام، می‌توانید وضعیت &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; را در ابتدای کار بررسی کنید و در صورت درخواست لغو، یک تسک لغو شده را برگردانید:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task ProcessDataAsync(CancellationToken cancellationToken)
+{
+    if (cancellationToken.IsCancellationRequested)
+    {
+        return Task.FromCanceled(cancellationToken);
+    }
+    
+    // ادامه با پردازش عادی
+    return await DoWorkAsync();
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همین الگو برای تسک‌هایی که یک نتیجه خاص را برمی‌گردانند نیز قابل استفاده است. در این حالت، شما باید نوع نتیجه را مشخص کنید:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;string&amp;gt; GetDataAsync(CancellationToken cancellationToken)
+{
+    if (cancellationToken.IsCancellationRequested)
+    {
+        return Task.FromCanceled&amp;lt;string&amp;gt;(cancellationToken);
+    }
+    
+    return await FetchDataAsync();
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;با استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;await Task.FromCanceled(...)&lt;/code&gt;، کد فراخواننده (Caller) می‌تواند لغو را به درستی مدیریت کند و یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;OperationCanceledException&lt;/code&gt; را دریافت نماید.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;موارد استفاده رایج&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; در سناریوهای مختلفی می‌تواند مفید باشد:&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;بررسی لغو زودهنگام (Early Cancellation Check):&lt;/strong&gt; همانطور که پیشتر اشاره شد، این یک الگوی قدرتمند برای جلوگیری از شروع عملیات‌های سنگین است. به عنوان مثال، قبل از بارگذاری یک مجموعه داده بزرگ، می‌توانید بررسی کنید که آیا درخواست لغو وجود دارد یا خیر:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;DataResult&amp;gt; ProcessLargeDatasetAsync(CancellationToken cancellationToken)
+{
+    if (cancellationToken.IsCancellationRequested)
+    {
+        return await Task.FromCanceled&amp;lt;DataResult&amp;gt;(cancellationToken);
+    }
+
+    var data = await LoadLargeDatasetAsync();
+    return new DataResult(data);
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;پردازش مشروط (Conditional Processing):&lt;/strong&gt; در مواقعی که نیاز به پردازش مشروط داده‌ها بر اساس معیارهای خاصی دارید و در صورت عدم برآورده شدن شرایط، باید یک لغو را اعلام کنید، این متد کارآمد است. به عنوان مثال، اگر نوع گزارش پشتیبانی نشود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Report&amp;gt; GenerateReportAsync(ReportType type, CancellationToken cancellationToken)
+{
+    if (!IsReportTypeSupported(type))
+    {
+        return await Task.FromCanceled&amp;lt;Report&amp;gt;(cancellationToken);
+    }
+
+    return await GenerateReportInternalAsync(type);
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;سناریوهای اعتبارسنجی (Validation Scenarios):&lt;/strong&gt; هنگام اعتبارسنجی پارامترهای ورودی، اگر ورودی نامعتبر باشد، می‌توانید یک تسک لغو شده را برگردانید. این روش یک راه تمیز برای مدیریت خطاهای اعتبارسنجی است که به صورت مفهومی به لغو عملیات جاری نزدیک هستند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;ValidationResult&amp;gt; ValidateDataAsync(DataModel data, CancellationToken cancellationToken)
+{
+    if (data == null)
+    {
+        return await Task.FromCanceled&amp;lt;ValidationResult&amp;gt;(cancellationToken);
+    }
+
+    return await PerformValidationAsync(data);
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الگوهای پیشرفته&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; می‌تواند در کنار الگوهای پیچیده‌تر برنامه‌نویسی ناهمگام نیز استفاده شود:&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;زنجیره‌سازی تسک‌ها (Chaining Tasks):&lt;/strong&gt; در سناریوهایی که یک عملیات اولیه ممکن است لغو شود و شما نیاز به ارائه یک پاسخ لغو شده دارید، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; راهکاری مناسب است. این در بلوک‌های &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;catch&lt;/code&gt; برای مدیریت &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;OperationCanceledException&lt;/code&gt; مفید است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ProcessWithFallbackAsync(CancellationToken cancellationToken)
+{
+    try
+    {
+        return await PrimaryOperationAsync();
+    }
+    catch (OperationCanceledException)
+    {
+        return await Task.FromCanceled&amp;lt;Result&amp;gt;(cancellationToken);
+    }
+    catch (Exception)
+    {
+        return await FallbackOperationAsync();
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;فکتوری تسک سفارشی (Custom Task Factory):&lt;/strong&gt; می‌توانید یک فکتوری سفارشی برای ایجاد تسک‌ها طراحی کنید که به طور خودکار &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; را در صورت لغو &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; استفاده کند. این به ایجاد کدی تمیزتر و قابل استفاده مجدد کمک می‌کند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class CustomTaskFactory
+{
+    public static async Task&amp;lt;T&amp;gt; CreateTaskAsync&amp;lt;T&amp;gt;(
+        Func&amp;lt;Task&amp;lt;T&amp;gt;&amp;gt; operation,
+        CancellationToken cancellationToken)
+    {
+        if (cancellationToken.IsCancellationRequested)
+        {
+            return await Task.FromCanceled&amp;lt;T&amp;gt;(cancellationToken);
+        }
+        try
+        {
+            return await operation();
+        }
+        catch (OperationCanceledException)
+        {
+            return await Task.FromCanceled&amp;lt;T&amp;gt;(cancellationToken);
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;الگوی تایم‌اوت (Timeout Pattern):&lt;/strong&gt; با ترکیب &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationTokenSource&lt;/code&gt; و &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; می‌توان یک الگوی تایم‌اوت قدرتمند پیاده‌سازی کرد. &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationTokenSource&lt;/code&gt; می‌تواند برای لغو خودکار پس از یک مدت زمان مشخص پیکربندی شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ExecuteWithTimeoutAsync(
+    Func&amp;lt;Task&amp;lt;Result&amp;gt;&amp;gt; operation,
+    TimeSpan timeout)
+{
+    using var cts = new CancellationTokenSource(timeout);
+
+    try
+    {
+        return await operation();
+    }
+    catch (OperationCanceledException)
+    {
+        return await Task.FromCanceled&amp;lt;Result&amp;gt;(cts.Token);
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;بهترین روش‌ها&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای استفاده مؤثر از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; و اطمینان از عملکرد صحیح مدیریت لغو، رعایت بهترین روش‌ها ضروری است:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;همیشه &lt;/strong&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt;&lt;strong&gt; را ارسال کنید:&lt;/strong&gt; همواره همان &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; را که برای ایجاد تسک لغو شده استفاده شده است، به متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; ارسال کنید. ارسال یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; جدید یا خالی، می‌تواند منجر به رفتار غیرمنتظره و عدم ردیابی صحیح لغو شود. این کار به سیستم لغو امکان می‌دهد که به درستی تشخیص دهد کدام عملیات لغو شده است.&lt;/li&gt;&lt;/ul&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// خوب
+return Task.FromCanceled(cancellationToken);
+
+// بد
+return Task.FromCanceled(new CancellationToken());&lt;/pre&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;مدیریت graceful لغو:&lt;/strong&gt; هنگام وقوع لغو، پیام‌های خطا یا لاگ‌های (Log) معنی‌دار ارائه دهید. این کار به اشکال‌زدایی (Debugging) و درک وضعیت برنامه در زمان لغو کمک می‌کند. لاگ‌کردن اطلاعات در مورد لغو، به تیم توسعه‌دهنده کمک می‌کند تا الگوهای لغو را شناسایی کرده و رفتار برنامه را در سناریوهای مختلف لغو بهبود بخشد.&lt;/li&gt;&lt;/ul&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ProcessWithMessageAsync(CancellationToken cancellationToken)
+{
+    if (cancellationToken.IsCancellationRequested)
+    {
+        _logger.LogInformation(&amp;quot;Operation canceled by user&amp;quot;);
+        return await Task.FromCanceled&amp;lt;Result&amp;gt;(cancellationToken);
+    }
+
+    return await ProcessAsync();
+}&lt;/pre&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;استفاده با &lt;/strong&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.WhenAll&lt;/code&gt;&lt;strong&gt;:&lt;/strong&gt; هنگام کار با چندین تسک به صورت همزمان (مثلاً با &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.WhenAll&lt;/code&gt;)، استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; می‌تواند به شما کمک کند تا در صورت لغو یکی از تسک‌ها، کل مجموعه تسک‌ها را لغو شده اعلام کنید. این تضمین می‌کند که حتی اگر یک تسک لغو شود، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.WhenAll&lt;/code&gt; نیز به درستی با یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;OperationCanceledException&lt;/code&gt; تکمیل شود.&lt;/li&gt;&lt;/ul&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result[]&amp;gt; ProcessMultipleAsync(CancellationToken cancellationToken)
+{
+    var tasks = new List&amp;lt;Task&amp;lt;Result&amp;gt;&amp;gt;();
+
+    foreach (var item in items)
+    {
+        if (cancellationToken.IsCancellationRequested)
+        {
+            return await Task.FromCanceled&amp;lt;Result[]&amp;gt;(cancellationToken);
+        }
+
+        tasks.Add(ProcessItemAsync(item));
+    }
+
+    return await Task.WhenAll(tasks);
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مثال کاربردی در دنیای واقعی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای درک بهتر، یک مثال عملی از خط لوله پردازش داده (Data Processing Pipeline) را در نظر بگیرید. در این سناریو، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; می‌تواند در مراحل مختلف برای مدیریت اعتبارسنجی (Validation) و لغو عملیات استفاده شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class DataProcessingPipeline
+{
+    private readonly ILogger&amp;lt;DataProcessingPipeline&amp;gt; _logger;
+    
+    public async Task&amp;lt;ProcessedData&amp;gt; ProcessDataAsync(
+        RawData data,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            // اعتبارسنجی ورودی
+            if (!IsValid(data))
+            {
+                _logger.LogWarning(&amp;quot;Invalid data received&amp;quot;);
+                return await Task.FromCanceled&amp;lt;ProcessedData&amp;gt;(cancellationToken);
+            }
+            
+            // پردازش داده
+            var result = await TransformDataAsync(data);
+            
+            // اعتبارسنجی خروجی
+            if (!IsValid(result))
+            {
+                _logger.LogError(&amp;quot;Invalid result generated&amp;quot;);
+                return await Task.FromCanceled&amp;lt;ProcessedData&amp;gt;(cancellationToken);
+            }
+            
+            return result;
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogInformation(&amp;quot;Operation canceled&amp;quot;);
+            return await Task.FromCanceled&amp;lt;ProcessedData&amp;gt;(cancellationToken);
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این مثال، اگر داده‌های ورودی نامعتبر باشند یا داده‌های خروجی پس از پردازش نامعتبر شوند، یک تسک لغو شده برگردانده می‌شود. همچنین، در بلوک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;catch&lt;/code&gt;، هر &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;OperationCanceledException&lt;/code&gt; گرفته شده و یک تسک لغو شده مجدداً برگردانده می‌شود، که نشان‌دهنده لغو عملیات توسط سیستم یا کاربر است. این رویکرد به شما امکان می‌دهد تا یک مدل یکپارچه و قابل پیش‌بینی برای مدیریت لغو در سراسر خط لوله پردازش خود داشته باشید.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; ابزاری قدرتمند و انعطاف‌پذیر در جعبه ابزار برنامه‌نویسی ناهمگام در سی‌شارپ است. این متد راهی تمیز و صریح برای مدیریت سناریوهای لغو و ایجاد تسک‌های لغو شده فراهم می‌کند. گرچه ممکن است در هر عملیات ناهمگام ضروری نباشد، اما درک زمان و نحوه استفاده از آن می‌تواند به ایجاد کدی مقاوم‌تر، قابل نگهداری‌تر و با مدیریت خطای بهتر منجر شود. با استفاده صحیح از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt;، توسعه‌دهندگان می‌توانند تجربه کاربری بهتری ارائه دهند، زیرا برنامه‌ها می‌توانند به درخواست‌های لغو به طور مؤثر پاسخ دهند و از هدر رفتن منابع جلوگیری کنند. به خاطر داشته باشید که همیشه &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; اصلی را ارسال کنید، لغو را به صورت graceful مدیریت کنید و این ابزار را در سناریوهای اعتبارسنجی و خروج زودهنگام در نظر بگیرید.&lt;/div&gt;">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="مدیریت لغو عملیات در برنامه‌نویسی ناهمگام با Task.FromCanceled ">
+    <meta property="og:description" content="&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در برنامه‌نویسی ناهمگام (Asynchronous Programming) در سی‌شارپ (#C)، مدیریت صحیح لغو عملیات (Cancellation) از اهمیت ویژه‌ای برخوردار است. بسیاری از توسعه‌دهندگان با مفهوم &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; و الگوهای پایه لغو آشنا هستند، اما &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; ابزاری کمتر شناخته شده ولی قدرتمند است که می‌تواند به بهبود چشمگیر کدهای ناهمگام شما کمک کند. این مقاله به بررسی عمیق &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt;، کاربردهای آن و بهترین روش‌های استفاده از آن برای توسعه‌دهندگان می‌پردازد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt;&lt;strong&gt;چیست؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; یک متد استاتیک (Static Method) در کتابخانه موازی وظایف (Task Parallel Library - TPL) است که به شما امکان می‌دهد یک شیء &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task&lt;/code&gt; را در وضعیت لغو شده (Canceled State) ایجاد کنید. این متد به طور خاص برای سناریوهایی طراحی شده است که نیاز به ایجاد صریح یک تسک لغو شده دارید، بدون اینکه یک عملیات واقعی شروع شده و سپس لغو شود. دو نسخه از این متد وجود دارد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static Task FromCanceled(CancellationToken cancellationToken)&lt;/code&gt;&lt;/li&gt;&lt;li&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static Task&amp;lt;TResult&amp;gt; FromCanceled&amp;lt;TResult&amp;gt;(CancellationToken cancellationToken)&lt;/code&gt;&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;نسخه اول برای تسک‌هایی استفاده می‌شود که مقداری را برنمی‌گردانند، در حالی که نسخه دوم برای تسک‌هایی است که نوع خاصی از نتیجه را برمی‌گردانند. &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;cancellationToken&lt;/code&gt; که به این متد پاس داده می‌شود، توکنی است که علت لغو را نشان می‌دهد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;کاربردهای پایه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یکی از متداول‌ترین سناریوها برای &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt;، بررسی زودهنگام لغو قبل از شروع یک عملیات پرهزینه یا پیچیده است. این رویکرد به شما امکان می‌دهد از انجام کارهای غیرضروری جلوگیری کرده و منابع سیستم را آزاد کنید. به عنوان مثال، در یک متد ناهمگام، می‌توانید وضعیت &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; را در ابتدای کار بررسی کنید و در صورت درخواست لغو، یک تسک لغو شده را برگردانید:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task ProcessDataAsync(CancellationToken cancellationToken)
+{
+    if (cancellationToken.IsCancellationRequested)
+    {
+        return Task.FromCanceled(cancellationToken);
+    }
+    
+    // ادامه با پردازش عادی
+    return await DoWorkAsync();
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همین الگو برای تسک‌هایی که یک نتیجه خاص را برمی‌گردانند نیز قابل استفاده است. در این حالت، شما باید نوع نتیجه را مشخص کنید:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;string&amp;gt; GetDataAsync(CancellationToken cancellationToken)
+{
+    if (cancellationToken.IsCancellationRequested)
+    {
+        return Task.FromCanceled&amp;lt;string&amp;gt;(cancellationToken);
+    }
+    
+    return await FetchDataAsync();
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;با استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;await Task.FromCanceled(...)&lt;/code&gt;، کد فراخواننده (Caller) می‌تواند لغو را به درستی مدیریت کند و یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;OperationCanceledException&lt;/code&gt; را دریافت نماید.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;موارد استفاده رایج&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; در سناریوهای مختلفی می‌تواند مفید باشد:&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;بررسی لغو زودهنگام (Early Cancellation Check):&lt;/strong&gt; همانطور که پیشتر اشاره شد، این یک الگوی قدرتمند برای جلوگیری از شروع عملیات‌های سنگین است. به عنوان مثال، قبل از بارگذاری یک مجموعه داده بزرگ، می‌توانید بررسی کنید که آیا درخواست لغو وجود دارد یا خیر:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;DataResult&amp;gt; ProcessLargeDatasetAsync(CancellationToken cancellationToken)
+{
+    if (cancellationToken.IsCancellationRequested)
+    {
+        return await Task.FromCanceled&amp;lt;DataResult&amp;gt;(cancellationToken);
+    }
+
+    var data = await LoadLargeDatasetAsync();
+    return new DataResult(data);
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;پردازش مشروط (Conditional Processing):&lt;/strong&gt; در مواقعی که نیاز به پردازش مشروط داده‌ها بر اساس معیارهای خاصی دارید و در صورت عدم برآورده شدن شرایط، باید یک لغو را اعلام کنید، این متد کارآمد است. به عنوان مثال، اگر نوع گزارش پشتیبانی نشود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Report&amp;gt; GenerateReportAsync(ReportType type, CancellationToken cancellationToken)
+{
+    if (!IsReportTypeSupported(type))
+    {
+        return await Task.FromCanceled&amp;lt;Report&amp;gt;(cancellationToken);
+    }
+
+    return await GenerateReportInternalAsync(type);
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;سناریوهای اعتبارسنجی (Validation Scenarios):&lt;/strong&gt; هنگام اعتبارسنجی پارامترهای ورودی، اگر ورودی نامعتبر باشد، می‌توانید یک تسک لغو شده را برگردانید. این روش یک راه تمیز برای مدیریت خطاهای اعتبارسنجی است که به صورت مفهومی به لغو عملیات جاری نزدیک هستند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;ValidationResult&amp;gt; ValidateDataAsync(DataModel data, CancellationToken cancellationToken)
+{
+    if (data == null)
+    {
+        return await Task.FromCanceled&amp;lt;ValidationResult&amp;gt;(cancellationToken);
+    }
+
+    return await PerformValidationAsync(data);
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الگوهای پیشرفته&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; می‌تواند در کنار الگوهای پیچیده‌تر برنامه‌نویسی ناهمگام نیز استفاده شود:&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;زنجیره‌سازی تسک‌ها (Chaining Tasks):&lt;/strong&gt; در سناریوهایی که یک عملیات اولیه ممکن است لغو شود و شما نیاز به ارائه یک پاسخ لغو شده دارید، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; راهکاری مناسب است. این در بلوک‌های &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;catch&lt;/code&gt; برای مدیریت &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;OperationCanceledException&lt;/code&gt; مفید است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ProcessWithFallbackAsync(CancellationToken cancellationToken)
+{
+    try
+    {
+        return await PrimaryOperationAsync();
+    }
+    catch (OperationCanceledException)
+    {
+        return await Task.FromCanceled&amp;lt;Result&amp;gt;(cancellationToken);
+    }
+    catch (Exception)
+    {
+        return await FallbackOperationAsync();
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;فکتوری تسک سفارشی (Custom Task Factory):&lt;/strong&gt; می‌توانید یک فکتوری سفارشی برای ایجاد تسک‌ها طراحی کنید که به طور خودکار &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; را در صورت لغو &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; استفاده کند. این به ایجاد کدی تمیزتر و قابل استفاده مجدد کمک می‌کند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class CustomTaskFactory
+{
+    public static async Task&amp;lt;T&amp;gt; CreateTaskAsync&amp;lt;T&amp;gt;(
+        Func&amp;lt;Task&amp;lt;T&amp;gt;&amp;gt; operation,
+        CancellationToken cancellationToken)
+    {
+        if (cancellationToken.IsCancellationRequested)
+        {
+            return await Task.FromCanceled&amp;lt;T&amp;gt;(cancellationToken);
+        }
+        try
+        {
+            return await operation();
+        }
+        catch (OperationCanceledException)
+        {
+            return await Task.FromCanceled&amp;lt;T&amp;gt;(cancellationToken);
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;الگوی تایم‌اوت (Timeout Pattern):&lt;/strong&gt; با ترکیب &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationTokenSource&lt;/code&gt; و &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; می‌توان یک الگوی تایم‌اوت قدرتمند پیاده‌سازی کرد. &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationTokenSource&lt;/code&gt; می‌تواند برای لغو خودکار پس از یک مدت زمان مشخص پیکربندی شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ExecuteWithTimeoutAsync(
+    Func&amp;lt;Task&amp;lt;Result&amp;gt;&amp;gt; operation,
+    TimeSpan timeout)
+{
+    using var cts = new CancellationTokenSource(timeout);
+
+    try
+    {
+        return await operation();
+    }
+    catch (OperationCanceledException)
+    {
+        return await Task.FromCanceled&amp;lt;Result&amp;gt;(cts.Token);
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;بهترین روش‌ها&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای استفاده مؤثر از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; و اطمینان از عملکرد صحیح مدیریت لغو، رعایت بهترین روش‌ها ضروری است:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;همیشه &lt;/strong&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt;&lt;strong&gt; را ارسال کنید:&lt;/strong&gt; همواره همان &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; را که برای ایجاد تسک لغو شده استفاده شده است، به متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; ارسال کنید. ارسال یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; جدید یا خالی، می‌تواند منجر به رفتار غیرمنتظره و عدم ردیابی صحیح لغو شود. این کار به سیستم لغو امکان می‌دهد که به درستی تشخیص دهد کدام عملیات لغو شده است.&lt;/li&gt;&lt;/ul&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// خوب
+return Task.FromCanceled(cancellationToken);
+
+// بد
+return Task.FromCanceled(new CancellationToken());&lt;/pre&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;مدیریت graceful لغو:&lt;/strong&gt; هنگام وقوع لغو، پیام‌های خطا یا لاگ‌های (Log) معنی‌دار ارائه دهید. این کار به اشکال‌زدایی (Debugging) و درک وضعیت برنامه در زمان لغو کمک می‌کند. لاگ‌کردن اطلاعات در مورد لغو، به تیم توسعه‌دهنده کمک می‌کند تا الگوهای لغو را شناسایی کرده و رفتار برنامه را در سناریوهای مختلف لغو بهبود بخشد.&lt;/li&gt;&lt;/ul&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ProcessWithMessageAsync(CancellationToken cancellationToken)
+{
+    if (cancellationToken.IsCancellationRequested)
+    {
+        _logger.LogInformation(&amp;quot;Operation canceled by user&amp;quot;);
+        return await Task.FromCanceled&amp;lt;Result&amp;gt;(cancellationToken);
+    }
+
+    return await ProcessAsync();
+}&lt;/pre&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;استفاده با &lt;/strong&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.WhenAll&lt;/code&gt;&lt;strong&gt;:&lt;/strong&gt; هنگام کار با چندین تسک به صورت همزمان (مثلاً با &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.WhenAll&lt;/code&gt;)، استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; می‌تواند به شما کمک کند تا در صورت لغو یکی از تسک‌ها، کل مجموعه تسک‌ها را لغو شده اعلام کنید. این تضمین می‌کند که حتی اگر یک تسک لغو شود، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.WhenAll&lt;/code&gt; نیز به درستی با یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;OperationCanceledException&lt;/code&gt; تکمیل شود.&lt;/li&gt;&lt;/ul&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result[]&amp;gt; ProcessMultipleAsync(CancellationToken cancellationToken)
+{
+    var tasks = new List&amp;lt;Task&amp;lt;Result&amp;gt;&amp;gt;();
+
+    foreach (var item in items)
+    {
+        if (cancellationToken.IsCancellationRequested)
+        {
+            return await Task.FromCanceled&amp;lt;Result[]&amp;gt;(cancellationToken);
+        }
+
+        tasks.Add(ProcessItemAsync(item));
+    }
+
+    return await Task.WhenAll(tasks);
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مثال کاربردی در دنیای واقعی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای درک بهتر، یک مثال عملی از خط لوله پردازش داده (Data Processing Pipeline) را در نظر بگیرید. در این سناریو، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; می‌تواند در مراحل مختلف برای مدیریت اعتبارسنجی (Validation) و لغو عملیات استفاده شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class DataProcessingPipeline
+{
+    private readonly ILogger&amp;lt;DataProcessingPipeline&amp;gt; _logger;
+    
+    public async Task&amp;lt;ProcessedData&amp;gt; ProcessDataAsync(
+        RawData data,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            // اعتبارسنجی ورودی
+            if (!IsValid(data))
+            {
+                _logger.LogWarning(&amp;quot;Invalid data received&amp;quot;);
+                return await Task.FromCanceled&amp;lt;ProcessedData&amp;gt;(cancellationToken);
+            }
+            
+            // پردازش داده
+            var result = await TransformDataAsync(data);
+            
+            // اعتبارسنجی خروجی
+            if (!IsValid(result))
+            {
+                _logger.LogError(&amp;quot;Invalid result generated&amp;quot;);
+                return await Task.FromCanceled&amp;lt;ProcessedData&amp;gt;(cancellationToken);
+            }
+            
+            return result;
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogInformation(&amp;quot;Operation canceled&amp;quot;);
+            return await Task.FromCanceled&amp;lt;ProcessedData&amp;gt;(cancellationToken);
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این مثال، اگر داده‌های ورودی نامعتبر باشند یا داده‌های خروجی پس از پردازش نامعتبر شوند، یک تسک لغو شده برگردانده می‌شود. همچنین، در بلوک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;catch&lt;/code&gt;، هر &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;OperationCanceledException&lt;/code&gt; گرفته شده و یک تسک لغو شده مجدداً برگردانده می‌شود، که نشان‌دهنده لغو عملیات توسط سیستم یا کاربر است. این رویکرد به شما امکان می‌دهد تا یک مدل یکپارچه و قابل پیش‌بینی برای مدیریت لغو در سراسر خط لوله پردازش خود داشته باشید.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; ابزاری قدرتمند و انعطاف‌پذیر در جعبه ابزار برنامه‌نویسی ناهمگام در سی‌شارپ است. این متد راهی تمیز و صریح برای مدیریت سناریوهای لغو و ایجاد تسک‌های لغو شده فراهم می‌کند. گرچه ممکن است در هر عملیات ناهمگام ضروری نباشد، اما درک زمان و نحوه استفاده از آن می‌تواند به ایجاد کدی مقاوم‌تر، قابل نگهداری‌تر و با مدیریت خطای بهتر منجر شود. با استفاده صحیح از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt;، توسعه‌دهندگان می‌توانند تجربه کاربری بهتری ارائه دهند، زیرا برنامه‌ها می‌توانند به درخواست‌های لغو به طور مؤثر پاسخ دهند و از هدر رفتن منابع جلوگیری کنند. به خاطر داشته باشید که همیشه &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; اصلی را ارسال کنید، لغو را به صورت graceful مدیریت کنید و این ابزار را در سناریوهای اعتبارسنجی و خروج زودهنگام در نظر بگیرید.&lt;/div&gt;">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="مدیریت لغو عملیات در برنامه‌نویسی ناهمگام با Task.FromCanceled ">
+    <meta name="twitter:description" content="&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در برنامه‌نویسی ناهمگام (Asynchronous Programming) در سی‌شارپ (#C)، مدیریت صحیح لغو عملیات (Cancellation) از اهمیت ویژه‌ای برخوردار است. بسیاری از توسعه‌دهندگان با مفهوم &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; و الگوهای پایه لغو آشنا هستند، اما &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; ابزاری کمتر شناخته شده ولی قدرتمند است که می‌تواند به بهبود چشمگیر کدهای ناهمگام شما کمک کند. این مقاله به بررسی عمیق &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt;، کاربردهای آن و بهترین روش‌های استفاده از آن برای توسعه‌دهندگان می‌پردازد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt;&lt;strong&gt;چیست؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; یک متد استاتیک (Static Method) در کتابخانه موازی وظایف (Task Parallel Library - TPL) است که به شما امکان می‌دهد یک شیء &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task&lt;/code&gt; را در وضعیت لغو شده (Canceled State) ایجاد کنید. این متد به طور خاص برای سناریوهایی طراحی شده است که نیاز به ایجاد صریح یک تسک لغو شده دارید، بدون اینکه یک عملیات واقعی شروع شده و سپس لغو شود. دو نسخه از این متد وجود دارد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static Task FromCanceled(CancellationToken cancellationToken)&lt;/code&gt;&lt;/li&gt;&lt;li&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static Task&amp;lt;TResult&amp;gt; FromCanceled&amp;lt;TResult&amp;gt;(CancellationToken cancellationToken)&lt;/code&gt;&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;نسخه اول برای تسک‌هایی استفاده می‌شود که مقداری را برنمی‌گردانند، در حالی که نسخه دوم برای تسک‌هایی است که نوع خاصی از نتیجه را برمی‌گردانند. &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;cancellationToken&lt;/code&gt; که به این متد پاس داده می‌شود، توکنی است که علت لغو را نشان می‌دهد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;کاربردهای پایه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یکی از متداول‌ترین سناریوها برای &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt;، بررسی زودهنگام لغو قبل از شروع یک عملیات پرهزینه یا پیچیده است. این رویکرد به شما امکان می‌دهد از انجام کارهای غیرضروری جلوگیری کرده و منابع سیستم را آزاد کنید. به عنوان مثال، در یک متد ناهمگام، می‌توانید وضعیت &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; را در ابتدای کار بررسی کنید و در صورت درخواست لغو، یک تسک لغو شده را برگردانید:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task ProcessDataAsync(CancellationToken cancellationToken)
+{
+    if (cancellationToken.IsCancellationRequested)
+    {
+        return Task.FromCanceled(cancellationToken);
+    }
+    
+    // ادامه با پردازش عادی
+    return await DoWorkAsync();
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همین الگو برای تسک‌هایی که یک نتیجه خاص را برمی‌گردانند نیز قابل استفاده است. در این حالت، شما باید نوع نتیجه را مشخص کنید:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;string&amp;gt; GetDataAsync(CancellationToken cancellationToken)
+{
+    if (cancellationToken.IsCancellationRequested)
+    {
+        return Task.FromCanceled&amp;lt;string&amp;gt;(cancellationToken);
+    }
+    
+    return await FetchDataAsync();
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;با استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;await Task.FromCanceled(...)&lt;/code&gt;، کد فراخواننده (Caller) می‌تواند لغو را به درستی مدیریت کند و یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;OperationCanceledException&lt;/code&gt; را دریافت نماید.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;موارد استفاده رایج&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; در سناریوهای مختلفی می‌تواند مفید باشد:&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;بررسی لغو زودهنگام (Early Cancellation Check):&lt;/strong&gt; همانطور که پیشتر اشاره شد، این یک الگوی قدرتمند برای جلوگیری از شروع عملیات‌های سنگین است. به عنوان مثال، قبل از بارگذاری یک مجموعه داده بزرگ، می‌توانید بررسی کنید که آیا درخواست لغو وجود دارد یا خیر:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;DataResult&amp;gt; ProcessLargeDatasetAsync(CancellationToken cancellationToken)
+{
+    if (cancellationToken.IsCancellationRequested)
+    {
+        return await Task.FromCanceled&amp;lt;DataResult&amp;gt;(cancellationToken);
+    }
+
+    var data = await LoadLargeDatasetAsync();
+    return new DataResult(data);
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;پردازش مشروط (Conditional Processing):&lt;/strong&gt; در مواقعی که نیاز به پردازش مشروط داده‌ها بر اساس معیارهای خاصی دارید و در صورت عدم برآورده شدن شرایط، باید یک لغو را اعلام کنید، این متد کارآمد است. به عنوان مثال، اگر نوع گزارش پشتیبانی نشود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Report&amp;gt; GenerateReportAsync(ReportType type, CancellationToken cancellationToken)
+{
+    if (!IsReportTypeSupported(type))
+    {
+        return await Task.FromCanceled&amp;lt;Report&amp;gt;(cancellationToken);
+    }
+
+    return await GenerateReportInternalAsync(type);
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;سناریوهای اعتبارسنجی (Validation Scenarios):&lt;/strong&gt; هنگام اعتبارسنجی پارامترهای ورودی، اگر ورودی نامعتبر باشد، می‌توانید یک تسک لغو شده را برگردانید. این روش یک راه تمیز برای مدیریت خطاهای اعتبارسنجی است که به صورت مفهومی به لغو عملیات جاری نزدیک هستند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;ValidationResult&amp;gt; ValidateDataAsync(DataModel data, CancellationToken cancellationToken)
+{
+    if (data == null)
+    {
+        return await Task.FromCanceled&amp;lt;ValidationResult&amp;gt;(cancellationToken);
+    }
+
+    return await PerformValidationAsync(data);
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الگوهای پیشرفته&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; می‌تواند در کنار الگوهای پیچیده‌تر برنامه‌نویسی ناهمگام نیز استفاده شود:&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;زنجیره‌سازی تسک‌ها (Chaining Tasks):&lt;/strong&gt; در سناریوهایی که یک عملیات اولیه ممکن است لغو شود و شما نیاز به ارائه یک پاسخ لغو شده دارید، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; راهکاری مناسب است. این در بلوک‌های &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;catch&lt;/code&gt; برای مدیریت &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;OperationCanceledException&lt;/code&gt; مفید است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ProcessWithFallbackAsync(CancellationToken cancellationToken)
+{
+    try
+    {
+        return await PrimaryOperationAsync();
+    }
+    catch (OperationCanceledException)
+    {
+        return await Task.FromCanceled&amp;lt;Result&amp;gt;(cancellationToken);
+    }
+    catch (Exception)
+    {
+        return await FallbackOperationAsync();
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;فکتوری تسک سفارشی (Custom Task Factory):&lt;/strong&gt; می‌توانید یک فکتوری سفارشی برای ایجاد تسک‌ها طراحی کنید که به طور خودکار &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; را در صورت لغو &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; استفاده کند. این به ایجاد کدی تمیزتر و قابل استفاده مجدد کمک می‌کند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class CustomTaskFactory
+{
+    public static async Task&amp;lt;T&amp;gt; CreateTaskAsync&amp;lt;T&amp;gt;(
+        Func&amp;lt;Task&amp;lt;T&amp;gt;&amp;gt; operation,
+        CancellationToken cancellationToken)
+    {
+        if (cancellationToken.IsCancellationRequested)
+        {
+            return await Task.FromCanceled&amp;lt;T&amp;gt;(cancellationToken);
+        }
+        try
+        {
+            return await operation();
+        }
+        catch (OperationCanceledException)
+        {
+            return await Task.FromCanceled&amp;lt;T&amp;gt;(cancellationToken);
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;الگوی تایم‌اوت (Timeout Pattern):&lt;/strong&gt; با ترکیب &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationTokenSource&lt;/code&gt; و &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; می‌توان یک الگوی تایم‌اوت قدرتمند پیاده‌سازی کرد. &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationTokenSource&lt;/code&gt; می‌تواند برای لغو خودکار پس از یک مدت زمان مشخص پیکربندی شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ExecuteWithTimeoutAsync(
+    Func&amp;lt;Task&amp;lt;Result&amp;gt;&amp;gt; operation,
+    TimeSpan timeout)
+{
+    using var cts = new CancellationTokenSource(timeout);
+
+    try
+    {
+        return await operation();
+    }
+    catch (OperationCanceledException)
+    {
+        return await Task.FromCanceled&amp;lt;Result&amp;gt;(cts.Token);
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;بهترین روش‌ها&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای استفاده مؤثر از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; و اطمینان از عملکرد صحیح مدیریت لغو، رعایت بهترین روش‌ها ضروری است:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;همیشه &lt;/strong&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt;&lt;strong&gt; را ارسال کنید:&lt;/strong&gt; همواره همان &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; را که برای ایجاد تسک لغو شده استفاده شده است، به متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; ارسال کنید. ارسال یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; جدید یا خالی، می‌تواند منجر به رفتار غیرمنتظره و عدم ردیابی صحیح لغو شود. این کار به سیستم لغو امکان می‌دهد که به درستی تشخیص دهد کدام عملیات لغو شده است.&lt;/li&gt;&lt;/ul&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// خوب
+return Task.FromCanceled(cancellationToken);
+
+// بد
+return Task.FromCanceled(new CancellationToken());&lt;/pre&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;مدیریت graceful لغو:&lt;/strong&gt; هنگام وقوع لغو، پیام‌های خطا یا لاگ‌های (Log) معنی‌دار ارائه دهید. این کار به اشکال‌زدایی (Debugging) و درک وضعیت برنامه در زمان لغو کمک می‌کند. لاگ‌کردن اطلاعات در مورد لغو، به تیم توسعه‌دهنده کمک می‌کند تا الگوهای لغو را شناسایی کرده و رفتار برنامه را در سناریوهای مختلف لغو بهبود بخشد.&lt;/li&gt;&lt;/ul&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ProcessWithMessageAsync(CancellationToken cancellationToken)
+{
+    if (cancellationToken.IsCancellationRequested)
+    {
+        _logger.LogInformation(&amp;quot;Operation canceled by user&amp;quot;);
+        return await Task.FromCanceled&amp;lt;Result&amp;gt;(cancellationToken);
+    }
+
+    return await ProcessAsync();
+}&lt;/pre&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;استفاده با &lt;/strong&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.WhenAll&lt;/code&gt;&lt;strong&gt;:&lt;/strong&gt; هنگام کار با چندین تسک به صورت همزمان (مثلاً با &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.WhenAll&lt;/code&gt;)، استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; می‌تواند به شما کمک کند تا در صورت لغو یکی از تسک‌ها، کل مجموعه تسک‌ها را لغو شده اعلام کنید. این تضمین می‌کند که حتی اگر یک تسک لغو شود، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.WhenAll&lt;/code&gt; نیز به درستی با یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;OperationCanceledException&lt;/code&gt; تکمیل شود.&lt;/li&gt;&lt;/ul&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result[]&amp;gt; ProcessMultipleAsync(CancellationToken cancellationToken)
+{
+    var tasks = new List&amp;lt;Task&amp;lt;Result&amp;gt;&amp;gt;();
+
+    foreach (var item in items)
+    {
+        if (cancellationToken.IsCancellationRequested)
+        {
+            return await Task.FromCanceled&amp;lt;Result[]&amp;gt;(cancellationToken);
+        }
+
+        tasks.Add(ProcessItemAsync(item));
+    }
+
+    return await Task.WhenAll(tasks);
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مثال کاربردی در دنیای واقعی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای درک بهتر، یک مثال عملی از خط لوله پردازش داده (Data Processing Pipeline) را در نظر بگیرید. در این سناریو، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; می‌تواند در مراحل مختلف برای مدیریت اعتبارسنجی (Validation) و لغو عملیات استفاده شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class DataProcessingPipeline
+{
+    private readonly ILogger&amp;lt;DataProcessingPipeline&amp;gt; _logger;
+    
+    public async Task&amp;lt;ProcessedData&amp;gt; ProcessDataAsync(
+        RawData data,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            // اعتبارسنجی ورودی
+            if (!IsValid(data))
+            {
+                _logger.LogWarning(&amp;quot;Invalid data received&amp;quot;);
+                return await Task.FromCanceled&amp;lt;ProcessedData&amp;gt;(cancellationToken);
+            }
+            
+            // پردازش داده
+            var result = await TransformDataAsync(data);
+            
+            // اعتبارسنجی خروجی
+            if (!IsValid(result))
+            {
+                _logger.LogError(&amp;quot;Invalid result generated&amp;quot;);
+                return await Task.FromCanceled&amp;lt;ProcessedData&amp;gt;(cancellationToken);
+            }
+            
+            return result;
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogInformation(&amp;quot;Operation canceled&amp;quot;);
+            return await Task.FromCanceled&amp;lt;ProcessedData&amp;gt;(cancellationToken);
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این مثال، اگر داده‌های ورودی نامعتبر باشند یا داده‌های خروجی پس از پردازش نامعتبر شوند، یک تسک لغو شده برگردانده می‌شود. همچنین، در بلوک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;catch&lt;/code&gt;، هر &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;OperationCanceledException&lt;/code&gt; گرفته شده و یک تسک لغو شده مجدداً برگردانده می‌شود، که نشان‌دهنده لغو عملیات توسط سیستم یا کاربر است. این رویکرد به شما امکان می‌دهد تا یک مدل یکپارچه و قابل پیش‌بینی برای مدیریت لغو در سراسر خط لوله پردازش خود داشته باشید.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; ابزاری قدرتمند و انعطاف‌پذیر در جعبه ابزار برنامه‌نویسی ناهمگام در سی‌شارپ است. این متد راهی تمیز و صریح برای مدیریت سناریوهای لغو و ایجاد تسک‌های لغو شده فراهم می‌کند. گرچه ممکن است در هر عملیات ناهمگام ضروری نباشد، اما درک زمان و نحوه استفاده از آن می‌تواند به ایجاد کدی مقاوم‌تر، قابل نگهداری‌تر و با مدیریت خطای بهتر منجر شود. با استفاده صحیح از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt;، توسعه‌دهندگان می‌توانند تجربه کاربری بهتری ارائه دهند، زیرا برنامه‌ها می‌توانند به درخواست‌های لغو به طور مؤثر پاسخ دهند و از هدر رفتن منابع جلوگیری کنند. به خاطر داشته باشید که همیشه &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; اصلی را ارسال کنید، لغو را به صورت graceful مدیریت کنید و این ابزار را در سناریوهای اعتبارسنجی و خروج زودهنگام در نظر بگیرید.&lt;/div&gt;">
+    <meta name="twitter:card" content="&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در برنامه‌نویسی ناهمگام (Asynchronous Programming) در سی‌شارپ (#C)، مدیریت صحیح لغو عملیات (Cancellation) از اهمیت ویژه‌ای برخوردار است. بسیاری از توسعه‌دهندگان با مفهوم &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; و الگوهای پایه لغو آشنا هستند، اما &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; ابزاری کمتر شناخته شده ولی قدرتمند است که می‌تواند به بهبود چشمگیر کدهای ناهمگام شما کمک کند. این مقاله به بررسی عمیق &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt;، کاربردهای آن و بهترین روش‌های استفاده از آن برای توسعه‌دهندگان می‌پردازد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt;&lt;strong&gt;چیست؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; یک متد استاتیک (Static Method) در کتابخانه موازی وظایف (Task Parallel Library - TPL) است که به شما امکان می‌دهد یک شیء &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task&lt;/code&gt; را در وضعیت لغو شده (Canceled State) ایجاد کنید. این متد به طور خاص برای سناریوهایی طراحی شده است که نیاز به ایجاد صریح یک تسک لغو شده دارید، بدون اینکه یک عملیات واقعی شروع شده و سپس لغو شود. دو نسخه از این متد وجود دارد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static Task FromCanceled(CancellationToken cancellationToken)&lt;/code&gt;&lt;/li&gt;&lt;li&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static Task&amp;lt;TResult&amp;gt; FromCanceled&amp;lt;TResult&amp;gt;(CancellationToken cancellationToken)&lt;/code&gt;&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;نسخه اول برای تسک‌هایی استفاده می‌شود که مقداری را برنمی‌گردانند، در حالی که نسخه دوم برای تسک‌هایی است که نوع خاصی از نتیجه را برمی‌گردانند. &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;cancellationToken&lt;/code&gt; که به این متد پاس داده می‌شود، توکنی است که علت لغو را نشان می‌دهد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;کاربردهای پایه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یکی از متداول‌ترین سناریوها برای &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt;، بررسی زودهنگام لغو قبل از شروع یک عملیات پرهزینه یا پیچیده است. این رویکرد به شما امکان می‌دهد از انجام کارهای غیرضروری جلوگیری کرده و منابع سیستم را آزاد کنید. به عنوان مثال، در یک متد ناهمگام، می‌توانید وضعیت &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; را در ابتدای کار بررسی کنید و در صورت درخواست لغو، یک تسک لغو شده را برگردانید:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task ProcessDataAsync(CancellationToken cancellationToken)
+{
+    if (cancellationToken.IsCancellationRequested)
+    {
+        return Task.FromCanceled(cancellationToken);
+    }
+    
+    // ادامه با پردازش عادی
+    return await DoWorkAsync();
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همین الگو برای تسک‌هایی که یک نتیجه خاص را برمی‌گردانند نیز قابل استفاده است. در این حالت، شما باید نوع نتیجه را مشخص کنید:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;string&amp;gt; GetDataAsync(CancellationToken cancellationToken)
+{
+    if (cancellationToken.IsCancellationRequested)
+    {
+        return Task.FromCanceled&amp;lt;string&amp;gt;(cancellationToken);
+    }
+    
+    return await FetchDataAsync();
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;با استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;await Task.FromCanceled(...)&lt;/code&gt;، کد فراخواننده (Caller) می‌تواند لغو را به درستی مدیریت کند و یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;OperationCanceledException&lt;/code&gt; را دریافت نماید.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;موارد استفاده رایج&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; در سناریوهای مختلفی می‌تواند مفید باشد:&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;بررسی لغو زودهنگام (Early Cancellation Check):&lt;/strong&gt; همانطور که پیشتر اشاره شد، این یک الگوی قدرتمند برای جلوگیری از شروع عملیات‌های سنگین است. به عنوان مثال، قبل از بارگذاری یک مجموعه داده بزرگ، می‌توانید بررسی کنید که آیا درخواست لغو وجود دارد یا خیر:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;DataResult&amp;gt; ProcessLargeDatasetAsync(CancellationToken cancellationToken)
+{
+    if (cancellationToken.IsCancellationRequested)
+    {
+        return await Task.FromCanceled&amp;lt;DataResult&amp;gt;(cancellationToken);
+    }
+
+    var data = await LoadLargeDatasetAsync();
+    return new DataResult(data);
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;پردازش مشروط (Conditional Processing):&lt;/strong&gt; در مواقعی که نیاز به پردازش مشروط داده‌ها بر اساس معیارهای خاصی دارید و در صورت عدم برآورده شدن شرایط، باید یک لغو را اعلام کنید، این متد کارآمد است. به عنوان مثال، اگر نوع گزارش پشتیبانی نشود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Report&amp;gt; GenerateReportAsync(ReportType type, CancellationToken cancellationToken)
+{
+    if (!IsReportTypeSupported(type))
+    {
+        return await Task.FromCanceled&amp;lt;Report&amp;gt;(cancellationToken);
+    }
+
+    return await GenerateReportInternalAsync(type);
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;سناریوهای اعتبارسنجی (Validation Scenarios):&lt;/strong&gt; هنگام اعتبارسنجی پارامترهای ورودی، اگر ورودی نامعتبر باشد، می‌توانید یک تسک لغو شده را برگردانید. این روش یک راه تمیز برای مدیریت خطاهای اعتبارسنجی است که به صورت مفهومی به لغو عملیات جاری نزدیک هستند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;ValidationResult&amp;gt; ValidateDataAsync(DataModel data, CancellationToken cancellationToken)
+{
+    if (data == null)
+    {
+        return await Task.FromCanceled&amp;lt;ValidationResult&amp;gt;(cancellationToken);
+    }
+
+    return await PerformValidationAsync(data);
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الگوهای پیشرفته&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; می‌تواند در کنار الگوهای پیچیده‌تر برنامه‌نویسی ناهمگام نیز استفاده شود:&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;زنجیره‌سازی تسک‌ها (Chaining Tasks):&lt;/strong&gt; در سناریوهایی که یک عملیات اولیه ممکن است لغو شود و شما نیاز به ارائه یک پاسخ لغو شده دارید، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; راهکاری مناسب است. این در بلوک‌های &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;catch&lt;/code&gt; برای مدیریت &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;OperationCanceledException&lt;/code&gt; مفید است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ProcessWithFallbackAsync(CancellationToken cancellationToken)
+{
+    try
+    {
+        return await PrimaryOperationAsync();
+    }
+    catch (OperationCanceledException)
+    {
+        return await Task.FromCanceled&amp;lt;Result&amp;gt;(cancellationToken);
+    }
+    catch (Exception)
+    {
+        return await FallbackOperationAsync();
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;فکتوری تسک سفارشی (Custom Task Factory):&lt;/strong&gt; می‌توانید یک فکتوری سفارشی برای ایجاد تسک‌ها طراحی کنید که به طور خودکار &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; را در صورت لغو &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; استفاده کند. این به ایجاد کدی تمیزتر و قابل استفاده مجدد کمک می‌کند:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class CustomTaskFactory
+{
+    public static async Task&amp;lt;T&amp;gt; CreateTaskAsync&amp;lt;T&amp;gt;(
+        Func&amp;lt;Task&amp;lt;T&amp;gt;&amp;gt; operation,
+        CancellationToken cancellationToken)
+    {
+        if (cancellationToken.IsCancellationRequested)
+        {
+            return await Task.FromCanceled&amp;lt;T&amp;gt;(cancellationToken);
+        }
+        try
+        {
+            return await operation();
+        }
+        catch (OperationCanceledException)
+        {
+            return await Task.FromCanceled&amp;lt;T&amp;gt;(cancellationToken);
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;الگوی تایم‌اوت (Timeout Pattern):&lt;/strong&gt; با ترکیب &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationTokenSource&lt;/code&gt; و &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; می‌توان یک الگوی تایم‌اوت قدرتمند پیاده‌سازی کرد. &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationTokenSource&lt;/code&gt; می‌تواند برای لغو خودکار پس از یک مدت زمان مشخص پیکربندی شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ExecuteWithTimeoutAsync(
+    Func&amp;lt;Task&amp;lt;Result&amp;gt;&amp;gt; operation,
+    TimeSpan timeout)
+{
+    using var cts = new CancellationTokenSource(timeout);
+
+    try
+    {
+        return await operation();
+    }
+    catch (OperationCanceledException)
+    {
+        return await Task.FromCanceled&amp;lt;Result&amp;gt;(cts.Token);
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;بهترین روش‌ها&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای استفاده مؤثر از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; و اطمینان از عملکرد صحیح مدیریت لغو، رعایت بهترین روش‌ها ضروری است:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;همیشه &lt;/strong&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt;&lt;strong&gt; را ارسال کنید:&lt;/strong&gt; همواره همان &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; را که برای ایجاد تسک لغو شده استفاده شده است، به متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; ارسال کنید. ارسال یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; جدید یا خالی، می‌تواند منجر به رفتار غیرمنتظره و عدم ردیابی صحیح لغو شود. این کار به سیستم لغو امکان می‌دهد که به درستی تشخیص دهد کدام عملیات لغو شده است.&lt;/li&gt;&lt;/ul&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// خوب
+return Task.FromCanceled(cancellationToken);
+
+// بد
+return Task.FromCanceled(new CancellationToken());&lt;/pre&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;مدیریت graceful لغو:&lt;/strong&gt; هنگام وقوع لغو، پیام‌های خطا یا لاگ‌های (Log) معنی‌دار ارائه دهید. این کار به اشکال‌زدایی (Debugging) و درک وضعیت برنامه در زمان لغو کمک می‌کند. لاگ‌کردن اطلاعات در مورد لغو، به تیم توسعه‌دهنده کمک می‌کند تا الگوهای لغو را شناسایی کرده و رفتار برنامه را در سناریوهای مختلف لغو بهبود بخشد.&lt;/li&gt;&lt;/ul&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result&amp;gt; ProcessWithMessageAsync(CancellationToken cancellationToken)
+{
+    if (cancellationToken.IsCancellationRequested)
+    {
+        _logger.LogInformation(&amp;quot;Operation canceled by user&amp;quot;);
+        return await Task.FromCanceled&amp;lt;Result&amp;gt;(cancellationToken);
+    }
+
+    return await ProcessAsync();
+}&lt;/pre&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;استفاده با &lt;/strong&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.WhenAll&lt;/code&gt;&lt;strong&gt;:&lt;/strong&gt; هنگام کار با چندین تسک به صورت همزمان (مثلاً با &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.WhenAll&lt;/code&gt;)، استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; می‌تواند به شما کمک کند تا در صورت لغو یکی از تسک‌ها، کل مجموعه تسک‌ها را لغو شده اعلام کنید. این تضمین می‌کند که حتی اگر یک تسک لغو شود، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.WhenAll&lt;/code&gt; نیز به درستی با یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;OperationCanceledException&lt;/code&gt; تکمیل شود.&lt;/li&gt;&lt;/ul&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public async Task&amp;lt;Result[]&amp;gt; ProcessMultipleAsync(CancellationToken cancellationToken)
+{
+    var tasks = new List&amp;lt;Task&amp;lt;Result&amp;gt;&amp;gt;();
+
+    foreach (var item in items)
+    {
+        if (cancellationToken.IsCancellationRequested)
+        {
+            return await Task.FromCanceled&amp;lt;Result[]&amp;gt;(cancellationToken);
+        }
+
+        tasks.Add(ProcessItemAsync(item));
+    }
+
+    return await Task.WhenAll(tasks);
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مثال کاربردی در دنیای واقعی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای درک بهتر، یک مثال عملی از خط لوله پردازش داده (Data Processing Pipeline) را در نظر بگیرید. در این سناریو، &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; می‌تواند در مراحل مختلف برای مدیریت اعتبارسنجی (Validation) و لغو عملیات استفاده شود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class DataProcessingPipeline
+{
+    private readonly ILogger&amp;lt;DataProcessingPipeline&amp;gt; _logger;
+    
+    public async Task&amp;lt;ProcessedData&amp;gt; ProcessDataAsync(
+        RawData data,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            // اعتبارسنجی ورودی
+            if (!IsValid(data))
+            {
+                _logger.LogWarning(&amp;quot;Invalid data received&amp;quot;);
+                return await Task.FromCanceled&amp;lt;ProcessedData&amp;gt;(cancellationToken);
+            }
+            
+            // پردازش داده
+            var result = await TransformDataAsync(data);
+            
+            // اعتبارسنجی خروجی
+            if (!IsValid(result))
+            {
+                _logger.LogError(&amp;quot;Invalid result generated&amp;quot;);
+                return await Task.FromCanceled&amp;lt;ProcessedData&amp;gt;(cancellationToken);
+            }
+            
+            return result;
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogInformation(&amp;quot;Operation canceled&amp;quot;);
+            return await Task.FromCanceled&amp;lt;ProcessedData&amp;gt;(cancellationToken);
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این مثال، اگر داده‌های ورودی نامعتبر باشند یا داده‌های خروجی پس از پردازش نامعتبر شوند، یک تسک لغو شده برگردانده می‌شود. همچنین، در بلوک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;catch&lt;/code&gt;، هر &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;OperationCanceledException&lt;/code&gt; گرفته شده و یک تسک لغو شده مجدداً برگردانده می‌شود، که نشان‌دهنده لغو عملیات توسط سیستم یا کاربر است. این رویکرد به شما امکان می‌دهد تا یک مدل یکپارچه و قابل پیش‌بینی برای مدیریت لغو در سراسر خط لوله پردازش خود داشته باشید.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt; ابزاری قدرتمند و انعطاف‌پذیر در جعبه ابزار برنامه‌نویسی ناهمگام در سی‌شارپ است. این متد راهی تمیز و صریح برای مدیریت سناریوهای لغو و ایجاد تسک‌های لغو شده فراهم می‌کند. گرچه ممکن است در هر عملیات ناهمگام ضروری نباشد، اما درک زمان و نحوه استفاده از آن می‌تواند به ایجاد کدی مقاوم‌تر، قابل نگهداری‌تر و با مدیریت خطای بهتر منجر شود. با استفاده صحیح از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Task.FromCanceled&lt;/code&gt;، توسعه‌دهندگان می‌توانند تجربه کاربری بهتری ارائه دهند، زیرا برنامه‌ها می‌توانند به درخواست‌های لغو به طور مؤثر پاسخ دهند و از هدر رفتن منابع جلوگیری کنند. به خاطر داشته باشید که همیشه &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CancellationToken&lt;/code&gt; اصلی را ارسال کنید، لغو را به صورت graceful مدیریت کنید و این ابزار را در سناریوهای اعتبارسنجی و خروج زودهنگام در نظر بگیرید.&lt;/div&gt;">
+    <meta property="article:published_time" content="Tue, 27 May 2025 06:24:51 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫مدیریت لغو عملیات در برنامه‌نویسی ناهمگام با Task.FromCanceled";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-news-20469.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫معرفی «دستورات نادیده گرفته شده» سی‌شارپ (C# Ignored Directives) در دات‌نت 10</span>
+   </h6>
+</a><a href='www.dntips.ir-news-20467.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫پیش‌نمایش پشتیبانی کاتلین برای ویژوال استودیو کد</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫مدیریت لغو عملیات در برنامه‌نویسی ناهمگام با Task.FromCanceled </h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۴/۰۳/۰۶ ۰۹:۵۴</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-news-20468.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در برنامه‌نویسی ناهمگام (Asynchronous Programming) در سی‌شارپ (#C)، مدیریت صحیح لغو عملیات (Cancellation) از اهمیت ویژه‌ای برخوردار است. بسیاری از توسعه‌دهندگان با مفهوم <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CancellationToken</code> و الگوهای پایه لغو آشنا هستند، اما <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Task.FromCanceled</code> ابزاری کمتر شناخته شده ولی قدرتمند است که می‌تواند به بهبود چشمگیر کدهای ناهمگام شما کمک کند. این مقاله به بررسی عمیق <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Task.FromCanceled</code>، کاربردهای آن و بهترین روش‌های استفاده از آن برای توسعه‌دهندگان می‌پردازد.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Task.FromCanceled</code><strong>چیست؟</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Task.FromCanceled</code> یک متد استاتیک (Static Method) در کتابخانه موازی وظایف (Task Parallel Library - TPL) است که به شما امکان می‌دهد یک شیء <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Task</code> را در وضعیت لغو شده (Canceled State) ایجاد کنید. این متد به طور خاص برای سناریوهایی طراحی شده است که نیاز به ایجاد صریح یک تسک لغو شده دارید، بدون اینکه یک عملیات واقعی شروع شده و سپس لغو شود. دو نسخه از این متد وجود دارد:</div><ul><li><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public static Task FromCanceled(CancellationToken cancellationToken)</code></li><li><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public static Task&lt;TResult&gt; FromCanceled&lt;TResult&gt;(CancellationToken cancellationToken)</code></li></ul><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">نسخه اول برای تسک‌هایی استفاده می‌شود که مقداری را برنمی‌گردانند، در حالی که نسخه دوم برای تسک‌هایی است که نوع خاصی از نتیجه را برمی‌گردانند. <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">cancellationToken</code> که به این متد پاس داده می‌شود، توکنی است که علت لغو را نشان می‌دهد.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>کاربردهای پایه</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">یکی از متداول‌ترین سناریوها برای <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Task.FromCanceled</code>، بررسی زودهنگام لغو قبل از شروع یک عملیات پرهزینه یا پیچیده است. این رویکرد به شما امکان می‌دهد از انجام کارهای غیرضروری جلوگیری کرده و منابع سیستم را آزاد کنید. به عنوان مثال، در یک متد ناهمگام، می‌توانید وضعیت <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CancellationToken</code> را در ابتدای کار بررسی کنید و در صورت درخواست لغو، یک تسک لغو شده را برگردانید:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public async Task ProcessDataAsync(CancellationToken cancellationToken)
+{
+    if (cancellationToken.IsCancellationRequested)
+    {
+        return Task.FromCanceled(cancellationToken);
+    }
+    
+    // ادامه با پردازش عادی
+    return await DoWorkAsync();
+}</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">همین الگو برای تسک‌هایی که یک نتیجه خاص را برمی‌گردانند نیز قابل استفاده است. در این حالت، شما باید نوع نتیجه را مشخص کنید:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public async Task&lt;string&gt; GetDataAsync(CancellationToken cancellationToken)
+{
+    if (cancellationToken.IsCancellationRequested)
+    {
+        return Task.FromCanceled&lt;string&gt;(cancellationToken);
+    }
+    
+    return await FetchDataAsync();
+}</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">با استفاده از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">await Task.FromCanceled(...)</code>، کد فراخواننده (Caller) می‌تواند لغو را به درستی مدیریت کند و یک <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">OperationCanceledException</code> را دریافت نماید.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>موارد استفاده رایج</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Task.FromCanceled</code> در سناریوهای مختلفی می‌تواند مفید باشد:</div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>بررسی لغو زودهنگام (Early Cancellation Check):</strong> همانطور که پیشتر اشاره شد، این یک الگوی قدرتمند برای جلوگیری از شروع عملیات‌های سنگین است. به عنوان مثال، قبل از بارگذاری یک مجموعه داده بزرگ، می‌توانید بررسی کنید که آیا درخواست لغو وجود دارد یا خیر:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public async Task&lt;DataResult&gt; ProcessLargeDatasetAsync(CancellationToken cancellationToken)
+{
+    if (cancellationToken.IsCancellationRequested)
+    {
+        return await Task.FromCanceled&lt;DataResult&gt;(cancellationToken);
+    }
+
+    var data = await LoadLargeDatasetAsync();
+    return new DataResult(data);
+}</pre><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>پردازش مشروط (Conditional Processing):</strong> در مواقعی که نیاز به پردازش مشروط داده‌ها بر اساس معیارهای خاصی دارید و در صورت عدم برآورده شدن شرایط، باید یک لغو را اعلام کنید، این متد کارآمد است. به عنوان مثال، اگر نوع گزارش پشتیبانی نشود:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public async Task&lt;Report&gt; GenerateReportAsync(ReportType type, CancellationToken cancellationToken)
+{
+    if (!IsReportTypeSupported(type))
+    {
+        return await Task.FromCanceled&lt;Report&gt;(cancellationToken);
+    }
+
+    return await GenerateReportInternalAsync(type);
+}</pre><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>سناریوهای اعتبارسنجی (Validation Scenarios):</strong> هنگام اعتبارسنجی پارامترهای ورودی، اگر ورودی نامعتبر باشد، می‌توانید یک تسک لغو شده را برگردانید. این روش یک راه تمیز برای مدیریت خطاهای اعتبارسنجی است که به صورت مفهومی به لغو عملیات جاری نزدیک هستند:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public async Task&lt;ValidationResult&gt; ValidateDataAsync(DataModel data, CancellationToken cancellationToken)
+{
+    if (data == null)
+    {
+        return await Task.FromCanceled&lt;ValidationResult&gt;(cancellationToken);
+    }
+
+    return await PerformValidationAsync(data);
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>الگوهای پیشرفته</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Task.FromCanceled</code> می‌تواند در کنار الگوهای پیچیده‌تر برنامه‌نویسی ناهمگام نیز استفاده شود:</div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>زنجیره‌سازی تسک‌ها (Chaining Tasks):</strong> در سناریوهایی که یک عملیات اولیه ممکن است لغو شود و شما نیاز به ارائه یک پاسخ لغو شده دارید، <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Task.FromCanceled</code> راهکاری مناسب است. این در بلوک‌های <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">catch</code> برای مدیریت <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">OperationCanceledException</code> مفید است:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public async Task&lt;Result&gt; ProcessWithFallbackAsync(CancellationToken cancellationToken)
+{
+    try
+    {
+        return await PrimaryOperationAsync();
+    }
+    catch (OperationCanceledException)
+    {
+        return await Task.FromCanceled&lt;Result&gt;(cancellationToken);
+    }
+    catch (Exception)
+    {
+        return await FallbackOperationAsync();
+    }
+}</pre><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>فکتوری تسک سفارشی (Custom Task Factory):</strong> می‌توانید یک فکتوری سفارشی برای ایجاد تسک‌ها طراحی کنید که به طور خودکار <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Task.FromCanceled</code> را در صورت لغو <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CancellationToken</code> استفاده کند. این به ایجاد کدی تمیزتر و قابل استفاده مجدد کمک می‌کند:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public class CustomTaskFactory
+{
+    public static async Task&lt;T&gt; CreateTaskAsync&lt;T&gt;(
+        Func&lt;Task&lt;T&gt;&gt; operation,
+        CancellationToken cancellationToken)
+    {
+        if (cancellationToken.IsCancellationRequested)
+        {
+            return await Task.FromCanceled&lt;T&gt;(cancellationToken);
+        }
+        try
+        {
+            return await operation();
+        }
+        catch (OperationCanceledException)
+        {
+            return await Task.FromCanceled&lt;T&gt;(cancellationToken);
+        }
+    }
+}</pre><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>الگوی تایم‌اوت (Timeout Pattern):</strong> با ترکیب <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CancellationTokenSource</code> و <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Task.FromCanceled</code> می‌توان یک الگوی تایم‌اوت قدرتمند پیاده‌سازی کرد. <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CancellationTokenSource</code> می‌تواند برای لغو خودکار پس از یک مدت زمان مشخص پیکربندی شود:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public async Task&lt;Result&gt; ExecuteWithTimeoutAsync(
+    Func&lt;Task&lt;Result&gt;&gt; operation,
+    TimeSpan timeout)
+{
+    using var cts = new CancellationTokenSource(timeout);
+
+    try
+    {
+        return await operation();
+    }
+    catch (OperationCanceledException)
+    {
+        return await Task.FromCanceled&lt;Result&gt;(cts.Token);
+    }
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>بهترین روش‌ها</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">برای استفاده مؤثر از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Task.FromCanceled</code> و اطمینان از عملکرد صحیح مدیریت لغو، رعایت بهترین روش‌ها ضروری است:</div><ul><li><strong>همیشه </strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CancellationToken</code><strong> را ارسال کنید:</strong> همواره همان <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CancellationToken</code> را که برای ایجاد تسک لغو شده استفاده شده است، به متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Task.FromCanceled</code> ارسال کنید. ارسال یک <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CancellationToken</code> جدید یا خالی، می‌تواند منجر به رفتار غیرمنتظره و عدم ردیابی صحیح لغو شود. این کار به سیستم لغو امکان می‌دهد که به درستی تشخیص دهد کدام عملیات لغو شده است.</li></ul><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">// خوب
+return Task.FromCanceled(cancellationToken);
+
+// بد
+return Task.FromCanceled(new CancellationToken());</pre><ul><li><strong>مدیریت graceful لغو:</strong> هنگام وقوع لغو، پیام‌های خطا یا لاگ‌های (Log) معنی‌دار ارائه دهید. این کار به اشکال‌زدایی (Debugging) و درک وضعیت برنامه در زمان لغو کمک می‌کند. لاگ‌کردن اطلاعات در مورد لغو، به تیم توسعه‌دهنده کمک می‌کند تا الگوهای لغو را شناسایی کرده و رفتار برنامه را در سناریوهای مختلف لغو بهبود بخشد.</li></ul><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public async Task&lt;Result&gt; ProcessWithMessageAsync(CancellationToken cancellationToken)
+{
+    if (cancellationToken.IsCancellationRequested)
+    {
+        _logger.LogInformation(&quot;Operation canceled by user&quot;);
+        return await Task.FromCanceled&lt;Result&gt;(cancellationToken);
+    }
+
+    return await ProcessAsync();
+}</pre><ul><li><strong>استفاده با </strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Task.WhenAll</code><strong>:</strong> هنگام کار با چندین تسک به صورت همزمان (مثلاً با <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Task.WhenAll</code>)، استفاده از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Task.FromCanceled</code> می‌تواند به شما کمک کند تا در صورت لغو یکی از تسک‌ها، کل مجموعه تسک‌ها را لغو شده اعلام کنید. این تضمین می‌کند که حتی اگر یک تسک لغو شود، <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Task.WhenAll</code> نیز به درستی با یک <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">OperationCanceledException</code> تکمیل شود.</li></ul><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public async Task&lt;Result[]&gt; ProcessMultipleAsync(CancellationToken cancellationToken)
+{
+    var tasks = new List&lt;Task&lt;Result&gt;&gt;();
+
+    foreach (var item in items)
+    {
+        if (cancellationToken.IsCancellationRequested)
+        {
+            return await Task.FromCanceled&lt;Result[]&gt;(cancellationToken);
+        }
+
+        tasks.Add(ProcessItemAsync(item));
+    }
+
+    return await Task.WhenAll(tasks);
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>مثال کاربردی در دنیای واقعی</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">برای درک بهتر، یک مثال عملی از خط لوله پردازش داده (Data Processing Pipeline) را در نظر بگیرید. در این سناریو، <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Task.FromCanceled</code> می‌تواند در مراحل مختلف برای مدیریت اعتبارسنجی (Validation) و لغو عملیات استفاده شود:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public class DataProcessingPipeline
+{
+    private readonly ILogger&lt;DataProcessingPipeline&gt; _logger;
+    
+    public async Task&lt;ProcessedData&gt; ProcessDataAsync(
+        RawData data,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            // اعتبارسنجی ورودی
+            if (!IsValid(data))
+            {
+                _logger.LogWarning(&quot;Invalid data received&quot;);
+                return await Task.FromCanceled&lt;ProcessedData&gt;(cancellationToken);
+            }
+            
+            // پردازش داده
+            var result = await TransformDataAsync(data);
+            
+            // اعتبارسنجی خروجی
+            if (!IsValid(result))
+            {
+                _logger.LogError(&quot;Invalid result generated&quot;);
+                return await Task.FromCanceled&lt;ProcessedData&gt;(cancellationToken);
+            }
+            
+            return result;
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogInformation(&quot;Operation canceled&quot;);
+            return await Task.FromCanceled&lt;ProcessedData&gt;(cancellationToken);
+        }
+    }
+}</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در این مثال، اگر داده‌های ورودی نامعتبر باشند یا داده‌های خروجی پس از پردازش نامعتبر شوند، یک تسک لغو شده برگردانده می‌شود. همچنین، در بلوک <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">catch</code>، هر <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">OperationCanceledException</code> گرفته شده و یک تسک لغو شده مجدداً برگردانده می‌شود، که نشان‌دهنده لغو عملیات توسط سیستم یا کاربر است. این رویکرد به شما امکان می‌دهد تا یک مدل یکپارچه و قابل پیش‌بینی برای مدیریت لغو در سراسر خط لوله پردازش خود داشته باشید.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>نتیجه‌گیری</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Task.FromCanceled</code> ابزاری قدرتمند و انعطاف‌پذیر در جعبه ابزار برنامه‌نویسی ناهمگام در سی‌شارپ است. این متد راهی تمیز و صریح برای مدیریت سناریوهای لغو و ایجاد تسک‌های لغو شده فراهم می‌کند. گرچه ممکن است در هر عملیات ناهمگام ضروری نباشد، اما درک زمان و نحوه استفاده از آن می‌تواند به ایجاد کدی مقاوم‌تر، قابل نگهداری‌تر و با مدیریت خطای بهتر منجر شود. با استفاده صحیح از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Task.FromCanceled</code>، توسعه‌دهندگان می‌توانند تجربه کاربری بهتری ارائه دهند، زیرا برنامه‌ها می‌توانند به درخواست‌های لغو به طور مؤثر پاسخ دهند و از هدر رفتن منابع جلوگیری کنند. به خاطر داشته باشید که همیشه <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CancellationToken</code> اصلی را ارسال کنید، لغو را به صورت graceful مدیریت کنید و این ابزار را در سناریوهای اعتبارسنجی و خروج زودهنگام در نظر بگیرید.</div></div><br><br><a href='https://medium.com/@info_4533/understanding-task-fromcanceled-0bd5fdc6b213'>مشاهده مطلب اصلی</a></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20449.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>چرا نادیده گرفتن CancellationToken هزینه‌ساز است؟</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20460.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>مدیریت منابع با Task.Dispose در برنامه‌نویسی ناهمزمان #C</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20471.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>مدیریت خطا در برنامه‌نویسی ناهمگام #C: درک Task.FromException</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20462.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>درک Task.Delay در برنامه‌نویسی ناهمگام #C</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20652.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>خدمات پس‌زمینه در .NET 10: چگونه ExecuteAsync بالاخره روی نخ جداگانه‌ای اجرا می‌شود</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1811.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>پردازش‌های Async در Entity framework 6</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3508.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>الگوهای طراحی API - مکانیزم جلوگیری از پردازش تکراری درخواست ها - Request Deduplication</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/courses/topic/14/30d50f58-9a19-44b8-8033-f70c3db1a636'><span class='badge bg-warning rounded-pill me-2'>مطالب دوره‌ها</span>لغو اعمال غیرهمزمان</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2997.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>پشتیبانی توکار از انجام کارهای پس‌زمینه در ASP.NET Core 2x</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2997.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>پشتیبانی توکار از انجام کارهای پس‌زمینه در ASP.NET Core 2x</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

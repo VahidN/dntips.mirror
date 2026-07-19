@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫ساخت یک عامل درخواست کشش مبتنی بر هوش مصنوعی برای Azure DevOps با استفاده از GitHub Copilot SDK</title>     <meta name="description" content="توسعه‌دهندگان اکنون می‌توانند از یک عامل درخواست کشش مبتنی بر هوش مصنوعی برای &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Azure DevOps&lt;/code&gt; بهره‌مند شوند، حتی اگر کد آن‌ها در &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GitHub&lt;/code&gt; نباشد. این عامل، که با استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GitHub Copilot SDK&lt;/code&gt; ساخته شده است، به طور خودکار درخواست‌های کشش را در &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Azure DevOps&lt;/code&gt; بررسی می‌کند و گزارش‌های Markdown ساختاریافته‌ای را در مورد آسیب‌پذیری‌های امنیتی، گلوگاه‌های عملکرد، نگرانی‌های مربوط به قابلیت نگهداری و پیشنهادات اصلاح ارائه می‌دهد.
+
+این عامل با استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GitHub Copilot CLI&lt;/code&gt; برای اجرای وظایف ارتباط برقرار می‌کند و از دو سرور &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;MCP&lt;/code&gt; (Model Context Protocol) استفاده می‌کند: یکی برای بازیابی جزئیات درخواست کشش از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Azure DevOps&lt;/code&gt; و دیگری برای جستجوی مستندات بهترین شیوه‌ها از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Microsoft Learn&lt;/code&gt;. این رویکرد تضمین می‌کند که بررسی کد بر اساس راهنمایی‌های رسمی و به‌روز انجام می‌شود.
+
+عملکرد اصلی این عامل شامل دریافت تفاوت‌های &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PR&lt;/code&gt;، تجزیه و تحلیل کد با استفاده از یک مدل هوش مصنوعی (مانند &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Claude Sonnet&lt;/code&gt;) و تولید یک گزارش Markdown جامع است. این گزارش به توسعه‌دهندگان کمک می‌کند تا مشکلات بالقوه را قبل از ادغام کد شناسایی و رفع کنند، در نتیجه کیفیت کد را بهبود می‌بخشند.
+
+این راه حل به صورت کانتینر بسته‌بندی شده است که توزیع و اجرای آن را در تیم‌ها و خطوط لوله مختلف آسان می‌کند. استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Azure Container Registry&lt;/code&gt; (ACR) برای میزبانی تصاویر، امنیت و دسترسی را افزایش می‌دهد و از ویژگی‌های امنیتی ACR مانند امضای تصویر و اسکن آسیب‌پذیری بهره می‌برد.
+
+این ابزار به تیم‌هایی که هنوز نمی‌توانند کد خود را به &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GitHub&lt;/code&gt; منتقل کنند، امکان می‌دهد از مزایای بررسی کد مبتنی بر هوش مصنوعی بهره‌مند شوند و سطح نوآوری و مراقبت را در فرآیند &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;DevOps&lt;/code&gt; خود افزایش دهند.">
+    <meta name="author" content="راویAI">
+    <meta itemprop="name" content="ساخت یک عامل درخواست کشش مبتنی بر هوش مصنوعی برای Azure DevOps با استفاده از GitHub Copilot SDK">
+    <meta itemprop="description" content="توسعه‌دهندگان اکنون می‌توانند از یک عامل درخواست کشش مبتنی بر هوش مصنوعی برای &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Azure DevOps&lt;/code&gt; بهره‌مند شوند، حتی اگر کد آن‌ها در &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GitHub&lt;/code&gt; نباشد. این عامل، که با استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GitHub Copilot SDK&lt;/code&gt; ساخته شده است، به طور خودکار درخواست‌های کشش را در &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Azure DevOps&lt;/code&gt; بررسی می‌کند و گزارش‌های Markdown ساختاریافته‌ای را در مورد آسیب‌پذیری‌های امنیتی، گلوگاه‌های عملکرد، نگرانی‌های مربوط به قابلیت نگهداری و پیشنهادات اصلاح ارائه می‌دهد.
+
+این عامل با استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GitHub Copilot CLI&lt;/code&gt; برای اجرای وظایف ارتباط برقرار می‌کند و از دو سرور &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;MCP&lt;/code&gt; (Model Context Protocol) استفاده می‌کند: یکی برای بازیابی جزئیات درخواست کشش از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Azure DevOps&lt;/code&gt; و دیگری برای جستجوی مستندات بهترین شیوه‌ها از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Microsoft Learn&lt;/code&gt;. این رویکرد تضمین می‌کند که بررسی کد بر اساس راهنمایی‌های رسمی و به‌روز انجام می‌شود.
+
+عملکرد اصلی این عامل شامل دریافت تفاوت‌های &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PR&lt;/code&gt;، تجزیه و تحلیل کد با استفاده از یک مدل هوش مصنوعی (مانند &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Claude Sonnet&lt;/code&gt;) و تولید یک گزارش Markdown جامع است. این گزارش به توسعه‌دهندگان کمک می‌کند تا مشکلات بالقوه را قبل از ادغام کد شناسایی و رفع کنند، در نتیجه کیفیت کد را بهبود می‌بخشند.
+
+این راه حل به صورت کانتینر بسته‌بندی شده است که توزیع و اجرای آن را در تیم‌ها و خطوط لوله مختلف آسان می‌کند. استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Azure Container Registry&lt;/code&gt; (ACR) برای میزبانی تصاویر، امنیت و دسترسی را افزایش می‌دهد و از ویژگی‌های امنیتی ACR مانند امضای تصویر و اسکن آسیب‌پذیری بهره می‌برد.
+
+این ابزار به تیم‌هایی که هنوز نمی‌توانند کد خود را به &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GitHub&lt;/code&gt; منتقل کنند، امکان می‌دهد از مزایای بررسی کد مبتنی بر هوش مصنوعی بهره‌مند شوند و سطح نوآوری و مراقبت را در فرآیند &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;DevOps&lt;/code&gt; خود افزایش دهند.">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="ساخت یک عامل درخواست کشش مبتنی بر هوش مصنوعی برای Azure DevOps با استفاده از GitHub Copilot SDK">
+    <meta property="og:description" content="توسعه‌دهندگان اکنون می‌توانند از یک عامل درخواست کشش مبتنی بر هوش مصنوعی برای &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Azure DevOps&lt;/code&gt; بهره‌مند شوند، حتی اگر کد آن‌ها در &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GitHub&lt;/code&gt; نباشد. این عامل، که با استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GitHub Copilot SDK&lt;/code&gt; ساخته شده است، به طور خودکار درخواست‌های کشش را در &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Azure DevOps&lt;/code&gt; بررسی می‌کند و گزارش‌های Markdown ساختاریافته‌ای را در مورد آسیب‌پذیری‌های امنیتی، گلوگاه‌های عملکرد، نگرانی‌های مربوط به قابلیت نگهداری و پیشنهادات اصلاح ارائه می‌دهد.
+
+این عامل با استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GitHub Copilot CLI&lt;/code&gt; برای اجرای وظایف ارتباط برقرار می‌کند و از دو سرور &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;MCP&lt;/code&gt; (Model Context Protocol) استفاده می‌کند: یکی برای بازیابی جزئیات درخواست کشش از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Azure DevOps&lt;/code&gt; و دیگری برای جستجوی مستندات بهترین شیوه‌ها از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Microsoft Learn&lt;/code&gt;. این رویکرد تضمین می‌کند که بررسی کد بر اساس راهنمایی‌های رسمی و به‌روز انجام می‌شود.
+
+عملکرد اصلی این عامل شامل دریافت تفاوت‌های &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PR&lt;/code&gt;، تجزیه و تحلیل کد با استفاده از یک مدل هوش مصنوعی (مانند &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Claude Sonnet&lt;/code&gt;) و تولید یک گزارش Markdown جامع است. این گزارش به توسعه‌دهندگان کمک می‌کند تا مشکلات بالقوه را قبل از ادغام کد شناسایی و رفع کنند، در نتیجه کیفیت کد را بهبود می‌بخشند.
+
+این راه حل به صورت کانتینر بسته‌بندی شده است که توزیع و اجرای آن را در تیم‌ها و خطوط لوله مختلف آسان می‌کند. استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Azure Container Registry&lt;/code&gt; (ACR) برای میزبانی تصاویر، امنیت و دسترسی را افزایش می‌دهد و از ویژگی‌های امنیتی ACR مانند امضای تصویر و اسکن آسیب‌پذیری بهره می‌برد.
+
+این ابزار به تیم‌هایی که هنوز نمی‌توانند کد خود را به &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GitHub&lt;/code&gt; منتقل کنند، امکان می‌دهد از مزایای بررسی کد مبتنی بر هوش مصنوعی بهره‌مند شوند و سطح نوآوری و مراقبت را در فرآیند &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;DevOps&lt;/code&gt; خود افزایش دهند.">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="ساخت یک عامل درخواست کشش مبتنی بر هوش مصنوعی برای Azure DevOps با استفاده از GitHub Copilot SDK">
+    <meta name="twitter:description" content="توسعه‌دهندگان اکنون می‌توانند از یک عامل درخواست کشش مبتنی بر هوش مصنوعی برای &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Azure DevOps&lt;/code&gt; بهره‌مند شوند، حتی اگر کد آن‌ها در &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GitHub&lt;/code&gt; نباشد. این عامل، که با استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GitHub Copilot SDK&lt;/code&gt; ساخته شده است، به طور خودکار درخواست‌های کشش را در &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Azure DevOps&lt;/code&gt; بررسی می‌کند و گزارش‌های Markdown ساختاریافته‌ای را در مورد آسیب‌پذیری‌های امنیتی، گلوگاه‌های عملکرد، نگرانی‌های مربوط به قابلیت نگهداری و پیشنهادات اصلاح ارائه می‌دهد.
+
+این عامل با استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GitHub Copilot CLI&lt;/code&gt; برای اجرای وظایف ارتباط برقرار می‌کند و از دو سرور &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;MCP&lt;/code&gt; (Model Context Protocol) استفاده می‌کند: یکی برای بازیابی جزئیات درخواست کشش از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Azure DevOps&lt;/code&gt; و دیگری برای جستجوی مستندات بهترین شیوه‌ها از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Microsoft Learn&lt;/code&gt;. این رویکرد تضمین می‌کند که بررسی کد بر اساس راهنمایی‌های رسمی و به‌روز انجام می‌شود.
+
+عملکرد اصلی این عامل شامل دریافت تفاوت‌های &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PR&lt;/code&gt;، تجزیه و تحلیل کد با استفاده از یک مدل هوش مصنوعی (مانند &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Claude Sonnet&lt;/code&gt;) و تولید یک گزارش Markdown جامع است. این گزارش به توسعه‌دهندگان کمک می‌کند تا مشکلات بالقوه را قبل از ادغام کد شناسایی و رفع کنند، در نتیجه کیفیت کد را بهبود می‌بخشند.
+
+این راه حل به صورت کانتینر بسته‌بندی شده است که توزیع و اجرای آن را در تیم‌ها و خطوط لوله مختلف آسان می‌کند. استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Azure Container Registry&lt;/code&gt; (ACR) برای میزبانی تصاویر، امنیت و دسترسی را افزایش می‌دهد و از ویژگی‌های امنیتی ACR مانند امضای تصویر و اسکن آسیب‌پذیری بهره می‌برد.
+
+این ابزار به تیم‌هایی که هنوز نمی‌توانند کد خود را به &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GitHub&lt;/code&gt; منتقل کنند، امکان می‌دهد از مزایای بررسی کد مبتنی بر هوش مصنوعی بهره‌مند شوند و سطح نوآوری و مراقبت را در فرآیند &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;DevOps&lt;/code&gt; خود افزایش دهند.">
+    <meta name="twitter:card" content="توسعه‌دهندگان اکنون می‌توانند از یک عامل درخواست کشش مبتنی بر هوش مصنوعی برای &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Azure DevOps&lt;/code&gt; بهره‌مند شوند، حتی اگر کد آن‌ها در &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GitHub&lt;/code&gt; نباشد. این عامل، که با استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GitHub Copilot SDK&lt;/code&gt; ساخته شده است، به طور خودکار درخواست‌های کشش را در &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Azure DevOps&lt;/code&gt; بررسی می‌کند و گزارش‌های Markdown ساختاریافته‌ای را در مورد آسیب‌پذیری‌های امنیتی، گلوگاه‌های عملکرد، نگرانی‌های مربوط به قابلیت نگهداری و پیشنهادات اصلاح ارائه می‌دهد.
+
+این عامل با استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GitHub Copilot CLI&lt;/code&gt; برای اجرای وظایف ارتباط برقرار می‌کند و از دو سرور &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;MCP&lt;/code&gt; (Model Context Protocol) استفاده می‌کند: یکی برای بازیابی جزئیات درخواست کشش از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Azure DevOps&lt;/code&gt; و دیگری برای جستجوی مستندات بهترین شیوه‌ها از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Microsoft Learn&lt;/code&gt;. این رویکرد تضمین می‌کند که بررسی کد بر اساس راهنمایی‌های رسمی و به‌روز انجام می‌شود.
+
+عملکرد اصلی این عامل شامل دریافت تفاوت‌های &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PR&lt;/code&gt;، تجزیه و تحلیل کد با استفاده از یک مدل هوش مصنوعی (مانند &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Claude Sonnet&lt;/code&gt;) و تولید یک گزارش Markdown جامع است. این گزارش به توسعه‌دهندگان کمک می‌کند تا مشکلات بالقوه را قبل از ادغام کد شناسایی و رفع کنند، در نتیجه کیفیت کد را بهبود می‌بخشند.
+
+این راه حل به صورت کانتینر بسته‌بندی شده است که توزیع و اجرای آن را در تیم‌ها و خطوط لوله مختلف آسان می‌کند. استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Azure Container Registry&lt;/code&gt; (ACR) برای میزبانی تصاویر، امنیت و دسترسی را افزایش می‌دهد و از ویژگی‌های امنیتی ACR مانند امضای تصویر و اسکن آسیب‌پذیری بهره می‌برد.
+
+این ابزار به تیم‌هایی که هنوز نمی‌توانند کد خود را به &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GitHub&lt;/code&gt; منتقل کنند، امکان می‌دهد از مزایای بررسی کد مبتنی بر هوش مصنوعی بهره‌مند شوند و سطح نوآوری و مراقبت را در فرآیند &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;DevOps&lt;/code&gt; خود افزایش دهند.">
+    <meta property="article:published_time" content="Tue, 24 Feb 2026 21:43:11 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫ساخت یک عامل درخواست کشش مبتنی بر هوش مصنوعی برای Azure DevOps با استفاده از GitHub Copilot SDK";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-news-24293.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫پادکست InfoQ: تکامل نرم‌افزار با میکروسرویس‌ها و مدل‌های زبانی بزرگ</span>
+   </h6>
+</a><a href='www.dntips.ir-news-24281.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫تجربیات اولیه با Copilot: چالش‌ها و راهکارها</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫ساخت یک عامل درخواست کشش مبتنی بر هوش مصنوعی برای Azure DevOps با استفاده از GitHub Copilot SDK</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>راویAI<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۴/۱۲/۰۶ ۰۱:۱۳</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-news-24290.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>توسعه‌دهندگان اکنون می‌توانند از یک عامل درخواست کشش مبتنی بر هوش مصنوعی برای <code dir='ltr' style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Azure DevOps</code> بهره‌مند شوند، حتی اگر کد آن‌ها در <code dir='ltr' style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">GitHub</code> نباشد. این عامل، که با استفاده از <code dir='ltr' style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">GitHub Copilot SDK</code> ساخته شده است، به طور خودکار درخواست‌های کشش را در <code dir='ltr' style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Azure DevOps</code> بررسی می‌کند و گزارش‌های Markdown ساختاریافته‌ای را در مورد آسیب‌پذیری‌های امنیتی، گلوگاه‌های عملکرد، نگرانی‌های مربوط به قابلیت نگهداری و پیشنهادات اصلاح ارائه می‌دهد.
+
+این عامل با استفاده از <code dir='ltr' style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">GitHub Copilot CLI</code> برای اجرای وظایف ارتباط برقرار می‌کند و از دو سرور <code dir='ltr' style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">MCP</code> (Model Context Protocol) استفاده می‌کند: یکی برای بازیابی جزئیات درخواست کشش از <code dir='ltr' style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Azure DevOps</code> و دیگری برای جستجوی مستندات بهترین شیوه‌ها از <code dir='ltr' style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Microsoft Learn</code>. این رویکرد تضمین می‌کند که بررسی کد بر اساس راهنمایی‌های رسمی و به‌روز انجام می‌شود.
+
+عملکرد اصلی این عامل شامل دریافت تفاوت‌های <code dir='ltr' style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">PR</code>، تجزیه و تحلیل کد با استفاده از یک مدل هوش مصنوعی (مانند <code dir='ltr' style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Claude Sonnet</code>) و تولید یک گزارش Markdown جامع است. این گزارش به توسعه‌دهندگان کمک می‌کند تا مشکلات بالقوه را قبل از ادغام کد شناسایی و رفع کنند، در نتیجه کیفیت کد را بهبود می‌بخشند.
+
+این راه حل به صورت کانتینر بسته‌بندی شده است که توزیع و اجرای آن را در تیم‌ها و خطوط لوله مختلف آسان می‌کند. استفاده از <code dir='ltr' style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Azure Container Registry</code> (ACR) برای میزبانی تصاویر، امنیت و دسترسی را افزایش می‌دهد و از ویژگی‌های امنیتی ACR مانند امضای تصویر و اسکن آسیب‌پذیری بهره می‌برد.
+
+این ابزار به تیم‌هایی که هنوز نمی‌توانند کد خود را به <code dir='ltr' style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">GitHub</code> منتقل کنند، امکان می‌دهد از مزایای بررسی کد مبتنی بر هوش مصنوعی بهره‌مند شوند و سطح نوآوری و مراقبت را در فرآیند <code dir='ltr' style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">DevOps</code> خود افزایش دهند.</div><br><br><a href='https://www.domstamand.com/building-an-ai-pull-request-agent-for-azure-devops-using-github-copilot-sdk'>مشاهده مطلب اصلی</a></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20261.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>یکپارچه‌سازی سرور MCP GitHub در VS Code برای توسعه‌دهندگان .NET</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20496.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>نشت اطلاعات خصوصی از طریق بهره‌برداری از GitHub MCP: آسیب‌پذیری بحرانی در سیستم‌های عامل هوشمند</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-23189.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>GitHub Copilot SDK در پیش‌نمایش فنی قرار گرفت</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-22717.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>استفاده از GitHub Copilot SDK در برنامه‌های .NET با استیو ساندرسون</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-23066.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>مهارت‌های عامل: از کلوید تا استاندارد باز تا گردش کار روزانه برنامه‌نویسی</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20457.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>ویدئوهای «ابزارهای توسعه‌دهنده و دات‌نت | مایکروسافت بیلد ۲۰۲۵»</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-23713.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>بررسی صادقانه از IDEهای مدرن و توسعه مبتنی بر هوش مصنوعی در .NET</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-22730.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>GitHub Copilot SDK معرفی شد: ساخت Agent در هر برنامه</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-21517.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>گام‌های بعدی در مسیر هوش مصنوعی عامل با Azure DevOps و مخازن GitHub</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20318.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>مهندسی درخواست‌ها با GitHub Copilot در Visual Studio Code</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

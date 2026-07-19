@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫طراحی سیستماتیک خصیصه‌های تاریخچه‌دار (Historized Attributes) در EF Core</title>     <meta name="description" content=" یک چالش رایج در طراحی پایگاه‌داده‌های سازمانی، حفظ و ردیابی تاریخچه تغییرات مقادیر یک ویژگی (Attribute) خاص است. به عنوان مثال، ثبت تاریخچه قیمت محصولات با گذشت زمان، یا حفظ آدرس‌های قبلی کاربران در سیستم.  اگرچه برخی از پایگاه‌های داده مانند SQL Server قابلیتی بومی به نام Temporal Tables دارند، اما در بسیاری از پروژه‌ها (به ویژه هنگام استفاده از پایگاه‌های داده‌ای مثل PostgreSQL یا MySQL) نیاز به یک طراحی مستقل، بهینه و قابل پیاده‌سازی ب ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="طراحی سیستماتیک خصیصه‌های تاریخچه‌دار (Historized Attributes) در EF Core">
+    <meta itemprop="description" content=" یک چالش رایج در طراحی پایگاه‌داده‌های سازمانی، حفظ و ردیابی تاریخچه تغییرات مقادیر یک ویژگی (Attribute) خاص است. به عنوان مثال، ثبت تاریخچه قیمت محصولات با گذشت زمان، یا حفظ آدرس‌های قبلی کاربران در سیستم.  اگرچه برخی از پایگاه‌های داده مانند SQL Server قابلیتی بومی به نام Temporal Tables دارند، اما در بسیاری از پروژه‌ها (به ویژه هنگام استفاده از پایگاه‌های داده‌ای مثل PostgreSQL یا MySQL) نیاز به یک طراحی مستقل، بهینه و قابل پیاده‌سازی ب ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="طراحی سیستماتیک خصیصه‌های تاریخچه‌دار (Historized Attributes) در EF Core">
+    <meta property="og:description" content=" یک چالش رایج در طراحی پایگاه‌داده‌های سازمانی، حفظ و ردیابی تاریخچه تغییرات مقادیر یک ویژگی (Attribute) خاص است. به عنوان مثال، ثبت تاریخچه قیمت محصولات با گذشت زمان، یا حفظ آدرس‌های قبلی کاربران در سیستم.  اگرچه برخی از پایگاه‌های داده مانند SQL Server قابلیتی بومی به نام Temporal Tables دارند، اما در بسیاری از پروژه‌ها (به ویژه هنگام استفاده از پایگاه‌های داده‌ای مثل PostgreSQL یا MySQL) نیاز به یک طراحی مستقل، بهینه و قابل پیاده‌سازی ب ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="طراحی سیستماتیک خصیصه‌های تاریخچه‌دار (Historized Attributes) در EF Core">
+    <meta name="twitter:description" content=" یک چالش رایج در طراحی پایگاه‌داده‌های سازمانی، حفظ و ردیابی تاریخچه تغییرات مقادیر یک ویژگی (Attribute) خاص است. به عنوان مثال، ثبت تاریخچه قیمت محصولات با گذشت زمان، یا حفظ آدرس‌های قبلی کاربران در سیستم.  اگرچه برخی از پایگاه‌های داده مانند SQL Server قابلیتی بومی به نام Temporal Tables دارند، اما در بسیاری از پروژه‌ها (به ویژه هنگام استفاده از پایگاه‌های داده‌ای مثل PostgreSQL یا MySQL) نیاز به یک طراحی مستقل، بهینه و قابل پیاده‌سازی ب ...">
+    <meta name="twitter:card" content=" یک چالش رایج در طراحی پایگاه‌داده‌های سازمانی، حفظ و ردیابی تاریخچه تغییرات مقادیر یک ویژگی (Attribute) خاص است. به عنوان مثال، ثبت تاریخچه قیمت محصولات با گذشت زمان، یا حفظ آدرس‌های قبلی کاربران در سیستم.  اگرچه برخی از پایگاه‌های داده مانند SQL Server قابلیتی بومی به نام Temporal Tables دارند، اما در بسیاری از پروژه‌ها (به ویژه هنگام استفاده از پایگاه‌های داده‌ای مثل PostgreSQL یا MySQL) نیاز به یک طراحی مستقل، بهینه و قابل پیاده‌سازی ب ...">
+    <meta property="article:published_time" content="Sun, 28 Jun 2026 06:50:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫طراحی سیستماتیک خصیصه‌های تاریخچه‌دار (Historized Attributes) در EF Core";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-3700.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫نگاهی جامع به مدیریت MIME Typeها در NET 11.</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-3698.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫مدیریت استراتژی‌های نام‌گذاری در System.Text.Json و قابلیت جدید PascalCase در NET 11.</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫طراحی سیستماتیک خصیصه‌های تاریخچه‌دار (Historized Attributes) در EF Core</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۵/۰۴/۰۷ ۱۰:۲۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-3699.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">یک چالش رایج در طراحی پایگاه‌داده‌های سازمانی، حفظ و ردیابی تاریخچه تغییرات مقادیر یک ویژگی (Attribute) خاص است. به عنوان مثال، ثبت تاریخچه قیمت محصولات با گذشت زمان، یا حفظ آدرس‌های قبلی کاربران در سیستم.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">اگرچه برخی از پایگاه‌های داده مانند SQL Server قابلیتی بومی به نام Temporal Tables دارند، اما در بسیاری از پروژه‌ها (به ویژه هنگام استفاده از پایگاه‌های داده‌ای مثل PostgreSQL یا MySQL) نیاز به یک طراحی مستقل، بهینه و قابل پیاده‌سازی با الگوهای شیء‌گرا داریم. در این مقاله، نحوه طراحی سیستماتیک این ساختار را بررسی کرده و پیاده‌سازی آن را در <strong>Entity Framework Core</strong> مرور خواهیم کرد.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>مدل‌سازی منطقی: از مفهوم تا موجودیت (Entity)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">برای درک بهتر، بیایید سناریوی یک فروشگاه میوه را در نظر بگیریم. قیمت هر میوه ممکن است بر اساس شرایط بازار تغییر کند و ما می‌خواهیم علاوه بر قیمت فعلی، تاریخچه تغییرات قیمت را نیز داشته باشیم.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در گام اول، دو موجودیت اصلی یا اصطلاحاً <strong>Anchor</strong> تعریف می‌کنیم:</div><ul><li><strong>نوع میوه (Fruit):</strong> موجودیت اصلی که نام میوه را نگه می‌دارد.</li><li><strong>قیمت تاریخچه‌دار (FruitPrice):</strong> خصیصه‌ای که ارزش مالی و بازه زمانی اعتبار آن قیمت را ثبت می‌کند.</li></ul><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>ساختار مدل منطقی و ارتباطات</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">ارتباط بین میوه و قیمت‌های آن یک ارتباط <strong>یک‌به‌چند (1:N)</strong> است؛ یعنی یک میوه می‌تواند در طول زمان چندین قیمت داشته باشد، اما هر رکوردِ قیمت، دقیقاً متعلق به یک میوه است.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">برای هر رکورد قیمت، به دو ستون زمانی نیاز داریم:</div><ul><li><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ValidFrom</code>: زمان شروع اعتبار قیمت (UTC).</li><li><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ValidTo</code>: زمان پایان اعتبار قیمت (UTC).</li></ul><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>پیاده‌سازی مدل فیزیکی در EF Core</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">برای تبدیل این مدل منطقی به کد، ابتدا کلاس‌های دامین (Domain Classes) را تعریف می‌کنیم. به جای استفاده از مقادیر <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">NULL</code> برای قیمت‌های فعلی (که کوئری‌ها را پیچیده می‌کند)، از یک <strong>مقدار نگهبان (Sentinel Value)</strong> مانند <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">DateTime.MaxValue</code> استفاده می‌کنیم. این کار نشان می‌دهد که قیمت مورد نظر تا آینده نامعلوم معتبر است.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>تعریف موجودیت‌ها (Entities)</strong></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public class Fruit
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    
+    // Navigation Property
+    public List&lt;FruitPrice&gt; Prices { get; set; } = new();
+}
+
+public class FruitPrice
+{
+    public int Id { get; set; }
+    public int FruitId { get; set; }
+    public decimal Value { get; set; }
+    public DateTime ValidFrom { get; set; }
+    public DateTime ValidTo { get; set; } // استفاده از مقدار نگهبان به جای Null
+
+    // Navigation Property
+    public Fruit? Fruit { get; set; }
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>تنظیمات Fluent API و بهینه‌سازی ایندکس‌ها</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">برای بالا بردن کارایی کوئری‌ها در حجم داده بالا، تعریف یک <strong>ایندکس ترکیبی (Composite Index)</strong> روی کلید خارجی و زمان شروع اعتبار (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">FruitId</code>, <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ValidFrom</code>) حیاتی است. بدون این ایندکس، دیتابیس مجبور به اسکن کامل جدول (Full Table Scan) خواهد شد.</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+public class FruitPriceConfiguration : IEntityTypeConfiguration&lt;FruitPrice&gt;
+{
+    public void Configure(EntityTypeBuilder&lt;FruitPrice&gt; builder)
+    {
+        builder.HasKey(fp =&gt; fp.Id);
+
+        builder.Property(fp =&gt; fp.Value)
+            .HasPrecision(18, 2);
+
+        // تعریف ایندکس ترکیبی برای بهبود کارایی کوئری‌های زمانی
+        builder.HasIndex(fp =&gt; new { fp.FruitId, fp.ValidFrom });
+
+        // ارتباط یک به چند
+        builder.HasOne(fp =&gt; fp.Fruit)
+            .WithMany(f =&gt; f.Prices)
+            .HasForeignKey(fp =&gt; fp.FruitId);
+    }
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>کوئری گرفتن از داده‌های تاریخچه‌دار در LINQ</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">یکی از بزرگ‌ترین مزایای رویکرد دو زمانه (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ValidFrom</code> / <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ValidTo</code>) همراه با مقدار نگهبان، سادگی و کارایی بالای کوئری‌های LINQ است.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۱. دریافت قیمت یک محصول در یک زمان مشخص در گذشته</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">فرض کنید می‌خواهید قیمت میوه‌ای با شناسه <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">3</code> را در تاریخ <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">2023-06-01</code> به دست آورید:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">var targetDate = new DateTime(2023, 6, 1, 0, 0, 0, DateTimeKind.Utc);
+
+var priceAtTime = await context.FruitPrices
+    .Where(fp =&gt; fp.FruitId == 3 
+              &amp;&amp; fp.ValidFrom &lt;= targetDate 
+              &amp;&amp; fp.ValidTo &gt; targetDate)
+    .FirstOrDefaultAsync();</pre><blockquote class="ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>نکته فنی مهم:</strong> به عملگرها دقت کنید. برای زمان شروع از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">&gt;=</code> و برای زمان پایان از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">&lt;</code> استفاده شده است. این فرمولاسیون تضمین می‌کند که بازه‌های زمانی با هم تداخل نداشته باشند.</blockquote><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۲. دریافت قیمت فعلی (Current Price)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">به دلیل استفاده از مقدار نگهبان (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">DateTime.MaxValue</code>) برای رکوردهای جاری، دریافت قیمت فعلی دقیقاً مشابه کوئری بالا با زمان <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">DateTime.UtcNow</code> است و نیازی به بررسی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Is Null</code> ندارد:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">var now = DateTime.UtcNow;
+
+var currentPrice = await context.FruitPrices
+    .Where(fp =&gt; fp.FruitId == 3 
+              &amp;&amp; fp.ValidFrom &lt;= now 
+              &amp;&amp; fp.ValidTo &gt; now)
+    .FirstOrDefaultAsync();</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>چرا دو زمان بهتر از یک زمان است؟</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">شاید این سوال پیش بیاید که چرا جدول را خلوت‌تر نکنیم و فقط از یک ستون <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ValidFrom</code> استفاده نکنیم؟ در نگاه اول، با داشتن یک ستون هم می‌توان فهمید که قیمت از چه زمانی تغییر کرده است. اما بیایید پیاده‌سازی آن را در LINQ ببینیم:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">// رویکرد تک زمانه (توصیه نمی‌شود)
+var price = await context.FruitPrices
+    .Where(fp =&gt; fp.FruitId == 3 &amp;&amp; fp.ValidFrom &lt;= targetDate)
+    .OrderByDescending(fp =&gt; fp.ValidFrom)
+    .FirstOrDefaultAsync();</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>معایب رویکرد تک زمانه (Single Timestamp):</strong></div><ul><li><strong>پیچیدگی در سناریوهای نبود داده (Gaps):</strong> اگر در کل سال ۲۰۲۳ به دلیل کمبود بار، این میوه را نمی‌فروختیم و قیمتی برای آن وجود نداشت، در ساختار تک‌زمانه نمی‌توان این «نبودِ قیمت» را نشان داد؛ دیتابیس به اشتباه آخرین قیمت سال ۲۰۲۲ را برای سال ۲۰۲۳ هم معتبر می‌داند. اما در ساختار دو زمانه، کافیست برای آن بازه رکوردی ثبت نشود.</li><li><strong>کارایی (Performance):</strong> در کوئری‌های پیچیده‌تر یا ساب‌کوئری‌ها، رویکرد تک‌زمانه دیتابیس را مجبور به اجرای توابع محاسباتی مانند <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">MAX</code> یا سورتهای سنگین می‌کند، در حالی که ساختار دو زمانه با یک فیلتر بازه‌ای ساده (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Between</code> منطقی) روی ایندکس ترکیبی، به سرعت پاسخ را می‌یابد.</li></ul><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>نتیجه‌گیری و الگوی عمومی (Template)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">طراحی سیستماتیک خصیصه‌های تاریخچه‌دار به کمک دو ستونِ زمان و مقدار نگهبان، یک الگوی قابل اعتماد، منعطف و با کارایی بالا در ابزار EF Core به شمار می‌رود. شما می‌توانید این الگو را برای هر ویژگی تغییرپذیر دیگری (مانند آدرس کاربر، عنوان شغلی، یا وضعیت‌های یک سفارش) تعمیم دهید.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">به عنوان یک قاعده کلی، هر زمان نیاز به تاریخچه‌دار کردن یک ویژگی داشتید، کافیست کلاس زیر را به عنوان الگوی پایه در نظر بگیرید:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public class HistorizedAttribute&lt;TValue&gt;
+{
+    public int Id { get; set; }
+    public int AnchorId { get; set; } // کلید خارجی به موجودیت اصلی
+    public TValue Value { get; set; } = default!;
+    public DateTime ValidFrom { get; set; }
+    public DateTime ValidTo { get; set; } = DateTime.MaxValue; // مقدار نگهبان
+}</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20276.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>نحوه‌ی اعمال فیلتر بر روی روی داده‌های مرتبط (جوین‌شده) در Entity Framework Core</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2578.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>سفارشی سازی ASP.NET Core Identity - قسمت دوم - سرویس‌های پایه</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3693.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>کشف تقلب در تراکنش‌های مالی: ۶ الگوی کاربردی با SQL</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-794.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>ارتقاء به NH 3.2 - قسمت دوم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-958.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>وی‍‍ژگی های پیشرفته ی AutoMapper - قسمت دوم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-958.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>وی‍‍ژگی های پیشرفته ی AutoMapper - قسمت دوم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2504.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>شروع به کار با EF Core 1.0 - قسمت 11 - بررسی رابطه‌ی Self Referencing</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2194.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>خودکارسازی فرآیند نگاشت اشیاء در AutoMapper</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1630.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>معرفی ASP.NET Identity</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-958.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>وی‍‍ژگی های پیشرفته ی AutoMapper - قسمت دوم</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

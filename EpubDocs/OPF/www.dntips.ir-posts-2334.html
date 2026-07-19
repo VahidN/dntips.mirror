@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫استفاده از GZip توکار IISهای جدید و تنظیمات مرتبط با آن‌ها</title>     <meta name="description" content="یکی از نقش‌های IISهای جدید (از نگارش 7 به بعد) که در ویندوز سرورهای قابل نصب است، نقش Performance است و ذیل آن دو نقش فشرده سازی استاتیک و پویا قابل انتخاب است. اگر این نقش‌ها بر روی سرور نصب باشند، دیگر نیازی به استفاده از HTTP Moduleهای متداول فشرده سازی صفحات وب نیست. برای استفاده‌ی از آن تنها کافی است کمی web.config را ویرایش کرد و ... گفته شده‌است که کار می‌کند! اما پس از اعمال تنظیمات، اگر به هدرهای خروجی Response صفحه در ابزارهای we ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="استفاده از GZip توکار IISهای جدید و تنظیمات مرتبط با آن‌ها">
+    <meta itemprop="description" content="یکی از نقش‌های IISهای جدید (از نگارش 7 به بعد) که در ویندوز سرورهای قابل نصب است، نقش Performance است و ذیل آن دو نقش فشرده سازی استاتیک و پویا قابل انتخاب است. اگر این نقش‌ها بر روی سرور نصب باشند، دیگر نیازی به استفاده از HTTP Moduleهای متداول فشرده سازی صفحات وب نیست. برای استفاده‌ی از آن تنها کافی است کمی web.config را ویرایش کرد و ... گفته شده‌است که کار می‌کند! اما پس از اعمال تنظیمات، اگر به هدرهای خروجی Response صفحه در ابزارهای we ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="استفاده از GZip توکار IISهای جدید و تنظیمات مرتبط با آن‌ها">
+    <meta property="og:description" content="یکی از نقش‌های IISهای جدید (از نگارش 7 به بعد) که در ویندوز سرورهای قابل نصب است، نقش Performance است و ذیل آن دو نقش فشرده سازی استاتیک و پویا قابل انتخاب است. اگر این نقش‌ها بر روی سرور نصب باشند، دیگر نیازی به استفاده از HTTP Moduleهای متداول فشرده سازی صفحات وب نیست. برای استفاده‌ی از آن تنها کافی است کمی web.config را ویرایش کرد و ... گفته شده‌است که کار می‌کند! اما پس از اعمال تنظیمات، اگر به هدرهای خروجی Response صفحه در ابزارهای we ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="استفاده از GZip توکار IISهای جدید و تنظیمات مرتبط با آن‌ها">
+    <meta name="twitter:description" content="یکی از نقش‌های IISهای جدید (از نگارش 7 به بعد) که در ویندوز سرورهای قابل نصب است، نقش Performance است و ذیل آن دو نقش فشرده سازی استاتیک و پویا قابل انتخاب است. اگر این نقش‌ها بر روی سرور نصب باشند، دیگر نیازی به استفاده از HTTP Moduleهای متداول فشرده سازی صفحات وب نیست. برای استفاده‌ی از آن تنها کافی است کمی web.config را ویرایش کرد و ... گفته شده‌است که کار می‌کند! اما پس از اعمال تنظیمات، اگر به هدرهای خروجی Response صفحه در ابزارهای we ...">
+    <meta name="twitter:card" content="یکی از نقش‌های IISهای جدید (از نگارش 7 به بعد) که در ویندوز سرورهای قابل نصب است، نقش Performance است و ذیل آن دو نقش فشرده سازی استاتیک و پویا قابل انتخاب است. اگر این نقش‌ها بر روی سرور نصب باشند، دیگر نیازی به استفاده از HTTP Moduleهای متداول فشرده سازی صفحات وب نیست. برای استفاده‌ی از آن تنها کافی است کمی web.config را ویرایش کرد و ... گفته شده‌است که کار می‌کند! اما پس از اعمال تنظیمات، اگر به هدرهای خروجی Response صفحه در ابزارهای we ...">
+    <meta property="article:published_time" content="Sat, 13 Feb 2016 13:15:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫استفاده از GZip توکار IISهای جدید و تنظیمات مرتبط با آن‌ها";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-2335.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫فیلترها در MVC</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-2333.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫آموزش LINQ بخش پنجم</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫استفاده از GZip توکار IISهای جدید و تنظیمات مرتبط با آن‌ها</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۴/۱۱/۲۴ ۱۳:۱۵</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-2334.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'>یکی از نقش‌های IISهای جدید (از نگارش 7 به بعد) که در ویندوز سرورهای قابل نصب است، نقش Performance است و ذیل آن دو نقش فشرده سازی استاتیک و پویا قابل انتخاب است. اگر این نقش‌ها بر روی سرور نصب باشند، دیگر نیازی به استفاده از HTTP Moduleهای متداول فشرده سازی صفحات وب نیست. برای استفاده‌ی از آن تنها کافی است کمی web.config را ویرایش کرد و ... گفته شده‌است که کار می‌کند! اما پس از اعمال تنظیمات، اگر به هدرهای خروجی Response صفحه در ابزارهای web developer مرورگرها دقت کنید، خبری از encoding جدیدی به نام gzip نیست (Content-Encoding: gzip) و به نظر اعمال نمی‌شود. در ادامه بررسی خواهیم کرد که چرا اینگونه است.<br> <br> <br> <b>
+
+فعال سازی GZip توکار IIS</b> <br> <br>
+
+
+
+
+
+تنظیمات پیش فرض فعال سازی ماژول توکار GZip وب سرورهای جدید شامل دو مرحله است:<br> <b>
+
+الف) تنظیمات سرور جهت فعال سازی فشرده سازی</b> <br>
+
+
+
+
+
+بر روی ویندوزهای سرور، پس از مراجعه به Administrative Tools -&gt; Server Manager و گشودن Roles آن، ذیل قسمت Web Server که در اینجا IIS است، نیاز است نقش جدیدی به نام Performance اضافه شود و مطابق تصویر، هر دو گزینه‌ی فشرده سازی استاتیک و پویا انتخاب گردد.<br> <br> <p style="display:block; margin-left: auto; margin-right: auto;"> <img style="display:block; margin-left: auto; margin-right: auto;" src="data:image/png;base64,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"> </p> <br>
+
+
+
+
+
+بنابراین اولین قدم برای عیب یابی کار نکردن GZip توکار IIS، از این مرحله شروع می‌شود که آیا اصلا ماژول مربوطه نصب هست یا خیر؟<br> <br> <b>
+
+ب) تنظیمات برنامه جهت فعال سازی ماژول GZip</b> <br>
+
+
+
+
+
+پس از اطمینان از نصب ماژول توکار فشرده سازی صفحات وب IIS در سمت تنظیمات سرور، اکنون باید چند سطر ذیل را به Web.Config برنامه اضافه کرد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="XML" name="code">  &lt;system.webServer&gt;
+
+    &lt;httpCompression directory="%SystemDrive%\inetpub\temp\IIS Temporary Compressed Files"&gt;
+      &lt;scheme name="gzip" dll="%Windir%\system32\inetsrv\gzip.dll" staticCompressionLevel="9" /&gt;
+      &lt;dynamicTypes&gt;
+        &lt;add mimeType="text/*" enabled="true" /&gt;
+        &lt;add mimeType="message/*" enabled="true" /&gt;
+        &lt;add mimeType="application/x-javascript" enabled="true" /&gt;
+        &lt;add mimeType="application/javascript" enabled="true" /&gt;
+        &lt;add mimeType="application/json" enabled="true" /&gt;
+        &lt;add mimeType="application/json; charset=utf-8" enabled="true" /&gt;
+        &lt;add mimeType="application/atom+xml" enabled="true" /&gt;
+        &lt;add mimeType="application/xaml+xml" enabled="true" /&gt;
+        &lt;add mimeType="*/*" enabled="false" /&gt;
+      &lt;/dynamicTypes&gt;
+      &lt;staticTypes&gt;
+        &lt;add mimeType="text/*" enabled="true" /&gt;
+        &lt;add mimeType="message/*" enabled="true" /&gt;
+        &lt;add mimeType="application/x-javascript" enabled="true" /&gt;
+        &lt;add mimeType="application/javascript" enabled="true" /&gt;
+        &lt;add mimeType="application/json" enabled="true" /&gt;
+        &lt;add mimeType="application/json; charset=utf-8" enabled="true" /&gt;
+        &lt;add mimeType="application/atom+xml" enabled="true" /&gt;
+        &lt;add mimeType="application/xaml+xml" enabled="true" /&gt;
+        &lt;add mimeType="*/*" enabled="false" /&gt;
+      &lt;/staticTypes&gt;
+    &lt;/httpCompression&gt;
+    &lt;urlCompression doStaticCompression="true" doDynamicCompression="true" /&gt;
+
+  &lt;/system.webServer&gt;</pre> </div>
+
+
+
+در اینجا تنظیمات مخصوص نحوه‌ی فعال سازی فشرده سازی توکار صفحات پویا و فایل‌های استاتیک را مشاهده می‌کنید. در این تنظیمات محل قرارگیری فایل‌های موقتی فشرده شده‌ی توسط این ماژول و همچنین mime typeهای مدنظر جهت فشرده سازی، ذکر شده‌اند. با این تنظیمات، تنها mime typeهایی که به صورت صریح ذکر شده‌اند فشرده خواهند شد و از سایر mime types صرفنظر می‌شود.<br>
+
+
+
+
+
+این تنظیماتی است که در اکثر سایت‌ها نیز یافت می‌شود. ذکر آن‌ها اجباری است و پس از اعمال، اگر برنامه را اجرا کنید ... چیزی فشرده نمی‌شود! علت اصلی را باید در تنظیماتی یافت که مخصوص سرور است و در اینجا ذکر نشده‌اند.<br> <br> <br> <b>
+
+تنظیمات مخصوص آستانه‌ی فشرده سازی صفحات</b> <br> <br>
+
+
+
+
+
+علت اصلی عدم مشاهده‌ی هدر gzip، در Response برنامه، به frequent hit threshold تنظیم شده‌ی در IIS بر می‌گردد. مقدار آن به 2 درخواست در طی 10 ثانیه تنظیم شده‌است. یعنی اگر به صفحه‌ای در طی 10 ثانیه دو درخواست نرسد، فشرده نخواهد شد. این تنظیم را می‌توان با مراجعه‌ی به configuration editor نود اصلی سرور وب در IIS manager، ویرایش کرد:<br> <br> <p style="display:block; margin-left: auto; margin-right: auto;"> <img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/png;base64,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"> </p> <br> <p style="display:block; margin-left: auto; margin-right: auto;"> <img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/png;base64,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"> </p> <br>
+
+
+
+
+
+برای نمونه در تصویر فوق، این آستانه به یک درخواست در طی 10 ساعت تنظیم شده‌است. این عدد سبب خواهد شد تا تمامی درخواست‌های رسیده حتما فشرده سازی شوند.<br>
+
+
+
+
+
+این تنظیم معادل یک سطر ذیل در فایل web.config است. اما چون قسمت system.webServer/serverRuntime در تنظیمات سرور قفل شده‌است، هیچ تاثیری نخواهد داشت و حتما باید در سمت سرور و توسط IIS manager اعمال شود:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="XML" name="code">&lt;system.webServer&gt;
+   &lt;serverRuntime frequentHitThreshold="1" frequentHitTimePeriod="10:00:00" /&gt;
+&lt;/system.webServer&gt;</pre> </div>
+
+
+
+برای آزاد سازی این تنظیمات نیاز است دستور ذیل بر روی سرور اجرا شود. پس از آن کاربران برنامه‌های وب می‌توانند از تنظیمات وب کانفیگ خاص خود استفاده کنند:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code"> C:\Windows\System32\inetsrv\appcmd.exe unlock config /section:system.webServer/serverRuntime</pre> </div> <br> <b>
+
+یک نکته</b> <br>
+
+
+
+
+
+اگر از سرورهای پس از 2008 استفاده می‌کنید، گزینه‌ی staticCompressionIgnoreHitFrequency نیز به تنظیمات serverRuntime اضافه شده‌است که با تنظیم آن به true، از این حد آستانه، برای فایل‌های استاتیک صرفنظر خواهد شد.<br> <br> <br> <b>
+
+تنظیمات مخصوص اندازه‌ی فایل‌هایی که باید فشرده سازی شوند</b> <br> <br>
+
+
+
+
+
+تنها حد آستانه‌ی درخواست صفحات وب نیست که بر روی فشرده سازی یا عدم آن ثاثیرگذار است. در اینجا میزان CPU Usage سیستم و یا حتی اندازه‌ی Response خروجی نیز مهم هستند که نمونه‌ای از تنظیمات آن‌را در شکل ذیل مشاهده می‌کنید:<br> <br> <p style="display:block; margin-left: auto; margin-right: auto;"> <img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAtsAAAGSCAMAAAAFEf2jAAADAFBMVEUAAAAQmhDv5ucIJGv/9/f//+X////tHCRaZGq9w1q1+9ZKkpzOyc7e1s4hPITW0841ns4UdRj37++9196ctoxrvtYQJHNzcXsxYYy14+f39feLk5RSyylr2++Agq3n3Nbv7e8xNDEpYcacmr1Cw+8xkkYhLKlKkr21trXe3ed7hIze296Uy6WcoN7W0tYhfUqc53MhywgIeRApRrW7vcYpec5rvnN712Nck9jv6+fe896MlKeM7/eEgoQxYaUdXVbe6O9rbcattLW16+8hsiGcoq0pVb338+9Ofr0pZm6ErNL3/f//9/9S1/Te29ZjjpSIjtLGxcZCnmOqvdFrcXO9zNYxjq1zx71zloxj/wDv8/wtUakxXXs/sedSz5SErq0/jdvn3t6l295zjntCZbVKZXPe886suMZSttaUkpScnJzn5e97ipRK1ymlqbUdliml260+skJjYWO928YpN7VawevW3ufn5+dairUpc2c5ioSlz73n7u9CVa29///Oz9ZClt4Tgx5rrvPO2N5KTUpFcc6coaXn495SroxNec5arsYtsDW1w85r6f+tytaU81K1uL2csq05U8KUpriMjpQxwxBCaa1adWOUmaY2RK3e5OdaotolnjVSjqU5gmuc//+EjIyltb2lpKVris6cqrVvwe/n5fdCgs6trrXGyc52fISUmZxKtlJCZcZ7x4RKrtrU5PGLkpwYjik5pttWkoh38//e7+djaXM5aXtWnNIpTofW196M05S9u71zonOtq617rr3R+/+tx+da3/tatpSEjpwpxyExhL0pjjkloilrzyklXalrnr0YpCFaZXMhM5R7g4Q1ujkxRcaUpKWMnao+qFYrO729w8Y1ZcaEjKWFhoxjweucrL/n8voQjhittb1SaaVjqd6lqr0xcVo1SbVMyO90e3vGzda9xc4pMK3O1tYxPEKM+/+lq61Kot5OiM4xsinW295ajsYx0xje19ZjZ2sxb4wQeSGEipSlpa0xccYxTb2MptZKcb05XcbGz961SGYqAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAcFklEQVR42u2dDaBkZVnHn3bjZSu3q1tR7ZbSh7ZY0gdbsZG5UYaIkBvQB0ZBXwTamoWQhSFuXCKFNiFb0HIh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"> </p> <br>
+
+
+
+
+
+در اینجا با تنظیم minFileSizeForComp به 1024، اعلام شده‌است که حجم‌هایی کمتر از یک کیلوبایت، فشرده سازی نشوند (مقدار پیش فرض آن، بیش از این عدد است).<br>
+
+
+
+
+
+البته این عدد را به شکل زیر نیز می‌توان به تنظیمات httpCompression وب کانفیگ اضافه کرد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="XML" name="code"> &lt;httpCompression directory="%SystemDrive%\inetpub\temp\IIS Temporary Compressed Files" minFileSizeForComp="1024"&gt;</pre> </div> <br>
+
+
+
+پس از اعمال این تنظیمات نیاز است یکبار IIS را نیز ری استارت کرد.<br> <br> <br> <b>
+
+نتیجه گیری</b> <br> <br>
+
+
+
+
+
+اگر پس از فعال سازی GZip وب سرور، خروجی برنامه فشرده سازی نشد (Content-Encoding: gzip)، علت اینجا است که هنوز 2 درخواست مورد نیاز، در طی 10 ثانیه به سمت سرور ارسال نشده‌اند و تنظیمات پیش فرض این ماژول، جهت حداقل مصرف CPU و فشار بر روی سرور است.</div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2576.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>معادل‌های چندسکویی اجزای فایل web.config در ASP.NET Core</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2473.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>ارتقاء به ASP.NET Core 1.0 - قسمت 22 - توزیع برنامه توسط IIS</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3326.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Blazor 5x - قسمت 34 - توزیع برنامه‌های Blazor بر روی IIS</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1798.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Content Negotiation در WCF</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/news/details/3746#comment-877'><span class='badge bg-warning-subtle text-warning-emphasis bg-gradient rounded-pill me-2'>نظرات اشتراک‌ها</span>39 فونت فارسی استانداردسازی شده</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-943.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>فشرده سازی فایل های CSS و JavaScript بصورت خودکار توسط MS Ajax Minifier</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1590.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>حذف فضاهای خالی در خروجی صفحات ASP.NET MVC</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1022.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>فشرده سازی خروجی فایلهای استاتیک سایت</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1250.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>یک نکته کوچک راجع به تعریف Mime Type ها روی سرور</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1783.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>استفاده از Froala WYSIWYG Editor در ASP.NET</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

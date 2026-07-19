@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫استفاده از postgres در برنامه‌های ASP.NET Core - قسمت اول</title>     <meta name="description" content="postgres  یک بانک اطلاعاتی متن باز، قدرتمند و relational میباشد که پس از 30 سال توسعه‌ی فعال، به کارآیی بالا، قابل اطمینان بودن و قدرتمند بودن شهرت دارد. همچنین در بنچمارک‌های مربوط به وبسایت  techempower  نیز استفاده از  این پایگاه داده در کنار asp.net core باعث شده‌است تا جایگاه خوبی کسب شود. علاوه بر این ویژگی‌ها، انعطاف نوع داده‌ها (data type) سبب تفاوت بین رقبا شده است. برای مثال فرض کنید که یک جدول به اسم Blog و قصد ذخیره تگ‌های مقا ...">
+    <meta name="author" content="امیر ح">
+    <meta itemprop="name" content="استفاده از postgres در برنامه‌های ASP.NET Core - قسمت اول">
+    <meta itemprop="description" content="postgres  یک بانک اطلاعاتی متن باز، قدرتمند و relational میباشد که پس از 30 سال توسعه‌ی فعال، به کارآیی بالا، قابل اطمینان بودن و قدرتمند بودن شهرت دارد. همچنین در بنچمارک‌های مربوط به وبسایت  techempower  نیز استفاده از  این پایگاه داده در کنار asp.net core باعث شده‌است تا جایگاه خوبی کسب شود. علاوه بر این ویژگی‌ها، انعطاف نوع داده‌ها (data type) سبب تفاوت بین رقبا شده است. برای مثال فرض کنید که یک جدول به اسم Blog و قصد ذخیره تگ‌های مقا ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="استفاده از postgres در برنامه‌های ASP.NET Core - قسمت اول">
+    <meta property="og:description" content="postgres  یک بانک اطلاعاتی متن باز، قدرتمند و relational میباشد که پس از 30 سال توسعه‌ی فعال، به کارآیی بالا، قابل اطمینان بودن و قدرتمند بودن شهرت دارد. همچنین در بنچمارک‌های مربوط به وبسایت  techempower  نیز استفاده از  این پایگاه داده در کنار asp.net core باعث شده‌است تا جایگاه خوبی کسب شود. علاوه بر این ویژگی‌ها، انعطاف نوع داده‌ها (data type) سبب تفاوت بین رقبا شده است. برای مثال فرض کنید که یک جدول به اسم Blog و قصد ذخیره تگ‌های مقا ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="استفاده از postgres در برنامه‌های ASP.NET Core - قسمت اول">
+    <meta name="twitter:description" content="postgres  یک بانک اطلاعاتی متن باز، قدرتمند و relational میباشد که پس از 30 سال توسعه‌ی فعال، به کارآیی بالا، قابل اطمینان بودن و قدرتمند بودن شهرت دارد. همچنین در بنچمارک‌های مربوط به وبسایت  techempower  نیز استفاده از  این پایگاه داده در کنار asp.net core باعث شده‌است تا جایگاه خوبی کسب شود. علاوه بر این ویژگی‌ها، انعطاف نوع داده‌ها (data type) سبب تفاوت بین رقبا شده است. برای مثال فرض کنید که یک جدول به اسم Blog و قصد ذخیره تگ‌های مقا ...">
+    <meta name="twitter:card" content="postgres  یک بانک اطلاعاتی متن باز، قدرتمند و relational میباشد که پس از 30 سال توسعه‌ی فعال، به کارآیی بالا، قابل اطمینان بودن و قدرتمند بودن شهرت دارد. همچنین در بنچمارک‌های مربوط به وبسایت  techempower  نیز استفاده از  این پایگاه داده در کنار asp.net core باعث شده‌است تا جایگاه خوبی کسب شود. علاوه بر این ویژگی‌ها، انعطاف نوع داده‌ها (data type) سبب تفاوت بین رقبا شده است. برای مثال فرض کنید که یک جدول به اسم Blog و قصد ذخیره تگ‌های مقا ...">
+    <meta property="article:published_time" content="Mon, 19 Sep 2022 22:55:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫استفاده از postgres در برنامه‌های ASP.NET Core - قسمت اول";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-3412.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫مدیریت استثناءها در Blazor Server - قسمت دوم</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-3410.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫مدیریت استثناءها در Blazor Server - قسمت اول</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫استفاده از postgres در برنامه‌های ASP.NET Core - قسمت اول</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>امیر ح<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۱/۰۶/۲۸ ۲۲:۵۵</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-3411.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><a href="https://www.postgresql.org/">postgres</a> یک بانک اطلاعاتی متن باز، قدرتمند و relational میباشد که پس از 30 سال توسعه‌ی فعال، به کارآیی بالا، قابل اطمینان بودن و قدرتمند بودن شهرت دارد. همچنین در بنچمارک‌های مربوط به وبسایت&nbsp;<a href="https://www.techempower.com/benchmarks/#section=data-r21">techempower&nbsp;</a>نیز استفاده از&nbsp; این پایگاه داده در کنار asp.net core باعث شده‌است تا جایگاه خوبی کسب شود. علاوه بر این ویژگی‌ها، انعطاف نوع داده‌ها (data type) سبب تفاوت بین رقبا شده است. برای مثال فرض کنید که یک جدول به اسم Blog و قصد ذخیره تگ‌های مقاله را داریم. کار به چه صورت خواهد بود؟ <br> <div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  اگر پیش‌تر با&nbsp;postgres آشنایی نداشته باشید، یکی از دو سناریو زیر را پیاده سازی خواهید کرد:</div> <div>- ذخیره در یک فیلد به صورت nvarchar و جدا کردن حرف‌ها با یک کاراکتر (برای مثال: dntips, csharp با کارکتر , از هم جدا شده اند)<br> </div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">Blog ID
+BlogID int
+Title nvarchar(250)
+Tags nvarchar(500)</pre> </div> <br> <div> <div dir="ltr" style="direction: ltr;" align="left"> </div>
+
+
+
+
+
+- ساخت جدول و رابطه چند به چند&nbsp; <br> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">Blog Tags Tbl
+BlogID int
+TagID int</pre> </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ایراد قطعه کد اول عدم امکان سرچ اصولی در بین کلمات کلیدی میباشد؛ زیرا شما مجبور به جستجو در یک فیلد هستید که واژه‌ها با کاراکتری از یکدیگر جدا شده‌اند. پس شما سرچ دقیقی نخواهید داشت. پس از این مشکل میتوان به وجود تگ‌های تکراری در یک رکورد و یا نداشتن تگ‌ها به صورت یکپارچه اشاره کرد و به عنوان مشکل آخر میتواند به یک سربار برای سیستم تبدیل شود. چون هر بار که دیتا واکشی میشود، باید یکبار کلمات را از یکدیگر جدا و سپس به یک آرایه تبدیل و هنگام ذخیره شدن نیز مجددا این رشته‌ها را به هم بچسبانیم.<br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+در مورد کد دوم هم شاید بتوان به انباشته شدن زیاد سطر‌ها و یا عدم ساختار مدرن اشاره کرد.</div> <div>اما در&nbsp;postgres&nbsp;به راحتی میتوان این گونه دیتا‌ها را به صورت آرایه ذخیره سازی کرد:</div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">CREATE TABLE sal_emp (
+    name            text,
+    pay_by_quarter  integer[],
+    schedule        text[][]
+);</pre> </div> </div> <div>که سبب سرچ اصولی و واکشی سریع‌تر اطلاعات خواهد شد.<br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+راجع به <a href="https://www.postgresql.org/docs/current/arrays.html#:~:text=PostgreSQL%20allows%20columns%20of%20a,or%20domain%20can%20be%20created.">نوع داده array در postgres</a> در بیشتر مطالعه کنید.</div> <div>در همین بحث دیتا تایپ‌ها میتوان به نوع text اشاره کرد که جایگزینی برای nvarchar و یا varchar میباشد. در اینجا نیازی به مشخص کردن سایز رشته نیز نیست و تمام فرآیند، به صورت خودکار در پس‌زمینه انجام خواهد شد.&nbsp; مثلا بجای nvarcahr 500 و یا MAX تنها، نوع داده را برابر text قرار می‌دهید.</div> <div>از نظر ساختار زبانی و syntax بسیار شبیه به سایر provider‌‌ها میباشد و تنها تفاوت اساسی آن، حساس بودن به حروف کوچک و بزرگ است.<br>
+
+
+
+سایر&nbsp;<a href="https://www.youtube.com/watch?v=Ya_cmZRwACM">مزیت‌های postgres</a> را میتوانید از زبان&nbsp;shayro jan sky، در کانال دات نت و&nbsp;در ویدیو لینک شده مشاهده کنید. <br> <br>
+
+مزیت بزرگ آن که باعث میشود تا از آن بتوانیم در پروژه‌های خود استفاده کنیم، سازگاری آن با ef core میباشد. یعنی اگر کل برنامه‌ی شما با ef core پیاده سازی شده باشد، با عوض کردن متد UseSqlServer به UseNpgsql در کلاس program،&nbsp;مشکلی در برنامه رخ نخواهد داد و اپلیکیشن شما بجای استفاده از sql server به راحتی از postgres استفاده خواهد کرد.<br>
+
+
+
+
+
+
+
+
+
+متد نام برده شده در پکیج زیر قابل دسترسی میباشد:<br> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="Sql" name="code">Npgsql.EntityFrameworkCore.PostgreSQL</pre> </div> <br>
+
+
+
+
+
+
+
+
+
+کار‌ها تماما مانند ef و حتی با کتابخانه‌های مربوط به آن انجام خواهد شد و تنها تغییر در کدها، همین متد&nbsp;UseNpgsql میباشد که provider را عوض خواهد کرد.&nbsp;<br> <br>
+
+در قسمت بعد به نصب و راه اندازی postrgress و دشبرد‌های مدیریتی آن از طریق داکر و پیاده سازی CRUD خواهیم پرداخت. </div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-18636.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>بررسی Full Text Search در Postgres</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-16752.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>پکیج C# و ASP برای دریافت و جستوجوی استان ها ، شهر ها ،بخش ها ،دهستان ها و روستاهای ایران</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-19236.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>استفاده از Postgres به‌عنوان یک موتور جستجو</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3417.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>راه اندازی دیتابیس postgresql در برنامه‌های ASP.NET Core – قسمت 2</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2495.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>شروع به کار با EF Core 1.0 - قسمت 7 - بررسی رابطه‌ی One-to-Many</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2739.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>ویژگی Batching در EF Core</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2854.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>MongoDb در سی شارپ (بخش نهم)</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3062.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>پیاده سازی الگوی طراحی Memento</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-831.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>EF Code First #1</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2160.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>کنترل نوع‌های داده با استفاده از EF در SQL Server</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

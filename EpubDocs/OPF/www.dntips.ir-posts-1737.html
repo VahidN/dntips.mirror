@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫ساخت کاربر ویندوز توسط SQL Server</title>     <meta name="description" content="چندی پیش لازم بود که از طریق ویندوز،  یک یوزر ادمین برای sql   بسازم که خدا را شکر میسر شد. اما خوب است بدانید با SQL Server نیز می‌توانید یک کاربر جدید ویندوز بسازید. این مورد را در ادامه‌ی بحث بررسی خواهیم کرد.   
+ 
+ 
+ البته باید دقت داشت که در حقیقت این امکان را توسط خط فرمان فعال شده‌ی ویندوز، به نام xp_cmdshell    در اختیار خواهیم داشت. توسط این رویه ذخیره شده، هر کاری را که در ویندوز توسط خط فرمان استاندارد آن می‌توانید انجام دهید ...">
+    <meta name="author" content="یوسف رضایی">
+    <meta itemprop="name" content="ساخت کاربر ویندوز توسط SQL Server">
+    <meta itemprop="description" content="چندی پیش لازم بود که از طریق ویندوز،  یک یوزر ادمین برای sql   بسازم که خدا را شکر میسر شد. اما خوب است بدانید با SQL Server نیز می‌توانید یک کاربر جدید ویندوز بسازید. این مورد را در ادامه‌ی بحث بررسی خواهیم کرد.   
+ 
+ 
+ البته باید دقت داشت که در حقیقت این امکان را توسط خط فرمان فعال شده‌ی ویندوز، به نام xp_cmdshell    در اختیار خواهیم داشت. توسط این رویه ذخیره شده، هر کاری را که در ویندوز توسط خط فرمان استاندارد آن می‌توانید انجام دهید ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="ساخت کاربر ویندوز توسط SQL Server">
+    <meta property="og:description" content="چندی پیش لازم بود که از طریق ویندوز،  یک یوزر ادمین برای sql   بسازم که خدا را شکر میسر شد. اما خوب است بدانید با SQL Server نیز می‌توانید یک کاربر جدید ویندوز بسازید. این مورد را در ادامه‌ی بحث بررسی خواهیم کرد.   
+ 
+ 
+ البته باید دقت داشت که در حقیقت این امکان را توسط خط فرمان فعال شده‌ی ویندوز، به نام xp_cmdshell    در اختیار خواهیم داشت. توسط این رویه ذخیره شده، هر کاری را که در ویندوز توسط خط فرمان استاندارد آن می‌توانید انجام دهید ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="ساخت کاربر ویندوز توسط SQL Server">
+    <meta name="twitter:description" content="چندی پیش لازم بود که از طریق ویندوز،  یک یوزر ادمین برای sql   بسازم که خدا را شکر میسر شد. اما خوب است بدانید با SQL Server نیز می‌توانید یک کاربر جدید ویندوز بسازید. این مورد را در ادامه‌ی بحث بررسی خواهیم کرد.   
+ 
+ 
+ البته باید دقت داشت که در حقیقت این امکان را توسط خط فرمان فعال شده‌ی ویندوز، به نام xp_cmdshell    در اختیار خواهیم داشت. توسط این رویه ذخیره شده، هر کاری را که در ویندوز توسط خط فرمان استاندارد آن می‌توانید انجام دهید ...">
+    <meta name="twitter:card" content="چندی پیش لازم بود که از طریق ویندوز،  یک یوزر ادمین برای sql   بسازم که خدا را شکر میسر شد. اما خوب است بدانید با SQL Server نیز می‌توانید یک کاربر جدید ویندوز بسازید. این مورد را در ادامه‌ی بحث بررسی خواهیم کرد.   
+ 
+ 
+ البته باید دقت داشت که در حقیقت این امکان را توسط خط فرمان فعال شده‌ی ویندوز، به نام xp_cmdshell    در اختیار خواهیم داشت. توسط این رویه ذخیره شده، هر کاری را که در ویندوز توسط خط فرمان استاندارد آن می‌توانید انجام دهید ...">
+    <meta property="article:published_time" content="Tue, 18 Mar 2014 09:45:02 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫ساخت کاربر ویندوز توسط SQL Server";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-1738.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫BulkInsert در EF CodeFirst</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-1736.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫انجام کارهای زمانبندی شده در برنامه‌های ASP.NET توسط DNT Scheduler</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫ساخت کاربر ویندوز توسط SQL Server</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>یوسف رضایی<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۲/۱۲/۲۷ ۹:۴۵</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-1737.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'>چندی پیش لازم بود که از طریق ویندوز، <a href="www.dntips.ir-posts-1724.html">یک یوزر ادمین برای sql</a>  بسازم که خدا را شکر میسر شد. اما خوب است بدانید با SQL Server نیز می‌توانید یک کاربر جدید ویندوز بسازید. این مورد را در ادامه‌ی بحث بررسی خواهیم کرد.<br> <br>
+
+
+البته باید دقت داشت که در حقیقت این امکان را توسط خط فرمان فعال شده‌ی ویندوز، به نام xp_cmdshell<span>&nbsp;</span> در اختیار خواهیم داشت. توسط این رویه ذخیره شده، هر کاری را که در ویندوز توسط خط فرمان استاندارد آن می‌توانید انجام دهید، اینجا نیز قادر به انجام آن خواهید بود. برای مثال یک کاربر را ادمین کنید و امثال آن.<br>
+
+
+
+
+برای اینکار ابتدا باید این امکان را جهت کاربر sa، یا هر کاربر دیگری که در SQL Server نقش sysadmin دارد، فعال کنید. برای این منظور کوئری‌های ذیل را اجرا کنید:<br> <div dir="ltr" align="left"> <pre language="Sql" name="code"> -- To allow advanced options to be changed.
+EXEC sp_configure 'show advanced options', 1
+GO
+-- To update the currently configured value for advanced options.
+RECONFIGURE
+GO
+-- To enable the feature.
+EXEC sp_configure 'xp_cmdshell', 1
+GO
+-- To update the currently configured value for this feature.
+RECONFIGURE
+GO</pre> </div>
+
+
+بعد برای اینکه کاربری را اضافه کنید، کد زیر را کپی و اجرا کنید:<br> <div dir="ltr" align="left"> <pre language="Sql" name="code">xp_cmdshell 'net user nadeema /Add'</pre> </div>
+
+
+و در آخر جهت تغییر گروه این کاربر و افزودن آن به مجموعه‌ی ادمین‌های محلی، می‌توانید کد زیر را نوشته و اجرا کنید:<br> <div dir="ltr" align="left"> <pre language="Sql" name="code">xp_cmdshell  'net localgroup Administrator nadeema /add'</pre> </div> <span> </span></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1083.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با Contained Databases در SQL Server 2012</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2147.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بهبود کارآیی برنامه‌های قدیمی که از SQL Server استفاده می‌کنند</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1767.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>اجرای SSIS Package از طریق برنامه کاربردی</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-102.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>تنظیمات پیشنهادی حداکثر حافظه‌ی مصرفی اس کیوال سرور</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-96.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مونیتور کردن میزان مصرف CPU در اس کیوال سرور</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1724.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>افزودن اکانت مدیریتی فراموش شده به SQL Server</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-332.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با قابلیت FileStream اس کیوال سرور 2008 - قسمت دوم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1674.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>استفاده از LocalDb در IIS، قسمت دوم: مالکیت وهله ها</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/courses/topic/13/c88875cb-9ce0-4f85-8342-e90bb82aad6c'><span class='badge bg-warning rounded-pill me-2'>مطالب دوره‌ها</span>استفاده از Adobe iFilter برای جستجوی Full Text در فایل‌های PDF</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2432.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>بررسی نحوه‌ی راه اندازی پروژه‌ی Decision</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

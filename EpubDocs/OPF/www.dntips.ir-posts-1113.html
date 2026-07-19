@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫خودکار کردن تعاریف DbSetها در EF Code first</title>     <meta name="description" content="پیشنیاز:
+ 
+ 
+ 
+ تعریف نوع جنریک به صورت متغیر 
+ 
+ 
+ 
+ 
+ 
+ مطلبی را چندی قبل در مورد نحوه خودکار کردن افزودن کلاس‌های EntityTypeConfiguration به modelBuilder در این سایت مطالعه کردید. در مطلب جاری به خودکار سازی تعاریف مرتبط با DbSetها خواهیم پرداخت.
+ 
+ 
+ 
+ ابتدا مثال کامل زیر را درنظر بگیرید:
+ 
+ 
+ 
+ using System;
+ using System.Data.Entity;
+ using System.Data.Entity.Migrations;
+ using System.Linq;
+ using System.Reflect ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="خودکار کردن تعاریف DbSetها در EF Code first">
+    <meta itemprop="description" content="پیشنیاز:
+ 
+ 
+ 
+ تعریف نوع جنریک به صورت متغیر 
+ 
+ 
+ 
+ 
+ 
+ مطلبی را چندی قبل در مورد نحوه خودکار کردن افزودن کلاس‌های EntityTypeConfiguration به modelBuilder در این سایت مطالعه کردید. در مطلب جاری به خودکار سازی تعاریف مرتبط با DbSetها خواهیم پرداخت.
+ 
+ 
+ 
+ ابتدا مثال کامل زیر را درنظر بگیرید:
+ 
+ 
+ 
+ using System;
+ using System.Data.Entity;
+ using System.Data.Entity.Migrations;
+ using System.Linq;
+ using System.Reflect ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="خودکار کردن تعاریف DbSetها در EF Code first">
+    <meta property="og:description" content="پیشنیاز:
+ 
+ 
+ 
+ تعریف نوع جنریک به صورت متغیر 
+ 
+ 
+ 
+ 
+ 
+ مطلبی را چندی قبل در مورد نحوه خودکار کردن افزودن کلاس‌های EntityTypeConfiguration به modelBuilder در این سایت مطالعه کردید. در مطلب جاری به خودکار سازی تعاریف مرتبط با DbSetها خواهیم پرداخت.
+ 
+ 
+ 
+ ابتدا مثال کامل زیر را درنظر بگیرید:
+ 
+ 
+ 
+ using System;
+ using System.Data.Entity;
+ using System.Data.Entity.Migrations;
+ using System.Linq;
+ using System.Reflect ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="خودکار کردن تعاریف DbSetها در EF Code first">
+    <meta name="twitter:description" content="پیشنیاز:
+ 
+ 
+ 
+ تعریف نوع جنریک به صورت متغیر 
+ 
+ 
+ 
+ 
+ 
+ مطلبی را چندی قبل در مورد نحوه خودکار کردن افزودن کلاس‌های EntityTypeConfiguration به modelBuilder در این سایت مطالعه کردید. در مطلب جاری به خودکار سازی تعاریف مرتبط با DbSetها خواهیم پرداخت.
+ 
+ 
+ 
+ ابتدا مثال کامل زیر را درنظر بگیرید:
+ 
+ 
+ 
+ using System;
+ using System.Data.Entity;
+ using System.Data.Entity.Migrations;
+ using System.Linq;
+ using System.Reflect ...">
+    <meta name="twitter:card" content="پیشنیاز:
+ 
+ 
+ 
+ تعریف نوع جنریک به صورت متغیر 
+ 
+ 
+ 
+ 
+ 
+ مطلبی را چندی قبل در مورد نحوه خودکار کردن افزودن کلاس‌های EntityTypeConfiguration به modelBuilder در این سایت مطالعه کردید. در مطلب جاری به خودکار سازی تعاریف مرتبط با DbSetها خواهیم پرداخت.
+ 
+ 
+ 
+ ابتدا مثال کامل زیر را درنظر بگیرید:
+ 
+ 
+ 
+ using System;
+ using System.Data.Entity;
+ using System.Data.Entity.Migrations;
+ using System.Linq;
+ using System.Reflect ...">
+    <meta property="article:published_time" content="Sat, 17 Nov 2012 21:05:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫خودکار کردن تعاریف DbSetها در EF Code first";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-1114.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='ltr'>Strong Name</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-1112.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫ساخت Arrow در CSS - قسمت اول</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫خودکار کردن تعاریف DbSetها در EF Code first</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۱/۰۸/۲۷ ۲۱:۵</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-1113.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><b>پیشنیاز:</b><br>
+
+
+
+<a href="www.dntips.ir-posts-796.html">تعریف نوع جنریک به صورت متغیر</a> <br>
+
+<br>
+
+
+
+مطلبی را چندی قبل در مورد نحوه خودکار کردن افزودن کلاس‌های EntityTypeConfiguration به modelBuilder در این سایت <a href="www.dntips.ir-posts-1041.html">مطالعه کردید</a>. در مطلب جاری به خودکار سازی تعاریف مرتبط با DbSetها خواهیم پرداخت.<br>
+
+
+
+ابتدا مثال کامل زیر را درنظر بگیرید:<br>
+
+<div dir="ltr" align="left">
+
+<pre language="CSharp" name="code">using System;
+using System.Data.Entity;
+using System.Data.Entity.Migrations;
+using System.Linq;
+using System.Reflection;
+
+namespace MyNamespace
+{
+    public abstract class BaseEntity
+    {
+        public int Id { set; get; }
+        public string CreatedBy { set; get; }
+    }
+
+    public class User : BaseEntity
+    {
+        public string Name { get; set; }
+    }
+
+    public class MyContext : DbContext
+    {
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            var asm = Assembly.GetExecutingAssembly();
+            loadEntities(asm, modelBuilder, "MyNamespace");
+        }
+
+        void loadEntities(Assembly asm, DbModelBuilder modelBuilder, string nameSpace)
+        {
+            var entityTypes = asm.GetTypes()
+                                    .Where(type =&gt; type.BaseType != null &amp;&amp;
+                                           type.Namespace == nameSpace &amp;&amp;
+                                           type.BaseType.IsAbstract &amp;&amp;
+                                           type.BaseType == typeof(BaseEntity))
+                                    .ToList();
+
+            var entityMethod = typeof(DbModelBuilder).GetMethod("Entity");
+            entityTypes.ForEach(type =&gt;
+            {
+                entityMethod.MakeGenericMethod(type).Invoke(modelBuilder, new object[] { });
+            });
+        }
+    }
+
+    public class Configuration : DbMigrationsConfiguration&lt;MyContext&gt;
+    {
+        public Configuration()
+        {
+            AutomaticMigrationsEnabled = true;
+            AutomaticMigrationDataLossAllowed = true;
+        }
+
+        protected override void Seed(MyContext context)
+        {
+            context.Set&lt;User&gt;().Add(new User { Name = "name-1" });
+            context.Set&lt;User&gt;().Add(new User { Name = "name-2" });
+            context.Set&lt;User&gt;().Add(new User { Name = "name-3" });
+            base.Seed(context);
+        }
+    }
+
+    public static class Test
+    {
+        public static void RunTests()
+        {
+            Database.SetInitializer(new MigrateDatabaseToLatestVersion&lt;MyContext, Configuration&gt;());
+            using (var context = new MyContext())
+            {
+                var user1 = context.Set&lt;User&gt;().Find(1);
+                if (user1 != null)
+                    Console.WriteLine(user1.Name);
+            }
+        }
+    }
+}</pre>
+
+</div>
+
+<b>توضیحات:</b><br>
+
+
+
+همانطور که ملاحظه می‌کنید در این مثال خبری از تعاریف DbSetها نیست. به کمک Reflection تمام مدل‌های برنامه که از نوع کلاس پایه BaseEntity هستند (روشی مرسوم جهت مدیریت خواص تکراری مدل‌ها) یافت شده (در متد loadEntities) و سپس نتیجه حاصل به صورت پویا به متد جنریک Entity ارسال می‌شود. حاصل، افزوده شدن خودکار کلاس‌های مورد نظر به سیستم EF است.<br>
+
+
+
+البته در این حالت چون دیگر کلاس‌های مدل‌ها در MyContext به صورت صریح تعریف نمی‌شوند، نحوه استفاده از آن‌ها را توسط متد Set، در متدهای RunTests و یا Seed، ملاحظه می‌کنید.&nbsp;<br></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/project-feedbacks/27/379#comment-663'><span class='badge bg-info bg-gradient rounded-pill me-2'>پاسخ به بازخورد‌های پروژه‌ها</span>درخواست راهنمایی   سیستم Decision</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1041.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>افزودن خودکار کلاس‌های تنظیمات نگاشت‌ها در EF Code first</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1227.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بررسی خطای cycles or multiple cascade paths و یا cyclical reference در EF Code first</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1424.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Func یا Expression Func در EF</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-977.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مباحث تکمیلی مدل‌های خود ارجاع دهنده در EF Code first</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1038.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مرتب سازی رکوردها به صورت اتفاقی در Entity framework</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1860.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>به روز رسانی ساده‌تر اجزاء ارتباطات در EF Code first به کمک GraphDiff</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-966.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>نحوه کاهش مصرف حافظه EF Code first حین گزارشگیری از اطلاعات</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1113.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>خودکار کردن تعاریف DbSetها در EF Code first</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1041.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>افزودن خودکار کلاس‌های تنظیمات نگاشت‌ها در EF Code first</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>محسن درپرستی</strong>  در  <span dir='ltr'>۱۳۹۱/۰۸/۲۷ ۲۳:۴۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>البته کد <br>
+<br>
+<div dir="ltr" align="left">
+<pre language="CSharp" name="code">var asm = Assembly.GetExecutingAssembly();</pre>
+</div>
+در صورتی کار میکنه که مدل‌ها در همین پروژه باشند ولی اگر در یک پروژه جداگانه تعریف شده باشند باید از <br>
+<br>
+<div dir="ltr" align="left">
+<pre language="CSharp" name="code">var asm = Assembly.GetAssembly(typeof(DomainModels.BaseEntity));</pre>
+</div>
+استفاده کرد . که DomainModels.BaseEntity یکی از کلاس‌های موجود در اسمبلی مربوط به مدلها باید باشد .<br></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۹۱/۱۲/۲۵ ۱۵:۵۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام<br>
+اگر مدلها در چندین پروژه بودن چطور؟<br>
+مثلا به صورت ماژول هر ماژول مدل خود را دارد<br><br></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۱/۱۲/۲۵ ۱۷:۱۷</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>الف)<br>
+
+
+
+- تمام مدل‌های شما باید از کلاس مشخصی مثلا BaseEntity مشتق شوند.<br>
+
+
+
+
+
+- یا در تنظیمات برنامه مشخص کنید در حین Reflection چه فضای نامی باید جستجو شود.<br>
+
+
+
+- و یا مثلا مانند ASP.NET MVC اگر کلاسی نامش به عبارت خاصی ختم شد و همچنین از کلاس پایه خاصی نیز مشتق شده بود آنگاه بررسی شود.<br>
+
+
+
+ب)<br>
+- مرحله بعد اندکی ویرایش متد loadEntities است جهت خواندن مدل‌های واقع شده مثلا در یک فضای نام خاص یا مشتق شده از یک کلاس پایه خاص و سپس افزودن خودکار آن‌ها به modelBuilder همانند چیزی که در مثال فوق پیاده سازی شده.<br>
+
+
+
+در مثال بالا فقط یک اسمبلی جستجو می‌شود؛ اگر نیاز است تمام اسمبلی‌های بارگذاری شده در برنامه جستجو شوند، روش کار مراجعه به AppDomain است:<br><div dir="ltr" align="left"><div dir="ltr" align="left"><pre language="CSharp" name="code">foreach (Assembly currentassembly in AppDomain.CurrentDomain.GetAssemblies()) 
+{
+   Type t = currentassembly.GetType("typeName", false, true);
+    if (t != null) {return currentassembly.FullName;}
+}</pre></div></div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۹۱/۱۲/۲۵ ۱۸:۱۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>ممنونم از جوابتون<br><br>
+
+
+
+AppDomain.CurrentDomain.GetAssemblisl اسمبلی‌ها را از پوشه Bin اضافه می‌نماید یا اینکه جستجویی در کل Libary‌ها انجام می‌دهد؟<br></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۱/۱۲/۲۵ ۱۸:۲۰</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>خیر. چیزی را اضافه یا بارگذاری نمی‌کند. فقط در AppDomain برنامه، کل اسمبلی‌ها و ماژول‌های بارگذاری شده موجود را <a href="http://msdn.microsoft.com/en-us/library/system.appdomain.getassemblies.aspx">لیست می‌کند</a>.<br></div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۹۱/۱۲/۲۶ ۱۸:۲۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام<br>
+من به این طریق Dbset‌ها رو اضافه میکنم و مشکلی پیش نمیاد . اما وقتی میخوام نگاشت‌ها را به وسیله توضیحات <a href="www.dntips.ir-posts-1041.html">این لینک</a>  انجام بدم به مشکل میخورم<br>
+من ابندا Dbsetها را با این کد شما اضافه میکنم سپس تابع اضافه کردن نگاشت‌ها را اجرا میکنم <br>
+اما به مشکل میخورم<br>
+ممنون میشم اگه راهنمایی نمایید به چه شکل باید هم موجودیت‌ها و هم نگاشت‌های آن‌ها را همزمان انجام داد <br>
+با تشکر<br><br><br></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۱/۱۲/۲۶ ۱۹:۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>عکس عمل کنید. ابتدا تنظیمات، بعد موجودیت‌ها اضافه شوند.<br>
+
+
+ضمنا اگر احیانا گذارتان به انجمنی افتاد این «به مشکل برخوردم» رو باید توضیح بدید. باید خطای حاصل رو ذکر کنید (علاوه بر روشی که طی شده).<br></div>
+</div></li></ul></li></ul></li></ul></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۹۱/۰۸/۲۸ ۱۴:۳۹</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام آیا این کار سربار اضافی نداره؟</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۱/۰۸/۲۸ ۱۶:۱۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>نه. اینکار فقط یکبار در آغاز برنامه انجام می‌شود. نتیجه کار هم توسط EF کش خواهد شد.<br></div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۹۱/۱۲/۰۴ ۲۳:۲۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام<div>این متد کار&nbsp; افزودن نگاشت‌های کلاس‌ها&nbsp; رو هم انجام میده ؟</div><div>و اگر بخواد انجام بده باید چه تغییراتی روی کد انجام بشه؟</div><div>ممنون</div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۱/۱۲/۰۴ ۲۳:۳۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>«<a href="www.dntips.ir-posts-1041.html">افزودن خودکار کلاس‌های تنظیمات نگاشت‌ها در EF Code first</a>»</div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهدی فرهانی</strong>  در  <span dir='ltr'>۱۳۹۲/۰۱/۰۹ ۱۳:۵۹</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>با سلام<div>چندوقتی هست که دارم از این روش برای برنامه هام استفاده میکنم و هیچ مشکلی نداشتم تا اینکه دیشب با یک مشکل عجیب برخورد کردم و مشکل این بود که زمان ساخت جداول به Property که به صورت NotMaped در کلاس Base تعریف کرده بودم ایراد گرفت.پس از بررسی که انجام دادم متوجه شدم که ترتیب Map کردن Entity‌ها باعث این مشکل میشه.<br><a href="http://entityframework.codeplex.com/workitem/481">http://entityframework.codeplex.com/workitem/481</a>&nbsp;<br></div><div>این لینک مشکلی که گزارش شده، راه حلی که نوشه شده این که ترتیب Map کردن کلاس‌ها باید تغییر کند.این درحالی است که در این روش هیچ ترتیبی در نظر گرفته نمیشه و براساس خواندن کلاس‌ها از اسمبلی ساخته میشه.</div><div>برای رفع این مشکل اومدم و یک ویژگی ترتیب به کلاسهایی که میدونستم ترتیبشون مهم هست اضافه کردم و زمان خواندن کلاس‌ها از اسمبلی مورد نظر اونها مرتب کردم و مشکل حل شد.</div><div>آیا راه حل بهتری وجود داره یا نه ؟</div><div><div align="left" dir="ltr"><pre language="CSharp" name="code">var entityTypes = modelAssembly.GetTypes()
+                                    .Where(type =&gt; type.Namespace != null
+                                        &amp;&amp; (type.Namespace.StartsWith(domainNamespace)
+                                            &amp;&amp; type.CustomAttributes.All(c =&gt; c.AttributeType != typeof(ComplexTypeAttribute))                                            
+                                            &amp;&amp; !type.IsAbstract &amp;&amp; !type.IsEnum)
+                                        )
+                                    .OrderBy(c =&gt; c.CustomAttributes.Any(
+                                        x =&gt; x.AttributeType == typeof (EntityOrderAttribute)) ? c.GetCustomAttribute&lt;EntityOrderAttribute&gt;().OrderNumber : 100).ToList();</pre></div><br></div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۹۲/۰۱/۱۰ ۹:۹</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>این مساله در حالت معمولی تعریف DbSetها&nbsp;هم پیش میاد. یعنی الزاما محدود به روش گفته شده در این مطلب نیست. خودشون هم پذیرفتن که یک باگ است و در حال رفعش هستند.</div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>پدرام جباری</strong>  در  <span dir='ltr'>۱۳۹۲/۰۲/۱۰ ۲۱:۲۷</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>با سلام<br><div>من برای پروژه ای که در حال انجام اون هستم چون تعداد جداول زیاد هست برای آنکه زمان نمونه ساختن هر context کاهش پیدا کنه، برای هر بخش از پروژه Context متفاوتی ایجاد کردم تا زمان نگاشت تنظیمات جداول کاهش پیدا کنه ، البته یک Context کلی هست که اون وظیفه ساخت دیتابیس رو داره ( داخل EF 6 این امکان هست که یک دیتابیس از چند Context متفاوت ایجاد شده باشه ، ولی خوب برای این کار تو EF5 باید یک Context کلی داشت که مشکلی ایجاد نشه)</div><div>به نظر شما کار درستی هست ؟ اصلا تاثیری داره ؟&nbsp;</div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۲/۰۲/۱۰ ۲۱:۵۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>- بحث جاری در مورد EF 5 هست. کل مباحثی که در سایت مطرح شده در مورد <a href="https://entityframework.codeplex.com/wikipage?title=Multi-tenant%20Migrations">تا قبل از EF 6 است</a>. (هرچند هدف اصلی EF6 از بحث چند Context ایی پوشش دادن ایجاد جداول مختلف به ازای Schema‌های مختلف است. پیشتر dbo بیشتر مد نظر بود (پشتیبانی از تک schema به ازای یک دیتابیس). الان پوشش چندین Schema با هم در طی چندین Context مختلف در یک بانک اطلاعاتی)<br>
+
+
+
+
+
+
+
+- تاثیری نداره. نگاشت‌ها فقط یکبار در آغاز کار برنامه انجام می‌شوند و بعد کش خواهند شد. هر بار وهله سازی context به معنای انجام چند باره نگاشت‌ها و یافتن و برقراری آن‌ها نیست. اتفاقا این وهله سازی‌های ثانویه پس از آغاز برنامه، فوق العاده هم سریع هستند. <br>
+
+
+
+
+
+
+
+خلاصه اینکه مباحث مطرح شده در مطلب جاری فقط در آغاز برنامه اجرا می‌شوند و نه به ازای هر بار وهله سازی تک Context برنامه.<br>
+
+
+
+
+
+
+
+- در مورد اینکه چرا باید یک کلاس Context در برنامه داشت <a href="www.dntips.ir-posts-833.html">اینجا توضیح دادم</a>. بحث الگوی واحد کار مهم‌ترین آن‌ها است.<br></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>پدرام جباری</strong>  در  <span dir='ltr'>۱۳۹۲/۰۲/۱۰ ۲۳:۴۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>ممنون بابت جوابتون، واقعا نمی‌دونم چرا همیشه فکر می‌کردم به این صورت نیست و هر بار بخش نگاشت‌ها انجام میشه، تقریبا بیشتر مقاله‌های مربوط به افزایش سرعت رو در EF رو در وبسایت مطالعه کردم و کل روند انجام کار مفهوم شد برام، شاید بیشتر به خاطر عدم اطمینانم به EF بود که همچین فکری کردم.<div>واقعا ممنون بابت مطالبتون که در وبسایت قرار دادید خیلی به من کمک کرده از همه نظر.</div></div>
+</div></li></ul></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>بهنام حقی</strong>  در  <span dir='ltr'>۱۳۹۳/۰۱/۲۸ ۱۲:۳۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام<div>من یه مشکلی دارم توی این قسمت.</div> <div>توی پروژه از خودکار سازی نگاشت‌ها و همین بخش استفاده کردم که در نهایت پیعام خطای زیر رو میده:</div> <div> <div dir="ltr" align="left"> <pre language="CSharp" name="code">The entity type User is not part of the model for the current context.</pre> </div>
+
+
+قسمت نگاشت‌ها همانند همین که تو سایت گفتین استفاده کردم.&nbsp;<span style="line-height: 1.5em; font-size: 9pt;">پروژه شامل سه بخش Domain و Model &nbsp;و Console هست برای تست این دو بخش.&nbsp;</span> </div> <div> <span style="line-height: 1.5em; font-size: 9pt;">قسمت خودکار سازی نگاشت‌ها بدون خود کارسازی تعاریف DbSet‌ها به درستی کار میکنه، وقتی این بخش رو پیاده میکنم پیغام خطای بالا رو میده تو متد Seed واسه دیتاهای پیش فرض User.</span> </div> <div> <div dir="ltr" align="left"> <pre language="CSharp" name="code">namespace Test.Domain
+{
+    public abstract class BaseEntity
+    {
+        public int Id { set; get; }
+    }
+}
+
+namespace Test.Domain.Entities
+{
+    public class User : BaseEntity
+    {
+        public int UserNumber { get; set; }
+        public string Name { get; set; }
+    }
+}
+
+namespace Test.Domain.Mappings
+{
+    public class UserMap : EntityTypeConfiguration&lt;User&gt;
+    {
+        public UserMap()
+        {
+            this.HasKey(x =&gt; x.UserNumber);
+            this.Property(x =&gt; x.Name).HasMaxLength(450).IsRequired();
+        }
+    }
+} </pre> </div> <br> <div dir="ltr" align="left"> <pre language="CSharp" name="code">   loadEntities(asm, modelBuilder, "Test.Domain");</pre> </div> <br> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۳/۰۱/۲۸ ۱۲:۵۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>درسته. چون کلاس User در فضای نام Test.Domain<span> قرار ندارد.</span> <br>
+بررسی انجام شده به صورت type.Namespace == nameSpace<span> </span>است ولی حالت مدنظر شما type.Namespace.<b>StartsWith</b> nameSpace<span> است.</span></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>بهنام حقی</strong>  در  <span dir='ltr'>۱۳۹۳/۰۱/۲۸ ۱۳:۱۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>خیلی ممنون. برای اینکه همه اسمبلی هارو بگرده، و یه اسمبلی خاص رو بهش معرفی نکنیم، چطور از این تابع استفاده کنم: <div> <div dir="ltr" align="left"> <pre language="CSharp" name="code">foreach (Assembly asm in AppDomain.CurrentDomain.GetAssemblies()) 
+{
+  //...
+}</pre> </div>
+
+
+
+تابع زیر رو به ازای هر فضای نام که میده باید فراخونی کنم؟</div> <div> <div dir="ltr" align="left"> <pre language="CSharp" name="code">loadEntities(asm, modelBuilder, "نام فضا");</pre> </div> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۳/۰۱/۲۸ ۱۳:۲۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>بله. ولی این حالت مقرون به صرفه نیست. چون تعداد اسمبلی‌های بارگذاری شده در یک App domain زیاد است و شامل موارد پایه و سیستمی دات نت هم هست (با هزاران فضای نام). در این حالت این جستجو زمان زیادی را به خود اختصاص خواهد داد. بهتر است لیست یک سری اسمبلی مشخص را درنظر داشته باشید تا اینکه کل سیستم را جستجو کنید.</div>
+</div></li></ul></li></ul></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>سدا</strong>  در  <span dir='ltr'>۱۳۹۳/۰۳/۲۱ ۱۷:۱۵</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>اگر بخوایم خودکار Dbset‌ها تعریف شه و Models و Mapping در پروژه ای دیگه باشه، متود Seed که نیاز مستقیم به Context و Dbset‌ها داره. یعنی بر فرض بخوایم یک User به Context.Users اضافه کنیم امکان پذیر نیست درسته؟</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۳/۰۳/۲۱ ۱۷:۲۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>از متد Set استفاده کنید. در مثال فوق در متد protected override void Seed نمونه‌اش ارائه شده:<br> <div dir="ltr" align="left"> <pre language="CSharp" name="code"> context.Set&lt;User&gt;().Add(new User { Name = "name-1" });</pre> </div></div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۴/۰۱/۲۶ ۲۳:۱۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><b>یک نکته‌ی تکمیلی</b> <br>
+
+
+
+
+
+متد modelBuilder.<b>RegisterEntityType</b>  به نگارش‌های اخیر EF برای افزودن پویای مدل‌ها و موجودیت‌ها اضافه شده‌است و دیگر نیازی به روش Reflection مطرح شده‌ی در این مطلب نیست.<br>
+
+
+برای نمونه زمانیکه entityTypes<span> مدنظر را یافتید، به این صورت آن‌را ثبت کنید:</span> <br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">entityTypes.ForEach(modelBuilder.RegisterEntityType);</pre> </div></div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>یونس بقائی</strong>  در  <span dir='ltr'>۱۳۹۷/۰۵/۰۳ ۸:۳۷</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>در .net core2 خطای ambigious match found میده در این خط<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">var entityMethod = typeof (DbModelBuilder).GetMethod("Entity");</pre> </div>
+
+چه شکلی میشه دقیقا مشخص کرد منظور کدوم متد Entity هست؟</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۷/۰۵/۰۳ ۱۱:۵۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div>در EF Core یک چنین شکلی را پیدا می‌کند (البته «<a href="https://www.dntips.ir/newsarchive/news/13426" title="https://natemcmaster.com/blog/2018/07/25/netcore-plugins/">روش صحیح بارگذاری پویای اسمبلی‌ها در NET Core.</a>» را هم مدنظر داشته باشید):</div> <div> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">    public class BloggingContext : DbContext
+    {        
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            loadEntities(modelBuilder,
+            asmPath: @"D:\Prog\SomeAsm1\bin\Debug\netstandard2.0\SomeAsm1.dll",
+            nameSpace: "SomeAsm1.Models");
+            base.OnModelCreating(modelBuilder);
+        }
+
+        private static void loadEntities(ModelBuilder modelBuilder, string asmPath, string nameSpace)
+        {
+            var modelInAssembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(asmPath);
+            // var modelInAssembly = Assembly.Load(new AssemblyName("ModuleApp"));
+            var entityMethod = typeof(ModelBuilder).GetMethod("Entity", new Type[] { });
+            foreach (var type in modelInAssembly.ExportedTypes)
+            {
+                if (type.BaseType is System.Object &amp;&amp; !type.IsAbstract &amp;&amp; type.Namespace == nameSpace)
+                {
+                    entityMethod.MakeGenericMethod(type).Invoke(modelBuilder, new object[] { });
+                }
+            }
+        }</pre> </div> </div> </div> </div></div>
+</div></li></ul></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

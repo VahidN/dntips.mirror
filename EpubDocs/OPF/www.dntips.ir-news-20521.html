@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫نحوه بهبود مدیریت حافظه «آرایه‌های بسیار بزرگ» در برنامه‌های دات‌نتی</title>     <meta name="description" content="&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در دنیای توسعه نرم‌افزار با پلتفرم Microsoft .NET، نوشتن کدی که صرفاً &amp;quot;کار کند&amp;quot; کافی نیست. برنامه‌های کاربردی با کارایی بالا (High-Performance)، مقیاس‌پذیر و پایدار، نیازمند درک عمیقی از مکانیزم‌های داخلی پلتفرم، به ویژه نحوه مدیریت حافظه هستند. یکی از مهم‌ترین اجزای این سیستم، زباله‌روب یا Garbage Collector (GC) است که وظیفه آزادسازی خودکار حافظه را بر عهده دارد. با این حال، اتکای صرف به این سیستم خودکار بدون درک قوانین آن، می‌تواند منجر به گلوگاه‌های عملکردی جدی شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این مقاله به تشریح مدل حافظه در دات‌نت، با تمرکز ویژه بر سیستم زباله‌روب نسلی (Generational Garbage Collector) و یکی از بزرگترین چالش‌های عملکردی مرتبط با آن یعنی &lt;strong&gt;هیپ اشیاء بزرگ (Large Object Heap)&lt;/strong&gt; یا &lt;strong&gt;LOH&lt;/strong&gt; می‌پردازد. هدف ما ارائه دانش و ابزارهای عملی برای شناسایی، پیشگیری و بهینه‌سازی الگوهای تخصیص حافظه‌ای است که منجر به فشار بر LOH و کاهش کارایی برنامه می‌شوند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مبانی مدل حافظه در دات‌نت: نسل‌ها و پشته&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;محیط اجرایی زبان مشترک (Common Language Runtime یا CLR)، قلب تپنده دات‌نت، یک سیستم مدیریت حافظه پیشرفته را پیاده‌سازی کرده است که بر پایه یک اصل کلیدی بنا شده: &lt;strong&gt;&amp;quot;بیشتر اشیاء، عمر کوتاهی دارند.&amp;quot;&lt;/strong&gt; این اصل، اساس کار زباله‌روب نسلی است که حافظه Heap (محلی برای ذخیره‌سازی اشیاء یا Reference Types) را به چند بخش یا نسل تقسیم می‌کند.&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;نسل صفر (Generation 0):&lt;/strong&gt; این نسل، محل تولد تمام اشیاء جدید است. عملیات پاک‌سازی (Collection) در این نسل بسیار سریع و مکرر رخ می‌دهد. از آنجایی که بیشتر اشیاء عمر کوتاهی دارند، در همین مرحله اولیه از بین می‌روند که بهینه‌ترین حالت ممکن است.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;نسل یک (Generation 1):&lt;/strong&gt; اشیائی که از پاک‌سازی نسل صفر جان سالم به در می‌برند، به نسل یک ارتقاء پیدا می‌کنند. این نسل نقش یک بافر را ایفا می‌کند و عملیات پاک‌سازی در آن کمتر از نسل صفر رخ می‌دهد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;نسل دو (Generation 2):&lt;/strong&gt; اشیائی که برای مدت طولانی‌تری زنده می‌مانند، نهایتاً به نسل دو منتقل می‌شوند. این نسل محل زندگی اشیاء با طول عمر بالاست. عملیات پاک‌سازی در این نسل به ندرت اتفاق می‌افتد اما بسیار هزینه‌بر و زمان‌بر است، زیرا نیازمند بررسی کل گراف اشیاء زنده در برنامه است.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این مدل نسلی، پیامدهای مهمی در معماری برنامه دارد. الگوی ایده‌آل، ایجاد اشیاء کوتاه‌عمری است که به سرعت غیرقابل دسترس (Unreachable) شده و در همان پاک‌سازی سریع نسل صفر، از حافظه حذف شوند. برعکس، اشیائی که بیهوده به نسل‌های بالاتر منتقل می‌شوند، باعث ناکارآمدی سیستم خواهند شد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در مقابل هیپ (Heap)، &lt;strong&gt;پشته (Stack)&lt;/strong&gt; قرار دارد که یک مدل حافظه جایگزین است. پشته برای ذخیره‌سازی انواع مقداری (Value Types) و برخی سناریوهای خاص مرجع به کار می‌رود. تخصیص و آزادسازی حافظه در پشته به صورت قطعی (Deterministic) و بسیار سریع (بر اساس الگوی LIFO) انجام می‌شود و هیچ سربار (Overhead) مرتبط با GC ندارد. با این حال، فضای پشته بسیار محدود است و استفاده نادرست از آن می‌تواند به خطای سرریز پشته (Stack Overflow) منجر شود. درک اینکه چه زمانی باید از پشته و چه زمانی از هیپ استفاده کرد، برای دستیابی به عملکرد بهینه، حیاتی است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;هیپ اشیاء بزرگ (LOH): چالش بزرگ عملکرد&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در کنار سیستم نسلی، یک بخش مجزا و با قوانینی کاملاً متفاوت در هیپ وجود دارد که به آن &lt;strong&gt;هیپ اشیاء بزرگ (Large Object Heap یا LOH)&lt;/strong&gt; می‌گویند. اشیائی که حجم آن‌ها از یک آستانه مشخص (معمولاً &lt;strong&gt;85,000 بایت&lt;/strong&gt;) فراتر رود، مستقیماً در LOH تخصیص داده می‌شوند و سیستم نسلی را دور می‌زنند. این تخصیص‌ها از چند جهت برای عملکرد برنامه گران تمام می‌شوند:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;چرخه پاک‌سازی پرهزینه:&lt;/strong&gt; پاک‌سازی LOH تنها همزمان با یک پاک‌سازی کامل نسل دو (Full GC) انجام می‌شود که خود پرهزینه‌ترین نوع پاک‌سازی است.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;عدم فشرده‌سازی پیش‌فرض:&lt;/strong&gt; برخلاف هیپ اشیاء کوچک (Small Object Heap یا SOH)، حافظه LOH به طور پیش‌فرض فشرده‌سازی (Compaction) نمی‌شود. این یعنی پس از آزادسازی یک شیء بزرگ، فضای خالی آن باقی می‌ماند. با گذشت زمان و تکرار تخصیص و آزادسازی اشیاء بزرگ با اندازه‌های مختلف، این فضاها به حفره‌های خالی در سراسر LOH تبدیل می‌شوند. این پدیده که &lt;strong&gt;پارگی حافظه (Fragmentation)&lt;/strong&gt; نام دارد، یکی از خطرناک‌ترین مشکلات عملکردی است.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;پارگی حافظه، مشکلات زنجیره‌واری را به وجود می‌آورد. زمانی که CLR نیاز به تخصیص یک شیء بزرگ جدید دارد اما نمی‌تواند یک بلوک حافظه یکپارچه و به اندازه کافی بزرگ پیدا کند، مجبور به انجام عملیات‌های سنگینی مانند فشرده‌سازی LOH یا گسترش کل حافظه فرآیند می‌شود. این عملیات‌ها می‌توانند باعث توقف کامل برنامه (Application Pauses) برای صدها میلی‌ثانیه یا بیشتر شوند که مستقیماً بر تجربه کاربر و توان عملیاتی سیستم تأثیر منفی می‌گذارد.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الگوهای رایج ایجاد فشار بر LOH و راهکارهای مقابله&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;منابع اصلی ایجاد فشار بر LOH معمولاً شامل تخصیص آرایه‌های بسیار بزرگ، عملیات‌های گسترده روی رشته‌ها (Strings)، و ساختارهای داده‌ای هستند که در طول زمان رشد کرده و از آستانه ۸۵ کیلوبایت عبور می‌کنند. برای درک بهتر مشکل، یک برنامه پردازش داده‌های مالی را در نظر بگیرید که برای تحلیل داده‌های بازار، آرایه‌های بزرگی تخصیص می‌دهد.&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class MarketDataProcessor
+{
+    public void ProcessDailyData(IEnumerable&amp;lt;MarketTick&amp;gt; ticks)
+    {
+        // این کد بسته به تعداد تیک‌ها، باعث فشار بر LOH می‌شود
+        var tickArray = ticks.ToArray();
+        
+        // تخصیص‌های بالقوه در LOH
+        var priceData = new decimal[tickArray.Length]; 
+        var volumeData = new long[tickArray.Length];
+
+        // منطق پردازش که روی آرایه‌های بزرگ کار می‌کند
+        for (int i = 0; i &amp;lt; tickArray.Length; i++)
+        {
+            priceData[i] = tickArray[i].Price;
+            volumeData[i] = tickArray[i].Volume;
+        }
+
+        // آرایه‌ها پس از پردازش، کاندید پاک‌سازی می‌شوند
+        // اما این پاک‌سازی تا زمان وقوع GC نسل دو به تعویق می‌افتد
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;کد بالا چندین مشکل دارد. بسته به حجم داده‌ها، آرایه‌ها به راحتی از آستانه LOH عبور کرده و فشار آنی ایجاد می‌کنند. هر فراخوانی این متد، آرایه‌های بزرگ جدیدی را تخصیص می‌دهد که در طول پردازش زنده مانده و احتمالاً تا پاک‌سازی نسل دو در حافظه باقی می‌مانند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای حل این مشکل، باید الگوهای دسترسی به داده را بازنگری کرده و از جایگزین‌های بهینه‌تر استفاده کنیم.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;بهینه‌سازی با ArrayPool: استراتژی بازیافت حافظه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یکی از قدرتمندترین راهکارها برای مقابله با تخصیص مکرر آرایه‌های بزرگ، استفاده از &lt;strong&gt;استخر آرایه (Array Pooling)&lt;/strong&gt; است. کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ArrayPool&lt;/code&gt; در دات‌نت به ما اجازه می‌دهد تا به جای ایجاد آرایه‌های جدید در هر بار نیاز، آرایه‌های از پیش تخصیص‌داده‌شده را از یک استخر مشترک &amp;quot;اجاره&amp;quot; (Rent) کرده و پس از اتمام کار، آن‌ها را به استخر &amp;quot;بازگردانیم&amp;quot; (Return). این کار تخصیص حافظه در LOH را به کلی حذف می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بیایید کد قبلی را با استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ArrayPool&lt;/code&gt; بهینه کنیم:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class OptimizedMarketDataProcessor
+{
+    private readonly ArrayPool&amp;lt;decimal&amp;gt; _decimalPool = ArrayPool&amp;lt;decimal&amp;gt;.Shared;
+    private readonly ArrayPool&amp;lt;long&amp;gt; _longPool = ArrayPool&amp;lt;long&amp;gt;.Shared;
+
+    public void ProcessDailyData(IEnumerable&amp;lt;MarketTick&amp;gt; ticks)
+    {
+        var tickList = ticks.ToList(); // برای دسترسی به تعداد
+        var count = tickList.Count;
+        
+        // آرایه‌ها از استخر مشترک اجاره می‌شوند
+        var priceData = _decimalPool.Rent(count);
+        var volumeData = _longPool.Rent(count);
+        
+        try
+        {
+            for (int i = 0; i &amp;lt; count; i++)
+            {
+                priceData[i] = tickList[i].Price;
+                volumeData[i] = tickList[i].Volume;
+            }
+            
+            // منطق پردازش با استفاده از آرایه‌های اجاره‌ای
+        }
+        finally
+        {
+            // تضمین بازگشت آرایه‌ها به استخر حتی در صورت بروز خطا
+            _decimalPool.Return(priceData);
+            _longPool.Return(volumeData);
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این نسخه بهینه، متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Rent&lt;/code&gt; یک آرایه با حداقل طول درخواستی را از استخر در اختیار ما قرار می‌دهد. مهم‌ترین نکته، استفاده از بلوک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;try...finally&lt;/code&gt; است که تضمین می‌کند آرایه‌ها همیشه به استخر بازگردانده می‌شوند، حتی اگر در حین پردازش خطایی رخ دهد. این الگو از هدررفت حافظه (Memory Leak) جلوگیری کرده و کارایی را به شدت بهبود می‌بخشد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پردازش جریانی (Streaming): راهکاری برای داده‌های عظیم&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;راهکار دیگر برای مدیریت مجموعه‌داده‌های بزرگ بدون ایجاد فشار بر LOH، &lt;strong&gt;پردازش جریانی (Streaming)&lt;/strong&gt; است. به جای بارگذاری کل داده‌ها در حافظه به صورت یکجا، می‌توانیم آن‌ها را در قالب قطعات (Chunks) یا دسته‌های (Batches) کوچکتر و قابل مدیریت پردازش کنیم.&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class StreamingMarketDataProcessor
+{
+    public async Task ProcessDailyDataAsync(IAsyncEnumerable&amp;lt;MarketTick&amp;gt; ticks)
+    {
+        // اندازه‌ای انتخاب شده که از LOH اجتناب شود
+        const int batchSize = 1000; 
+        var batch = new List&amp;lt;MarketTick&amp;gt;(batchSize);
+        
+        await foreach (var tick in ticks)
+        {
+            batch.Add(tick);
+            
+            if (batch.Count &amp;gt;= batchSize)
+            {
+                ProcessBatch(batch);
+                batch.Clear(); // استفاده مجدد از همان نمونه List
+            }
+        }
+        
+        // پردازش آخرین دسته باقی‌مانده
+        if (batch.Count &amp;gt; 0)
+        {
+            ProcessBatch(batch);
+        }
+    }
+    
+    private void ProcessBatch(List&amp;lt;MarketTick&amp;gt; batch)
+    {
+        // پردازش دسته‌های کوچکتر که در هیپ اشیاء کوچک (SOH) باقی می‌مانند
+        foreach (var tick in batch)
+        {
+            // منطق پردازش تیک‌های داده
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این رویکرد، با استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IAsyncEnumerable&lt;/code&gt;، داده‌ها به صورت غیرهمزمان و جریانی دریافت می‌شوند. ما داده‌ها را در یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;List&lt;/code&gt; با ظرفیت محدود جمع‌آوری کرده و هر بار که لیست پر می‌شود، آن را پردازش و سپس پاک می‌کنیم (&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;batch.Clear()&lt;/code&gt;). این کار باعث می‌شود که حافظه مورد نیاز در هر لحظه بسیار کمتر از کل حجم داده‌ها باشد و به این ترتیب از رسیدن به آستانه LOH جلوگیری می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;خودآزمایی &lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;کدام یک از گزاره‌های زیر در مورد هیپ اشیاء بزرگ (LOH) در دات‌نت &lt;strong&gt;صحیح&lt;/strong&gt; است؟&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;الف) اشیاء موجود در LOH در طی پاک‌سازی نسل صفر (Generation 0) حذف می‌شوند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ب) LOH به طور پیش‌فرض پس از هر بار پاک‌سازی، برای حذف فضاهای خالی فشرده‌سازی (Compaction) می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ج) اشیائی که حجمی بزرگتر از 85,000 بایت دارند، مستقیماً در LOH تخصیص داده می‌شوند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;د) &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ArrayPool&amp;lt;T&amp;gt;&lt;/code&gt; با ایجاد مکرر آرایه‌های جدید، فشار بر LOH را افزایش می‌دهد.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مدیریت حافظه در دات‌نت یک موضوع چندوجهی است که تسلط بر آن تفاوت میان یک برنامه متوسط و یک برنامه با کارایی بالا را رقم می‌زند. درک عملکرد زباله‌روب نسلی و به‌ویژه شناخت چالش‌های مرتبط با هیپ اشیاء بزرگ (LOH)، یک مهارت ضروری برای هر توسعه‌دهنده دات‌نت است. تخصیص بی‌رویه اشیاء بزرگ، به ویژه آرایه‌ها، منجر به پارگی حافظه و توقف‌های پرهزینه در برنامه می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همانطور که دیدیم، با به‌کارگیری استراتژی‌های هوشمندانه‌ای مانند استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ArrayPool&lt;/code&gt; برای بازیافت حافظه و پردازش جریانی برای مدیریت داده‌های عظیم، می‌توانیم به طور مؤثری از این مشکلات جلوگیری کرده و برنامه‌هایی بنویسیم که نه تنها سریع و پاسخگو هستند، بلکه منابع سیستم را نیز به صورت بهینه مصرف می‌کنند. توجه به این الگوهای بهینه‌سازی، سرمایه‌گذاری ارزشمندی در پایداری و مقیاس‌پذیری بلندمدت پروژه‌های شما خواهد بود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پاسخ خودآزمایی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;گزینه ج:&lt;/strong&gt; اشیائی که حجمی بزرگتر از 85,000 بایت دارند، مستقیماً در LOH تخصیص داده می‌شوند. این تعریف اصلی LOH است. گزینه‌های دیگر نادرست هستند زیرا پاک‌سازی LOH با نسل دو انجام می‌شود، به طور پیش‌فرض فشرده‌سازی نمی‌شود و &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ArrayPool&lt;/code&gt; فشار بر LOH را کاهش می‌دهد.&lt;/div&gt;">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="نحوه بهبود مدیریت حافظه «آرایه‌های بسیار بزرگ» در برنامه‌های دات‌نتی">
+    <meta itemprop="description" content="&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در دنیای توسعه نرم‌افزار با پلتفرم Microsoft .NET، نوشتن کدی که صرفاً &amp;quot;کار کند&amp;quot; کافی نیست. برنامه‌های کاربردی با کارایی بالا (High-Performance)، مقیاس‌پذیر و پایدار، نیازمند درک عمیقی از مکانیزم‌های داخلی پلتفرم، به ویژه نحوه مدیریت حافظه هستند. یکی از مهم‌ترین اجزای این سیستم، زباله‌روب یا Garbage Collector (GC) است که وظیفه آزادسازی خودکار حافظه را بر عهده دارد. با این حال، اتکای صرف به این سیستم خودکار بدون درک قوانین آن، می‌تواند منجر به گلوگاه‌های عملکردی جدی شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این مقاله به تشریح مدل حافظه در دات‌نت، با تمرکز ویژه بر سیستم زباله‌روب نسلی (Generational Garbage Collector) و یکی از بزرگترین چالش‌های عملکردی مرتبط با آن یعنی &lt;strong&gt;هیپ اشیاء بزرگ (Large Object Heap)&lt;/strong&gt; یا &lt;strong&gt;LOH&lt;/strong&gt; می‌پردازد. هدف ما ارائه دانش و ابزارهای عملی برای شناسایی، پیشگیری و بهینه‌سازی الگوهای تخصیص حافظه‌ای است که منجر به فشار بر LOH و کاهش کارایی برنامه می‌شوند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مبانی مدل حافظه در دات‌نت: نسل‌ها و پشته&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;محیط اجرایی زبان مشترک (Common Language Runtime یا CLR)، قلب تپنده دات‌نت، یک سیستم مدیریت حافظه پیشرفته را پیاده‌سازی کرده است که بر پایه یک اصل کلیدی بنا شده: &lt;strong&gt;&amp;quot;بیشتر اشیاء، عمر کوتاهی دارند.&amp;quot;&lt;/strong&gt; این اصل، اساس کار زباله‌روب نسلی است که حافظه Heap (محلی برای ذخیره‌سازی اشیاء یا Reference Types) را به چند بخش یا نسل تقسیم می‌کند.&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;نسل صفر (Generation 0):&lt;/strong&gt; این نسل، محل تولد تمام اشیاء جدید است. عملیات پاک‌سازی (Collection) در این نسل بسیار سریع و مکرر رخ می‌دهد. از آنجایی که بیشتر اشیاء عمر کوتاهی دارند، در همین مرحله اولیه از بین می‌روند که بهینه‌ترین حالت ممکن است.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;نسل یک (Generation 1):&lt;/strong&gt; اشیائی که از پاک‌سازی نسل صفر جان سالم به در می‌برند، به نسل یک ارتقاء پیدا می‌کنند. این نسل نقش یک بافر را ایفا می‌کند و عملیات پاک‌سازی در آن کمتر از نسل صفر رخ می‌دهد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;نسل دو (Generation 2):&lt;/strong&gt; اشیائی که برای مدت طولانی‌تری زنده می‌مانند، نهایتاً به نسل دو منتقل می‌شوند. این نسل محل زندگی اشیاء با طول عمر بالاست. عملیات پاک‌سازی در این نسل به ندرت اتفاق می‌افتد اما بسیار هزینه‌بر و زمان‌بر است، زیرا نیازمند بررسی کل گراف اشیاء زنده در برنامه است.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این مدل نسلی، پیامدهای مهمی در معماری برنامه دارد. الگوی ایده‌آل، ایجاد اشیاء کوتاه‌عمری است که به سرعت غیرقابل دسترس (Unreachable) شده و در همان پاک‌سازی سریع نسل صفر، از حافظه حذف شوند. برعکس، اشیائی که بیهوده به نسل‌های بالاتر منتقل می‌شوند، باعث ناکارآمدی سیستم خواهند شد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در مقابل هیپ (Heap)، &lt;strong&gt;پشته (Stack)&lt;/strong&gt; قرار دارد که یک مدل حافظه جایگزین است. پشته برای ذخیره‌سازی انواع مقداری (Value Types) و برخی سناریوهای خاص مرجع به کار می‌رود. تخصیص و آزادسازی حافظه در پشته به صورت قطعی (Deterministic) و بسیار سریع (بر اساس الگوی LIFO) انجام می‌شود و هیچ سربار (Overhead) مرتبط با GC ندارد. با این حال، فضای پشته بسیار محدود است و استفاده نادرست از آن می‌تواند به خطای سرریز پشته (Stack Overflow) منجر شود. درک اینکه چه زمانی باید از پشته و چه زمانی از هیپ استفاده کرد، برای دستیابی به عملکرد بهینه، حیاتی است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;هیپ اشیاء بزرگ (LOH): چالش بزرگ عملکرد&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در کنار سیستم نسلی، یک بخش مجزا و با قوانینی کاملاً متفاوت در هیپ وجود دارد که به آن &lt;strong&gt;هیپ اشیاء بزرگ (Large Object Heap یا LOH)&lt;/strong&gt; می‌گویند. اشیائی که حجم آن‌ها از یک آستانه مشخص (معمولاً &lt;strong&gt;85,000 بایت&lt;/strong&gt;) فراتر رود، مستقیماً در LOH تخصیص داده می‌شوند و سیستم نسلی را دور می‌زنند. این تخصیص‌ها از چند جهت برای عملکرد برنامه گران تمام می‌شوند:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;چرخه پاک‌سازی پرهزینه:&lt;/strong&gt; پاک‌سازی LOH تنها همزمان با یک پاک‌سازی کامل نسل دو (Full GC) انجام می‌شود که خود پرهزینه‌ترین نوع پاک‌سازی است.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;عدم فشرده‌سازی پیش‌فرض:&lt;/strong&gt; برخلاف هیپ اشیاء کوچک (Small Object Heap یا SOH)، حافظه LOH به طور پیش‌فرض فشرده‌سازی (Compaction) نمی‌شود. این یعنی پس از آزادسازی یک شیء بزرگ، فضای خالی آن باقی می‌ماند. با گذشت زمان و تکرار تخصیص و آزادسازی اشیاء بزرگ با اندازه‌های مختلف، این فضاها به حفره‌های خالی در سراسر LOH تبدیل می‌شوند. این پدیده که &lt;strong&gt;پارگی حافظه (Fragmentation)&lt;/strong&gt; نام دارد، یکی از خطرناک‌ترین مشکلات عملکردی است.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;پارگی حافظه، مشکلات زنجیره‌واری را به وجود می‌آورد. زمانی که CLR نیاز به تخصیص یک شیء بزرگ جدید دارد اما نمی‌تواند یک بلوک حافظه یکپارچه و به اندازه کافی بزرگ پیدا کند، مجبور به انجام عملیات‌های سنگینی مانند فشرده‌سازی LOH یا گسترش کل حافظه فرآیند می‌شود. این عملیات‌ها می‌توانند باعث توقف کامل برنامه (Application Pauses) برای صدها میلی‌ثانیه یا بیشتر شوند که مستقیماً بر تجربه کاربر و توان عملیاتی سیستم تأثیر منفی می‌گذارد.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الگوهای رایج ایجاد فشار بر LOH و راهکارهای مقابله&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;منابع اصلی ایجاد فشار بر LOH معمولاً شامل تخصیص آرایه‌های بسیار بزرگ، عملیات‌های گسترده روی رشته‌ها (Strings)، و ساختارهای داده‌ای هستند که در طول زمان رشد کرده و از آستانه ۸۵ کیلوبایت عبور می‌کنند. برای درک بهتر مشکل، یک برنامه پردازش داده‌های مالی را در نظر بگیرید که برای تحلیل داده‌های بازار، آرایه‌های بزرگی تخصیص می‌دهد.&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class MarketDataProcessor
+{
+    public void ProcessDailyData(IEnumerable&amp;lt;MarketTick&amp;gt; ticks)
+    {
+        // این کد بسته به تعداد تیک‌ها، باعث فشار بر LOH می‌شود
+        var tickArray = ticks.ToArray();
+        
+        // تخصیص‌های بالقوه در LOH
+        var priceData = new decimal[tickArray.Length]; 
+        var volumeData = new long[tickArray.Length];
+
+        // منطق پردازش که روی آرایه‌های بزرگ کار می‌کند
+        for (int i = 0; i &amp;lt; tickArray.Length; i++)
+        {
+            priceData[i] = tickArray[i].Price;
+            volumeData[i] = tickArray[i].Volume;
+        }
+
+        // آرایه‌ها پس از پردازش، کاندید پاک‌سازی می‌شوند
+        // اما این پاک‌سازی تا زمان وقوع GC نسل دو به تعویق می‌افتد
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;کد بالا چندین مشکل دارد. بسته به حجم داده‌ها، آرایه‌ها به راحتی از آستانه LOH عبور کرده و فشار آنی ایجاد می‌کنند. هر فراخوانی این متد، آرایه‌های بزرگ جدیدی را تخصیص می‌دهد که در طول پردازش زنده مانده و احتمالاً تا پاک‌سازی نسل دو در حافظه باقی می‌مانند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای حل این مشکل، باید الگوهای دسترسی به داده را بازنگری کرده و از جایگزین‌های بهینه‌تر استفاده کنیم.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;بهینه‌سازی با ArrayPool: استراتژی بازیافت حافظه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یکی از قدرتمندترین راهکارها برای مقابله با تخصیص مکرر آرایه‌های بزرگ، استفاده از &lt;strong&gt;استخر آرایه (Array Pooling)&lt;/strong&gt; است. کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ArrayPool&lt;/code&gt; در دات‌نت به ما اجازه می‌دهد تا به جای ایجاد آرایه‌های جدید در هر بار نیاز، آرایه‌های از پیش تخصیص‌داده‌شده را از یک استخر مشترک &amp;quot;اجاره&amp;quot; (Rent) کرده و پس از اتمام کار، آن‌ها را به استخر &amp;quot;بازگردانیم&amp;quot; (Return). این کار تخصیص حافظه در LOH را به کلی حذف می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بیایید کد قبلی را با استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ArrayPool&lt;/code&gt; بهینه کنیم:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class OptimizedMarketDataProcessor
+{
+    private readonly ArrayPool&amp;lt;decimal&amp;gt; _decimalPool = ArrayPool&amp;lt;decimal&amp;gt;.Shared;
+    private readonly ArrayPool&amp;lt;long&amp;gt; _longPool = ArrayPool&amp;lt;long&amp;gt;.Shared;
+
+    public void ProcessDailyData(IEnumerable&amp;lt;MarketTick&amp;gt; ticks)
+    {
+        var tickList = ticks.ToList(); // برای دسترسی به تعداد
+        var count = tickList.Count;
+        
+        // آرایه‌ها از استخر مشترک اجاره می‌شوند
+        var priceData = _decimalPool.Rent(count);
+        var volumeData = _longPool.Rent(count);
+        
+        try
+        {
+            for (int i = 0; i &amp;lt; count; i++)
+            {
+                priceData[i] = tickList[i].Price;
+                volumeData[i] = tickList[i].Volume;
+            }
+            
+            // منطق پردازش با استفاده از آرایه‌های اجاره‌ای
+        }
+        finally
+        {
+            // تضمین بازگشت آرایه‌ها به استخر حتی در صورت بروز خطا
+            _decimalPool.Return(priceData);
+            _longPool.Return(volumeData);
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این نسخه بهینه، متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Rent&lt;/code&gt; یک آرایه با حداقل طول درخواستی را از استخر در اختیار ما قرار می‌دهد. مهم‌ترین نکته، استفاده از بلوک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;try...finally&lt;/code&gt; است که تضمین می‌کند آرایه‌ها همیشه به استخر بازگردانده می‌شوند، حتی اگر در حین پردازش خطایی رخ دهد. این الگو از هدررفت حافظه (Memory Leak) جلوگیری کرده و کارایی را به شدت بهبود می‌بخشد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پردازش جریانی (Streaming): راهکاری برای داده‌های عظیم&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;راهکار دیگر برای مدیریت مجموعه‌داده‌های بزرگ بدون ایجاد فشار بر LOH، &lt;strong&gt;پردازش جریانی (Streaming)&lt;/strong&gt; است. به جای بارگذاری کل داده‌ها در حافظه به صورت یکجا، می‌توانیم آن‌ها را در قالب قطعات (Chunks) یا دسته‌های (Batches) کوچکتر و قابل مدیریت پردازش کنیم.&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class StreamingMarketDataProcessor
+{
+    public async Task ProcessDailyDataAsync(IAsyncEnumerable&amp;lt;MarketTick&amp;gt; ticks)
+    {
+        // اندازه‌ای انتخاب شده که از LOH اجتناب شود
+        const int batchSize = 1000; 
+        var batch = new List&amp;lt;MarketTick&amp;gt;(batchSize);
+        
+        await foreach (var tick in ticks)
+        {
+            batch.Add(tick);
+            
+            if (batch.Count &amp;gt;= batchSize)
+            {
+                ProcessBatch(batch);
+                batch.Clear(); // استفاده مجدد از همان نمونه List
+            }
+        }
+        
+        // پردازش آخرین دسته باقی‌مانده
+        if (batch.Count &amp;gt; 0)
+        {
+            ProcessBatch(batch);
+        }
+    }
+    
+    private void ProcessBatch(List&amp;lt;MarketTick&amp;gt; batch)
+    {
+        // پردازش دسته‌های کوچکتر که در هیپ اشیاء کوچک (SOH) باقی می‌مانند
+        foreach (var tick in batch)
+        {
+            // منطق پردازش تیک‌های داده
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این رویکرد، با استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IAsyncEnumerable&lt;/code&gt;، داده‌ها به صورت غیرهمزمان و جریانی دریافت می‌شوند. ما داده‌ها را در یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;List&lt;/code&gt; با ظرفیت محدود جمع‌آوری کرده و هر بار که لیست پر می‌شود، آن را پردازش و سپس پاک می‌کنیم (&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;batch.Clear()&lt;/code&gt;). این کار باعث می‌شود که حافظه مورد نیاز در هر لحظه بسیار کمتر از کل حجم داده‌ها باشد و به این ترتیب از رسیدن به آستانه LOH جلوگیری می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;خودآزمایی &lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;کدام یک از گزاره‌های زیر در مورد هیپ اشیاء بزرگ (LOH) در دات‌نت &lt;strong&gt;صحیح&lt;/strong&gt; است؟&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;الف) اشیاء موجود در LOH در طی پاک‌سازی نسل صفر (Generation 0) حذف می‌شوند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ب) LOH به طور پیش‌فرض پس از هر بار پاک‌سازی، برای حذف فضاهای خالی فشرده‌سازی (Compaction) می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ج) اشیائی که حجمی بزرگتر از 85,000 بایت دارند، مستقیماً در LOH تخصیص داده می‌شوند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;د) &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ArrayPool&amp;lt;T&amp;gt;&lt;/code&gt; با ایجاد مکرر آرایه‌های جدید، فشار بر LOH را افزایش می‌دهد.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مدیریت حافظه در دات‌نت یک موضوع چندوجهی است که تسلط بر آن تفاوت میان یک برنامه متوسط و یک برنامه با کارایی بالا را رقم می‌زند. درک عملکرد زباله‌روب نسلی و به‌ویژه شناخت چالش‌های مرتبط با هیپ اشیاء بزرگ (LOH)، یک مهارت ضروری برای هر توسعه‌دهنده دات‌نت است. تخصیص بی‌رویه اشیاء بزرگ، به ویژه آرایه‌ها، منجر به پارگی حافظه و توقف‌های پرهزینه در برنامه می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همانطور که دیدیم، با به‌کارگیری استراتژی‌های هوشمندانه‌ای مانند استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ArrayPool&lt;/code&gt; برای بازیافت حافظه و پردازش جریانی برای مدیریت داده‌های عظیم، می‌توانیم به طور مؤثری از این مشکلات جلوگیری کرده و برنامه‌هایی بنویسیم که نه تنها سریع و پاسخگو هستند، بلکه منابع سیستم را نیز به صورت بهینه مصرف می‌کنند. توجه به این الگوهای بهینه‌سازی، سرمایه‌گذاری ارزشمندی در پایداری و مقیاس‌پذیری بلندمدت پروژه‌های شما خواهد بود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پاسخ خودآزمایی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;گزینه ج:&lt;/strong&gt; اشیائی که حجمی بزرگتر از 85,000 بایت دارند، مستقیماً در LOH تخصیص داده می‌شوند. این تعریف اصلی LOH است. گزینه‌های دیگر نادرست هستند زیرا پاک‌سازی LOH با نسل دو انجام می‌شود، به طور پیش‌فرض فشرده‌سازی نمی‌شود و &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ArrayPool&lt;/code&gt; فشار بر LOH را کاهش می‌دهد.&lt;/div&gt;">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="نحوه بهبود مدیریت حافظه «آرایه‌های بسیار بزرگ» در برنامه‌های دات‌نتی">
+    <meta property="og:description" content="&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در دنیای توسعه نرم‌افزار با پلتفرم Microsoft .NET، نوشتن کدی که صرفاً &amp;quot;کار کند&amp;quot; کافی نیست. برنامه‌های کاربردی با کارایی بالا (High-Performance)، مقیاس‌پذیر و پایدار، نیازمند درک عمیقی از مکانیزم‌های داخلی پلتفرم، به ویژه نحوه مدیریت حافظه هستند. یکی از مهم‌ترین اجزای این سیستم، زباله‌روب یا Garbage Collector (GC) است که وظیفه آزادسازی خودکار حافظه را بر عهده دارد. با این حال، اتکای صرف به این سیستم خودکار بدون درک قوانین آن، می‌تواند منجر به گلوگاه‌های عملکردی جدی شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این مقاله به تشریح مدل حافظه در دات‌نت، با تمرکز ویژه بر سیستم زباله‌روب نسلی (Generational Garbage Collector) و یکی از بزرگترین چالش‌های عملکردی مرتبط با آن یعنی &lt;strong&gt;هیپ اشیاء بزرگ (Large Object Heap)&lt;/strong&gt; یا &lt;strong&gt;LOH&lt;/strong&gt; می‌پردازد. هدف ما ارائه دانش و ابزارهای عملی برای شناسایی، پیشگیری و بهینه‌سازی الگوهای تخصیص حافظه‌ای است که منجر به فشار بر LOH و کاهش کارایی برنامه می‌شوند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مبانی مدل حافظه در دات‌نت: نسل‌ها و پشته&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;محیط اجرایی زبان مشترک (Common Language Runtime یا CLR)، قلب تپنده دات‌نت، یک سیستم مدیریت حافظه پیشرفته را پیاده‌سازی کرده است که بر پایه یک اصل کلیدی بنا شده: &lt;strong&gt;&amp;quot;بیشتر اشیاء، عمر کوتاهی دارند.&amp;quot;&lt;/strong&gt; این اصل، اساس کار زباله‌روب نسلی است که حافظه Heap (محلی برای ذخیره‌سازی اشیاء یا Reference Types) را به چند بخش یا نسل تقسیم می‌کند.&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;نسل صفر (Generation 0):&lt;/strong&gt; این نسل، محل تولد تمام اشیاء جدید است. عملیات پاک‌سازی (Collection) در این نسل بسیار سریع و مکرر رخ می‌دهد. از آنجایی که بیشتر اشیاء عمر کوتاهی دارند، در همین مرحله اولیه از بین می‌روند که بهینه‌ترین حالت ممکن است.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;نسل یک (Generation 1):&lt;/strong&gt; اشیائی که از پاک‌سازی نسل صفر جان سالم به در می‌برند، به نسل یک ارتقاء پیدا می‌کنند. این نسل نقش یک بافر را ایفا می‌کند و عملیات پاک‌سازی در آن کمتر از نسل صفر رخ می‌دهد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;نسل دو (Generation 2):&lt;/strong&gt; اشیائی که برای مدت طولانی‌تری زنده می‌مانند، نهایتاً به نسل دو منتقل می‌شوند. این نسل محل زندگی اشیاء با طول عمر بالاست. عملیات پاک‌سازی در این نسل به ندرت اتفاق می‌افتد اما بسیار هزینه‌بر و زمان‌بر است، زیرا نیازمند بررسی کل گراف اشیاء زنده در برنامه است.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این مدل نسلی، پیامدهای مهمی در معماری برنامه دارد. الگوی ایده‌آل، ایجاد اشیاء کوتاه‌عمری است که به سرعت غیرقابل دسترس (Unreachable) شده و در همان پاک‌سازی سریع نسل صفر، از حافظه حذف شوند. برعکس، اشیائی که بیهوده به نسل‌های بالاتر منتقل می‌شوند، باعث ناکارآمدی سیستم خواهند شد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در مقابل هیپ (Heap)، &lt;strong&gt;پشته (Stack)&lt;/strong&gt; قرار دارد که یک مدل حافظه جایگزین است. پشته برای ذخیره‌سازی انواع مقداری (Value Types) و برخی سناریوهای خاص مرجع به کار می‌رود. تخصیص و آزادسازی حافظه در پشته به صورت قطعی (Deterministic) و بسیار سریع (بر اساس الگوی LIFO) انجام می‌شود و هیچ سربار (Overhead) مرتبط با GC ندارد. با این حال، فضای پشته بسیار محدود است و استفاده نادرست از آن می‌تواند به خطای سرریز پشته (Stack Overflow) منجر شود. درک اینکه چه زمانی باید از پشته و چه زمانی از هیپ استفاده کرد، برای دستیابی به عملکرد بهینه، حیاتی است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;هیپ اشیاء بزرگ (LOH): چالش بزرگ عملکرد&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در کنار سیستم نسلی، یک بخش مجزا و با قوانینی کاملاً متفاوت در هیپ وجود دارد که به آن &lt;strong&gt;هیپ اشیاء بزرگ (Large Object Heap یا LOH)&lt;/strong&gt; می‌گویند. اشیائی که حجم آن‌ها از یک آستانه مشخص (معمولاً &lt;strong&gt;85,000 بایت&lt;/strong&gt;) فراتر رود، مستقیماً در LOH تخصیص داده می‌شوند و سیستم نسلی را دور می‌زنند. این تخصیص‌ها از چند جهت برای عملکرد برنامه گران تمام می‌شوند:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;چرخه پاک‌سازی پرهزینه:&lt;/strong&gt; پاک‌سازی LOH تنها همزمان با یک پاک‌سازی کامل نسل دو (Full GC) انجام می‌شود که خود پرهزینه‌ترین نوع پاک‌سازی است.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;عدم فشرده‌سازی پیش‌فرض:&lt;/strong&gt; برخلاف هیپ اشیاء کوچک (Small Object Heap یا SOH)، حافظه LOH به طور پیش‌فرض فشرده‌سازی (Compaction) نمی‌شود. این یعنی پس از آزادسازی یک شیء بزرگ، فضای خالی آن باقی می‌ماند. با گذشت زمان و تکرار تخصیص و آزادسازی اشیاء بزرگ با اندازه‌های مختلف، این فضاها به حفره‌های خالی در سراسر LOH تبدیل می‌شوند. این پدیده که &lt;strong&gt;پارگی حافظه (Fragmentation)&lt;/strong&gt; نام دارد، یکی از خطرناک‌ترین مشکلات عملکردی است.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;پارگی حافظه، مشکلات زنجیره‌واری را به وجود می‌آورد. زمانی که CLR نیاز به تخصیص یک شیء بزرگ جدید دارد اما نمی‌تواند یک بلوک حافظه یکپارچه و به اندازه کافی بزرگ پیدا کند، مجبور به انجام عملیات‌های سنگینی مانند فشرده‌سازی LOH یا گسترش کل حافظه فرآیند می‌شود. این عملیات‌ها می‌توانند باعث توقف کامل برنامه (Application Pauses) برای صدها میلی‌ثانیه یا بیشتر شوند که مستقیماً بر تجربه کاربر و توان عملیاتی سیستم تأثیر منفی می‌گذارد.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الگوهای رایج ایجاد فشار بر LOH و راهکارهای مقابله&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;منابع اصلی ایجاد فشار بر LOH معمولاً شامل تخصیص آرایه‌های بسیار بزرگ، عملیات‌های گسترده روی رشته‌ها (Strings)، و ساختارهای داده‌ای هستند که در طول زمان رشد کرده و از آستانه ۸۵ کیلوبایت عبور می‌کنند. برای درک بهتر مشکل، یک برنامه پردازش داده‌های مالی را در نظر بگیرید که برای تحلیل داده‌های بازار، آرایه‌های بزرگی تخصیص می‌دهد.&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class MarketDataProcessor
+{
+    public void ProcessDailyData(IEnumerable&amp;lt;MarketTick&amp;gt; ticks)
+    {
+        // این کد بسته به تعداد تیک‌ها، باعث فشار بر LOH می‌شود
+        var tickArray = ticks.ToArray();
+        
+        // تخصیص‌های بالقوه در LOH
+        var priceData = new decimal[tickArray.Length]; 
+        var volumeData = new long[tickArray.Length];
+
+        // منطق پردازش که روی آرایه‌های بزرگ کار می‌کند
+        for (int i = 0; i &amp;lt; tickArray.Length; i++)
+        {
+            priceData[i] = tickArray[i].Price;
+            volumeData[i] = tickArray[i].Volume;
+        }
+
+        // آرایه‌ها پس از پردازش، کاندید پاک‌سازی می‌شوند
+        // اما این پاک‌سازی تا زمان وقوع GC نسل دو به تعویق می‌افتد
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;کد بالا چندین مشکل دارد. بسته به حجم داده‌ها، آرایه‌ها به راحتی از آستانه LOH عبور کرده و فشار آنی ایجاد می‌کنند. هر فراخوانی این متد، آرایه‌های بزرگ جدیدی را تخصیص می‌دهد که در طول پردازش زنده مانده و احتمالاً تا پاک‌سازی نسل دو در حافظه باقی می‌مانند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای حل این مشکل، باید الگوهای دسترسی به داده را بازنگری کرده و از جایگزین‌های بهینه‌تر استفاده کنیم.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;بهینه‌سازی با ArrayPool: استراتژی بازیافت حافظه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یکی از قدرتمندترین راهکارها برای مقابله با تخصیص مکرر آرایه‌های بزرگ، استفاده از &lt;strong&gt;استخر آرایه (Array Pooling)&lt;/strong&gt; است. کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ArrayPool&lt;/code&gt; در دات‌نت به ما اجازه می‌دهد تا به جای ایجاد آرایه‌های جدید در هر بار نیاز، آرایه‌های از پیش تخصیص‌داده‌شده را از یک استخر مشترک &amp;quot;اجاره&amp;quot; (Rent) کرده و پس از اتمام کار، آن‌ها را به استخر &amp;quot;بازگردانیم&amp;quot; (Return). این کار تخصیص حافظه در LOH را به کلی حذف می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بیایید کد قبلی را با استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ArrayPool&lt;/code&gt; بهینه کنیم:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class OptimizedMarketDataProcessor
+{
+    private readonly ArrayPool&amp;lt;decimal&amp;gt; _decimalPool = ArrayPool&amp;lt;decimal&amp;gt;.Shared;
+    private readonly ArrayPool&amp;lt;long&amp;gt; _longPool = ArrayPool&amp;lt;long&amp;gt;.Shared;
+
+    public void ProcessDailyData(IEnumerable&amp;lt;MarketTick&amp;gt; ticks)
+    {
+        var tickList = ticks.ToList(); // برای دسترسی به تعداد
+        var count = tickList.Count;
+        
+        // آرایه‌ها از استخر مشترک اجاره می‌شوند
+        var priceData = _decimalPool.Rent(count);
+        var volumeData = _longPool.Rent(count);
+        
+        try
+        {
+            for (int i = 0; i &amp;lt; count; i++)
+            {
+                priceData[i] = tickList[i].Price;
+                volumeData[i] = tickList[i].Volume;
+            }
+            
+            // منطق پردازش با استفاده از آرایه‌های اجاره‌ای
+        }
+        finally
+        {
+            // تضمین بازگشت آرایه‌ها به استخر حتی در صورت بروز خطا
+            _decimalPool.Return(priceData);
+            _longPool.Return(volumeData);
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این نسخه بهینه، متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Rent&lt;/code&gt; یک آرایه با حداقل طول درخواستی را از استخر در اختیار ما قرار می‌دهد. مهم‌ترین نکته، استفاده از بلوک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;try...finally&lt;/code&gt; است که تضمین می‌کند آرایه‌ها همیشه به استخر بازگردانده می‌شوند، حتی اگر در حین پردازش خطایی رخ دهد. این الگو از هدررفت حافظه (Memory Leak) جلوگیری کرده و کارایی را به شدت بهبود می‌بخشد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پردازش جریانی (Streaming): راهکاری برای داده‌های عظیم&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;راهکار دیگر برای مدیریت مجموعه‌داده‌های بزرگ بدون ایجاد فشار بر LOH، &lt;strong&gt;پردازش جریانی (Streaming)&lt;/strong&gt; است. به جای بارگذاری کل داده‌ها در حافظه به صورت یکجا، می‌توانیم آن‌ها را در قالب قطعات (Chunks) یا دسته‌های (Batches) کوچکتر و قابل مدیریت پردازش کنیم.&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class StreamingMarketDataProcessor
+{
+    public async Task ProcessDailyDataAsync(IAsyncEnumerable&amp;lt;MarketTick&amp;gt; ticks)
+    {
+        // اندازه‌ای انتخاب شده که از LOH اجتناب شود
+        const int batchSize = 1000; 
+        var batch = new List&amp;lt;MarketTick&amp;gt;(batchSize);
+        
+        await foreach (var tick in ticks)
+        {
+            batch.Add(tick);
+            
+            if (batch.Count &amp;gt;= batchSize)
+            {
+                ProcessBatch(batch);
+                batch.Clear(); // استفاده مجدد از همان نمونه List
+            }
+        }
+        
+        // پردازش آخرین دسته باقی‌مانده
+        if (batch.Count &amp;gt; 0)
+        {
+            ProcessBatch(batch);
+        }
+    }
+    
+    private void ProcessBatch(List&amp;lt;MarketTick&amp;gt; batch)
+    {
+        // پردازش دسته‌های کوچکتر که در هیپ اشیاء کوچک (SOH) باقی می‌مانند
+        foreach (var tick in batch)
+        {
+            // منطق پردازش تیک‌های داده
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این رویکرد، با استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IAsyncEnumerable&lt;/code&gt;، داده‌ها به صورت غیرهمزمان و جریانی دریافت می‌شوند. ما داده‌ها را در یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;List&lt;/code&gt; با ظرفیت محدود جمع‌آوری کرده و هر بار که لیست پر می‌شود، آن را پردازش و سپس پاک می‌کنیم (&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;batch.Clear()&lt;/code&gt;). این کار باعث می‌شود که حافظه مورد نیاز در هر لحظه بسیار کمتر از کل حجم داده‌ها باشد و به این ترتیب از رسیدن به آستانه LOH جلوگیری می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;خودآزمایی &lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;کدام یک از گزاره‌های زیر در مورد هیپ اشیاء بزرگ (LOH) در دات‌نت &lt;strong&gt;صحیح&lt;/strong&gt; است؟&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;الف) اشیاء موجود در LOH در طی پاک‌سازی نسل صفر (Generation 0) حذف می‌شوند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ب) LOH به طور پیش‌فرض پس از هر بار پاک‌سازی، برای حذف فضاهای خالی فشرده‌سازی (Compaction) می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ج) اشیائی که حجمی بزرگتر از 85,000 بایت دارند، مستقیماً در LOH تخصیص داده می‌شوند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;د) &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ArrayPool&amp;lt;T&amp;gt;&lt;/code&gt; با ایجاد مکرر آرایه‌های جدید، فشار بر LOH را افزایش می‌دهد.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مدیریت حافظه در دات‌نت یک موضوع چندوجهی است که تسلط بر آن تفاوت میان یک برنامه متوسط و یک برنامه با کارایی بالا را رقم می‌زند. درک عملکرد زباله‌روب نسلی و به‌ویژه شناخت چالش‌های مرتبط با هیپ اشیاء بزرگ (LOH)، یک مهارت ضروری برای هر توسعه‌دهنده دات‌نت است. تخصیص بی‌رویه اشیاء بزرگ، به ویژه آرایه‌ها، منجر به پارگی حافظه و توقف‌های پرهزینه در برنامه می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همانطور که دیدیم، با به‌کارگیری استراتژی‌های هوشمندانه‌ای مانند استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ArrayPool&lt;/code&gt; برای بازیافت حافظه و پردازش جریانی برای مدیریت داده‌های عظیم، می‌توانیم به طور مؤثری از این مشکلات جلوگیری کرده و برنامه‌هایی بنویسیم که نه تنها سریع و پاسخگو هستند، بلکه منابع سیستم را نیز به صورت بهینه مصرف می‌کنند. توجه به این الگوهای بهینه‌سازی، سرمایه‌گذاری ارزشمندی در پایداری و مقیاس‌پذیری بلندمدت پروژه‌های شما خواهد بود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پاسخ خودآزمایی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;گزینه ج:&lt;/strong&gt; اشیائی که حجمی بزرگتر از 85,000 بایت دارند، مستقیماً در LOH تخصیص داده می‌شوند. این تعریف اصلی LOH است. گزینه‌های دیگر نادرست هستند زیرا پاک‌سازی LOH با نسل دو انجام می‌شود، به طور پیش‌فرض فشرده‌سازی نمی‌شود و &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ArrayPool&lt;/code&gt; فشار بر LOH را کاهش می‌دهد.&lt;/div&gt;">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="نحوه بهبود مدیریت حافظه «آرایه‌های بسیار بزرگ» در برنامه‌های دات‌نتی">
+    <meta name="twitter:description" content="&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در دنیای توسعه نرم‌افزار با پلتفرم Microsoft .NET، نوشتن کدی که صرفاً &amp;quot;کار کند&amp;quot; کافی نیست. برنامه‌های کاربردی با کارایی بالا (High-Performance)، مقیاس‌پذیر و پایدار، نیازمند درک عمیقی از مکانیزم‌های داخلی پلتفرم، به ویژه نحوه مدیریت حافظه هستند. یکی از مهم‌ترین اجزای این سیستم، زباله‌روب یا Garbage Collector (GC) است که وظیفه آزادسازی خودکار حافظه را بر عهده دارد. با این حال، اتکای صرف به این سیستم خودکار بدون درک قوانین آن، می‌تواند منجر به گلوگاه‌های عملکردی جدی شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این مقاله به تشریح مدل حافظه در دات‌نت، با تمرکز ویژه بر سیستم زباله‌روب نسلی (Generational Garbage Collector) و یکی از بزرگترین چالش‌های عملکردی مرتبط با آن یعنی &lt;strong&gt;هیپ اشیاء بزرگ (Large Object Heap)&lt;/strong&gt; یا &lt;strong&gt;LOH&lt;/strong&gt; می‌پردازد. هدف ما ارائه دانش و ابزارهای عملی برای شناسایی، پیشگیری و بهینه‌سازی الگوهای تخصیص حافظه‌ای است که منجر به فشار بر LOH و کاهش کارایی برنامه می‌شوند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مبانی مدل حافظه در دات‌نت: نسل‌ها و پشته&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;محیط اجرایی زبان مشترک (Common Language Runtime یا CLR)، قلب تپنده دات‌نت، یک سیستم مدیریت حافظه پیشرفته را پیاده‌سازی کرده است که بر پایه یک اصل کلیدی بنا شده: &lt;strong&gt;&amp;quot;بیشتر اشیاء، عمر کوتاهی دارند.&amp;quot;&lt;/strong&gt; این اصل، اساس کار زباله‌روب نسلی است که حافظه Heap (محلی برای ذخیره‌سازی اشیاء یا Reference Types) را به چند بخش یا نسل تقسیم می‌کند.&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;نسل صفر (Generation 0):&lt;/strong&gt; این نسل، محل تولد تمام اشیاء جدید است. عملیات پاک‌سازی (Collection) در این نسل بسیار سریع و مکرر رخ می‌دهد. از آنجایی که بیشتر اشیاء عمر کوتاهی دارند، در همین مرحله اولیه از بین می‌روند که بهینه‌ترین حالت ممکن است.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;نسل یک (Generation 1):&lt;/strong&gt; اشیائی که از پاک‌سازی نسل صفر جان سالم به در می‌برند، به نسل یک ارتقاء پیدا می‌کنند. این نسل نقش یک بافر را ایفا می‌کند و عملیات پاک‌سازی در آن کمتر از نسل صفر رخ می‌دهد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;نسل دو (Generation 2):&lt;/strong&gt; اشیائی که برای مدت طولانی‌تری زنده می‌مانند، نهایتاً به نسل دو منتقل می‌شوند. این نسل محل زندگی اشیاء با طول عمر بالاست. عملیات پاک‌سازی در این نسل به ندرت اتفاق می‌افتد اما بسیار هزینه‌بر و زمان‌بر است، زیرا نیازمند بررسی کل گراف اشیاء زنده در برنامه است.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این مدل نسلی، پیامدهای مهمی در معماری برنامه دارد. الگوی ایده‌آل، ایجاد اشیاء کوتاه‌عمری است که به سرعت غیرقابل دسترس (Unreachable) شده و در همان پاک‌سازی سریع نسل صفر، از حافظه حذف شوند. برعکس، اشیائی که بیهوده به نسل‌های بالاتر منتقل می‌شوند، باعث ناکارآمدی سیستم خواهند شد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در مقابل هیپ (Heap)، &lt;strong&gt;پشته (Stack)&lt;/strong&gt; قرار دارد که یک مدل حافظه جایگزین است. پشته برای ذخیره‌سازی انواع مقداری (Value Types) و برخی سناریوهای خاص مرجع به کار می‌رود. تخصیص و آزادسازی حافظه در پشته به صورت قطعی (Deterministic) و بسیار سریع (بر اساس الگوی LIFO) انجام می‌شود و هیچ سربار (Overhead) مرتبط با GC ندارد. با این حال، فضای پشته بسیار محدود است و استفاده نادرست از آن می‌تواند به خطای سرریز پشته (Stack Overflow) منجر شود. درک اینکه چه زمانی باید از پشته و چه زمانی از هیپ استفاده کرد، برای دستیابی به عملکرد بهینه، حیاتی است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;هیپ اشیاء بزرگ (LOH): چالش بزرگ عملکرد&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در کنار سیستم نسلی، یک بخش مجزا و با قوانینی کاملاً متفاوت در هیپ وجود دارد که به آن &lt;strong&gt;هیپ اشیاء بزرگ (Large Object Heap یا LOH)&lt;/strong&gt; می‌گویند. اشیائی که حجم آن‌ها از یک آستانه مشخص (معمولاً &lt;strong&gt;85,000 بایت&lt;/strong&gt;) فراتر رود، مستقیماً در LOH تخصیص داده می‌شوند و سیستم نسلی را دور می‌زنند. این تخصیص‌ها از چند جهت برای عملکرد برنامه گران تمام می‌شوند:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;چرخه پاک‌سازی پرهزینه:&lt;/strong&gt; پاک‌سازی LOH تنها همزمان با یک پاک‌سازی کامل نسل دو (Full GC) انجام می‌شود که خود پرهزینه‌ترین نوع پاک‌سازی است.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;عدم فشرده‌سازی پیش‌فرض:&lt;/strong&gt; برخلاف هیپ اشیاء کوچک (Small Object Heap یا SOH)، حافظه LOH به طور پیش‌فرض فشرده‌سازی (Compaction) نمی‌شود. این یعنی پس از آزادسازی یک شیء بزرگ، فضای خالی آن باقی می‌ماند. با گذشت زمان و تکرار تخصیص و آزادسازی اشیاء بزرگ با اندازه‌های مختلف، این فضاها به حفره‌های خالی در سراسر LOH تبدیل می‌شوند. این پدیده که &lt;strong&gt;پارگی حافظه (Fragmentation)&lt;/strong&gt; نام دارد، یکی از خطرناک‌ترین مشکلات عملکردی است.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;پارگی حافظه، مشکلات زنجیره‌واری را به وجود می‌آورد. زمانی که CLR نیاز به تخصیص یک شیء بزرگ جدید دارد اما نمی‌تواند یک بلوک حافظه یکپارچه و به اندازه کافی بزرگ پیدا کند، مجبور به انجام عملیات‌های سنگینی مانند فشرده‌سازی LOH یا گسترش کل حافظه فرآیند می‌شود. این عملیات‌ها می‌توانند باعث توقف کامل برنامه (Application Pauses) برای صدها میلی‌ثانیه یا بیشتر شوند که مستقیماً بر تجربه کاربر و توان عملیاتی سیستم تأثیر منفی می‌گذارد.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الگوهای رایج ایجاد فشار بر LOH و راهکارهای مقابله&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;منابع اصلی ایجاد فشار بر LOH معمولاً شامل تخصیص آرایه‌های بسیار بزرگ، عملیات‌های گسترده روی رشته‌ها (Strings)، و ساختارهای داده‌ای هستند که در طول زمان رشد کرده و از آستانه ۸۵ کیلوبایت عبور می‌کنند. برای درک بهتر مشکل، یک برنامه پردازش داده‌های مالی را در نظر بگیرید که برای تحلیل داده‌های بازار، آرایه‌های بزرگی تخصیص می‌دهد.&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class MarketDataProcessor
+{
+    public void ProcessDailyData(IEnumerable&amp;lt;MarketTick&amp;gt; ticks)
+    {
+        // این کد بسته به تعداد تیک‌ها، باعث فشار بر LOH می‌شود
+        var tickArray = ticks.ToArray();
+        
+        // تخصیص‌های بالقوه در LOH
+        var priceData = new decimal[tickArray.Length]; 
+        var volumeData = new long[tickArray.Length];
+
+        // منطق پردازش که روی آرایه‌های بزرگ کار می‌کند
+        for (int i = 0; i &amp;lt; tickArray.Length; i++)
+        {
+            priceData[i] = tickArray[i].Price;
+            volumeData[i] = tickArray[i].Volume;
+        }
+
+        // آرایه‌ها پس از پردازش، کاندید پاک‌سازی می‌شوند
+        // اما این پاک‌سازی تا زمان وقوع GC نسل دو به تعویق می‌افتد
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;کد بالا چندین مشکل دارد. بسته به حجم داده‌ها، آرایه‌ها به راحتی از آستانه LOH عبور کرده و فشار آنی ایجاد می‌کنند. هر فراخوانی این متد، آرایه‌های بزرگ جدیدی را تخصیص می‌دهد که در طول پردازش زنده مانده و احتمالاً تا پاک‌سازی نسل دو در حافظه باقی می‌مانند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای حل این مشکل، باید الگوهای دسترسی به داده را بازنگری کرده و از جایگزین‌های بهینه‌تر استفاده کنیم.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;بهینه‌سازی با ArrayPool: استراتژی بازیافت حافظه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یکی از قدرتمندترین راهکارها برای مقابله با تخصیص مکرر آرایه‌های بزرگ، استفاده از &lt;strong&gt;استخر آرایه (Array Pooling)&lt;/strong&gt; است. کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ArrayPool&lt;/code&gt; در دات‌نت به ما اجازه می‌دهد تا به جای ایجاد آرایه‌های جدید در هر بار نیاز، آرایه‌های از پیش تخصیص‌داده‌شده را از یک استخر مشترک &amp;quot;اجاره&amp;quot; (Rent) کرده و پس از اتمام کار، آن‌ها را به استخر &amp;quot;بازگردانیم&amp;quot; (Return). این کار تخصیص حافظه در LOH را به کلی حذف می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بیایید کد قبلی را با استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ArrayPool&lt;/code&gt; بهینه کنیم:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class OptimizedMarketDataProcessor
+{
+    private readonly ArrayPool&amp;lt;decimal&amp;gt; _decimalPool = ArrayPool&amp;lt;decimal&amp;gt;.Shared;
+    private readonly ArrayPool&amp;lt;long&amp;gt; _longPool = ArrayPool&amp;lt;long&amp;gt;.Shared;
+
+    public void ProcessDailyData(IEnumerable&amp;lt;MarketTick&amp;gt; ticks)
+    {
+        var tickList = ticks.ToList(); // برای دسترسی به تعداد
+        var count = tickList.Count;
+        
+        // آرایه‌ها از استخر مشترک اجاره می‌شوند
+        var priceData = _decimalPool.Rent(count);
+        var volumeData = _longPool.Rent(count);
+        
+        try
+        {
+            for (int i = 0; i &amp;lt; count; i++)
+            {
+                priceData[i] = tickList[i].Price;
+                volumeData[i] = tickList[i].Volume;
+            }
+            
+            // منطق پردازش با استفاده از آرایه‌های اجاره‌ای
+        }
+        finally
+        {
+            // تضمین بازگشت آرایه‌ها به استخر حتی در صورت بروز خطا
+            _decimalPool.Return(priceData);
+            _longPool.Return(volumeData);
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این نسخه بهینه، متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Rent&lt;/code&gt; یک آرایه با حداقل طول درخواستی را از استخر در اختیار ما قرار می‌دهد. مهم‌ترین نکته، استفاده از بلوک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;try...finally&lt;/code&gt; است که تضمین می‌کند آرایه‌ها همیشه به استخر بازگردانده می‌شوند، حتی اگر در حین پردازش خطایی رخ دهد. این الگو از هدررفت حافظه (Memory Leak) جلوگیری کرده و کارایی را به شدت بهبود می‌بخشد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پردازش جریانی (Streaming): راهکاری برای داده‌های عظیم&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;راهکار دیگر برای مدیریت مجموعه‌داده‌های بزرگ بدون ایجاد فشار بر LOH، &lt;strong&gt;پردازش جریانی (Streaming)&lt;/strong&gt; است. به جای بارگذاری کل داده‌ها در حافظه به صورت یکجا، می‌توانیم آن‌ها را در قالب قطعات (Chunks) یا دسته‌های (Batches) کوچکتر و قابل مدیریت پردازش کنیم.&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class StreamingMarketDataProcessor
+{
+    public async Task ProcessDailyDataAsync(IAsyncEnumerable&amp;lt;MarketTick&amp;gt; ticks)
+    {
+        // اندازه‌ای انتخاب شده که از LOH اجتناب شود
+        const int batchSize = 1000; 
+        var batch = new List&amp;lt;MarketTick&amp;gt;(batchSize);
+        
+        await foreach (var tick in ticks)
+        {
+            batch.Add(tick);
+            
+            if (batch.Count &amp;gt;= batchSize)
+            {
+                ProcessBatch(batch);
+                batch.Clear(); // استفاده مجدد از همان نمونه List
+            }
+        }
+        
+        // پردازش آخرین دسته باقی‌مانده
+        if (batch.Count &amp;gt; 0)
+        {
+            ProcessBatch(batch);
+        }
+    }
+    
+    private void ProcessBatch(List&amp;lt;MarketTick&amp;gt; batch)
+    {
+        // پردازش دسته‌های کوچکتر که در هیپ اشیاء کوچک (SOH) باقی می‌مانند
+        foreach (var tick in batch)
+        {
+            // منطق پردازش تیک‌های داده
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این رویکرد، با استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IAsyncEnumerable&lt;/code&gt;، داده‌ها به صورت غیرهمزمان و جریانی دریافت می‌شوند. ما داده‌ها را در یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;List&lt;/code&gt; با ظرفیت محدود جمع‌آوری کرده و هر بار که لیست پر می‌شود، آن را پردازش و سپس پاک می‌کنیم (&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;batch.Clear()&lt;/code&gt;). این کار باعث می‌شود که حافظه مورد نیاز در هر لحظه بسیار کمتر از کل حجم داده‌ها باشد و به این ترتیب از رسیدن به آستانه LOH جلوگیری می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;خودآزمایی &lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;کدام یک از گزاره‌های زیر در مورد هیپ اشیاء بزرگ (LOH) در دات‌نت &lt;strong&gt;صحیح&lt;/strong&gt; است؟&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;الف) اشیاء موجود در LOH در طی پاک‌سازی نسل صفر (Generation 0) حذف می‌شوند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ب) LOH به طور پیش‌فرض پس از هر بار پاک‌سازی، برای حذف فضاهای خالی فشرده‌سازی (Compaction) می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ج) اشیائی که حجمی بزرگتر از 85,000 بایت دارند، مستقیماً در LOH تخصیص داده می‌شوند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;د) &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ArrayPool&amp;lt;T&amp;gt;&lt;/code&gt; با ایجاد مکرر آرایه‌های جدید، فشار بر LOH را افزایش می‌دهد.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مدیریت حافظه در دات‌نت یک موضوع چندوجهی است که تسلط بر آن تفاوت میان یک برنامه متوسط و یک برنامه با کارایی بالا را رقم می‌زند. درک عملکرد زباله‌روب نسلی و به‌ویژه شناخت چالش‌های مرتبط با هیپ اشیاء بزرگ (LOH)، یک مهارت ضروری برای هر توسعه‌دهنده دات‌نت است. تخصیص بی‌رویه اشیاء بزرگ، به ویژه آرایه‌ها، منجر به پارگی حافظه و توقف‌های پرهزینه در برنامه می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همانطور که دیدیم، با به‌کارگیری استراتژی‌های هوشمندانه‌ای مانند استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ArrayPool&lt;/code&gt; برای بازیافت حافظه و پردازش جریانی برای مدیریت داده‌های عظیم، می‌توانیم به طور مؤثری از این مشکلات جلوگیری کرده و برنامه‌هایی بنویسیم که نه تنها سریع و پاسخگو هستند، بلکه منابع سیستم را نیز به صورت بهینه مصرف می‌کنند. توجه به این الگوهای بهینه‌سازی، سرمایه‌گذاری ارزشمندی در پایداری و مقیاس‌پذیری بلندمدت پروژه‌های شما خواهد بود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پاسخ خودآزمایی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;گزینه ج:&lt;/strong&gt; اشیائی که حجمی بزرگتر از 85,000 بایت دارند، مستقیماً در LOH تخصیص داده می‌شوند. این تعریف اصلی LOH است. گزینه‌های دیگر نادرست هستند زیرا پاک‌سازی LOH با نسل دو انجام می‌شود، به طور پیش‌فرض فشرده‌سازی نمی‌شود و &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ArrayPool&lt;/code&gt; فشار بر LOH را کاهش می‌دهد.&lt;/div&gt;">
+    <meta name="twitter:card" content="&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در دنیای توسعه نرم‌افزار با پلتفرم Microsoft .NET، نوشتن کدی که صرفاً &amp;quot;کار کند&amp;quot; کافی نیست. برنامه‌های کاربردی با کارایی بالا (High-Performance)، مقیاس‌پذیر و پایدار، نیازمند درک عمیقی از مکانیزم‌های داخلی پلتفرم، به ویژه نحوه مدیریت حافظه هستند. یکی از مهم‌ترین اجزای این سیستم، زباله‌روب یا Garbage Collector (GC) است که وظیفه آزادسازی خودکار حافظه را بر عهده دارد. با این حال، اتکای صرف به این سیستم خودکار بدون درک قوانین آن، می‌تواند منجر به گلوگاه‌های عملکردی جدی شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این مقاله به تشریح مدل حافظه در دات‌نت، با تمرکز ویژه بر سیستم زباله‌روب نسلی (Generational Garbage Collector) و یکی از بزرگترین چالش‌های عملکردی مرتبط با آن یعنی &lt;strong&gt;هیپ اشیاء بزرگ (Large Object Heap)&lt;/strong&gt; یا &lt;strong&gt;LOH&lt;/strong&gt; می‌پردازد. هدف ما ارائه دانش و ابزارهای عملی برای شناسایی، پیشگیری و بهینه‌سازی الگوهای تخصیص حافظه‌ای است که منجر به فشار بر LOH و کاهش کارایی برنامه می‌شوند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مبانی مدل حافظه در دات‌نت: نسل‌ها و پشته&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;محیط اجرایی زبان مشترک (Common Language Runtime یا CLR)، قلب تپنده دات‌نت، یک سیستم مدیریت حافظه پیشرفته را پیاده‌سازی کرده است که بر پایه یک اصل کلیدی بنا شده: &lt;strong&gt;&amp;quot;بیشتر اشیاء، عمر کوتاهی دارند.&amp;quot;&lt;/strong&gt; این اصل، اساس کار زباله‌روب نسلی است که حافظه Heap (محلی برای ذخیره‌سازی اشیاء یا Reference Types) را به چند بخش یا نسل تقسیم می‌کند.&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;نسل صفر (Generation 0):&lt;/strong&gt; این نسل، محل تولد تمام اشیاء جدید است. عملیات پاک‌سازی (Collection) در این نسل بسیار سریع و مکرر رخ می‌دهد. از آنجایی که بیشتر اشیاء عمر کوتاهی دارند، در همین مرحله اولیه از بین می‌روند که بهینه‌ترین حالت ممکن است.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;نسل یک (Generation 1):&lt;/strong&gt; اشیائی که از پاک‌سازی نسل صفر جان سالم به در می‌برند، به نسل یک ارتقاء پیدا می‌کنند. این نسل نقش یک بافر را ایفا می‌کند و عملیات پاک‌سازی در آن کمتر از نسل صفر رخ می‌دهد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;نسل دو (Generation 2):&lt;/strong&gt; اشیائی که برای مدت طولانی‌تری زنده می‌مانند، نهایتاً به نسل دو منتقل می‌شوند. این نسل محل زندگی اشیاء با طول عمر بالاست. عملیات پاک‌سازی در این نسل به ندرت اتفاق می‌افتد اما بسیار هزینه‌بر و زمان‌بر است، زیرا نیازمند بررسی کل گراف اشیاء زنده در برنامه است.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این مدل نسلی، پیامدهای مهمی در معماری برنامه دارد. الگوی ایده‌آل، ایجاد اشیاء کوتاه‌عمری است که به سرعت غیرقابل دسترس (Unreachable) شده و در همان پاک‌سازی سریع نسل صفر، از حافظه حذف شوند. برعکس، اشیائی که بیهوده به نسل‌های بالاتر منتقل می‌شوند، باعث ناکارآمدی سیستم خواهند شد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در مقابل هیپ (Heap)، &lt;strong&gt;پشته (Stack)&lt;/strong&gt; قرار دارد که یک مدل حافظه جایگزین است. پشته برای ذخیره‌سازی انواع مقداری (Value Types) و برخی سناریوهای خاص مرجع به کار می‌رود. تخصیص و آزادسازی حافظه در پشته به صورت قطعی (Deterministic) و بسیار سریع (بر اساس الگوی LIFO) انجام می‌شود و هیچ سربار (Overhead) مرتبط با GC ندارد. با این حال، فضای پشته بسیار محدود است و استفاده نادرست از آن می‌تواند به خطای سرریز پشته (Stack Overflow) منجر شود. درک اینکه چه زمانی باید از پشته و چه زمانی از هیپ استفاده کرد، برای دستیابی به عملکرد بهینه، حیاتی است.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;هیپ اشیاء بزرگ (LOH): چالش بزرگ عملکرد&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در کنار سیستم نسلی، یک بخش مجزا و با قوانینی کاملاً متفاوت در هیپ وجود دارد که به آن &lt;strong&gt;هیپ اشیاء بزرگ (Large Object Heap یا LOH)&lt;/strong&gt; می‌گویند. اشیائی که حجم آن‌ها از یک آستانه مشخص (معمولاً &lt;strong&gt;85,000 بایت&lt;/strong&gt;) فراتر رود، مستقیماً در LOH تخصیص داده می‌شوند و سیستم نسلی را دور می‌زنند. این تخصیص‌ها از چند جهت برای عملکرد برنامه گران تمام می‌شوند:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;چرخه پاک‌سازی پرهزینه:&lt;/strong&gt; پاک‌سازی LOH تنها همزمان با یک پاک‌سازی کامل نسل دو (Full GC) انجام می‌شود که خود پرهزینه‌ترین نوع پاک‌سازی است.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;عدم فشرده‌سازی پیش‌فرض:&lt;/strong&gt; برخلاف هیپ اشیاء کوچک (Small Object Heap یا SOH)، حافظه LOH به طور پیش‌فرض فشرده‌سازی (Compaction) نمی‌شود. این یعنی پس از آزادسازی یک شیء بزرگ، فضای خالی آن باقی می‌ماند. با گذشت زمان و تکرار تخصیص و آزادسازی اشیاء بزرگ با اندازه‌های مختلف، این فضاها به حفره‌های خالی در سراسر LOH تبدیل می‌شوند. این پدیده که &lt;strong&gt;پارگی حافظه (Fragmentation)&lt;/strong&gt; نام دارد، یکی از خطرناک‌ترین مشکلات عملکردی است.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;پارگی حافظه، مشکلات زنجیره‌واری را به وجود می‌آورد. زمانی که CLR نیاز به تخصیص یک شیء بزرگ جدید دارد اما نمی‌تواند یک بلوک حافظه یکپارچه و به اندازه کافی بزرگ پیدا کند، مجبور به انجام عملیات‌های سنگینی مانند فشرده‌سازی LOH یا گسترش کل حافظه فرآیند می‌شود. این عملیات‌ها می‌توانند باعث توقف کامل برنامه (Application Pauses) برای صدها میلی‌ثانیه یا بیشتر شوند که مستقیماً بر تجربه کاربر و توان عملیاتی سیستم تأثیر منفی می‌گذارد.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;الگوهای رایج ایجاد فشار بر LOH و راهکارهای مقابله&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;منابع اصلی ایجاد فشار بر LOH معمولاً شامل تخصیص آرایه‌های بسیار بزرگ، عملیات‌های گسترده روی رشته‌ها (Strings)، و ساختارهای داده‌ای هستند که در طول زمان رشد کرده و از آستانه ۸۵ کیلوبایت عبور می‌کنند. برای درک بهتر مشکل، یک برنامه پردازش داده‌های مالی را در نظر بگیرید که برای تحلیل داده‌های بازار، آرایه‌های بزرگی تخصیص می‌دهد.&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class MarketDataProcessor
+{
+    public void ProcessDailyData(IEnumerable&amp;lt;MarketTick&amp;gt; ticks)
+    {
+        // این کد بسته به تعداد تیک‌ها، باعث فشار بر LOH می‌شود
+        var tickArray = ticks.ToArray();
+        
+        // تخصیص‌های بالقوه در LOH
+        var priceData = new decimal[tickArray.Length]; 
+        var volumeData = new long[tickArray.Length];
+
+        // منطق پردازش که روی آرایه‌های بزرگ کار می‌کند
+        for (int i = 0; i &amp;lt; tickArray.Length; i++)
+        {
+            priceData[i] = tickArray[i].Price;
+            volumeData[i] = tickArray[i].Volume;
+        }
+
+        // آرایه‌ها پس از پردازش، کاندید پاک‌سازی می‌شوند
+        // اما این پاک‌سازی تا زمان وقوع GC نسل دو به تعویق می‌افتد
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;کد بالا چندین مشکل دارد. بسته به حجم داده‌ها، آرایه‌ها به راحتی از آستانه LOH عبور کرده و فشار آنی ایجاد می‌کنند. هر فراخوانی این متد، آرایه‌های بزرگ جدیدی را تخصیص می‌دهد که در طول پردازش زنده مانده و احتمالاً تا پاک‌سازی نسل دو در حافظه باقی می‌مانند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای حل این مشکل، باید الگوهای دسترسی به داده را بازنگری کرده و از جایگزین‌های بهینه‌تر استفاده کنیم.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;بهینه‌سازی با ArrayPool: استراتژی بازیافت حافظه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یکی از قدرتمندترین راهکارها برای مقابله با تخصیص مکرر آرایه‌های بزرگ، استفاده از &lt;strong&gt;استخر آرایه (Array Pooling)&lt;/strong&gt; است. کلاس &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ArrayPool&lt;/code&gt; در دات‌نت به ما اجازه می‌دهد تا به جای ایجاد آرایه‌های جدید در هر بار نیاز، آرایه‌های از پیش تخصیص‌داده‌شده را از یک استخر مشترک &amp;quot;اجاره&amp;quot; (Rent) کرده و پس از اتمام کار، آن‌ها را به استخر &amp;quot;بازگردانیم&amp;quot; (Return). این کار تخصیص حافظه در LOH را به کلی حذف می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بیایید کد قبلی را با استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ArrayPool&lt;/code&gt; بهینه کنیم:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class OptimizedMarketDataProcessor
+{
+    private readonly ArrayPool&amp;lt;decimal&amp;gt; _decimalPool = ArrayPool&amp;lt;decimal&amp;gt;.Shared;
+    private readonly ArrayPool&amp;lt;long&amp;gt; _longPool = ArrayPool&amp;lt;long&amp;gt;.Shared;
+
+    public void ProcessDailyData(IEnumerable&amp;lt;MarketTick&amp;gt; ticks)
+    {
+        var tickList = ticks.ToList(); // برای دسترسی به تعداد
+        var count = tickList.Count;
+        
+        // آرایه‌ها از استخر مشترک اجاره می‌شوند
+        var priceData = _decimalPool.Rent(count);
+        var volumeData = _longPool.Rent(count);
+        
+        try
+        {
+            for (int i = 0; i &amp;lt; count; i++)
+            {
+                priceData[i] = tickList[i].Price;
+                volumeData[i] = tickList[i].Volume;
+            }
+            
+            // منطق پردازش با استفاده از آرایه‌های اجاره‌ای
+        }
+        finally
+        {
+            // تضمین بازگشت آرایه‌ها به استخر حتی در صورت بروز خطا
+            _decimalPool.Return(priceData);
+            _longPool.Return(volumeData);
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این نسخه بهینه، متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Rent&lt;/code&gt; یک آرایه با حداقل طول درخواستی را از استخر در اختیار ما قرار می‌دهد. مهم‌ترین نکته، استفاده از بلوک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;try...finally&lt;/code&gt; است که تضمین می‌کند آرایه‌ها همیشه به استخر بازگردانده می‌شوند، حتی اگر در حین پردازش خطایی رخ دهد. این الگو از هدررفت حافظه (Memory Leak) جلوگیری کرده و کارایی را به شدت بهبود می‌بخشد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پردازش جریانی (Streaming): راهکاری برای داده‌های عظیم&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;راهکار دیگر برای مدیریت مجموعه‌داده‌های بزرگ بدون ایجاد فشار بر LOH، &lt;strong&gt;پردازش جریانی (Streaming)&lt;/strong&gt; است. به جای بارگذاری کل داده‌ها در حافظه به صورت یکجا، می‌توانیم آن‌ها را در قالب قطعات (Chunks) یا دسته‌های (Batches) کوچکتر و قابل مدیریت پردازش کنیم.&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class StreamingMarketDataProcessor
+{
+    public async Task ProcessDailyDataAsync(IAsyncEnumerable&amp;lt;MarketTick&amp;gt; ticks)
+    {
+        // اندازه‌ای انتخاب شده که از LOH اجتناب شود
+        const int batchSize = 1000; 
+        var batch = new List&amp;lt;MarketTick&amp;gt;(batchSize);
+        
+        await foreach (var tick in ticks)
+        {
+            batch.Add(tick);
+            
+            if (batch.Count &amp;gt;= batchSize)
+            {
+                ProcessBatch(batch);
+                batch.Clear(); // استفاده مجدد از همان نمونه List
+            }
+        }
+        
+        // پردازش آخرین دسته باقی‌مانده
+        if (batch.Count &amp;gt; 0)
+        {
+            ProcessBatch(batch);
+        }
+    }
+    
+    private void ProcessBatch(List&amp;lt;MarketTick&amp;gt; batch)
+    {
+        // پردازش دسته‌های کوچکتر که در هیپ اشیاء کوچک (SOH) باقی می‌مانند
+        foreach (var tick in batch)
+        {
+            // منطق پردازش تیک‌های داده
+        }
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این رویکرد، با استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IAsyncEnumerable&lt;/code&gt;، داده‌ها به صورت غیرهمزمان و جریانی دریافت می‌شوند. ما داده‌ها را در یک &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;List&lt;/code&gt; با ظرفیت محدود جمع‌آوری کرده و هر بار که لیست پر می‌شود، آن را پردازش و سپس پاک می‌کنیم (&lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;batch.Clear()&lt;/code&gt;). این کار باعث می‌شود که حافظه مورد نیاز در هر لحظه بسیار کمتر از کل حجم داده‌ها باشد و به این ترتیب از رسیدن به آستانه LOH جلوگیری می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;خودآزمایی &lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;کدام یک از گزاره‌های زیر در مورد هیپ اشیاء بزرگ (LOH) در دات‌نت &lt;strong&gt;صحیح&lt;/strong&gt; است؟&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;الف) اشیاء موجود در LOH در طی پاک‌سازی نسل صفر (Generation 0) حذف می‌شوند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ب) LOH به طور پیش‌فرض پس از هر بار پاک‌سازی، برای حذف فضاهای خالی فشرده‌سازی (Compaction) می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;ج) اشیائی که حجمی بزرگتر از 85,000 بایت دارند، مستقیماً در LOH تخصیص داده می‌شوند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;د) &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ArrayPool&amp;lt;T&amp;gt;&lt;/code&gt; با ایجاد مکرر آرایه‌های جدید، فشار بر LOH را افزایش می‌دهد.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مدیریت حافظه در دات‌نت یک موضوع چندوجهی است که تسلط بر آن تفاوت میان یک برنامه متوسط و یک برنامه با کارایی بالا را رقم می‌زند. درک عملکرد زباله‌روب نسلی و به‌ویژه شناخت چالش‌های مرتبط با هیپ اشیاء بزرگ (LOH)، یک مهارت ضروری برای هر توسعه‌دهنده دات‌نت است. تخصیص بی‌رویه اشیاء بزرگ، به ویژه آرایه‌ها، منجر به پارگی حافظه و توقف‌های پرهزینه در برنامه می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;همانطور که دیدیم، با به‌کارگیری استراتژی‌های هوشمندانه‌ای مانند استفاده از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ArrayPool&lt;/code&gt; برای بازیافت حافظه و پردازش جریانی برای مدیریت داده‌های عظیم، می‌توانیم به طور مؤثری از این مشکلات جلوگیری کرده و برنامه‌هایی بنویسیم که نه تنها سریع و پاسخگو هستند، بلکه منابع سیستم را نیز به صورت بهینه مصرف می‌کنند. توجه به این الگوهای بهینه‌سازی، سرمایه‌گذاری ارزشمندی در پایداری و مقیاس‌پذیری بلندمدت پروژه‌های شما خواهد بود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پاسخ خودآزمایی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;گزینه ج:&lt;/strong&gt; اشیائی که حجمی بزرگتر از 85,000 بایت دارند، مستقیماً در LOH تخصیص داده می‌شوند. این تعریف اصلی LOH است. گزینه‌های دیگر نادرست هستند زیرا پاک‌سازی LOH با نسل دو انجام می‌شود، به طور پیش‌فرض فشرده‌سازی نمی‌شود و &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;ArrayPool&lt;/code&gt; فشار بر LOH را کاهش می‌دهد.&lt;/div&gt;">
+    <meta property="article:published_time" content="Mon, 09 Jun 2025 06:39:29 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫نحوه بهبود مدیریت حافظه «آرایه‌های بسیار بزرگ» در برنامه‌های دات‌نتی";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-news-20522.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫ArrayPool: مدیریت هوشمند حافظه و کلید عملکرد فوق‌العاده در دات‌نت</span>
+   </h6>
+</a><a href='www.dntips.ir-news-20520.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫اجرای سریع فایل‌های سی‌شارپ در وی‌اس‌کد با بهره‌گیری از دات‌نت ۱۰</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫نحوه بهبود مدیریت حافظه «آرایه‌های بسیار بزرگ» در برنامه‌های دات‌نتی</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۴/۰۳/۱۹ ۱۰:۰۹</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-news-20521.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در دنیای توسعه نرم‌افزار با پلتفرم Microsoft .NET، نوشتن کدی که صرفاً &quot;کار کند&quot; کافی نیست. برنامه‌های کاربردی با کارایی بالا (High-Performance)، مقیاس‌پذیر و پایدار، نیازمند درک عمیقی از مکانیزم‌های داخلی پلتفرم، به ویژه نحوه مدیریت حافظه هستند. یکی از مهم‌ترین اجزای این سیستم، زباله‌روب یا Garbage Collector (GC) است که وظیفه آزادسازی خودکار حافظه را بر عهده دارد. با این حال، اتکای صرف به این سیستم خودکار بدون درک قوانین آن، می‌تواند منجر به گلوگاه‌های عملکردی جدی شود.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">این مقاله به تشریح مدل حافظه در دات‌نت، با تمرکز ویژه بر سیستم زباله‌روب نسلی (Generational Garbage Collector) و یکی از بزرگترین چالش‌های عملکردی مرتبط با آن یعنی <strong>هیپ اشیاء بزرگ (Large Object Heap)</strong> یا <strong>LOH</strong> می‌پردازد. هدف ما ارائه دانش و ابزارهای عملی برای شناسایی، پیشگیری و بهینه‌سازی الگوهای تخصیص حافظه‌ای است که منجر به فشار بر LOH و کاهش کارایی برنامه می‌شوند.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>مبانی مدل حافظه در دات‌نت: نسل‌ها و پشته</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">محیط اجرایی زبان مشترک (Common Language Runtime یا CLR)، قلب تپنده دات‌نت، یک سیستم مدیریت حافظه پیشرفته را پیاده‌سازی کرده است که بر پایه یک اصل کلیدی بنا شده: <strong>&quot;بیشتر اشیاء، عمر کوتاهی دارند.&quot;</strong> این اصل، اساس کار زباله‌روب نسلی است که حافظه Heap (محلی برای ذخیره‌سازی اشیاء یا Reference Types) را به چند بخش یا نسل تقسیم می‌کند.</div><ul><li><strong>نسل صفر (Generation 0):</strong> این نسل، محل تولد تمام اشیاء جدید است. عملیات پاک‌سازی (Collection) در این نسل بسیار سریع و مکرر رخ می‌دهد. از آنجایی که بیشتر اشیاء عمر کوتاهی دارند، در همین مرحله اولیه از بین می‌روند که بهینه‌ترین حالت ممکن است.</li><li><strong>نسل یک (Generation 1):</strong> اشیائی که از پاک‌سازی نسل صفر جان سالم به در می‌برند، به نسل یک ارتقاء پیدا می‌کنند. این نسل نقش یک بافر را ایفا می‌کند و عملیات پاک‌سازی در آن کمتر از نسل صفر رخ می‌دهد.</li><li><strong>نسل دو (Generation 2):</strong> اشیائی که برای مدت طولانی‌تری زنده می‌مانند، نهایتاً به نسل دو منتقل می‌شوند. این نسل محل زندگی اشیاء با طول عمر بالاست. عملیات پاک‌سازی در این نسل به ندرت اتفاق می‌افتد اما بسیار هزینه‌بر و زمان‌بر است، زیرا نیازمند بررسی کل گراف اشیاء زنده در برنامه است.</li></ul><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">این مدل نسلی، پیامدهای مهمی در معماری برنامه دارد. الگوی ایده‌آل، ایجاد اشیاء کوتاه‌عمری است که به سرعت غیرقابل دسترس (Unreachable) شده و در همان پاک‌سازی سریع نسل صفر، از حافظه حذف شوند. برعکس، اشیائی که بیهوده به نسل‌های بالاتر منتقل می‌شوند، باعث ناکارآمدی سیستم خواهند شد.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در مقابل هیپ (Heap)، <strong>پشته (Stack)</strong> قرار دارد که یک مدل حافظه جایگزین است. پشته برای ذخیره‌سازی انواع مقداری (Value Types) و برخی سناریوهای خاص مرجع به کار می‌رود. تخصیص و آزادسازی حافظه در پشته به صورت قطعی (Deterministic) و بسیار سریع (بر اساس الگوی LIFO) انجام می‌شود و هیچ سربار (Overhead) مرتبط با GC ندارد. با این حال، فضای پشته بسیار محدود است و استفاده نادرست از آن می‌تواند به خطای سرریز پشته (Stack Overflow) منجر شود. درک اینکه چه زمانی باید از پشته و چه زمانی از هیپ استفاده کرد، برای دستیابی به عملکرد بهینه، حیاتی است.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>هیپ اشیاء بزرگ (LOH): چالش بزرگ عملکرد</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در کنار سیستم نسلی، یک بخش مجزا و با قوانینی کاملاً متفاوت در هیپ وجود دارد که به آن <strong>هیپ اشیاء بزرگ (Large Object Heap یا LOH)</strong> می‌گویند. اشیائی که حجم آن‌ها از یک آستانه مشخص (معمولاً <strong>85,000 بایت</strong>) فراتر رود، مستقیماً در LOH تخصیص داده می‌شوند و سیستم نسلی را دور می‌زنند. این تخصیص‌ها از چند جهت برای عملکرد برنامه گران تمام می‌شوند:</div><ul><li><strong>چرخه پاک‌سازی پرهزینه:</strong> پاک‌سازی LOH تنها همزمان با یک پاک‌سازی کامل نسل دو (Full GC) انجام می‌شود که خود پرهزینه‌ترین نوع پاک‌سازی است.</li><li><strong>عدم فشرده‌سازی پیش‌فرض:</strong> برخلاف هیپ اشیاء کوچک (Small Object Heap یا SOH)، حافظه LOH به طور پیش‌فرض فشرده‌سازی (Compaction) نمی‌شود. این یعنی پس از آزادسازی یک شیء بزرگ، فضای خالی آن باقی می‌ماند. با گذشت زمان و تکرار تخصیص و آزادسازی اشیاء بزرگ با اندازه‌های مختلف، این فضاها به حفره‌های خالی در سراسر LOH تبدیل می‌شوند. این پدیده که <strong>پارگی حافظه (Fragmentation)</strong> نام دارد، یکی از خطرناک‌ترین مشکلات عملکردی است.</li></ul><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">پارگی حافظه، مشکلات زنجیره‌واری را به وجود می‌آورد. زمانی که CLR نیاز به تخصیص یک شیء بزرگ جدید دارد اما نمی‌تواند یک بلوک حافظه یکپارچه و به اندازه کافی بزرگ پیدا کند، مجبور به انجام عملیات‌های سنگینی مانند فشرده‌سازی LOH یا گسترش کل حافظه فرآیند می‌شود. این عملیات‌ها می‌توانند باعث توقف کامل برنامه (Application Pauses) برای صدها میلی‌ثانیه یا بیشتر شوند که مستقیماً بر تجربه کاربر و توان عملیاتی سیستم تأثیر منفی می‌گذارد.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>الگوهای رایج ایجاد فشار بر LOH و راهکارهای مقابله</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">منابع اصلی ایجاد فشار بر LOH معمولاً شامل تخصیص آرایه‌های بسیار بزرگ، عملیات‌های گسترده روی رشته‌ها (Strings)، و ساختارهای داده‌ای هستند که در طول زمان رشد کرده و از آستانه ۸۵ کیلوبایت عبور می‌کنند. برای درک بهتر مشکل، یک برنامه پردازش داده‌های مالی را در نظر بگیرید که برای تحلیل داده‌های بازار، آرایه‌های بزرگی تخصیص می‌دهد.</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public class MarketDataProcessor
+{
+    public void ProcessDailyData(IEnumerable&lt;MarketTick&gt; ticks)
+    {
+        // این کد بسته به تعداد تیک‌ها، باعث فشار بر LOH می‌شود
+        var tickArray = ticks.ToArray();
+        
+        // تخصیص‌های بالقوه در LOH
+        var priceData = new decimal[tickArray.Length]; 
+        var volumeData = new long[tickArray.Length];
+
+        // منطق پردازش که روی آرایه‌های بزرگ کار می‌کند
+        for (int i = 0; i &lt; tickArray.Length; i++)
+        {
+            priceData[i] = tickArray[i].Price;
+            volumeData[i] = tickArray[i].Volume;
+        }
+
+        // آرایه‌ها پس از پردازش، کاندید پاک‌سازی می‌شوند
+        // اما این پاک‌سازی تا زمان وقوع GC نسل دو به تعویق می‌افتد
+    }
+}</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">کد بالا چندین مشکل دارد. بسته به حجم داده‌ها، آرایه‌ها به راحتی از آستانه LOH عبور کرده و فشار آنی ایجاد می‌کنند. هر فراخوانی این متد، آرایه‌های بزرگ جدیدی را تخصیص می‌دهد که در طول پردازش زنده مانده و احتمالاً تا پاک‌سازی نسل دو در حافظه باقی می‌مانند.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">برای حل این مشکل، باید الگوهای دسترسی به داده را بازنگری کرده و از جایگزین‌های بهینه‌تر استفاده کنیم.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>بهینه‌سازی با ArrayPool: استراتژی بازیافت حافظه</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">یکی از قدرتمندترین راهکارها برای مقابله با تخصیص مکرر آرایه‌های بزرگ، استفاده از <strong>استخر آرایه (Array Pooling)</strong> است. کلاس <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ArrayPool</code> در دات‌نت به ما اجازه می‌دهد تا به جای ایجاد آرایه‌های جدید در هر بار نیاز، آرایه‌های از پیش تخصیص‌داده‌شده را از یک استخر مشترک &quot;اجاره&quot; (Rent) کرده و پس از اتمام کار، آن‌ها را به استخر &quot;بازگردانیم&quot; (Return). این کار تخصیص حافظه در LOH را به کلی حذف می‌کند.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">بیایید کد قبلی را با استفاده از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ArrayPool</code> بهینه کنیم:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public class OptimizedMarketDataProcessor
+{
+    private readonly ArrayPool&lt;decimal&gt; _decimalPool = ArrayPool&lt;decimal&gt;.Shared;
+    private readonly ArrayPool&lt;long&gt; _longPool = ArrayPool&lt;long&gt;.Shared;
+
+    public void ProcessDailyData(IEnumerable&lt;MarketTick&gt; ticks)
+    {
+        var tickList = ticks.ToList(); // برای دسترسی به تعداد
+        var count = tickList.Count;
+        
+        // آرایه‌ها از استخر مشترک اجاره می‌شوند
+        var priceData = _decimalPool.Rent(count);
+        var volumeData = _longPool.Rent(count);
+        
+        try
+        {
+            for (int i = 0; i &lt; count; i++)
+            {
+                priceData[i] = tickList[i].Price;
+                volumeData[i] = tickList[i].Volume;
+            }
+            
+            // منطق پردازش با استفاده از آرایه‌های اجاره‌ای
+        }
+        finally
+        {
+            // تضمین بازگشت آرایه‌ها به استخر حتی در صورت بروز خطا
+            _decimalPool.Return(priceData);
+            _longPool.Return(volumeData);
+        }
+    }
+}</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در این نسخه بهینه، متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Rent</code> یک آرایه با حداقل طول درخواستی را از استخر در اختیار ما قرار می‌دهد. مهم‌ترین نکته، استفاده از بلوک <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">try...finally</code> است که تضمین می‌کند آرایه‌ها همیشه به استخر بازگردانده می‌شوند، حتی اگر در حین پردازش خطایی رخ دهد. این الگو از هدررفت حافظه (Memory Leak) جلوگیری کرده و کارایی را به شدت بهبود می‌بخشد.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>پردازش جریانی (Streaming): راهکاری برای داده‌های عظیم</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">راهکار دیگر برای مدیریت مجموعه‌داده‌های بزرگ بدون ایجاد فشار بر LOH، <strong>پردازش جریانی (Streaming)</strong> است. به جای بارگذاری کل داده‌ها در حافظه به صورت یکجا، می‌توانیم آن‌ها را در قالب قطعات (Chunks) یا دسته‌های (Batches) کوچکتر و قابل مدیریت پردازش کنیم.</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public class StreamingMarketDataProcessor
+{
+    public async Task ProcessDailyDataAsync(IAsyncEnumerable&lt;MarketTick&gt; ticks)
+    {
+        // اندازه‌ای انتخاب شده که از LOH اجتناب شود
+        const int batchSize = 1000; 
+        var batch = new List&lt;MarketTick&gt;(batchSize);
+        
+        await foreach (var tick in ticks)
+        {
+            batch.Add(tick);
+            
+            if (batch.Count &gt;= batchSize)
+            {
+                ProcessBatch(batch);
+                batch.Clear(); // استفاده مجدد از همان نمونه List
+            }
+        }
+        
+        // پردازش آخرین دسته باقی‌مانده
+        if (batch.Count &gt; 0)
+        {
+            ProcessBatch(batch);
+        }
+    }
+    
+    private void ProcessBatch(List&lt;MarketTick&gt; batch)
+    {
+        // پردازش دسته‌های کوچکتر که در هیپ اشیاء کوچک (SOH) باقی می‌مانند
+        foreach (var tick in batch)
+        {
+            // منطق پردازش تیک‌های داده
+        }
+    }
+}</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در این رویکرد، با استفاده از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IAsyncEnumerable</code>، داده‌ها به صورت غیرهمزمان و جریانی دریافت می‌شوند. ما داده‌ها را در یک <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">List</code> با ظرفیت محدود جمع‌آوری کرده و هر بار که لیست پر می‌شود، آن را پردازش و سپس پاک می‌کنیم (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">batch.Clear()</code>). این کار باعث می‌شود که حافظه مورد نیاز در هر لحظه بسیار کمتر از کل حجم داده‌ها باشد و به این ترتیب از رسیدن به آستانه LOH جلوگیری می‌شود.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>خودآزمایی </strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">کدام یک از گزاره‌های زیر در مورد هیپ اشیاء بزرگ (LOH) در دات‌نت <strong>صحیح</strong> است؟</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">الف) اشیاء موجود در LOH در طی پاک‌سازی نسل صفر (Generation 0) حذف می‌شوند.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">ب) LOH به طور پیش‌فرض پس از هر بار پاک‌سازی، برای حذف فضاهای خالی فشرده‌سازی (Compaction) می‌شود.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">ج) اشیائی که حجمی بزرگتر از 85,000 بایت دارند، مستقیماً در LOH تخصیص داده می‌شوند.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">د) <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ArrayPool&lt;T&gt;</code> با ایجاد مکرر آرایه‌های جدید، فشار بر LOH را افزایش می‌دهد.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>نتیجه‌گیری</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">مدیریت حافظه در دات‌نت یک موضوع چندوجهی است که تسلط بر آن تفاوت میان یک برنامه متوسط و یک برنامه با کارایی بالا را رقم می‌زند. درک عملکرد زباله‌روب نسلی و به‌ویژه شناخت چالش‌های مرتبط با هیپ اشیاء بزرگ (LOH)، یک مهارت ضروری برای هر توسعه‌دهنده دات‌نت است. تخصیص بی‌رویه اشیاء بزرگ، به ویژه آرایه‌ها، منجر به پارگی حافظه و توقف‌های پرهزینه در برنامه می‌شود.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">همانطور که دیدیم، با به‌کارگیری استراتژی‌های هوشمندانه‌ای مانند استفاده از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ArrayPool</code> برای بازیافت حافظه و پردازش جریانی برای مدیریت داده‌های عظیم، می‌توانیم به طور مؤثری از این مشکلات جلوگیری کرده و برنامه‌هایی بنویسیم که نه تنها سریع و پاسخگو هستند، بلکه منابع سیستم را نیز به صورت بهینه مصرف می‌کنند. توجه به این الگوهای بهینه‌سازی، سرمایه‌گذاری ارزشمندی در پایداری و مقیاس‌پذیری بلندمدت پروژه‌های شما خواهد بود.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>پاسخ خودآزمایی</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>گزینه ج:</strong> اشیائی که حجمی بزرگتر از 85,000 بایت دارند، مستقیماً در LOH تخصیص داده می‌شوند. این تعریف اصلی LOH است. گزینه‌های دیگر نادرست هستند زیرا پاک‌سازی LOH با نسل دو انجام می‌شود، به طور پیش‌فرض فشرده‌سازی نمی‌شود و <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ArrayPool</code> فشار بر LOH را کاهش می‌دهد.</div></div><br><br><a href='https://isitvritra101.medium.com/part-3-memory-allocation-inefficiencies-in-net-a-complete-technical-analysis-3fc1057ed37b'>مشاهده مطلب اصلی</a></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20522.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>ArrayPool: مدیریت هوشمند حافظه و کلید عملکرد فوق‌العاده در دات‌نت</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20394.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>مدیریت حافظه در دات‌نت: راهنمای استفاده صحیح از جمع‌آوری زباله (Garbage Collection)</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20254.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>بهینه‌سازی تخصیص حافظه در توسعه برنامه‌های .NET</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-24210.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>درک مدیریت حافظه با جمع‌آوری زباله (GC) در ‎.NET</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20271.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>تخصیص پشته‌ای آرایه‌های کوچک در دات‌نت 10</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20339.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>معماری سه نسلی جمع‌آورنده زباله در دات‌نت: چرایی استفاده از سه نسل حافظه</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20027.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>تنظیم Garbage Collector در NET. برای عملکرد بالا</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3553.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بهینه‌سازی GC در دات‌نت 9 : تقویت مدیریت حافظه با کاهش Fragmentation و افزایش کارایی</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3551.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بررسی ساختار، عملکرد و تفاوت‌های Heap مدیریت‌شده و مدیریت‌نشده و مدل نسل‌بندی (Generations) در Garbage Collection</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3544.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مدیریت حافظه و جمع‌آوری زباله (Garbage Collection) - قسمت هجدهم</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

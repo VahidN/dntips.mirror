@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫PowerShell 7.x - قسمت هشتم - ماژول‌ها</title>     <meta name="description" content="توسط ماژول‌ها میتوانیم یک مجموعه از دستورات را گروه‌بندی کنیم و تحت عنوان یک پکیج ارائه دهیم که برای دیگران نیز قابل استفاده باشند. برای ایجاد یک ماژول کافی است اسکریپت‌های خود را درون یک فایل با پسوند psm1 قرار دهیم؛ به این فایل اصطلاحاً root module گفته میشود. در واقع میتوان گفت ماژول‌ها یک روش مناسب برای به اشتراک‌گذاری اسکریپت‌ها میباشند. تا اینجا با کمک پروفایل‌ها توانستیم امکان استفاده مجدد از توابع و اسکریپت‌ها را داشته باشیم؛ ماژول ...">
+    <meta name="author" content="سیروان عفیفی">
+    <meta itemprop="name" content="PowerShell 7.x - قسمت هشتم - ماژول‌ها">
+    <meta itemprop="description" content="توسط ماژول‌ها میتوانیم یک مجموعه از دستورات را گروه‌بندی کنیم و تحت عنوان یک پکیج ارائه دهیم که برای دیگران نیز قابل استفاده باشند. برای ایجاد یک ماژول کافی است اسکریپت‌های خود را درون یک فایل با پسوند psm1 قرار دهیم؛ به این فایل اصطلاحاً root module گفته میشود. در واقع میتوان گفت ماژول‌ها یک روش مناسب برای به اشتراک‌گذاری اسکریپت‌ها میباشند. تا اینجا با کمک پروفایل‌ها توانستیم امکان استفاده مجدد از توابع و اسکریپت‌ها را داشته باشیم؛ ماژول ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="PowerShell 7.x - قسمت هشتم - ماژول‌ها">
+    <meta property="og:description" content="توسط ماژول‌ها میتوانیم یک مجموعه از دستورات را گروه‌بندی کنیم و تحت عنوان یک پکیج ارائه دهیم که برای دیگران نیز قابل استفاده باشند. برای ایجاد یک ماژول کافی است اسکریپت‌های خود را درون یک فایل با پسوند psm1 قرار دهیم؛ به این فایل اصطلاحاً root module گفته میشود. در واقع میتوان گفت ماژول‌ها یک روش مناسب برای به اشتراک‌گذاری اسکریپت‌ها میباشند. تا اینجا با کمک پروفایل‌ها توانستیم امکان استفاده مجدد از توابع و اسکریپت‌ها را داشته باشیم؛ ماژول ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="PowerShell 7.x - قسمت هشتم - ماژول‌ها">
+    <meta name="twitter:description" content="توسط ماژول‌ها میتوانیم یک مجموعه از دستورات را گروه‌بندی کنیم و تحت عنوان یک پکیج ارائه دهیم که برای دیگران نیز قابل استفاده باشند. برای ایجاد یک ماژول کافی است اسکریپت‌های خود را درون یک فایل با پسوند psm1 قرار دهیم؛ به این فایل اصطلاحاً root module گفته میشود. در واقع میتوان گفت ماژول‌ها یک روش مناسب برای به اشتراک‌گذاری اسکریپت‌ها میباشند. تا اینجا با کمک پروفایل‌ها توانستیم امکان استفاده مجدد از توابع و اسکریپت‌ها را داشته باشیم؛ ماژول ...">
+    <meta name="twitter:card" content="توسط ماژول‌ها میتوانیم یک مجموعه از دستورات را گروه‌بندی کنیم و تحت عنوان یک پکیج ارائه دهیم که برای دیگران نیز قابل استفاده باشند. برای ایجاد یک ماژول کافی است اسکریپت‌های خود را درون یک فایل با پسوند psm1 قرار دهیم؛ به این فایل اصطلاحاً root module گفته میشود. در واقع میتوان گفت ماژول‌ها یک روش مناسب برای به اشتراک‌گذاری اسکریپت‌ها میباشند. تا اینجا با کمک پروفایل‌ها توانستیم امکان استفاده مجدد از توابع و اسکریپت‌ها را داشته باشیم؛ ماژول ...">
+    <meta property="article:published_time" content="Sat, 04 Feb 2023 19:10:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫PowerShell 7.x - قسمت هشتم - ماژول‌ها";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-3448.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫نکات ویژه کار با عملیات نامتقارن در Blazor Server</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-3446.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫روش دیگر نوشتن Model binderهای سفارشی در ASP.NET Core 7x با معرفی IParseable</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫PowerShell 7.x - قسمت هشتم - ماژول‌ها</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>سیروان عفیفی<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۱/۱۱/۱۵ ۱۹:۱۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-3447.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'>توسط ماژول‌ها میتوانیم یک مجموعه از دستورات را گروه‌بندی کنیم و تحت عنوان یک پکیج ارائه دهیم که برای دیگران نیز قابل استفاده باشند. برای ایجاد یک ماژول کافی است اسکریپت‌های خود را درون یک فایل با پسوند psm1 قرار دهیم؛ به این فایل اصطلاحاً root module گفته میشود. در واقع میتوان گفت ماژول‌ها یک روش مناسب برای به اشتراک‌گذاری اسکریپت‌ها میباشند. تا اینجا با کمک پروفایل‌ها توانستیم امکان استفاده مجدد از توابع و اسکریپت‌ها را داشته باشیم؛ ماژول‌ها نیز یک روش دیگر برای بارگذاری اسکریپت‌ها درون شل هستند. زمانیکه شل را باز میکنیم PowerShell به صورت خودکار یکسری مسیر را برای بارگذاری ماژول‌ها اسکن میکند. توسط متغیر env:PSModulePath$ میتوانیم لیست این مسیرها را ببینیم:&nbsp;&nbsp; <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">PS /&gt; $env:PSModulePath -Split ":"
+
+/Users/sirwanafifi/.local/share/powershell/Modules
+/usr/local/share/powershell/Modules
+/usr/local/microsoft/powershell/7/Modules</pre> </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+همانطور که عنوان شد برای ایجاد یک ماژول کافی است اسکریپت‌های خود را داخل یک فایل با پسوند psm1 ذخیره کنیم. به عنوان مثال میتوانیم تابع Get-PingReply را درون یک فایل با نام PingModule.psm1 ذخیره و سپس توسط دستور Import-Module ماژول را ایمپورت کنیم:&nbsp;&nbsp; <br> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">PS /&gt; Import-Module ./PingModule.psm1</pre> </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+سپس توسط دستور Get-Module PingModule میتوانیم جزئیات ماژول ایمپورت شده را مشاهده نمائیم:&nbsp; <br> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">PS /&gt; Get-Module PingModule
+
+ModuleType Version    PreRelease Name                                ExportedCommands
+---------- -------    ---------- ----                                ----------------
+Script     0.0                   PingModule                          Get-PingReply</pre> </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+به صورت پیش‌فرض تمام توابع درون اسکریپت export خواهند شد. اگر ExportedCommands خالی باشد به این معنا است که ماژول به درستی ایمپورت نشده‌است. به عنوان مثال اگر سعی کنید فایل قبل را با پسوند ps1 به عنوان ماژول ایمپورت کنید. خطایی هنگام ایمپورت کردن مشاهده نخواهید کرد و قسمت ExportedCommands خالی خواهد بود. در این‌حالت نیز امکان استفاده از تابع درون اسکریپت را خواهیم داشت؛ اما هیچ تضمینی نیست که به صورت یک ماژول به درستی عمل کند. بنابراین بهتر است ماژول‌هایی که ایجاد میکنیم حتماً پسوند psm1 داشته باشند.<br> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">PS /&gt; Import-Module ./PingModule.ps1
+PS /&gt; Get-Module PingModule
+
+ModuleType Version    PreRelease Name                                ExportedCommands
+---------- -------    ---------- ----                                ----------------
+Script     0.0                   PingModule</pre> </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ممکن است بخواهیم یکسری توابع را به صورت private تعریف کنیم و فقط تعداد محدودی از توابع به صورت public باشند. در این حالت میتوانیم درون فایل psm1 با کمک دستور Export-ModuleMember اینکار را انجام دهیم:&nbsp; <br> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">Function Get-PingReply {
+    // as before
+}
+
+Function Get-PrivateFunction {
+    Write-Debug 'This is a private function'
+}
+
+Export-ModuleMember -Function @(
+    'Get-PingReply'
+)</pre> </div> <div> <b>اضافه کردن متادیتا به ماژول‌ها</b> </div> <div>برای هر ماژول میتوانیم با کمک module manifest یکسری متادیتا به ماژول اضافه کنیم. این متادیتا درون یک فایل با پسوند psd1 که محتویات آن در واقع یک Hashtable است ذخیره میشود. برای ایجاد فایل manifest میتوانیم از دستور New-ModuleManifest استفاده کنیم. به عنوان مثال برای ایجاد فایل manifest برای ماژول PingModule.psm1 اینگونه عمل خواهیم کرد:&nbsp;&nbsp; </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">$moduleSettings = @{
+    Path                 = './PingModule.psd1'
+    Description          = 'A module to ping a remote system'
+    RootModule           = 'PingModule.psm1'
+    ModuleVersion        = '1.0.0'
+    FunctionsToExport    = @(
+        'Get-PingReply'
+    )
+    PowerShellVersion    = '5.1'
+    CompatiblePSEditions = @(
+        'Core'
+        'Desktop'
+    )
+}
+New-ModuleManifest @moduleSettings</pre> </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+تنها پراپرتی موردنیاز برای ایجاد module manifest پراپرتی Path میباشد. این پراپرتی به فایلی که متادیتا قرار است درون آن ایجاد شود اشاره دارد. همانطور که مشاهده میکنید یکسری پراپرتی دیگر نیز اضافه کرده‌ایم و توسط splatted hash table (با کمک @) به دستور New-ModuleManifest ارسال کرده‌ایم. به این معنا که کلیدها و مقادیر درون hash table به جای اینکه یکجا به عنوان یک آبجکت به دستور موردنظر ارسال شوند، به صورت جدا پاس داده شده‌اند. اما اگر از $ استفاده میکردیم:&nbsp; <br> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">$moduleSettings = @{
+    Author = 'John Doe'
+    Description = 'This is a sample module'
+}
+
+New-ModuleManifest $moduleSettings</pre> </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+با خطای زیر مواجه میشدیم:&nbsp; <br> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">New-ModuleManifest : A parameter cannot be found that matches parameter name 'Author'.</pre> </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+در نهایت فایل manifest در مسیر تعیین شده ایجاد خواهد شد:&nbsp; <br> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">#
+# Module manifest for module 'PingModule'
+#
+# Generated by: sirwanafifi
+#
+# Generated on: 01/01/2023
+#
+
+@{
+
+    # Script module or binary module file associated with this manifest.
+    RootModule           = './PingModule.psm1'
+
+    # Version number of this module.
+    ModuleVersion        = '1.0.0'
+
+    # Supported PSEditions
+    CompatiblePSEditions = 'Core', 'Desktop'
+
+    # ID used to uniquely identify this module
+    GUID                 = '3f8561fc-c004-4c8e-b2fc-4a4191504131'
+
+    # Author of this module
+    Author               = 'sirwanafifi'
+
+    # Company or vendor of this module
+    CompanyName          = 'Unknown'
+
+    # Copyright statement for this module
+    Copyright            = '(c) sirwanafifi. All rights reserved.'
+
+    # Description of the functionality provided by this module
+    Description          = 'A module to ping a remote system'
+
+    # Minimum version of the PowerShell engine required by this module
+    PowerShellVersion    = '5.1'
+
+    # Name of the PowerShell host required by this module
+    # PowerShellHostName = ''
+
+    # Minimum version of the PowerShell host required by this module
+    # PowerShellHostVersion = ''
+
+    # Minimum version of Microsoft .NET Framework required by this module. This prerequisite is valid for the PowerShell Desktop edition only.
+    # DotNetFrameworkVersion = ''
+
+    # Minimum version of the common language runtime (CLR) required by this module. This prerequisite is valid for the PowerShell Desktop edition only.
+    # ClrVersion = ''
+
+    # Processor architecture (None, X86, Amd64) required by this module
+    # ProcessorArchitecture = ''
+
+    # Modules that must be imported into the global environment prior to importing this module
+    # RequiredModules = @()
+
+    # Assemblies that must be loaded prior to importing this module
+    # RequiredAssemblies = @()
+
+    # Script files (.ps1) that are run in the caller's environment prior to importing this module.
+    # ScriptsToProcess = @()
+
+    # Type files (.ps1xml) to be loaded when importing this module
+    # TypesToProcess = @()
+
+    # Format files (.ps1xml) to be loaded when importing this module
+    # FormatsToProcess = @()
+
+    # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
+    # NestedModules = @()
+
+    # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
+    FunctionsToExport    = 'Get-PingReply'
+
+    # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
+    CmdletsToExport      = '*'
+
+    # Variables to export from this module
+    VariablesToExport    = '*'
+
+    # Aliases to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no aliases to export.
+    AliasesToExport      = '*'
+
+    # DSC resources to export from this module
+    # DscResourcesToExport = @()
+
+    # List of all modules packaged with this module
+    # ModuleList = @()
+
+    # List of all files packaged with this module
+    # FileList = @()
+
+    # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
+    PrivateData          = @{
+
+        PSData = @{
+
+            # Tags applied to this module. These help with module discovery in online galleries.
+            # Tags = @()
+
+            # A URL to the license for this module.
+            # LicenseUri = ''
+
+            # A URL to the main website for this project.
+            # ProjectUri = ''
+
+            # A URL to an icon representing this module.
+            # IconUri = ''
+
+            # ReleaseNotes of this module
+            # ReleaseNotes = ''
+
+            # Prerelease string of this module
+            # Prerelease = ''
+
+            # Flag to indicate whether the module requires explicit user acceptance for install/update/save
+            # RequireLicenseAcceptance = $false
+
+            # External dependent modules of this module
+            # ExternalModuleDependencies = @()
+
+        } # End of PSData hashtable
+
+    } # End of PrivateData hashtable
+
+    # HelpInfo URI of this module
+    # HelpInfoURI = ''
+
+    # Default prefix for commands exported from this module. Override the default prefix using Import-Module -Prefix.
+    # DefaultCommandPrefix = ''
+
+}</pre> </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+هر ماژول باید یک آی‌دی منحصر به فرد داشته باشد که به صورت Guid توسط یک پراپرتی با همین نام تعیین میشود. برای هر پراپرتی درون این فایل توضیحی به صورت کامنت نوشته شده است؛ اما برای دیدن جزئیات کامل میتوانید به اینجا مراجعه نمائید. در اینجا RootModule به PingModule.psm1 تنظیم شده است. تنظیم این پراپرتی نحوه نمایش module type را در خروجی Get-Module مشخص میکند. این مقدار اگر به فایل ماژول (psm1) اشاره کند، نوع ماژول script در نظر گرفته میشود، اگر به یک DLL اشاره کند به binary و در نهایت اگر به یک فایلی با پسوند دیگری اشاره کند manifest در نظر گرفته میشود. همچنین درون فایل فوق یکسری پراپرتی مانند CmdletsToExport, VariablesToExport, AliasesToExport به صورت خودکار تنظیم شده‌اند. در نهایت برای تست صحت فایل میتوانیم از دستور Test-ModuleManifest استفاده کنیم:&nbsp; <br> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">PS /&gt; Test-ModuleManifest ./PingModule.psd1   
+
+ModuleType Version    PreRelease Name                                ExportedCommands
+---------- -------    ---------- ----                                ----------------
+Script     1.0.0                 PingModule                          Get-PingReply</pre> </div> <div> <b>پابلیش ماژول</b> </div> <div>در نهایت توسط Publish-Module میتوانیم ماژول موردنظرمان را درون یک مخزن PowerShell پابلیش کنیم. رایج‌ترین مخزن برای انتشار پکیج‌های PowerShell یک فید نیوگت (مانند PowerShell Gallery) است. همچنین میتوانیم یک مخزن لوکال نیز برای پابلیش پکیج‌ها نیز ایجاد کنیم و خروجی نهایی را به صورت یک فایل با پسوند nupkg با دیگران به اشتراک بگذاریم. برای اینکار ابتدا نیاز است یک مخزن لوکال را به PowerShell معرفی کنیم:&nbsp; </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">PS /&gt; Register-PSRepository -Name 'PSLocal' `                       
+&gt;&gt;     -SourceLocation "$(Resolve-Path $RepoPath)" `
+&gt;&gt;     -PublishLocation "$(Resolve-Path $RepoPath)" `
+&gt;&gt;     -InstallationPolicy 'Trusted'</pre> </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+در کد فوق میتوانید مقدار متغیر RepoPath را به محل مدنظر روی سیستم‌تان تنظیم کنید. ساختار ماژولی که میخواهیم پابلیش کنیم نیز اینچنین خواهد بود:&nbsp; <br> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">ProjectRoot 
+| -- PingModule
+     | -- PingModule.psd1 
+     | -- PingModule.psm1</pre> </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+در ادامه برای پابلیش ماژول فوق درون ProjectRoot دستور Publish-Module را اینگونه اجرا خواهیم کرد:&nbsp; <br> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">PS /&gt; Publish-Module -Path ./PingModule/ -Repository PSLocal</pre> </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+خروجی دستور فوق یک فایل با پسوند nupkg در مسیر مخزنی است که معرفی کردیم. همچنین با کمک دستور Find-Module میتوانیم ماژول موردنظر را لیست کنیم:&nbsp; <br> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">PS /&gt; Find-Module -Name PingModule -Repository PSLocal
+
+Version              Name                                Repository           Description
+-------              ----                                ----------           -----------
+0.0.1                PingModule                          PSLocal              Get-PingReply is a.</pre> </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+برای نصب ماژول روی یک سیستم دیگر نیز ابتدا باید مطمئن شوید که سیستم مقصد، مخزن لوکال را تعریف کرده باشد و در نهایت توسط دستور Install-Module میتوانیم ماژول موردنظر را نصب کنیم:&nbsp; <br> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">PS /&gt; Install-Module -Name PingModule -Repository PSLocal -Scope CurrentUser</pre> </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+همچنین امکان پابلیش کردن ورژن‌های متفاوت را نیز خواهیم داشت:&nbsp; <br> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">ProjectRoot 
+| -- PingModule
+     | -- 1.0.0
+          | -- PingModule.psd1 
+          | -- PingModule.psm1
+     | -- 1.0.1
+          | -- PingModule.psd1 
+          | -- PingModule.psm1</pre> </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+برای پابلیش کردن هر کدام از ماژول‌های فوق باید به ازای هر کدام یکبار دستور Publish-Module را اجرا کنیم:&nbsp; <br> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">PS /&gt; Publish-Module -Path ./PingModule/1.0.0 -Repository PSLocal
+PS /&gt; Publish-Module -Path ./PingModule/1.0.1 -Repository PSLocal</pre> </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+اکنون حین نصب ماژول میتوانیم ورژن را نیز تعیین کنیم؛ در غیراینصورت آخرین ورژن یعنی 1.0.1 نصب خواهد شد:&nbsp; <br> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">PS /&gt; Install-Module -Name PingModule -Repository PSLocal -Scope CurrentUser
+PS /&gt; Get-InstalledModule -Name PingModule                                                                            
+Version              Name                                Repository           Description
+-------              ----                                ----------           -----------
+1.0.1                PingModule                          PSLocal              Get-PingReply is a.</pre> </div> <div> <b>ساختار مناسب برای ایجاد ماژول‌ها</b> </div> <div>برای توسعه ماژول‌های PowerShell توصیه میشود که از ساختار Multi-file layout استفاده شود به این معنا که بخش‌های مختلف پروژه به قسمت‌های کوچک‌تر و قابل‌نگهداری تقسیم شوند:&nbsp; </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">ProjectRoot 
+| -- PingModule
+     | -- 1.0.0
+          | -- Public/
+          | -- Private/
+          | -- PingModule.psd1
+          | -- PingModule.psm1</pre> </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+در اینحالت باید اسکریپت‌ها و فایل‌های موردنیاز را توسط dot sourcing درون فایل ماژول بارگذاری کنیم:&nbsp; <br> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">$ScriptList = Get-ChildItem -Path $PSScriptRoot/Public/*.ps1 -Filter *.ps1
+
+foreach ($Script in $ScriptList) {
+    . $Script.FullName
+}
+
+$ScriptList = Get-ChildItem -Path $PSScriptRoot/Private/*.ps1 -Filter *.ps1
+
+foreach ($Script in $ScriptList) {
+    . $Script.FullName
+}</pre> </div> <div> <b>یک مثال عملی</b> </div> <div>در ادامه میخواهیم یک ماژول تهیه کنیم که قابلیت امضاء روی PDF را با کمک کتابخانه&nbsp;<a href="https://github.com/VahidN/iTextSharp.LGPLv2.Core">iTextSharp.LGPLv2.Core</a>&nbsp;انجام دهیم و به شکل زیر برای کاربر قابل استفاده باشد:&nbsp; </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">PS /&gt; Set-PDFSingature -PdfToSign "./sample_invoice.pdf" -SignatureImage "./sample_signature.jpg"</pre> </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+بنابراین ساختار پروژه را اینگونه ایجاد خواهیم کرد:&nbsp; <br> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">ProjectRoot 
+| -- SignPdf
+     | -- 1.0.0
+          | -- Public/
+               | -- dependencies/
+                    | -- BouncyCastle.Crypto.dll
+                    | -- System.Drawing.Common.dll
+                    | -- Microsoft.Win32.SystemEvents.dll
+                    | -- iTextSharp.LGPLv2.Core.dll
+               | -- Set-PDFSingature.ps1
+          | -- SignPdf.psd1
+          | -- SignPdf.psm1</pre> </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+برای استفاده از پکیج ذکر شده نیاز خواهد بود که Dllهای موردنیاز را نیز به عنوان وابستگی به پروژه اضافه کنیم (محتویات پوشه dependencies) سپس درون فایل ماژول (SignPdf.psm1) همانطور که عنوان شد میبایست اسکریپت‌ها درون پوشه Public را بارگذاری کنیم و همچنین درون تابعی که قرار است Export شود را نیز تعیین کرده‌ایم (Set-PDFSingature)&nbsp; <br> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">$ScriptList = Get-ChildItem -Path $PSScriptRoot/Public/*.ps1 -Filter *.ps1
+
+foreach ($Script in $ScriptList) {
+    . $Script.FullName
+}
+
+Export-ModuleMember -Function Set-PDFSingature</pre> </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+در ادامه درون فایل Set-PDFSignature پیاده‌سازی را انجام خواهیم داد:&nbsp; <br> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">using namespace iTextSharp.text
+using namespace iTextSharp.text.pdf
+using namespace System.IO
+
+Function Set-PDFSingature {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
+        [ValidateScript({
+                if (Test-Path ([Path]::Join($(Get-Location), $_))) {
+                    return $true
+                }
+                else {
+                    throw "Signature image not found"
+                }
+                if ($_.EndsWith('.pdf')) {
+                    return $true
+                }
+                else {
+                    throw "File extension must be .pdf"
+                }
+            })]
+        [string]$PdfToSign,
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
+        [ValidateScript({
+                if (Test-Path ([Path]::Join($(Get-Location), $_))) {
+                    return $true
+                }
+                else {
+                    throw "Signature image not found"
+                }
+                if ($_.EndsWith('.png') -or $_.EndsWith('.jpg')) {
+                    return $true
+                }
+                else {
+                    throw "File extension must be .png or .jpg"
+                }
+            })]
+        [string]$SignatureImage,
+        [Parameter(Mandatory = $false, ValueFromPipeline = $true)]
+        [int]$XPos = 130,
+        [Parameter(Mandatory = $false, ValueFromPipeline = $true)]
+        [int]$YPos = 50
+    )
+    Try {
+        Add-Type -Path "$PSScriptRoot/dependencies/*.dll"
+        $pdf = [PdfReader]::new("$(Get-Location)/$PdfToSign")
+        $fs = [FileStream]::new("$(Get-Location)/$PdfToSign-signed.pdf", 
+            [FileMode]::Create)
+        $stamper = [PdfStamper]::new($pdf, $fs)
+        $stamper.AcroFields.AddSubstitutionFont([BaseFont]::CreateFont())
+        $content = $stamper.GetOverContent(1)
+        $width = $pdf.GetPageSize(1).Width
+        $image = [Image]::GetInstance("$(Get-Location)/$SignatureImage")
+        $image.SetAbsolutePosition($width - $XPos, $YPos)
+        $image.ScaleAbsolute(100, 30)
+        $content.AddImage($image)
+        $stamper.Close()
+        $pdf.Close()
+        $fs.Dispose()
+    }
+    Catch {
+        Write-Host "Error: $($_.Exception.Message)"
+    }
+}</pre> </div>
+
+
+
+
+
+
+
+
+
+
+
+روال قرار دادن یک امضاء بر روی یک فایل PDF قبلاً در سایت توضیح داده شده است. کدهای فوق در واقع معادل PowerShell همان کدهای موجود در سایت هستند و نکته خاصی ندارند. در نهایت میتوانیم ماژول تهیه شده را روی مخزن موردنظر پابلیش کنیم:&nbsp; <br> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">PS /&gt; Publish-Module -Path ./SignPdf/1.0.0 -Repository PSLocal</pre> </div>
+
+
+
+
+
+
+
+
+
+برای نصب ماژول میتوانیم از دستور Install-Module استفاده کنیم:&nbsp; <br> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">PS /&gt; Install-Module -Name SignPdf -Repository PSLocal -Scope CurrentUser</pre> </div>
+
+
+
+
+
+
+
+در نهایت برای استفاده از ماژول ایجاد شده میتوانیم اینگونه عمل کنیم:&nbsp; <br> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">PS /&gt; Set-PDFSingature -PdfToSign "./sample_invoice.pdf" -SignatureImage "./sample_signature.jpg"</pre> </div>
+
+
+
+
+
+خروجی نیز فایل امضاء شده خواهد بود:&nbsp; <br> </div> <div> <p style="margin-left: auto; margin-right: auto;"> <img style="display: block; margin-left: auto; margin-right: auto; cursor: default; height: 890px;" src="data:image/jpg;base64,/9j/4AAQSkZJRgABAQAAkACQAAD/4QCeRXhpZgAATU0AKgAAAAgABQESAAMAAAABAAEAAAEaAAUAAAABAAAASgEbAAUAAAABAAAAUgEoAAMAAAABAAIAAIdpAAQAAAABAAAAWgAAAAAAAACQAAAAAQAAAJAAAAABAAOShgAHAAAAEgAAAISgAgAEAAAAAQAABAqgAwAEAAAAAQAABbQAAAAAQVNDSUkAAABTY3JlZW5zaG90/+EJIWh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8APD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNi4wLjAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIi8+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPD94cGFja2V0IGVuZD0idyI/PgD/7QA4UGhvdG9zaG9wIDMuMAA4QklNBAQAAAAAAAA4QklNBCUAAAAAABDUHYzZjwCyBOmACZjs+EJ+/+IP0ElDQ19QUk9GSUxFAAEBAAAPwGFwcGwCEAAAbW50clJHQiBYWVogB+cAAQABAA8ANwAQYWNzcEFQUEwAAAAAQVBQTAAAAAAAAAAAAAAAAAAAAAAAAPbWAAEAAAAA0y1hcHBsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARZGVzYwAAAVAAAABiZHNjbQAAAbQAAAScY3BydAAABlAAAAAjd3RwdAAABnQAAAAUclhZWgAABogAAAAUZ1hZWgAABpwAAAAUYlhZWgAABrAAAAAUclRSQwAABsQAAAgMYWFyZwAADtAAAAAgdmNndAAADvAAAAAwbmRpbgAADyAAAAA+bW1vZAAAD2AAAAAodmNncAAAD4gAAAA4YlRSQwAABsQAAAgMZ1RSQwAABsQAAAgMYWFiZwAADtAAAAAgYWFnZwAADtAAAAAgZGVzYwAAAAAAAAAIRGlzcGxheQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAG1sdWMAAAAAAAAAJgAAAAxockhSAAAAFAAAAdhrb0tSAAAADAAAAexuYk5PAAAAEgAAAfhpZAAAAAAAEgAAAgpodUhVAAAAFAAAAhxjc0NaAAAAFgAAAjBkYURLAAAAHAAAAkZubE5MAAAAFgAAAmJmaUZJAAAAEAAAAnhpdElUAAAAGAAAAohlc0VTAAAAFgAAAqByb1JPAAAAEgAAArZmckNBAAAAFgAAAshhcgAAAAAAFAAAAt51a1VBAAAAHAAAAvJoZUlMAAAAFgAAAw56aFRXAAAACgAAAyR2aVZOAAAADgAAAy5za1NLAAAAFgAAAzx6aENOAAAACgAAAyRydVJVAAAAJAAAA1JlbkdCAAAAFAAAA3ZmckZSAAAAFgAAA4ptcwAAAAAAEgAAA6BoaUlOAAAAEgAAA7J0aFRIAAAADAAAA8RjYUVTAAAAGAAAA9BlbkFVAAAAFAAAA3Zlc1hMAAAAEgAAArZkZURFAAAAEAAAA+hlblVTAAAAEgAAA/hwdEJSAAAAGAAABApwbFBMAAAAEgAABCJlbEdSAAAAIgAABDRzdlNFAAAAEAAABFZ0clRSAAAAFAAABGZwdFBUAAAAFgAABHpqYUpQAAAADAAABJAATABDAEQAIAB1ACAAYgBvAGoAac7st+wAIABMAEMARABGAGEAcgBnAGUALQBMAEMARABMAEMARAAgAFcAYQByAG4AYQBTAHoA7QBuAGUAcwAgAEwAQwBEAEIAYQByAGUAdgBuAP0AIABMAEMARABMAEMARAAtAGYAYQByAHYAZQBzAGsA5gByAG0ASwBsAGUAdQByAGUAbgAtAEwAQwBEAFYA5AByAGkALQBMAEMARABMAEMARAAgAGEAIABjAG8AbABvAHIAaQBMAEMARAAgAGEAIABjAG8AbABvAHIATABDAEQAIABjAG8AbABvAHIAQQBDAEwAIABjAG8AdQBsAGUAdQByIA8ATABDAEQAIAZFBkQGSAZGBikEGgQ+BDsETAQ+BEAEPgQyBDgEOQAgAEwAQwBEIA8ATABDAEQAIAXmBdEF4gXVBeAF2V9pgnIATABDAEQATABDAEQAIABNAOAAdQBGAGEAcgBlAGIAbgD9ACAATABDAEQEJgQyBDUEQgQ9BD4EOQAgBBYEGgAtBDQEOARBBD8EOwQ1BDkAQwBvAGwAbwB1AHIAIABMAEMARABMAEMARAAgAGMAbwB1AGwAZQB1AHIAVwBhAHIAbgBhACAATABDAEQJMAkCCRcJQAkoACAATABDAEQATABDAEQAIA4qDjUATABDAEQAIABlAG4AIABjAG8AbABvAHIARgBhAHIAYgAtAEwAQwBEAEMAbwBsAG8AcgAgAEwAQwBEAEwAQwBEACAAQwBvAGwAbwByAGkAZABvAEsAbwBsAG8AcgAgAEwAQwBEA4gDswPHA8EDyQO8A7cAIAO/A7gDzAO9A7cAIABMAEMARABGAOQAcgBnAC0ATABDAEQAUgBlAG4AawBsAGkAIABMAEMARABMAEMARAAgAGEAIABjAG8AcgBlAHMwqzDpMPwATABDAER0ZXh0AAAAAENvcHlyaWdodCBBcHBsZSBJbmMuLCAyMDIzAABYWVogAAAAAAAA81EAAQAAAAEWzFhZWiAAAAAAAACD3wAAPb////+7WFlaIAAAAAAAAEq/AACxNwAACrlYWVogAAAAAAAAKDgAABELAADIuWN1cnYAAAAAAAAEAAAAAAUACgAPABQAGQAeACMAKAAtADIANgA7AEAARQBKAE8AVABZAF4AYwBoAG0AcgB3AHwAgQCGAIsAkACVAJoAnwCjAKgArQCyALcAvADBAMYAywDQANUA2wDgAOUA6wDwAPYA+wEBAQcBDQETARkBHwElASsBMgE4AT4BRQFMAVIBWQFgAWcBbgF1AXwBgwGLAZIBmgGhAakBsQG5AcEB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/wCSt/FD66N/6Jmr9A6ACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAPnX9rX/k3Dxd/wBeR/8AQ1r4K+H3/IhaH/2D7b/0Wtfev7Wv/JuHi7/ryP8A6GtfBXw+/wCRC0P/ALB9t/6LWgD/0f69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA+df2tf+TcPF3/AF5H/wBDWvgr4ff8iFof/YPtv/Ra196/ta/8m4eLv+vI/wDoa18FfD7/AJELQ/8AsH23/otaAP/S/r1/Y5/5K38UPro3/omav0Dr8/P2Of8AkrfxQ+ujf+iZq/QOgAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD51/a1/5Nw8Xf8AXkf/AENa+Cvh9/yIWh/9g+2/9FrX3r+1r/ybh4u/68j/AOhrXwV8Pv8AkQtD/wCwfbf+i1oA/9P+vX9jn/krfxQ+ujf+iZq/QOvz8/Y5/wCSt/FD66N/6Jmr9A6ACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAor8h/Df/Baz9kLxV8V7D4O6VY+JP7U1LVotGhkeyhEH2iaYQKS32jcE3EEnbnHbPFfrxWdOtCpfkd7HLhcbQxKboTUrb2CiiitDqCiiigAooooAKKKKACivmv9q79qb4efsefCSX4zfE+11C80uK6gszFpkcctwZJyQuFlkiXAwckuPxry79i3/goD8Gf264vEk3wi07WdPHhc2guv7Xhgh3/bfN2eX5M8+ceS27dtxkYzzjN1oKapt+8+hyyxtBVlh3Nc72XX+tD7looorQ6gooooAKKKKACiivn/APaM/ah+CH7KXgf/AIT74363HpNpIzR20QBlubqVRny4Ylyzt0ycbVyCxA5pSkoq8nZEVasKcXOo7Jbtn0BRX89Gv/8ABw/8BrbUli8L+ANfvLPOGlupre2kA9QitMD9N4r7e/ZR/wCCtP7Jv7V3iKDwHo15d+GPEt24jtdN1pEiN057QSxvJE7HoEZldj0U1zQxtCcuWM1c8yjnmAqz9nTrK/zX5n6c0UUV1HrBRRRQAUUUUAFFFFABRRRQAUUV8D/tg/8ABRv4A/sR+ItG8L/GC21i5utctpLq3/sy3jmVY422HeZJYsEnoBmoqVIwjzTdkYYjE0qEHUrStHuz74orxb9nj47+C/2mfg5ovxx+Hkd1Fo2urM1sl7GsU4EEzwNvVWdR80Zxhjxj6V7TVRkmk1saU6kakFODumrr0YUUUUywooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA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CiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA/Bb9uX/gjZ4s/a9/aT1r486V47tNDh1aG0iFnLYvOyfZoEhJLiVQd2zPQYziv26+H3hiTwT4C0PwZLMLh9I0+2smlA2hzbxrGWAycZ25xk4rr6Kxp4enCUpxWr3OHDZbh6FWpWpRtKer1fe4UUUVsdwUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQB86/ta/8m4eLv8AryP/AKGtfBXw+/5ELQ/+wfbf+i1r71/a1/5Nw8Xf9eR/9DWvgr4ff8iFof8A2D7b/wBFrQB//9f+vX9jn/krfxQ+ujf+iZq/QOvz8/Y5/wCSt/FD66N/6Jmr9A6ACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAPnX9rX/k3Dxd/wBeR/8AQ1r4K+H3/IhaH/2D7b/0Wtfev7Wv/JuHi7/ryP8A6GtfBXw+/wCRC0P/ALB9t/6LWgD/0P69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA+df2tf+TcPF3/AF5H/wBDWvgr4ff8iFof/YPtv/Ra196/ta/8m4eLv+vI/wDoa18FfD7/AJELQ/8AsH23/otaAP/R/r1/Y5/5K38UPro3/omav0Dr8/P2Of8AkrfxQ+ujf+iZq/QOgAooooAKKKKACivye/4KKfEb9sSx+Nvwa+A37HXi2y8J6x4+/wCEi+0TajbQz2z/ANlQW9wm9pba6dMJ5oHlp8zMN3ABHhP/AAoT/gvf/wBFt8F/+AkP/wApa5Z4q0nFQk7drdr9/M8urmnJVnShRnLldm0la9k+sl0a6H7r0V+FH/ChP+C9/wD0W3wX/wCAkP8A8paP+FCf8F7/APotvgv/AMBIf/lLU/W5f8+pfcv8yP7Vn/0C1Puj/wDJH7r0V+FH/ChP+C9//RbfBf8A4CQ//KWj/hQn/Be//otvgv8A8BIf/lLR9bl/z6l9y/zD+1Z/9AtT7o//ACR+69FfhR/woT/gvf8A9Ft8F/8AgJD/APKWj/hQn/Be/wD6Lb4L/wDASH/5S0fW5f8APqX3L/MP7Vn/ANAtT7o//JH7r0V+FH/ChP8Agvf/ANFt8F/+AkP/AMpaP+FCf8F7/wDotvgv/wABIf8A5S0fW5f8+pfcv8w/tWf/AEC1Puj/APJH7r0V+FH/AAoT/gvf/wBFt8F/+AkP/wApaP8AhQn/AAXv/wCi2+C//ASH/wCUtH1uX/PqX3L/ADD+1Z/9AtT7o/8AyR+69FfhR/woT/gvf/0W3wX/AOAkP/ylo/4UJ/wXv/6Lb4L/APASH/5S0fW5f8+pfcv8w/tWf/QLU+6P/wAkfuvRX4Uf8KE/4L3/APRbfBf/AICQ/wDylo/4UJ/wXv8A+i2+C/8AwEh/+UtH1uX/AD6l9y/zD+1Z/wDQLU+6P/yR+69FfhR/woT/AIL3/wDRbfBf/gJD/wDKWj/hQn/Be/8A6Lb4L/8AASH/AOUtH1uX/PqX3L/MP7Vn/wBAtT7o/wDyR+69FfhR/wAKE/4L3/8ARbfBf/gJD/8AKWj/AIUJ/wAF7/8Aotvgv/wEh/8AlLR9bl/z6l9y/wAw/tWf/QLU+6P/AMkfuvRX4Uf8KE/4L3/9Ft8F/wDgJD/8paP+FCf8F7/+i2+C/wDwEh/+UtH1uX/PqX3L/MP7Vn/0C1Puj/8AJH7r0V+FH/ChP+C9/wD0W3wX/wCAkP8A8paP+FCf8F7/APotvgv/AMBIf/lLR9bl/wA+pfcv8w/tWf8A0C1Puj/8kfuvRX4Uf8KE/wCC9/8A0W3wX/4CQ/8Aylo/4UJ/wXv/AOi2+C//AAEh/wDlLR9bl/z6l9y/zD+1Z/8AQLU+6P8A8kfuvRX4Uf8AChP+C9//AEW3wX/4CQ//AClo/wCFCf8ABe//AKLb4L/8BIf/AJS0fW5f8+pfcv8AMP7Vn/0C1Puj/wDJH7r0V+FH/ChP+C9//RbfBf8A4CQ//KWj/hQn/Be//otvgv8A8BIf/lLR9bl/z6l9y/zD+1Z/9AtT7o//ACR+69FfhR/woT/gvf8A9Ft8F/8AgJD/APKWj/hQn/Be/wD6Lb4L/wDASH/5S0fW5f8APqX3L/MP7Vn/ANAtT7o//JH7r0V+FH/ChP8Agvf/ANFt8F/+AkP/AMpaP+FCf8F7/wDotvgv/wABIf8A5S0fW5f8+pfcv8w/tWf/AEC1Puj/APJH7r0V+FH/AAoT/gvf/wBFt8F/+AkP/wApaP8AhQn/AAXv/wCi2+C//ASH/wCUtH1uX/PqX3L/ADD+1Z/9AtT7o/8AyR+69FfhR/woT/gvf/0W3wX/AOAkP/ylo/4UJ/wXv/6Lb4L/APASH/5S0fW5f8+pfcv8w/tWf/QLU+6P/wAkfuvRX4Uf8KE/4L3/APRbfBf/AICQ/wDylo/4UJ/wXv8A+i2+C/8AwEh/+UtH1uX/AD6l9y/zD+1Z/wDQLU+6P/yR+69FfhR/woT/AIL3/wDRbfBf/gJD/wDKWj/hQn/Be/8A6Lb4L/8AASH/AOUtH1uX/PqX3L/MP7Vn/wBAtT7o/wDyR+69FfhR/wAKE/4L3/8ARbfBf/gJD/8AKWj/AIUJ/wAF7/8Aotvgv/wEh/8AlLR9bl/z6l9y/wAw/tWf/QLU+6P/AMkfuvRX4Uf8KE/4L3/9Ft8F/wDgJD/8paP+FCf8F7/+i2+C/wDwEh/+UtH1uX/PqX3L/MP7Vn/0C1Puj/8AJH7r0V+FH/ChP+C9/wD0W3wX/wCAkP8A8paP+FCf8F7/APotvgv/AMBIf/lLR9bl/wA+pfcv8w/tWf8A0C1Puj/8kfuvRX4Uf8KE/wCC9/8A0W3wX/4CQ/8Aylo/4UJ/wXv/AOi2+C//AAEh/wDlLR9bl/z6l9y/zD+1Z/8AQLU+6P8A8kfuvRX4Uf8AChP+C9//AEW3wX/4CQ//AClo/wCFCf8ABe//AKLb4L/8BIf/AJS0fW5f8+pfcv8AMP7Vn/0C1Puj/wDJH7r0V+FH/ChP+C9//RbfBf8A4CQ//KWj/hQn/Be//otvgv8A8BIf/lLR9bl/z6l9y/zD+1Z/9AtT7o//ACR+69FfhR/woT/gvf8A9Ft8F/8AgJD/APKWj/hQn/Be/wD6Lb4L/wDASH/5S0fW5f8APqX3L/MP7Vn/ANAtT7o//JH7r0V+FH/ChP8Agvf/ANFt8F/+AkP/AMpaP+FCf8F7/wDotvgv/wABIf8A5S0fW5f8+pfcv8w/tWf/AEC1Puj/APJH7r0V+FH/AAoT/gvf/wBFt8F/+AkP/wApaP8AhQn/AAXv/wCi2+C//ASH/wCUtH1uX/PqX3L/ADD+1Z/9AtT7o/8AyR+69FfhR/woT/gvf/0W3wX/AOAkP/ylo/4UJ/wXv/6Lb4L/APASH/5S0fW5f8+pfcv8w/tWf/QLU+6P/wAkfuvRX4Uf8KE/4L3/APRbfBf/AICQ/wDylo/4UJ/wXv8A+i2+C/8AwEh/+UtH1uX/AD6l9y/zD+1Z/wDQLU+6P/yR+69FfhR/woT/AIL3/wDRbfBf/gJD/wDKWj/hQn/Be/8A6Lb4L/8AASH/AOUtH1uX/PqX3L/MP7Vn/wBAtT7o/wDyR+69FfhR/wAKE/4L3/8ARbfBf/gJD/8AKWj/AIUJ/wAF7/8Aotvgv/wEh/8AlLR9bl/z6l9y/wAw/tWf/QLU+6P/AMkfuvRX4Uf8KE/4L3/9Ft8F/wDgJD/8paP+FCf8F7/+i2+C/wDwEh/+UtH1uX/PqX3L/MP7Vn/0C1Puj/8AJH7r0V+FH/ChP+C9/wD0W3wX/wCAkP8A8paP+FCf8F7/APotvgv/AMBIf/lLR9bl/wA+pfcv8w/tWf8A0C1Puj/8kfuvRX4Uf8KE/wCC9/8A0W3wX/4CQ/8Aylo/4UJ/wXv/AOi2+C//AAEh/wDlLR9bl/z6l9y/zD+1Z/8AQLU+6P8A8kfuvRX4Uf8AChP+C9//AEW3wX/4CQ//AClo/wCFCf8ABe//AKLb4L/8BIf/AJS0fW5f8+pfcv8AMP7Vn/0C1Puj/wDJH7r0V+FH/ChP+C9//RbfBf8A4CQ//KWj/hQn/Be//otvgv8A8BIf/lLR9bl/z6l9y/zD+1Z/9AtT7o//ACR+69FfhR/woT/gvf8A9Ft8F/8AgJD/APKWj/hQn/Be/wD6Lb4L/wDASH/5S0fW5f8APqX3L/MP7Vn/ANAtT7o//JH7r0V+FH/ChP8Agvf/ANFt8F/+AkP/AMpaP+FCf8F7/wDotvgv/wABIf8A5S0fW5f8+pfcv8w/tWf/AEC1Puj/APJH7r0V+FH/AAoT/gvf/wBFt8F/+AkP/wApaP8AhQn/AAXv/wCi2+C//ASH/wCUtH1uX/PqX3L/ADD+1Z/9AtT7o/8AyR+69FfhR/woT/gvf/0W3wX/AOAkP/ylo/4UJ/wXv/6Lb4L/APASH/5S0fW5f8+pfcv8w/tWf/QLU+6P/wAkfuvRX4Uf8KE/4L3/APRbfBf/AICQ/wDylo/4UJ/wXv8A+i2+C/8AwEh/+UtH1uX/AD6l9y/zD+1Z/wDQLU+6P/yR+69FfhR/woT/AIL3/wDRbfBf/gJD/wDKWj/hQn/Be/8A6Lb4L/8AASH/AOUtH1uX/PqX3L/MP7Vn/wBAtT7o/wDyR+69FfhR/wAKE/4L3/8ARbfBf/gJD/8AKWj/AIUJ/wAF7/8Aotvgv/wEh/8AlLR9bl/z6l9y/wAw/tWf/QLU+6P/AMkfuvRX4Uf8KE/4L3/9Ft8F/wDgJD/8paP+FCf8F7/+i2+C/wDwEh/+UtH1uX/PqX3L/MP7Vn/0C1Puj/8AJH7r0V+FH/ChP+C9/wD0W3wX/wCAkP8A8paP+FCf8F7/APotvgv/AMBIf/lLR9bl/wA+pfcv8w/tWf8A0C1Puj/8kfuvRX4Uf8KE/wCC9/8A0W3wX/4CQ/8Aylo/4UJ/wXv/AOi2+C//AAEh/wDlLR9bl/z6l9y/zD+1Z/8AQLU+6P8A8kfuvRX4Uf8AChP+C9//AEW3wX/4CQ//AClo/wCFCf8ABe//AKLb4L/8BIf/AJS0fW5f8+pfcv8AMP7Vn/0C1Puj/wDJH7r0V+FH/ChP+C9//RbfBf8A4CQ//KWj/hQn/Be//otvgv8A8BIf/lLR9bl/z6l9y/zD+1Z/9AtT7o//ACR+69FfhR/woT/gvf8A9Ft8F/8AgJD/APKWj/hQn/Be/wD6Lb4L/wDASH/5S0fW5f8APqX3L/MP7Vn/ANAtT7o//JH7r0V+FH/ChP8Agvf/ANFt8F/+AkP/AMpaP+FCf8F7/wDotvgv/wABIf8A5S0fW5f8+pfcv8w/tWf/AEC1Puj/APJH7r0V+FH/AAoT/gvf/wBFt8F/+AkP/wApaP8AhQn/AAXv/wCi2+C//ASH/wCUtH1uX/PqX3L/ADD+1Z/9AtT7o/8AyR+69FfhR/woT/gvf/0W3wX/AOAkP/ylo/4UJ/wXv/6Lb4L/APASH/5S0fW5f8+pfcv8w/tWf/QLU+6P/wAkfuvRX4Uf8KE/4L3/APRbfBf/AICQ/wDylo/4UJ/wXv8A+i2+C/8AwEh/+UtH1uX/AD6l9y/zD+1Z/wDQLU+6P/yR+69FfhR/woT/AIL3/wDRbfBf/gJD/wDKWj/hQn/Be/8A6Lb4L/8AASH/AOUtH1uX/PqX3L/MP7Vn/wBAtT7o/wDyR+69FfhR/wAKE/4L3/8ARbfBf/gJD/8AKWj/AIUJ/wAF7/8Aotvgv/wEh/8AlLR9bl/z6l9y/wAw/tWf/QLU+6P/AMkfuvRX4Uf8KE/4L3/9Ft8F/wDgJD/8paP+FCf8F7/+i2+C/wDwEh/+UtH1uX/PqX3L/MP7Vn/0C1Puj/8AJH7r0V+T3/BHX9pf42/tUfsy678QvjzrX9vaxZ+J7rTobj7NBa7baO0tJVTZbxxIcPK5yVLc4zgDH6w10UaqqQVSOzO7CYqGIoxrwTtJX13/AFCiiitDpPnX9rX/AJNw8Xf9eR/9DWvgr4ff8iFof/YPtv8A0Wtfev7Wv/JuHi7/AK8j/wChrXwV8Pv+RC0P/sH23/otaAP/0v69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigD8xf2p/+UkX7Kn/AHPP/prir9Oq/MX9qf8A5SRfsqf9zz/6a4q/Tquej8dT1/8AbYnBg/42J/xr/wBNwCiiudu/F/hOw8RWvg++1S0h1a9RpLexknRbmZFBJZIyd7ABTkgEDB9K6DubS3Z0VFYupeJPDui39lpWsX9taXWpO0dpDNKsclw6jJWNWILkDkhQSBW1QCaeiCiiigYUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRX5n+Pv2/PiRpf7RHjT9nr4QfB/VvHd34GFgdQu7LULe3QDUbdbiI7JgCOCy8E8qT3FRUqRhbm6nPicVToJSqPd2Vk3rZvZJvZM/TCivjT9lX9srQP2mNY8TeAdT8N6r4J8ZeDZIF1fQtYRRNElypaKRGXh0cDOcDqDjDKT7d8RfiP4m8G+J/C2geG/C954ig13UfsV/dWjKI9Li2b/PnBB+TtgYPNEakZR5k9Ahi6U6arQd4+j7223337dT12ioHuraOdLWSRVlkBKoSAzAdcDqcVKzogBcgZIAz6npVnQOooooAKKKKAPwo/wCDfH/kzLxN/wBjpe/+kNhX7r1+FH/Bvj/yZl4m/wCx0vf/AEhsK/deuPL/APd4eh5GQ/8AIvo+gUUUV2Hrnzr+1r/ybh4u/wCvI/8Aoa18FfD7/kQtD/7B9t/6LWvvX9rX/k3Dxd/15H/0Na+Cvh9/yIWh/wDYPtv/AEWtAH//0/69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigD8xf2p/+UkX7Kn/AHPP/prir9Oq/MX9qf8A5SRfsqf9zz/6a4q/Tquej8dT1/8AbYnBg/42J/xr/wBNwCv55v8AgpT8J/il8Vv+ChHg0/A2/ew8aeGPA0/iHRCmMTXmnXruIDngiVSyAH5SSA3yk1/QzXxB4n/Z88fav/wUE8MftMWhtf8AhG9I8IXeiThpCLj7VNcGRdqbcFdp5O7r2oxNP2kFHzX5mOb4V4ilGkk7OUb23Svv8j8+PF/7Svhr9rH4jfsjfF/QI/slzP4m1S21SwP37HUYLVBPAwPI2tyucEoytgZr1D9pf9t39rT4SeJvG+tWMXw98IeHPCDz/wBn6f4t1CVNa8QxW6bjJZxwyoAspyIQVJZsA96Z49/4Ju+NNO/4KIeFP2ovg9dWtt4Nk1Q63r+lyytGYtSMbRyTwRhSpM4Ks/IO8MScFQPCLz/gnr+1JY6/8WfBlh4P8D+IZviJq2pXtr8QdflNxqNjZaiu3yY4DC8iSxqTsKFUVznLADHG/bpS0d77ryS1+f8Aw54U1mEPae7Lmct49bQST0T0bV+iT0Z9E+Mf28/2l/Gfi34L+Cv2avDGgSX/AMW/Cr68w16SfytPkVFkYtJAyl4o13AgR73O3BHSvI9J/bg/4KVeKPDfxKk0Twp4Dtrv4KyXieJbq4lvnh1JrRGlKWESsrIfKjZiZXw25cbeRXtH7NH7JH7RHhD4kfA/xr8S7HTNOh+GvhHUfDN+ltem4aRjhLeVP3agiRFDMM/KTjmvTPBf7J3xU0Dw3+0tpd81kZfixe6pcaHtmJAS8s2gj875PkO8843YHNXy1pattf8A7P8AmbxhjqlpylNXvptpyJrpp79/yPDvHH/BTTxl4w1f4e/Dn4Enwn4b1zxb4TtfF2q6l41vXh0vTobpQFtk2NE805c8YIG3B2kFiv1P+wn+2BrP7UGn+MPCfjy30mLxX4C1JdP1GfQLk3elXkcwZoLm1kJY7JAjjazMRtySCdo+CJP+CdXxl+F998OPi34e8GeE/iZqej+CrTwp4i8M6+0Zt2mtcMl1aTzwugdcBCWUHYMDO47f0J/Yd/Z/+I3wX0DxJ4j+Kun+GtD1bxVfrdJo/hbT7ezs9NtIlIitzNDDFJcuu5izyFwCfkOCSaous6i5/wDgbf5muAnmDxUfb3t1VtLcumu179td7qx9z0UUV3n0wUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAV+C/h/Q/wBq3W/+Cmn7Rq/sv674f0OSOPwr/aJ120luhIDpy+V5QiZdu3D7s9cjFfvRXjvg74D/AA38CfFvxh8bvDlrJF4h8dCxXV5mld0kGnRGGDahO1MIcHaOTyawrUnNw12d/wAGv1ODHYR13SSdlGV3Z2duWS0fq18j8Qv2w/2TPiJ8E/2KPj78f/jp4uj8X/EDx1FoUV5d2dqLK1trayvrWOOKJByeMbmIGQo4zuZvQ/ix+zh4F/Zb8bfs2eHPAbXlze6z49iv9avrq6muLjUr82gWSeQyuwDPt+6uFHp1NfsL8cPgr4A/aI+Fuq/Bv4o28l3oWtCJbqKKVoXYQSpMmHQhhh0U8HnpVT4ifAj4b/FLxB4R8TeMbSSe78D6gNT0lkmeMRXAXYCwUgOMdmyKxeEXM3Hy/Nt/eebWySPNKVJLaNm227qblJ3d9Xff9D8BPgD+zT8AP2qv2MfEH7bX7Tfii50P4g6nq99fXHi97ydZdAktbry4IYohIkYRFC7I8ZAkAUghNuRr+leOP2t/2w/iNovjn4eXXx00jwPYaPp+k2w8QR+H4LOO7thI18sTyIXkuyvmBlJ2A4P8GP1n8Vf8Euv2QvGPjy98a6vpF+ttqmof2rf6JDqE8Wj3d7nJmltFYIWJGSBhT3GCRXbfHH9gP4A/HbxwPiZqv9reHfEEloun3V94e1CXTZby0TAWGfyjtkQAbRkZ2gDOAAMfqk+VKy0tf+9vq7q3W+z/ACOF5JXdOMeWOlr2es7c2r5ouN7tPVN766I8x/4JWXXxUX9l6Tw18V76G/n0DXL/AE3T3j1W21mSOwi2NFDNc20kiNJCzPGVJDKqqNoGK/SWvNfhF8IPhx8B/h9p/wALPhNpcWj6FpastvbRFmwXJZmZnLM7MxJZmJJJ5NelV30oOMFF9D6XA0JUcPClJ3aSXf8Ay/JBRRRWh1H4Uf8ABvj/AMmZeJv+x0vf/SGwr916/Cj/AIN8f+TMvE3/AGOl7/6Q2FfuvXHl/wDu8PQ8jIf+RfR9AooorsPXPnX9rX/k3Dxd/wBeR/8AQ1r4K+H3/IhaH/2D7b/0Wtfev7Wv/JuHi7/ryP8A6GtfBXw+/wCRC0P/ALB9t/6LWgD/1P69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigD8xf2p/+UkX7Kn/AHPP/prir9Oq/MX9qf8A5SRfsqf9zz/6a4q/Tquej8dT1/8AbYnBg/42J/xr/wBNwCiiiug7wooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD8KP+DfH/kzLxN/2Ol7/AOkNhX7r1+FH/Bvj/wAmZeJv+x0vf/SGwr91648v/wB3h6HkZD/yL6PoFFFFdh6586/ta/8AJuHi7/ryP/oa18FfD7/kQtD/AOwfbf8Aota+9f2tf+TcPF3/AF5H/wBDWvgr4ff8iFof/YPtv/Ra0Af/1f69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigD8f/wDgoB8Jvh/8c/24v2ZPhZ8UtP8A7U0HVP8AhNPtVr5skHmeRp8EyfPC6SDEiKeGGcYPBIr2n/h0z/wT+/6ED/yq6l/8lVzn7U//ACki/ZU/7nn/ANNcVfp1XHTpQlUqOUU9e392J41LA4atXxEq1KMnzJXaT+xDufnR/wAOmf8Agn9/0IH/AJVdS/8Akqj/AIdM/wDBP7/oQP8Ayq6l/wDJVfovRW31el/IvuR0/wBk4H/nxD/wGP8AkfnR/wAOmf8Agn9/0IH/AJVdS/8Akqj/AIdM/wDBP7/oQP8Ayq6l/wDJVfovRR9XpfyL7kH9k4H/AJ8Q/wDAY/5H50f8Omf+Cf3/AEIH/lV1L/5Ko/4dM/8ABP7/AKED/wAqupf/ACVX6L0UfV6X8i+5B/ZOB/58Q/8AAY/5H50f8Omf+Cf3/Qgf+VXUv/kqj/h0z/wT+/6ED/yq6l/8lV+i9FH1el/IvuQf2Tgf+fEP/AY/5H50f8Omf+Cf3/Qgf+VXUv8A5Ko/4dM/8E/v+hA/8qupf/JVfovRR9XpfyL7kH9k4H/nxD/wGP8AkfnR/wAOmf8Agn9/0IH/AJVdS/8Akqj/AIdM/wDBP7/oQP8Ayq6l/wDJVfovRR9XpfyL7kH9k4H/AJ8Q/wDAY/5H50f8Omf+Cf3/AEIH/lV1L/5Ko/4dM/8ABP7/AKED/wAqupf/ACVX6L0UfV6X8i+5B/ZOB/58Q/8AAY/5H50f8Omf+Cf3/Qgf+VXUv/kqj/h0z/wT+/6ED/yq6l/8lV+i9FH1el/IvuQf2Tgf+fEP/AY/5H50f8Omf+Cf3/Qgf+VXUv8A5Ko/4dM/8E/v+hA/8qupf/JVfovRR9XpfyL7kH9k4H/nxD/wGP8AkfnR/wAOmf8Agn9/0IH/AJVdS/8Akqj/AIdM/wDBP7/oQP8Ayq6l/wDJVfovRR9XpfyL7kH9k4H/AJ8Q/wDAY/5H50f8Omf+Cf3/AEIH/lV1L/5Ko/4dM/8ABP7/AKED/wAqupf/ACVX6L0UfV6X8i+5B/ZOB/58Q/8AAY/5H50f8Omf+Cf3/Qgf+VXUv/kqj/h0z/wT+/6ED/yq6l/8lV+i9FH1el/IvuQf2Tgf+fEP/AY/5H50f8Omf+Cf3/Qgf+VXUv8A5Ko/4dM/8E/v+hA/8qupf/JVfovRR9XpfyL7kH9k4H/nxD/wGP8AkfnR/wAOmf8Agn9/0IH/AJVdS/8Akqj/AIdM/wDBP7/oQP8Ayq6l/wDJVfovRR9XpfyL7kH9k4H/AJ8Q/wDAY/5H50f8Omf+Cf3/AEIH/lV1L/5Ko/4dM/8ABP7/AKED/wAqupf/ACVX6L0UfV6X8i+5B/ZOB/58Q/8AAY/5H50f8Omf+Cf3/Qgf+VXUv/kqj/h0z/wT+/6ED/yq6l/8lV+i9FH1el/IvuQf2Tgf+fEP/AY/5H50f8Omf+Cf3/Qgf+VXUv8A5Ko/4dM/8E/v+hA/8qupf/JVfovRR9XpfyL7kH9k4H/nxD/wGP8AkfnR/wAOmf8Agn9/0IH/AJVdS/8Akqj/AIdM/wDBP7/oQP8Ayq6l/wDJVfovRR9XpfyL7kH9k4H/AJ8Q/wDAY/5H50f8Omf+Cf3/AEIH/lV1L/5Ko/4dM/8ABP7/AKED/wAqupf/ACVX6L0UfV6X8i+5B/ZOB/58Q/8AAY/5H50f8Omf+Cf3/Qgf+VXUv/kqj/h0z/wT+/6ED/yq6l/8lV+i9FH1el/IvuQf2Tgf+fEP/AY/5H50f8Omf+Cf3/Qgf+VXUv8A5Ko/4dM/8E/v+hA/8qupf/JVfovRR9XpfyL7kH9k4H/nxD/wGP8AkfnR/wAOmf8Agn9/0IH/AJVdS/8Akqj/AIdM/wDBP7/oQP8Ayq6l/wDJVfovRR9XpfyL7kH9k4H/AJ8Q/wDAY/5H50f8Omf+Cf3/AEIH/lV1L/5Ko/4dM/8ABP7/AKED/wAqupf/ACVX6L0UfV6X8i+5B/ZOB/58Q/8AAY/5H50f8Omf+Cf3/Qgf+VXUv/kqj/h0z/wT+/6ED/yq6l/8lV+i9FH1el/IvuQf2Tgf+fEP/AY/5H50f8Omf+Cf3/Qgf+VXUv8A5Ko/4dM/8E/v+hA/8qupf/JVfovRR9XpfyL7kH9k4H/nxD/wGP8AkfnR/wAOmf8Agn9/0IH/AJVdS/8Akqj/AIdM/wDBP7/oQP8Ayq6l/wDJVfovRR9XpfyL7kH9k4H/AJ8Q/wDAY/5H50f8Omf+Cf3/AEIH/lV1L/5Ko/4dM/8ABP7/AKED/wAqupf/ACVX6L0UfV6X8i+5B/ZOB/58Q/8AAY/5H50f8Omf+Cf3/Qgf+VXUv/kqj/h0z/wT+/6ED/yq6l/8lV+i9FH1el/IvuQf2Tgf+fEP/AY/5H50f8Omf+Cf3/Qgf+VXUv8A5Ko/4dM/8E/v+hA/8qupf/JVfovRR9XpfyL7kH9k4H/nxD/wGP8AkfnR/wAOmf8Agn9/0IH/AJVdS/8Akqj/AIdM/wDBP7/oQP8Ayq6l/wDJVfovRR9XpfyL7kH9k4H/AJ8Q/wDAY/5H50f8Omf+Cf3/AEIH/lV1L/5Ko/4dM/8ABP7/AKED/wAqupf/ACVX6L0UfV6X8i+5B/ZOB/58Q/8AAY/5H50f8Omf+Cf3/Qgf+VXUv/kqj/h0z/wT+/6ED/yq6l/8lV+i9FH1el/IvuQf2Tgf+fEP/AY/5H50f8Omf+Cf3/Qgf+VXUv8A5Ko/4dM/8E/v+hA/8qupf/JVfovRR9XpfyL7kH9k4H/nxD/wGP8AkfnR/wAOmf8Agn9/0IH/AJVdS/8Akqj/AIdM/wDBP7/oQP8Ayq6l/wDJVfovRR9XpfyL7kH9k4H/AJ8Q/wDAY/5H50f8Omf+Cf3/AEIH/lV1L/5Ko/4dM/8ABP7/AKED/wAqupf/ACVX6L0UfV6X8i+5B/ZOB/58Q/8AAY/5H50f8Omf+Cf3/Qgf+VXUv/kqj/h0z/wT+/6ED/yq6l/8lV+i9FH1el/IvuQf2Tgf+fEP/AY/5H50f8Omf+Cf3/Qgf+VXUv8A5Ko/4dM/8E/v+hA/8qupf/JVfovRR9XpfyL7kH9k4H/nxD/wGP8AkfnR/wAOmf8Agn9/0IH/AJVdS/8Akqj/AIdM/wDBP7/oQP8Ayq6l/wDJVfovRR9XpfyL7kH9k4H/AJ8Q/wDAY/5H50f8Omf+Cf3/AEIH/lV1L/5Ko/4dM/8ABP7/AKED/wAqupf/ACVX6L0UfV6X8i+5B/ZOB/58Q/8AAY/5H50f8Omf+Cf3/Qgf+VXUv/kqj/h0z/wT+/6ED/yq6l/8lV+i9FH1el/IvuQf2Tgf+fEP/AY/5H50f8Omf+Cf3/Qgf+VXUv8A5Ko/4dM/8E/v+hA/8qupf/JVfovRR9XpfyL7kH9k4H/nxD/wGP8AkfnR/wAOmf8Agn9/0IH/AJVdS/8Akqj/AIdM/wDBP7/oQP8Ayq6l/wDJVfovRR9XpfyL7kH9k4H/AJ8Q/wDAY/5H50f8Omf+Cf3/AEIH/lV1L/5Ko/4dM/8ABP7/AKED/wAqupf/ACVX6L0UfV6X8i+5B/ZOB/58Q/8AAY/5H50f8Omf+Cf3/Qgf+VXUv/kqj/h0z/wT+/6ED/yq6l/8lV+i9FH1el/IvuQf2Tgf+fEP/AY/5H50f8Omf+Cf3/Qgf+VXUv8A5Ko/4dM/8E/v+hA/8qupf/JVfovRR9XpfyL7kH9k4H/nxD/wGP8AkfnR/wAOmf8Agn9/0IH/AJVdS/8Akqj/AIdM/wDBP7/oQP8Ayq6l/wDJVfovRR9XpfyL7kH9k4H/AJ8Q/wDAY/5H50f8Omf+Cf3/AEIH/lV1L/5Ko/4dM/8ABP7/AKED/wAqupf/ACVX6L0UfV6X8i+5B/ZOB/58Q/8AAY/5H50f8Omf+Cf3/Qgf+VXUv/kqj/h0z/wT+/6ED/yq6l/8lV+i9FH1el/IvuQf2Tgf+fEP/AY/5H50f8Omf+Cf3/Qgf+VXUv8A5Ko/4dM/8E/v+hA/8qupf/JVfovRR9XpfyL7kH9k4H/nxD/wGP8AkfnR/wAOmf8Agn9/0IH/AJVdS/8Akqj/AIdM/wDBP7/oQP8Ayq6l/wDJVfovRR9XpfyL7kH9k4H/AJ8Q/wDAY/5H50f8Omf+Cf3/AEIH/lV1L/5Ko/4dM/8ABP7/AKED/wAqupf/ACVX6L0UfV6X8i+5B/ZOB/58Q/8AAY/5H50f8Omf+Cf3/Qgf+VXUv/kqj/h0z/wT+/6ED/yq6l/8lV+i9FH1el/IvuQf2Tgf+fEP/AY/5H50f8Omf+Cf3/Qgf+VXUv8A5Ko/4dM/8E/v+hA/8qupf/JVfovRR9XpfyL7kH9k4H/nxD/wGP8AkfnR/wAOmf8Agn9/0IH/AJVdS/8Akqj/AIdM/wDBP7/oQP8Ayq6l/wDJVfovRR9XpfyL7kH9k4H/AJ8Q/wDAY/5H50f8Omf+Cf3/AEIH/lV1L/5Ko/4dM/8ABP7/AKED/wAqupf/ACVX6L0UfV6X8i+5B/ZOB/58Q/8AAY/5H50f8Omf+Cf3/Qgf+VXUv/kqj/h0z/wT+/6ED/yq6l/8lV+i9FH1el/IvuQf2Tgf+fEP/AY/5H50f8Omf+Cf3/Qgf+VXUv8A5Ko/4dM/8E/v+hA/8qupf/JVfovRR9XpfyL7kH9k4H/nxD/wGP8AkfnR/wAOmf8Agn9/0IH/AJVdS/8Akqj/AIdM/wDBP7/oQP8Ayq6l/wDJVfovRR9XpfyL7kH9k4H/AJ8Q/wDAY/5H4Uf8G+P/ACZl4m/7HS9/9IbCv3Xr8KP+DfH/AJMy8Tf9jpe/+kNhX7r1jl/+7w9DDIf+RfR9AooorsPXPnX9rX/k3Dxd/wBeR/8AQ1r4K+H3/IhaH/2D7b/0Wtfev7Wv/JuHi7/ryP8A6GtfBXw+/wCRC0P/ALB9t/6LWgD/1v69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigD8xf2p/+UkX7Kn/AHPP/prir9Oq/MX9qf8A5SRfsqf9zz/6a4q/Tquej8dT1/8AbYnBg/42J/xr/wBNwCvyM/4KU/sc/CDXfhF8Sv2opptYt/Fthoct3DJbapcQ26y2cASM+QriPogyMcnk8mv1zr5h/bU8EeKviV+yV8RPAHgazfUdY1fQb21s7ZCoaWaSMhVBYgZJ9SKqvBSpyTVx5lh4VsNOM481k2uutna3mflX8LdA+BP7Enwa+D37QfhXSPEHjH4pfEnSNMs9J0X+2JjHf32pWsUk7MJ2aKGJS+S+1ghZeMZI+xvDP/BQ288N6r408D/tR+A7v4feKfBvhubxZ9givYdUh1DSoMhntp4xGrSbxs2EDBz83DY+Vv2pP2MPiT4+/Zq/Zx12fwjL4ru/hRpthb+IPCkd0bS6ubaaztorpYZo5E/fQvANoV/mycE4wcj4Gfsw+L28VeOfi58C/gVZfD+1i8KXWl6FbeNbu7vtQ1XULggyRTwPfSQxWboDGVdcliGD7SwXhi6sJKMFZadPLV7b38z52lLF0Kqo0I8sbJ2tv7vvPSO99PjWyVtT6l+C/wC3t8ePiReeEtY8U/Be507wv8QLeWXQdY03WItVjEgiMsMd6sUK/ZRLjbvc4jc7WGQxGN/wTA+OH7Rfxfk+Ktv8atInjtNM8a6vBBd3GqJemymRow2lxoFBMVqDlZgQj7sKoxXxF8DP2fPifaftE/DfxH+zr8IvFPwVu7DUIbjx9Jc3xXw7d2iAfaIbeB55vO805WLaAEyDt43r+iv7BPgf4t/B7x58Zfht8RvCt3p1jq3jjV/FOl60ZIpLO9tdTdBGibHLrIqx7mVlGAcHBGKujKpKUXJvr6bei/rQ2wFbFVK1J1pSsm1e2j91P+SPW/RWel2cv8W9Y1eD/grd8JtFhupks5vB+sPJArsInYGTBZc4JGByR2pf26tY1fTf2vv2YLPTrqa3hu/EmppOkbsiyqIIuHAIDDk8GtL9tX4R/HTRP2h/hn+2d8ANB/4TC98Ex32mavoCTpb3F3p98hXfC74UtEWZtpOS23AIDV5rouhftH/to/te/Df4zfED4e33w18C/CwX97CmszRm/wBSv72MRqBDGSY0jKK2W4xuwSWAFTbvKFndyT+WnXbozSvzp1sPyvmlUjJaO3LeDbva2lnfU3NQ/wCCk/xT1zxH431T4LfB+68Z+C/h3rMuiaxf2urQpqjS27BZpLfTfLaWRFzlPmHmDupDAewfFf8Abh8WWXxft/gD+zL8Pbn4jeLE0eLXdThmv4tGt9OtLjb5Syyzo589wwPlFQQGBz94D8sv2i/2f/ir4q8W+M5z8CNasfjDc6tcN4d8b+Bbs6bpdxA7gwXF2xuiscpHzTbkDMerIcmuu+MH7GPjfwj+0avxy/aF+G2q/G3T/FHhbR7PU5PDl5LbXlnr2n2sNtM5jintjJDP5Rfd0Ut0BGGy9tX1Wu+9tt/7vp373OR4/MEpJNvVXdrcqvL+47PZPSdt76n2F4t/4KteGfC37O9n8bX8DalJq1v4zTwRrvhtrhEvtO1AJI8oQhGWcqExGMRiQnGVINfoX8DfGnxO+IHw6tfFXxe8It4G1q5km36Q95HfvFEHIiZpYgE3OmGK4ypODyK/FnQ/2Lfi5p3wP8Btonwzs/CV7c/GPRfFV5omn3s17LY6JaiRRLezXVzMJJ0U5k8oqCCPkDbgP6A66cO6sneo+i6f8C56+VzxdSTliZOyS0tZNvd6pO+2mltdNrFFFFdZ7QUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAV+Qf8AwVk+Llx4LtPhX8MdQ8ZS+CvDXjTxRFZ+JL2wu1tdQXTF27yjZ3rCN376VQVT5Q2Q21v18r8vv+Cp/wAPPjb8aPg1pfwR+DPgAeMR4lvo11W8FzbWslhZ2csVwyxyXBAR7gptD8hdpyCStc+Kv7KXLv8A127nmZypvB1FC97dE23qtNNddn5GZ+yn+z7qnwv+MN/4+/ZR+JFv4z+D2raLLbSWN7rb6wINfikyskEkayIsezAlHmb8scg4Tb55+zV4u/a5k/4KgeI/Av7UWtaVO8fw9W9tNM8OS3P9kQRtfwojiO4CsZ8+ZukYE4YAHbhR9Tfs5fH341+KvGsPwv8AGHwG1X4c2EEE0lzqD3lpcafDIgGxUaLb53mcgsgJBxkEZK4+i/CP4jW3/BUTWfjjPpUi+FLj4dQ6PHqO5fLa+W/WUxY3b8hAWztxjvWKgrQcL2v5r8H0OCFGPJRlh+aynqrSS89Gr2X3I+eLnwx8QP26P2v/AIr+Dr/4heJfBng74W/2dpGl23ha/bTpJ9SuYmlmubh1DbzE4KqvTGOhDbvlrwd+09+0l8cPhp8MP2QL7xdd6T4s1nxzrnhPXvEunv5OpS6f4YSOeZ4pBzHNJFKimTliVyc7mz9V6rpf7Rn7F/7WvxP+Jfw4+G2ofErwn8VxY6hbDSZ40msdUtY2jeOcSY2xSs5Yy4IVdvUhhXgOnfsQftNfBP4U/C39onQ9Hi8RfErwl4t1bxbr/h+2nRDNF4iEaXcEEpOxpYooo1+8VJ37S+FDYSU7uyd7u++3Mv02sedVhWvLlUua8vafFrHnVrdH7l7cutrn078An8f/ALMH7e91+yDe+L9b8YeDPE3hIeJNJbxDdm+vbG7t5zBLCs7AMYnVWfb0B24Gdxbqv22fE/xD+JH7R/wo/Yx8B+J9Q8IWHi9dT1fxDqWjzG31EWGnRZjhhmGTGJn3KzAZGAeQCp5z4MeG/j58YP2q/EH7c/xD8BXnhK00Lwg3hzwx4e1GaNdQvZTIbmSWXYWEO5sxKG7MDjjnm/jfoH7Tuv8AjL4M/t++HPhtcDxN4Ti1Ow8R+Co72Oe9Wxvw8StDNtjSV4xmTaBkl1GMBjWuvs2kna/n8N1f9dN7bHXzSWFlTipcrndK0r+z5lfz76b8uysfO/jz9oz4wf8ABPzWPjp8EY/FWpeLrDQfCdj4m8JXniKf7de2Ul9cxae0bysAZUSeZWRW4ATGPmbPY+OfA3xt/YPT4PfHuX4n+KfFlx4l8RaXoHjPTdd1BrywuF1VDvlt4nGITAyER4JONozgMGZ4p/Y++O37cdv8bfjN8TPD7+Ab3xt4esPDvhPR9SlR7lIdOnivhLdmPcIhNcwoNv3kBbIOFLb95pX7W/7aF38JPgz8Vvhjf+BNL8Aa3p2veKtY1GeJ4LyfSYyqQ2YRmaRbhmYlhkJkcnGTlaWuj/u793+lt+hxclW7spW/5dfFp7737aW+L7J+4dFFFeqfan4Uf8G+P/JmXib/ALHS9/8ASGwr916/Cj/g3x/5My8Tf9jpe/8ApDYV+69ceX/7vD0PIyH/AJF9H0Ciiiuw9c+df2tf+TcPF3/Xkf8A0Na+Cvh9/wAiFof/AGD7b/0Wtfev7Wv/ACbh4u/68j/6GtfBXw+/5ELQ/wDsH23/AKLWgD//1/69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigD8xf2p/+UkX7Kn/AHPP/prir9Oq/MX9qf8A5SRfsqf9zz/6a4q/Tquej8dT1/8AbYnBg/42J/xr/wBNwCiiiug7wooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD8KP+DfH/kzLxN/2Ol7/AOkNhX7r1+FH/Bvj/wAmZeJv+x0vf/SGwr91648v/wB3h6HkZD/yL6PoFFFFdh6586/ta/8AJuHi7/ryP/oa18FfD7/kQtD/AOwfbf8Aota+9f2tf+TcPF3/AF5H/wBDWvgr4ff8iFof/YPtv/Ra0Af/0P69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigD8xf2p/+UkX7Kn/AHPP/prir9Oq/MX9qf8A5SRfsqf9zz/6a4q/Tquej8dT1/8AbYnBg/42J/xr/wBNwCiiiug7wooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD8KP+DfH/kzLxN/2Ol7/AOkNhX7r1+FH/Bvj/wAmZeJv+x0vf/SGwr91648v/wB3h6HkZD/yL6PoFFFFdh6586/ta/8AJuHi7/ryP/oa18FfD7/kQtD/AOwfbf8Aota+9f2tf+TcPF3/AF5H/wBDWvgr4ff8iFof/YPtv/Ra0Af/0f69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigD8xf2p/+UkX7Kn/AHPP/prir9Oq/MX9qf8A5SRfsqf9zz/6a4q/Tquej8dT1/8AbYnBg/42J/xr/wBNwCiiiug7wooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD8KP+DfH/kzLxN/2Ol7/AOkNhX7r1+FH/Bvj/wAmZeJv+x0vf/SGwr91648v/wB3h6HkZD/yL6PoFFFFdh6586/ta/8AJuHi7/ryP/oa18FfD7/kQtD/AOwfbf8Aota+9f2tf+TcPF3/AF5H/wBDWvgr4ff8iFof/YPtv/Ra0Af/0v69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigD8xf2p/+UkX7Kn/AHPP/prir9Oq/MX9qf8A5SRfsqf9zz/6a4q/Tquej8dT1/8AbYnBg/42J/xr/wBNwCiiiug7wooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD8KP+DfH/kzLxN/2Ol7/AOkNhX7r1+FH/Bvj/wAmZeJv+x0vf/SGwr91648v/wB3h6HkZD/yL6PoFFFFdh6586/ta/8AJuHi7/ryP/oa18FfD7/kQtD/AOwfbf8Aota+9f2tf+TcPF3/AF5H/wBDWvgr4ff8iFof/YPtv/Ra0Af/0/69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigD8xf2p/+UkX7Kn/AHPP/prir9Oq/MX9qf8A5SRfsqf9zz/6a4q/Tquej8dT1/8AbYnBg/42J/xr/wBNwCiiiug7wooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD8KP+DfH/kzLxN/2Ol7/AOkNhX7r1+FH/Bvj/wAmZeJv+x0vf/SGwr91648v/wB3h6HkZD/yL6PoFFFFdh6586/ta/8AJuHi7/ryP/oa18FfD7/kQtD/AOwfbf8Aota+9f2tf+TcPF3/AF5H/wBDWvgr4ff8iFof/YPtv/Ra0Af/1P69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigD8xf2p/+UkX7Kn/AHPP/prir9Oq/MX9qf8A5SRfsqf9zz/6a4q/Tquej8dT1/8AbYnBg/42J/xr/wBNwCiiiug7wooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD8KP+DfH/kzLxN/2Ol7/AOkNhX7r1+FH/Bvj/wAmZeJv+x0vf/SGwr91648v/wB3h6HkZD/yL6PoFFFFdh6586/ta/8AJuHi7/ryP/oa18FfD7/kQtD/AOwfbf8Aota+9f2tf+TcPF3/AF5H/wBDWvgr4ff8iFof/YPtv/Ra0Af/1f69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigD8xf2p/+UkX7Kn/AHPP/prir9Oq/MX9qf8A5SRfsqf9zz/6a4q/Tquej8dT1/8AbYnBg/42J/xr/wBNwCiiiug7wooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD8KP+DfH/kzLxN/2Ol7/AOkNhX7r1+FH/Bvj/wAmZeJv+x0vf/SGwr91648v/wB3h6HkZD/yL6PoFFFFdh6586/ta/8AJuHi7/ryP/oa18FfD7/kQtD/AOwfbf8Aota+9f2tf+TcPF3/AF5H/wBDWvgr4ff8iFof/YPtv/Ra0Af/1v69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigD8xf2p/+UkX7Kn/AHPP/prir9Oq/MX9qf8A5SRfsqf9zz/6a4q/Tquej8dT1/8AbYnBg/42J/xr/wBNwCiiiug7wooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD8KP+DfH/kzLxN/2Ol7/AOkNhX7r1+FH/Bvj/wAmZeJv+x0vf/SGwr91648v/wB3h6HkZD/yL6PoFFFFdh6586/ta/8AJuHi7/ryP/oa18FfD7/kQtD/AOwfbf8Aota+9f2tf+TcPF3/AF5H/wBDWvgr4ff8iFof/YPtv/Ra0Af/1/69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigD8xf2p/+UkX7Kn/AHPP/prir9Oq/MX9qf8A5SRfsqf9zz/6a4q/Tquej8dT1/8AbYnBg/42J/xr/wBNwCiiiug7wooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD8KP+DfH/kzLxN/2Ol7/AOkNhX7r1+FH/Bvj/wAmZeJv+x0vf/SGwr91648v/wB3h6HkZD/yL6PoFFFFdh6586/ta/8AJuHi7/ryP/oa18FfD7/kQtD/AOwfbf8Aota+9f2tf+TcPF3/AF5H/wBDWvgr4ff8iFof/YPtv/Ra0Af/0P69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigD8xf2p/+UkX7Kn/AHPP/prir9Oq/MX9qf8A5SRfsqf9zz/6a4q/Tquej8dT1/8AbYnBg/42J/xr/wBNwCiiiug7wooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD8KP+DfH/kzLxN/2Ol7/AOkNhX7r1+FH/Bvj/wAmZeJv+x0vf/SGwr91648v/wB3h6HkZD/yL6PoFFFFdh6586/ta/8AJuHi7/ryP/oa18FfD7/kQtD/AOwfbf8Aota+9f2tf+TcPF3/AF5H/wBDWvgr4ff8iFof/YPtv/Ra0Af/0f69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigD8xf2p/+UkX7Kn/AHPP/prir9Oq/MX9qf8A5SRfsqf9zz/6a4q/Tquej8dT1/8AbYnBg/42J/xr/wBNwCiiiug7wooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD8KP+DfH/kzLxN/2Ol7/AOkNhX7r1+FH/Bvj/wAmZeJv+x0vf/SGwr91648v/wB3h6HkZD/yL6PoFFFFdh6586/ta/8AJuHi7/ryP/oa18FfD7/kQtD/AOwfbf8Aota+9f2tf+TcPF3/AF5H/wBDWvgr4ff8iFof/YPtv/Ra0Af/0v69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigD8xf2p/+UkX7Kn/AHPP/prir9Oq/MX9qf8A5SRfsqf9zz/6a4q/Tquej8dT1/8AbYnBg/42J/xr/wBNwCiiiug7wooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD8KP+DfH/kzLxN/2Ol7/AOkNhX7r1+FH/Bvj/wAmZeJv+x0vf/SGwr91648v/wB3h6HkZD/yL6PoFFFFdh6586/ta/8AJuHi7/ryP/oa18FfD7/kQtD/AOwfbf8Aota+9f2tf+TcPF3/AF5H/wBDWvgr4ff8iFof/YPtv/Ra0Af/0/69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigD8xf2p/+UkX7Kn/AHPP/prir9Oq/MX9qf8A5SRfsqf9zz/6a4q/Tquej8dT1/8AbYnBg/42J/xr/wBNwCiiiug7wooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD8KP+DfH/kzLxN/2Ol7/AOkNhX7r1+FH/Bvj/wAmZeJv+x0vf/SGwr91648v/wB3h6HkZD/yL6PoFFFFdh6586/ta/8AJuHi7/ryP/oa18FfD7/kQtD/AOwfbf8Aota+9f2tf+TcPF3/AF5H/wBDWvgr4ff8iFof/YPtv/Ra0Af/1P69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigD8xf2p/+UkX7Kn/AHPP/prir9Oq/MX9qf8A5SRfsqf9zz/6a4q/Tquej8dT1/8AbYnBg/42J/xr/wBNwCiiiug7wooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD8KP+DfH/kzLxN/2Ol7/AOkNhX7r1+FH/Bvj/wAmZeJv+x0vf/SGwr91648v/wB3h6HkZD/yL6PoFFFFdh6586/ta/8AJuHi7/ryP/oa18FfD7/kQtD/AOwfbf8Aota+9f2tf+TcPF3/AF5H/wBDWvgr4ff8iFof/YPtv/Ra0Af/1f69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigD8xf2//ANl39q/42/Ej4X/F39kXxLovhfxF8P8A+2/9L1jc2P7Vigh/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/wDlLR/woT/gvf8A9Ft8F/8AgJD/APKWv3Xoo+pR/nl/4Ew/saH/AD+qf+DJf5n4Uf8AChP+C9//AEW3wX/4CQ//AClo/wCFCf8ABe//AKLb4L/8BIf/AJS1+69FH1KP88v/AAJh/Y0P+f1T/wAGS/zPwo/4UJ/wXv8A+i2+C/8AwEh/+UtH/ChP+C9//RbfBf8A4CQ//KWv3Xoo+pR/nl/4Ew/saH/P6p/4Ml/mfmz/AMEtv2Ovib+xH+z/AKx8KfitfaXqGo6h4huNWjk0mWWWEQy21tCFYzQwtv3QsSApGCOc5A/SaiiuilTjTgoR2R6GGw0KFKNGn8K0QUUUVobnzr+1r/ybh4u/68j/AOhrXwV8Pv8AkQtD/wCwfbf+i1r71/a1/wCTcPF3/Xkf/Q1r4K+H3/IhaH/2D7b/ANFrQB//1v69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA+df2tf+TcPF3/AF5H/wBDWvgr4ff8iFof/YPtv/Ra196/ta/8m4eLv+vI/wDoa18FfD7/AJELQ/8AsH23/otaAP/X/r1/Y5/5K38UPro3/omav0Dr8/P2Of8AkrfxQ+ujf+iZq/QOgAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD51/a1/5Nw8Xf8AXkf/AENa+Cvh9/yIWh/9g+2/9FrX3r+1r/ybh4u/68j/AOhrXwV8Pv8AkQtD/wCwfbf+i1oA/9D+vX9jn/krfxQ+ujf+iZq/QOvz8/Y5/wCSt/FD66N/6Jmr9A6ACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAPnX9rX/k3Dxd/wBeR/8AQ1r4K+H3/IhaH/2D7b/0Wtfev7Wv/JuHi7/ryP8A6GtfBXw+/wCRC0P/ALB9t/6LWgD/0f69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA+df2tf+TcPF3/AF5H/wBDWvgr4ff8iFof/YPtv/Ra196/ta/8m4eLv+vI/wDoa18FfD7/AJELQ/8AsH23/otaAP/S/r1/Y5/5K38UPro3/omav0Dr8/P2Of8AkrfxQ+ujf+iZq/QOgAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD51/a1/5Nw8Xf8AXkf/AENa+Cvh9/yIWh/9g+2/9FrX3r+1r/ybh4u/68j/AOhrXwV8Pv8AkQtD/wCwfbf+i1oA/9P+vX9jn/krfxQ+ujf+iZq/QOvz8/Y5/wCSt/FD66N/6Jmr9A6ACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAPnX9rX/k3Dxd/wBeR/8AQ1r4K+H3/IhaH/2D7b/0Wtfev7Wv/JuHi7/ryP8A6GtfBXw+/wCRC0P/ALB9t/6LWgD/1P69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA+df2tf+TcPF3/AF5H/wBDWvgr4ff8iFof/YPtv/Ra196/ta/8m4eLv+vI/wDoa18FfD7/AJELQ/8AsH23/otaAP/V/r1/Y5/5K38UPro3/omav0Dr8/P2Of8AkrfxQ+ujf+iZq/QOgAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD51/a1/5Nw8Xf8AXkf/AENa+Cvh9/yIWh/9g+2/9FrX3r+1r/ybh4u/68j/AOhrXwV8Pv8AkQtD/wCwfbf+i1oA/9b+vX9jn/krfxQ+ujf+iZq/QOvz8/Y5/wCSt/FD66N/6Jmr9A6ACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAPnX9rX/k3Dxd/wBeR/8AQ1r4K+H3/IhaH/2D7b/0Wtfev7Wv/JuHi7/ryP8A6GtfBXw+/wCRC0P/ALB9t/6LWgD/1/69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA+df2tf+TcPF3/AF5H/wBDWvgr4ff8iFof/YPtv/Ra196/ta/8m4eLv+vI/wDoa18FfD7/AJELQ/8AsH23/otaAP/Q/r1/Y5/5K38UPro3/omav0Dr8/P2Of8AkrfxQ+ujf+iZq/QOgAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD51/a1/5Nw8Xf8AXkf/AENa+Cvh9/yIWh/9g+2/9FrX3r+1r/ybh4u/68j/AOhrXwV8Pv8AkQtD/wCwfbf+i1oA/9H+vX9jn/krfxQ+ujf+iZq/QOvz8/Y5/wCSt/FD66N/6Jmr9A6ACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAPnX9rX/k3Dxd/wBeR/8AQ1r4K+H3/IhaH/2D7b/0Wtfev7Wv/JuHi7/ryP8A6GtfBXw+/wCRC0P/ALB9t/6LWgD/0v69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA+df2tf+TcPF3/AF5H/wBDWvgr4ff8iFof/YPtv/Ra196/ta/8m4eLv+vI/wDoa18FfD7/AJELQ/8AsH23/otaAP/T/r1/Y5/5K38UPro3/omav0Dr8/P2Of8AkrfxQ+ujf+iZq/QOgAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD51/a1/5Nw8Xf8AXkf/AENa+Cvh9/yIWh/9g+2/9FrX3r+1r/ybh4u/68j/AOhrXwV8Pv8AkQtD/wCwfbf+i1oA/9T+vX9jn/krfxQ+ujf+iZq/QOvz8/Y5/wCSt/FD66N/6Jmr9A6ACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAPnX9rX/k3Dxd/wBeR/8AQ1r4K+H3/IhaH/2D7b/0Wtfev7Wv/JuHi7/ryP8A6GtfBXw+/wCRC0P/ALB9t/6LWgD/1f69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA+df2tf+TcPF3/AF5H/wBDWvgr4ff8iFof/YPtv/Ra196/ta/8m4eLv+vI/wDoa18FfD7/AJELQ/8AsH23/otaAP/W/r1/Y5/5K38UPro3/omav0Dr8/P2Of8AkrfxQ+ujf+iZq/QOgAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD51/a1/5Nw8Xf8AXkf/AENa+Cvh9/yIWh/9g+2/9FrX3r+1r/ybh4u/68j/AOhrXwV8Pv8AkQtD/wCwfbf+i1oA/9f+vX9jn/krfxQ+ujf+iZq/QOvz8/Y5/wCSt/FD66N/6Jmr9A6ACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAPnX9rX/k3Dxd/wBeR/8AQ1r4K+H3/IhaH/2D7b/0Wtfev7Wv/JuHi7/ryP8A6GtfBXw+/wCRC0P/ALB9t/6LWgD/0P69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA+df2tf+TcPF3/AF5H/wBDWvgr4ff8iFof/YPtv/Ra196/ta/8m4eLv+vI/wDoa18FfD7/AJELQ/8AsH23/otaAP/R/r1/Y5/5K38UPro3/omav0Dr8/P2Of8AkrfxQ+ujf+iZq/QOgAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD51/a1/5Nw8Xf8AXkf/AENa+Cvh9/yIWh/9g+2/9FrX3r+1r/ybh4u/68j/AOhrXwV8Pv8AkQtD/wCwfbf+i1oA/9L+vX9jn/krfxQ+ujf+iZq/QOvz8/Y5/wCSt/FD66N/6Jmr9A6ACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAPnX9rX/k3Dxd/wBeR/8AQ1r4K+H3/IhaH/2D7b/0Wtfev7Wv/JuHi7/ryP8A6GtfBXw+/wCRC0P/ALB9t/6LWgD/0/69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA+df2tf+TcPF3/AF5H/wBDWvgr4ff8iFof/YPtv/Ra196/ta/8m4eLv+vI/wDoa18FfD7/AJELQ/8AsH23/otaAP/U/r1/Y5/5K38UPro3/omav0Dr8/P2Of8AkrfxQ+ujf+iZq/QOgAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD51/a1/5Nw8Xf8AXkf/AENa+Cvh9/yIWh/9g+2/9FrX3r+1r/ybh4u/68j/AOhrXwV8Pv8AkQtD/wCwfbf+i1oA/9X+vX9jn/krfxQ+ujf+iZq/QOvz8/Y5/wCSt/FD66N/6Jmr9A6ACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAPnX9rX/k3Dxd/wBeR/8AQ1r4K+H3/IhaH/2D7b/0Wtfev7Wv/JuHi7/ryP8A6GtfBXw+/wCRC0P/ALB9t/6LWgD/1v69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA+df2tf+TcPF3/AF5H/wBDWvgr4ff8iFof/YPtv/Ra196/ta/8m4eLv+vI/wDoa18FfD7/AJELQ/8AsH23/otaAP/X/r1/Y5/5K38UPro3/omav0Dr8/P2Of8AkrfxQ+ujf+iZq/QOgAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD51/a1/5Nw8Xf8AXkf/AENa+Cvh9/yIWh/9g+2/9FrX3r+1r/ybh4u/68j/AOhrXwV8Pv8AkQtD/wCwfbf+i1oA/9D+vX9jn/krfxQ+ujf+iZq/QOvz8/Y5/wCSt/FD66N/6Jmr9A6ACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAPnX9rX/k3Dxd/wBeR/8AQ1r4K+H3/IhaH/2D7b/0Wtfev7Wv/JuHi7/ryP8A6GtfBXw+/wCRC0P/ALB9t/6LWgD/0f69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA+df2tf+TcPF3/AF5H/wBDWvgr4ff8iFof/YPtv/Ra196/ta/8m4eLv+vI/wDoa18FfD7/AJELQ/8AsH23/otaAP/S/r1/Y5/5K38UPro3/omav0Dr8/P2Of8AkrfxQ+ujf+iZq/QOgAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD51/a1/5Nw8Xf8AXkf/AENa+Cvh9/yIWh/9g+2/9FrX3r+1r/ybh4u/68j/AOhrXwV8Pv8AkQtD/wCwfbf+i1oA/9P+vX9jn/krfxQ+ujf+iZq/QOvz8/Y5/wCSt/FD66N/6Jmr9A6ACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAPnX9rX/k3Dxd/wBeR/8AQ1r4K+H3/IhaH/2D7b/0Wtfev7Wv/JuHi7/ryP8A6GtfBXw+/wCRC0P/ALB9t/6LWgD/1P69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA+df2tf+TcPF3/AF5H/wBDWvgr4ff8iFof/YPtv/Ra196/ta/8m4eLv+vI/wDoa18FfD7/AJELQ/8AsH23/otaAP/V/r1/Y5/5K38UPro3/omav0Dr8/P2Of8AkrfxQ+ujf+iZq/QOgAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD51/a1/5Nw8Xf8AXkf/AENa+Cvh9/yIWh/9g+2/9FrX3r+1r/ybh4u/68j/AOhrXwV8Pv8AkQtD/wCwfbf+i1oA/9b+vX9jn/krfxQ+ujf+iZq/QOvz8/Y5/wCSt/FD66N/6Jmr9A6ACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAPnX9rX/k3Dxd/wBeR/8AQ1r4K+H3/IhaH/2D7b/0Wtfev7Wv/JuHi7/ryP8A6GtfBXw+/wCRC0P/ALB9t/6LWgD/1/69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA+df2tf+TcPF3/AF5H/wBDWvgr4ff8iFof/YPtv/Ra196/ta/8m4eLv+vI/wDoa18FfD7/AJELQ/8AsH23/otaAP/Q/r1/Y5/5K38UPro3/omav0Dr8/P2Of8AkrfxQ+ujf+iZq/QOgAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD51/a1/5Nw8Xf8AXkf/AENa+Cvh9/yIWh/9g+2/9FrX3r+1r/ybh4u/68j/AOhrXwV8Pv8AkQtD/wCwfbf+i1oA/9H+vX9jn/krfxQ+ujf+iZq/QOvz8/Y5/wCSt/FD66N/6Jmr9A6ACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAPnX9rX/k3Dxd/wBeR/8AQ1r4K+H3/IhaH/2D7b/0Wtfev7Wv/JuHi7/ryP8A6GtfBXw+/wCRC0P/ALB9t/6LWgD/0v69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA+df2tf+TcPF3/AF5H/wBDWvgr4ff8iFof/YPtv/Ra196/ta/8m4eLv+vI/wDoa18FfD7/AJELQ/8AsH23/otaAP/T/r1/Y5/5K38UPro3/omav0Dr8/P2Of8AkrfxQ+ujf+iZq/QOgAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD51/a1/5Nw8Xf8AXkf/AENa+Cvh9/yIWh/9g+2/9FrX3r+1r/ybh4u/68j/AOhrXwV8Pv8AkQtD/wCwfbf+i1oA/9T+vX9jn/krfxQ+ujf+iZq/QOvz8/Y5/wCSt/FD66N/6Jmr9A6ACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAPnX9rX/k3Dxd/wBeR/8AQ1r4K+H3/IhaH/2D7b/0Wtfev7Wv/JuHi7/ryP8A6GtfBXw+/wCRC0P/ALB9t/6LWgD/1f69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA+df2tf+TcPF3/AF5H/wBDWvgr4ff8iFof/YPtv/Ra196/ta/8m4eLv+vI/wDoa18FfD7/AJELQ/8AsH23/otaAP/W/r1/Y5/5K38UPro3/omav0Dr8/P2Of8AkrfxQ+ujf+iZq/QOgAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD51/a1/5Nw8Xf8AXkf/AENa+Cvh9/yIWh/9g+2/9FrX3r+1r/ybh4u/68j/AOhrXwV8Pv8AkQtD/wCwfbf+i1oA/9f+vX9jn/krfxQ+ujf+iZq/QOvz8/Y5/wCSt/FD66N/6Jmr9A6ACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAPnX9rX/k3Dxd/wBeR/8AQ1r4K+H3/IhaH/2D7b/0Wtfev7Wv/JuHi7/ryP8A6GtfBXw+/wCRC0P/ALB9t/6LWgD/0P69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA+df2tf+TcPF3/AF5H/wBDWvgr4ff8iFof/YPtv/Ra196/ta/8m4eLv+vI/wDoa18FfD7/AJELQ/8AsH23/otaAP/R/r1/Y5/5K38UPro3/omav0Dr8/P2Of8AkrfxQ+ujf+iZq/QOgAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD51/a1/5Nw8Xf8AXkf/AENa+Cvh9/yIWh/9g+2/9FrX3r+1r/ybh4u/68j/AOhrXwV8Pv8AkQtD/wCwfbf+i1oA/9L+vX9jn/krfxQ+ujf+iZq/QOvz8/Y5/wCSt/FD66N/6Jmr9A6ACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAPnX9rX/k3Dxd/wBeR/8AQ1r4K+H3/IhaH/2D7b/0Wtfev7Wv/JuHi7/ryP8A6GtfBXw+/wCRC0P/ALB9t/6LWgD/0/69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA+df2tf+TcPF3/AF5H/wBDWvgr4ff8iFof/YPtv/Ra196/ta/8m4eLv+vI/wDoa18FfD7/AJELQ/8AsH23/otaAP/U/r1/Y5/5K38UPro3/omav0Dr8/P2Of8AkrfxQ+ujf+iZq/QOgAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD51/a1/5Nw8Xf8AXkf/AENa+Cvh9/yIWh/9g+2/9FrX3r+1r/ybh4u/68j/AOhrXwV8Pv8AkQtD/wCwfbf+i1oA/9X+vX9jn/krfxQ+ujf+iZq/QOvz8/Y5/wCSt/FD66N/6Jmr9A6ACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAPnX9rX/k3Dxd/wBeR/8AQ1r4K+H3/IhaH/2D7b/0Wtfev7Wv/JuHi7/ryP8A6GtfBXw+/wCRC0P/ALB9t/6LWgD/1v69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA+df2tf+TcPF3/AF5H/wBDWvgr4ff8iFof/YPtv/Ra196/ta/8m4eLv+vI/wDoa18FfD7/AJELQ/8AsH23/otaAP/X/r1/Y5/5K38UPro3/omav0Dr8/P2Of8AkrfxQ+ujf+iZq/QOgAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD51/a1/5Nw8Xf8AXkf/AENa+Cvh9/yIWh/9g+2/9FrX3r+1r/ybh4u/68j/AOhrXwV8Pv8AkQtD/wCwfbf+i1oA/9D+vX9jn/krfxQ+ujf+iZq/QOvz8/Y5/wCSt/FD66N/6Jmr9A6ACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAPnX9rX/k3Dxd/wBeR/8AQ1r4K+H3/IhaH/2D7b/0Wtfev7Wv/JuHi7/ryP8A6GtfBXw+/wCRC0P/ALB9t/6LWgD/0f69f2Of+St/FD66N/6Jmr9A6/Pz9jn/AJK38UPro3/omav0DoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACvm34pfti/sq/BHxrZ/Dn4vfELQPDmu3wRorLUL6KCYJIdqM4Zv3aseFZ9qk8Ak17b4x8TWXg7wvfeJ9ROIrOIuc9z0UfiSBXx/+zZ+zv4G1j4MXPiv4m6TbarrXxK36zrUtzGsrEXwzFCGIJCwwFIxg9QT3oA+4YZobiFbi3YPG4DKynIIPIII6g1JXxx+xdZXngjwT4g+A93O1zF8Pdan0ixlc5dtPdI7i2BPfy0m8oe0Yr7HoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA+df2tf+TcPF3/Xkf/Q1r4K+H3/IhaH/ANg+2/8ARa196/ta/wDJuHi7/ryP/oa18FfD7/kQtD/7B9t/6LWgD//S/r1/Y5/5K38UPro3/omav0Dr8/P2Of8AkrfxQ+ujf+iZq/QOgAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA+Sv26L3UdP/Za8TXWlEicNp6jHXDXsCt/46TXX/s/fE7Q/GOl6h4H0m2a3PgxbHTpGYgrIHtYpVZeBgbWx+Fbv7Q/h7/hKfg1rmibN/mRxPg8/wCqlR//AGWvyI0v43+NtL8eX/7M/wAB4WuPHPxMsNDuvtoTzItH042IjudQmAyPkChYg2A8hAznigD9I/2UbxPFeo/Eb4m2o/0TXPFNxHaHs0OnxRWpbPfMscg+gr69rgPhX8NvDXwf+HWj/DLwgjJp2i2yW0RkO6R9vLSO38TyMS7t3Yk96yPjF8c/g7+z54TXx18b/E2meFNHe4itFvNVuo7SFp5jhIw8rKpZj0GcmgD1aiq1le2mpWcWoafKs8E6LJHIhDK6MMggjggjkGrNABXL+N9T1DRfBer6zpIBu7SyuJoQwyDJHGzLkemQK6dWVxlTke1ZmtxRz6LeQyjKvBIpB7gqc0AeO/sx/ErW/jD8A/C3xM8SJHHqGsWSzXCxAqgkyVbAJJAyPWvdq+PP2BdXs9b/AGSfCF7YEGIR3UYxyP3dzKv9K+w6ACiiigAooooAKKK+Wf2s/iv4z+Eng3w5qXgUot3q/ijSNJkZ0EgFvdTYlwDxkoCAe2c0AfU1QQXVtc7jbSLJsYo20g4ZeoOOhHcVPX5Mf8E0pvEuifGT9p/4ea/ezXkNj8Ur/UbFZmLGC21O3gn8tcnhN5dlHT5qAP1nooooAKKKKACiiigAooooAKKK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zF/z/wDqoAtZWjK1V8xf8/8A6qPMX/P/AOqgC1laMrVXzF/z/wDqo8xf8/8A6qALWVoytVfMX/P/AOqjzF/z/wDqoAtZWjK1V8xf8/8A6qPMX/P/AOqgC1laMrVXzF/z/wDqo8xf8/8A6qALWVoytVfMX/P/AOqjzF/z/wDqoAtZWjK1V8xf8/8A6qPMX/P/AOqgC1laMrVXzF/z/wDqo8xf8/8A6qALWVoytVfMX/P/AOqjzF/z/wDqoAtZWjK1V8xf8/8A6qPMX/P/AOqgC1laMrVXzF/z/wDqo8xf8/8A6qALWVoytVfMX/P/AOqjzF/z/wDqoAtZWjK1V8xf8/8A6qPMX/P/AOqgC1laMrVXzF/z/wDqo8xf8/8A6qALWVoytVfMX/P/AOqjzF/z/wDqoAtZWjK1V8xf8/8A6qPMX/P/AOqgC1laMrVXzF/z/wDqo8xf8/8A6qALWVoytVfMX/P/AOqjzF/z/wDqoAtZWjK1V8xf8/8A6qPMX/P/AOqgC1laMrVXzF/z/wDqo8xf8/8A6qALWVoytVfMX/P/AOqjzF/z/wDqoAtZWjK1V8xf8/8A6qPMX/P/AOqgC1laMrVXzF/z/wDqo8xf8/8A6qALWVoytVfMX/P/AOqjzF/z/wDqoAtZWjK1V8xf8/8A6qPMX/P/AOqgC1laMrVXzF/z/wDqo8xf8/8A6qALWVoytVfMX/P/AOqjzF/z/wDqoAtZWjK1V8xf8/8A6qPMX/P/AOqgC1laMrVXzF/z/wDqo8xf8/8A6qALWVoytVfMX/P/AOqjzF/z/wDqoAtZWjK1V8xf8/8A6qPMX/P/AOqgC1laMrVXzF/z/wDqo8xf8/8A6qALWVoytVfMX/P/AOqjzF/z/wDqoAtZWjK1V8xf8/8A6qPMX/P/AOqgC1laMrVXzF/z/wDqo8xf8/8A6qALWVoytVfMX/P/AOqjzF/z/wDqoAtZWjK1V8xf8/8A6qPMX/P/AOqgC1laMrVXzF/z/wDqo8xf8/8A6qALWVoytVfMX/P/AOqjzF/z/wDqoAtZWjK1V8xf8/8A6qPMX/P/AOqgC1laMrVXzF/z/wDqo8xf8/8A6qALWVoytVfMX/P/AOqjzF/z/wDqoAtZWjK1V8xf8/8A6qPMX/P/AOqgC1laMrVXzF/z/wDqo8xf8/8A6qALWVoytVfMX/P/AOqj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"> </p> <p style="margin-left: auto; margin-right: auto;">کدهای ماژول را میتوانید از&nbsp;<a href="https://github.com/SirwanAfifi/SignPdf-PS">اینجا</a>&nbsp;دانلود کنید.&nbsp; <br> </p> </div> </div> </div> </div> </div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-12393.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>آیا سیستم شما دچار مشکل امنیتی Spectre است؟</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-18841.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>دوره کار با SQL Server توسط PowerShell</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3464.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>PowerShell 7.x - قسمت نهم - آشنایی با Crescendo</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3424.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>PowerShell 7.x - قسمت ششم - ایجاد Cmdletها توسط #C</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3420.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>PowerShell 7.x - قسمت چهارم - نوشتن اولین اسکریپت</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1950.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با ساختار IIS قسمت ششم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3414.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>PowerShell 7.x - قسمت دوم - آشنایی با Pipelineها</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-18256.html'><span class='badge bg-warning-subtle text-warning-emphasis bg-gradient rounded-pill me-2'>نظرات اشتراک‌ها</span>PowerShell 7.3 منتشر شد</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-834.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>EF Code First #4</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2765.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>سازماندهی برنامه‌های Angular توسط ماژول‌ها</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

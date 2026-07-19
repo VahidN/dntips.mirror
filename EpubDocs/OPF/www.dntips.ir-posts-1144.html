@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫آشنایی با Window Function ها در SQL Server بخش دوم</title>     <meta name="description" content="قبل از مطالعه این بخش لطفا آشنایی با Window Function‌ها در SQL Server بخش اول را مطالعه نمایید.       دربخش اول،در مورد Syntax مربوط به Over Clause صحبت کردیم، و برای درک استفاده از Over Clause، مثالهایی را بررسی نمودیم، در این بخش نیز،به تفاوت Row Clause و Range Clause می پردازیم. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ مثال:  با ایجاد یک Script،عملیات جمع روی یک فیلد خاص، بوسیله Row Clause و Range Clause انجام می‌دهیم. تا تفاوت آنها را درک نماییم.
+ 
+  ...">
+    <meta name="author" content="فرهاد فرهمندخواه">
+    <meta itemprop="name" content="آشنایی با Window Function ها در SQL Server بخش دوم">
+    <meta itemprop="description" content="قبل از مطالعه این بخش لطفا آشنایی با Window Function‌ها در SQL Server بخش اول را مطالعه نمایید.       دربخش اول،در مورد Syntax مربوط به Over Clause صحبت کردیم، و برای درک استفاده از Over Clause، مثالهایی را بررسی نمودیم، در این بخش نیز،به تفاوت Row Clause و Range Clause می پردازیم. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ مثال:  با ایجاد یک Script،عملیات جمع روی یک فیلد خاص، بوسیله Row Clause و Range Clause انجام می‌دهیم. تا تفاوت آنها را درک نماییم.
+ 
+  ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="آشنایی با Window Function ها در SQL Server بخش دوم">
+    <meta property="og:description" content="قبل از مطالعه این بخش لطفا آشنایی با Window Function‌ها در SQL Server بخش اول را مطالعه نمایید.       دربخش اول،در مورد Syntax مربوط به Over Clause صحبت کردیم، و برای درک استفاده از Over Clause، مثالهایی را بررسی نمودیم، در این بخش نیز،به تفاوت Row Clause و Range Clause می پردازیم. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ مثال:  با ایجاد یک Script،عملیات جمع روی یک فیلد خاص، بوسیله Row Clause و Range Clause انجام می‌دهیم. تا تفاوت آنها را درک نماییم.
+ 
+  ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="آشنایی با Window Function ها در SQL Server بخش دوم">
+    <meta name="twitter:description" content="قبل از مطالعه این بخش لطفا آشنایی با Window Function‌ها در SQL Server بخش اول را مطالعه نمایید.       دربخش اول،در مورد Syntax مربوط به Over Clause صحبت کردیم، و برای درک استفاده از Over Clause، مثالهایی را بررسی نمودیم، در این بخش نیز،به تفاوت Row Clause و Range Clause می پردازیم. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ مثال:  با ایجاد یک Script،عملیات جمع روی یک فیلد خاص، بوسیله Row Clause و Range Clause انجام می‌دهیم. تا تفاوت آنها را درک نماییم.
+ 
+  ...">
+    <meta name="twitter:card" content="قبل از مطالعه این بخش لطفا آشنایی با Window Function‌ها در SQL Server بخش اول را مطالعه نمایید.       دربخش اول،در مورد Syntax مربوط به Over Clause صحبت کردیم، و برای درک استفاده از Over Clause، مثالهایی را بررسی نمودیم، در این بخش نیز،به تفاوت Row Clause و Range Clause می پردازیم. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ مثال:  با ایجاد یک Script،عملیات جمع روی یک فیلد خاص، بوسیله Row Clause و Range Clause انجام می‌دهیم. تا تفاوت آنها را درک نماییم.
+ 
+  ...">
+    <meta property="article:published_time" content="Sun, 09 Dec 2012 09:30:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫آشنایی با Window Function ها در SQL Server بخش دوم";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-1145.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫گرفتن خروجی JSON از جداول در SQL Server 2012</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-1143.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫گرفتن خروجی XML از جداول در SQL Server 2012</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫آشنایی با Window Function ها در SQL Server بخش دوم</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>فرهاد فرهمندخواه<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۱/۰۹/۱۹ ۹:۳۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-1144.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'>قبل از مطالعه این بخش لطفا&nbsp;<a href="www.dntips.ir-posts-1142.html">آشنایی با Window Function‌ها در SQL Server بخش اول</a>&nbsp;را مطالعه نمایید.<div>&nbsp; &nbsp; &nbsp; &nbsp;در<a href="www.dntips.ir-posts-1142.html">بخش اول</a>،در مورد Syntax مربوط به Over Clause صحبت کردیم، و برای درک استفاده از Over Clause، مثالهایی را بررسی نمودیم، در این بخش نیز،به تفاوت Row Clause و Range Clause<span>&nbsp;می پردازیم.</span>&nbsp;</div>
+
+
+
+
+
+
+
+<div>مثال: &nbsp;با ایجاد یک Script،عملیات جمع روی یک فیلد خاص، بوسیله Row Clause و Range Clause انجام می‌دهیم. تا تفاوت آنها را درک نماییم.</div>
+
+
+
+
+
+
+
+<div>در ادامه Script زیر را اجرا نمایید:</div>
+
+
+
+
+
+
+
+<div><div align="left" dir="ltr">
+
+
+
+
+
+
+
+<pre language="CSharp" name="code">DECLARE @Test TABLE
+(
+RowID INT IDENTITY,
+FName VARCHAR(20),
+Salary SMALLINT
+);
+INSERT INTO @Test (FName, Salary)
+VALUES ('George', 800),
+('Sam', 950),
+('Diane', 1100),
+('Nicholas', 1250),
+('Samuel', 1250),
+('Patricia', 1300),
+('Brian', 3000),
+('Thomas', 1600),
+('Fran', 2450),
+('Debbie', 2850),
+('Mark', 2975),
+('James', 3000),
+('Cynthia', 3000),
+('Christopher', 5000);
+
+SELECT RowID,FName,Salary,
+       SumByRows = SUM(Salary) OVER (ORDER BY Salary ROWS UNBOUNDED PRECEDING),
+   SumByRange = SUM(Salary) OVER (ORDER BY Salary RANGE UNBOUNDED PRECEDING)
+FROM @Test
+ORDER BY RowID;
+</pre>
+
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+<div>خروجی بصورت زیر خواهد بود:</div>
+
+
+
+
+
+
+
+<div><p><img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/png;base64,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"></p>
+
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<div>با مشاهده شکل بالا، به وضوح می‌توان تفاوت Row و Range را تشخیص داد. در Script بالا از UNBOUNDED PRECEDING استفاده کردیم ، و مفهوم &nbsp;قالب آن به شرح ذیل می‌باشد:</div>
+
+
+
+
+
+
+
+<div>مقدار فیلد Salary سطر جاری = جمع مقادیر فیلد Salary همه سطر‌های ماقبل،سطر جاری + مقدار فیلد Salary سطر جاری</div>
+
+
+
+
+
+
+
+<div style="text-align: justify;">Row Clause بصورت فیزیکی به سطرها می‌نگرد و قالب بیان شده در Script را،روی تمامی سطرها،نسبت به جایگاه آنها در جدول، به ترتیب اعمال می‌نماید.و در شکل نیز قابل مشاهده می باشد، یعنی به چیدمان سطر‌ها در خروجی که بصورت فیزیکی نمایش داده شده است، توجه می کند، و حاصل جمع هر سطر برابر است با حاصل جمع سطرهای ماقبل + سطر جاری</div>
+
+
+
+
+
+
+
+<div>اما Range Clause:به چیدمان فیزیکی سطرها توجه نمی‌کند، بلکه بصورت منطقی به مقدار فیلد Salary سطرها توجه می‌نماید، یعنی مقادیری که در یک محدوده(Range) قرار دارند، حاصل جمع آنها،یکی است.</div>
+
+
+
+
+
+
+<div>مقدار فیلد Salary سطر چهار و پنج برابر است با 1250 بنابراین حاصل جمع آنها برابر هم می‌باشد. و بصورت زیر محاسبه می‌شود:</div>
+
+
+
+
+
+
+<div>&nbsp;800 + 950 + 1100 + 1250 + 1250 =5350</div>
+
+
+
+
+
+
+<div>روش بیان شده، در مورد سطرهای 12 و 13 نیز صادق است.</div>
+
+
+
+
+<div>امیدوارم با مثالهایی که در بخش اول و بخش دوم بررسی نمودیم، روش استفاده از Over Clause را درک کرده باشیم.&nbsp;</div>
+
+
+
+
+<div>&nbsp;Window Function‌ها را به چهار بخش تقسیم بندی شده اند، که به شرح ذیل می‌باشد:</div>
+
+
+
+
+<div>1-&nbsp;<a href="www.dntips.ir-posts-968.html">Ranking functions</a>&nbsp;(توابع رتبه بندی)، که بررسی نمودیم.</div>
+
+
+
+
+<div>2-&nbsp;<a href="www.dntips.ir-posts-1067.html">NEXT VALUE FOR</a>&nbsp;، که در بحث ایجاد Sequence آن را بررسی نمودیم.</div>
+
+
+
+
+<div>3-&nbsp;<a href="http://msdn.microsoft.com/en-us/library/ms173454.aspx">Aggregate Functions</a> (توابع جمعی)، اکثرا با اینگونه توابع آشنا هستیم.</div>
+
+
+<div>4- Analytic Functions (توابع تحلیلی) که در بخش بعدی آن را بررسی می‌نماییم.</div>
+<div>&nbsp; &nbsp; &nbsp;یکی از منابع بسیار مفید در مورد Window Function ها&nbsp;کتاب&nbsp;<a href="http://www.amazon.com/Microsoft-Server-High-Performance-Window-Functions/dp/0735658366">Microsoft SQL Server 2012 High-Performance T-SQL Using Window Functions</a>&nbsp;، &nbsp;می باشد،که بطور کامل به &nbsp;Window Function‌ها اختصاص دارد و تکنیک‌های بسیار مفیدی را بیان می‌کند. مطالعه آن به علاقمندان، پیشنهاد می‌گردد.</div>
+
+
+<div>موفق باشید.</div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1142.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با Window Function ها در SQL Server بخش اول</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1163.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با Window Function ها در SQL Server بخش چهارم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1156.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با Window Function ها در SQL Server بخش سوم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1205.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>توابع Window و مساله های آماری running total و runnning average</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1163.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>آشنایی با Window Function ها در SQL Server بخش چهارم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1163.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>آشنایی با Window Function ها در SQL Server بخش چهارم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1142.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>آشنایی با Window Function ها در SQL Server بخش اول</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1163.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>آشنایی با Window Function ها در SQL Server بخش چهارم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1144.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>آشنایی با Window Function ها در SQL Server بخش دوم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1142.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>آشنایی با Window Function ها در SQL Server بخش اول</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>محمد صاحب</strong>  در  <span dir='ltr'>۱۳۹۱/۰۹/۱۹ ۱۲:۲۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>دوست عزیز ممنون...<br>
+
+
+
+
+من قسمت Range و Row رو که شما توضیح دادی درست متوجه نشدم سرچی که زدم متوجه شدم این قابلیت تقریبا شبیه قسمت WITH TIES<span> تو Select هست</span>.برای مثال اگه بخواهیم 3 شاگرد برتر کلاس رو کوئری بزنیم اگه تو کلاس 3 نفر معدل 18 داشته باشن(با توجه به اینکه یک معدل 20 و 19 داریم) 2 نفر از شاگرد‌ها که معدل 18 دارن تو این کوئری نمیان(TOP 3) و...<br>
+
+
+برداشت منم ازRange <span>اینه که</span> بواسط ی برابر بودن تاریخ‌ها این 2 مقدار به هم گره خوردن و هنگام محاسبه مقدار یکسانی را تولید میکنن.<br>
+
+
+<br></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>فرهاد فرهمندخواه</strong>  در  <span dir='ltr'>۱۳۹۱/۰۹/۱۹ ۱۴:۲۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div style="text-align: justify;">سلام</div>
+
+<div style="text-align: justify;">اگر سئوال شما رو درست متوجه شده باشم،با یک مثال مفهوم Range رو بررسی می‌کنیم:</div>
+
+<div><div align="left" dir="ltr">
+
+<pre language="CSharp" name="code">CREATE TABLE #Transactions
+(
+AccountId INTEGER,
+TranDate DATE,
+TranAmt NUMERIC(8, 2)
+);
+INSERT INTO #Transactions
+SELECT *
+FROM ( VALUES ( 1, '2011-01-15', 50),( 1, '2011-01-17', 500),( 1, '2011-01-17', 500),
+  ( 1, '2011-01-16', 500),( 1, '2011-01-24', 75),( 1, '2011-01-26', 125),
+  ( 1, '2011-02-28', 500),( 2, '2011-01-01', 500),( 2, '2011-01-15', 50),
+              ( 2, '2011-01-22', 25),( 2, '2011-01-23', 125),( 2, '2011-01-26', 200),
+              ( 2, '2011-01-29', 250),( 3, '2011-01-01', 500),( 3, '2011-01-15', 50 ),
+              ( 3, '2011-01-22', 5000),( 3, '2011-01-25', 550),( 3, '2011-01-27', 95 ),
+              ( 3, '2011-01-30', 2500)
+) dt (AccountId, TranDate, TranAmt);
+</pre>
+
+</div>
+
+</div>
+
+<div style="text-align: justify;">روی جدول فوق دو نوع Script اجرا می‌کنیم، مثال اول، براساس AccountID جدول را گروه بندی می‌نماییم. سپس هر گروه را براساس تاریخ Sort می‌کنیم، و در هر گروه مقدار Sum آن را بدست می‌آوریم:</div>
+
+<div style="text-align: justify;"><div align="left" dir="ltr">
+
+<pre language="CSharp" name="code">SELECT  
+    AccountId,   
+    TranDate,
+  TranAmt, 
+    Sum(TranAmt) OVER(partition by Accountid ORDER BY TranDate RANGE UNBOUNDED PRECEDING) AS SumAmt  
+FROM  #Transactions 
+GO</pre>
+
+</div>
+
+</div>
+
+<div style="text-align: justify;">خروجی :&nbsp;</div>
+
+<div style="text-align: justify;"><p><img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/png;base64,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"></p>
+
+</div>
+
+<div style="text-align: justify;">مطابق شکل Sort براساس TranDate است، که چهار مقدار 500 &nbsp;در سه بازه تاریخی دیده می‌شود، حال محاسبه جمع هر سطر بصورت زیر است:</div>
+
+<div style="text-align: justify;">سطر دوم با وجود اینکه مقدار آن 500 است و در بازه تاریخی 16-01-2011 قرار دارد: مقدار آن برابر است با 550=50 + 500&nbsp;<br>
+
+</div>
+
+<div style="text-align: justify;">سطر سوم و چهارم که در بازه تاریخی 17-01-2011 می‌باشد(به عبارتی در یک محدوده می‌باشند): برابر است با : 1550=50+500+500+500&nbsp;</div>
+
+<div style="text-align: justify;"><b>در اینجا چیزی حذف نشده، حاصل جمع سطر سوم و چهارم ، چون در یک محدوده (Range) می‌باشد، برابر است با حاصل جمع سطر‌های ما قبل یعنی سطر اول و دوم (550=50+500) + حاصل جمع تمامی سطرهای آن محدوده(Range)، یعنی سطر سوم و چهارم (1000=500+500)</b></div>
+
+<div style="text-align: justify;">مثال دیگر، در این حالت Sort روی فیلد TranAMT انجام می‌شود، و جدول همچنان روی فیلد Accountid گروه بندی می‌شود، بنابراین خواهیم داشت:</div>
+
+<div style="text-align: justify;"><div align="left" dir="ltr">
+
+<pre language="CSharp" name="code">SELECT  
+    AccountId,   
+    TranDate,
+  TranAmt, 
+    Sum(TranAmt) OVER(partition by Accountid ORDER BY TranAmt RANGE UNBOUNDED PRECEDING) AS SumAmt  
+FROM  #Transactions 
+GO
+</pre>
+
+</div>
+
+</div>
+
+<div style="text-align: justify;">خروجی :</div>
+
+<div style="text-align: justify;"><p><img style="display:block; margin-left: auto; margin-right: auto;" src="data:image/png;base64,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"></p>
+
+</div>
+
+<div style="text-align: justify;">
+</div>
+
+<div style="text-align: justify;">در شکل، مقدار جمع هیچ سطری حذف نشده است، و Top ی هم در کار نیست.</div>
+
+<div style="text-align: justify;">حال اگر مثال فوق را روی میانگین در نظر بگیرید، باز هم تمام مقادیر، در محاسبه میانگین تاثیر گذار میباشند.</div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>محمد صاحب</strong>  در  <span dir='ltr'>۱۳۹۱/۰۹/۱۹ ۱۴:۵۹</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>ممنون...<br>
+
+
+
+
+
+
+<span>«<span></span></span>سطرهای فیزیکی<span>»<span> </span></span>و<span> «سطرهای منطقی» که شما گفتید برا من گیج کننده بود من با مثال Top ی که زدم فرق رو متوجه شدم گفتم عنوان کنم دیگران هم استفاده کنن.البته این پست شما خیلی بهتر موضوع رو توضیح داد.<br>
+
+
+
+
+</span></div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>محمد سلیم آبادی</strong>  در  <span dir='ltr'>۱۳۹۱/۱۰/۳۰ ۱۲:۱۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام،<br>ممنون از مطالب مفیدتون.<br>آیا دو دستور زیر با هم یکسان هستند یا خیر؟<br>range unbounded preceding<br>range between unbounded preceding and current row<br><br>و کوئری اولتون باید مساله running total باشه، که به سادگی توسط Over Clause حل شده.<br>کوئری زیر روشی بوده که قبل از نسخه 2012 برای حل اینگونه مسائل مورد استفاده قرار میگرفته<br><div dir="ltr" align="left"><pre language="Sql" name="code">SELECT AccountId,  
+       TranDate,
+       TranAmt,
+       D.sumAmt AS older_method
+       Sum(TranAmt) OVER(partition by Accountid 
+                         ORDER BY TranDate 
+                         RANGE UNBOUNDED PRECEDING) AS SumAmt        
+FROM  #Transactions AS T1
+CROSS APPLY (SELECT SUM(T2.TranAmt)
+   FROM #Transactions AS T2
+  WHERE T2.AccountId = T1.AccountId
+    AND T2.TranDate &lt;= T1.TranDate) AS D(SumAmt)
+ORDER BY T1.AccountId, T1.TranDate;</pre></div><br></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>فرهاد فرهمندخواه</strong>  در  <span dir='ltr'>۱۳۹۱/۱۰/۳۰ ۱۳:۲۵</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام&nbsp;&nbsp; <br>در جواب سؤال شما باید بگویم هر دو دستور یکی میباشند و هر دو از اولین سطر&nbsp; تا سطر جاری را در نظر می‌گیرند.<br></div>
+</div></li></ul></li></ul></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>zarei</strong>  در  <span dir='ltr'>۱۳۹۲/۰۲/۲۲ ۱۹:۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام<div>من یه کوئری توسط Sum() Over() .. نوشتم که تو در تو هست که ترتیب جمع دستور بیرونی برام مهمه .</div><div style="text-align: left;"><div><div align="left" dir="ltr"><pre language="Sql" name="code">;WITH cteBed ([Counter], id_doc , [Year] ,id_Total , date_duc ,Number_Temp , number_fix , sumbed , sumbes , row_no ) AS (
+SELECT [Counter], d.id_doc , d.[Year] ,r.id_Total , d.date_duc ,d.Number_Temp ,d.number_fix ,  
+SUM( r.Mablagh_bed) OVER(PARTITION BY d.[Year] ,r.id_Total , d.Number_Temp) AS sumbed , 
+ sumbes= 0,
+ROW_NUMBER() OVER (PARTITION BY d.[Year] ,r.id_Total , d.date_duc , d.Number_Temp , d.number_fix  ORDER BY  d.date_duc )AS  row_no
+FROM tbl_Records r JOIN tbl_Documents d ON d.id_doc = r.id_doc  ) ,
+     
+ cteBes ([Counter], id_doc , [Year] ,id_Total , date_duc ,Number_Temp , number_fix , sumbed , sumbes  , row_no) AS (
+SELECT   [Counter], d.id_doc , d.[Year] ,r.id_Total , d.date_duc ,d.Number_Temp ,d.number_fix , sumbed = 0 , 
+SUM( r.Mablagh_bes ) OVER(PARTITION BY d.[Year] ,r.id_Total , d.Number_Temp ) AS sumbes,
+ROW_NUMBER() OVER (PARTITION BY d.[Year] ,r.id_Total ,  d.date_duc ,d.Number_Temp , d.number_fix ORDER BY  d.date_duc )AS row_no 
+FROM tbl_Records r JOIN tbl_Documents d ON d.id_doc = r.id_doc ) 
+
+SELECT [Counter], id_doc , [Year] ,id_Total , date_duc ,Number_Temp , number_fix , sumbed , sumbes , amountBed ,amountBes 
+,SUM(amountBed)OVER(  ORDER BY [Year] ,id_Total , date_duc , number_Temp, number_Fix ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS bed
+,SUM(amountBes)OVER(  ORDER BY [Year] ,id_Total , date_duc , number_Temp, number_Fix ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS bes
+FROM (
+SELECT [Counter], id_doc , [Year] ,id_Total , date_duc ,Number_Temp , number_fix , sumbed , sumbes ,  
+amountBed = CASE WHEN id_Total  LIKE '1%' OR  Id_Total LIKE '2%' OR  Id_Total LIKE '7%' OR  Id_Total LIKE '8%' THEN (tt.sumbed-tt.sumbes) ELSE 0 END ,
+amountBes=CASE WHEN Id_Total LIKE '3%' OR Id_Total LIKE '4%' OR Id_Total LIKE '5%' OR Id_Total LIKE '6%' OR Id_Total LIKE '9%' THEN (tt.sumbes-tt.sumbed)ELSE 0 END ,
+ROW_NUMBER() OVER (PARTITION BY [Year] ,id_Total , date_duc , Number_Temp , number_fix  ORDER BY  date_duc )AS  row_no
+FROM (
+SELECT * FROM cteBed cb WHERE cb.row_no = 1
+UNION ALL
+SELECT * FROM cteBes cb WHERE cb.row_no = 1
+) AS tt ([Counter], id_doc , [Year] ,id_Total , date_duc ,Number_Temp , number_fix , sumbed , sumbes,row_no ) WHERE not(sumbed = 0 AND sumbes = 0)
+) AS rr</pre></div><br></div><div style="text-align: right;">اگه تو یه دستور Select از Row_Number استفاده کرده باشم ، اول خروجی رو بدست میاره بعد خروجی رو بر حسب نوع مرتب سازی مربوط به Row_Number مرتب میکنه ؟ و دیگه اینکه خروجی دستور اول که شامل Row_Number هست بعد از مرتب شدن به همون صورت به دست دستور دوم (یا همون Select بیرونی) میرسه یا باز باید روی اون نیز مرتب سازی انجام بدم ؟ اصلا جای ستونی که مربوط به Row_Number هست اول یا آخر فرق میکنه ؟</div><div style="text-align: right;">اینارو به این خاطر پرسیدم ، چون هر بار داده هام جواب متفاوتی میداد و نتونستم تشخیص بدم . ممنون</div></div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>فرهاد فرهمندخواه</strong>  در  <span dir='ltr'>۱۳۹۲/۰۲/۲۵ ۸:۱۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام<div>جواب سوال اول: در Syntax&nbsp;‌تابع Row_Number عملیات order by اجباری است، بنابراین عملیات سورت در ابتدا انجام می‌شود و سپس Row_Number (اعداد ترتیبی) روی رکوردها اعمال می‌گردد.</div><div>در سا‌یت مایکروسافت به خوبی اشاره شده است که هیچ تضمینی وجود ندارد، خروجی یک Query با استفاده از Row_number در هر بار اجرا، با اجرای قبلی یکی باشد مگر آنکه موارد زیر را رعایت کرده باشید:</div><div>1- مقادیر ستونی که برای قسمت Partition در نظر گرفته اید، منحصربفرد باشد.</div><div>2- مقادیری که برای قسمت Order by در نظر گرفته اید منحصربفرد باشد.</div><div>3- ترکیب مقادیر Partition و Order by نیز مقدار منحصربفردی را ایجاد نماید.</div><div>جواب سوال دوم: جای ستون Row_number در زمان نمایش اهمیتی ندارد.</div><div>پیشنهاد دوستانه:</div><div>1- تاجایی که امکان دارد از OR در Query‌های خود استفاده ننمایید، باعث افزایش زمان اجرای Query شما می‌شود و هزینه بالایی دارد.</div><div>2- از Like نیز در نوشتن Query‌های خود اجتناب کنید.</div><div>برای اطلاعات بیشتر در مورد Row_Number به آدرس زیر مراجعه نمایید:</div><div><a href="http://msdn.microsoft.com/en-us/library/ms186734(v=sql.105).aspx">Row_Number()</a>&nbsp;<br></div><div>موفق باشید.</div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>zarei</strong>  در  <span dir='ltr'>۱۳۹۲/۰۲/۲۷ ۱:۳۸</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>ممنون از راهنماییتون . ولی برای رسیدن به پاسخ راه دیگه ای به ذهنم نرسید (استفاده &nbsp;از OR و Like)<div>میشه خواهش کنم راه جایگزین رو بهم بگید ؟ اموزشی در خصوص بررسی مفهومی Planهای تولیدی SQL سراغ دارید ؟&nbsp;</div><div>دیگه اینکه از کجا میتونم به طور دقیق و مفهومی هزینه استفاده از دستورات SQL &nbsp;رو مثل OR و ... &nbsp;رو بخونم ؟</div><div>ممنون</div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>فرهاد فرهمندخواه</strong>  در  <span dir='ltr'>۱۳۹۲/۰۲/۲۷ ۲۲:۱۹</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام&nbsp;<div>مقاله زیر به خوبی طرز استفاده از Execution Plan را آموزش می‌دهد.</div><div><a href="http://www.mssqltips.com/sqlservertip/1873/how-to-read-sql-server-graphical-query-execution-plans/">How to read SQL Server graphical query execution plans</a>&nbsp;<br></div><div>دو کتاب زیر، جهت مطالعه و بهینه سازی در ایجاد Query مفید است:</div><div><a href="http://www.apress.com/9781430242000">SQL Server 2012 T-SQL Recipes</a>&nbsp;<br></div><div><a href="http://www.apress.com/9781430242031">SQL Server 2012 Query Performance Tuning</a>&nbsp;<br></div><div>موفق باشید.</div></div>
+</div></li></ul></li></ul></li></ul></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

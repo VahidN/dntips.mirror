@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫سری بررسی SQL Smell در EF Core - استفاده از مدل Entity Attribute Value - بخش دوم</title>     <meta name="description" content="در  مطلب قبلی ، مدل EAV را معرفی کردیم و گفتیم که این نوع پیاده‌سازی در واقع یک SQL Smell است؛ زیرا کوئری نویسی را سخت میکند و همچنین به دلیل عدم امکان تعریف constraints، کنترلی بر روی صحت دیتاهای وارده شد نخواهیم داشت. در نهایت با برنامه‌ای روبرو خواهیم شد که درک صحیحی از ماهیت دیتا ندارد. اما اگر در شرایطی مجبور به استفاده‌ی از این مدل هستید، بهتر است از فرمت JSON برای ذخیره‌سازی دیتای داینامیک استفاده کنید. بیشتر دیتابیس‌های رابطه‌ایی  ...">
+    <meta name="author" content="سیروان عفیفی">
+    <meta itemprop="name" content="سری بررسی SQL Smell در EF Core - استفاده از مدل Entity Attribute Value - بخش دوم">
+    <meta itemprop="description" content="در  مطلب قبلی ، مدل EAV را معرفی کردیم و گفتیم که این نوع پیاده‌سازی در واقع یک SQL Smell است؛ زیرا کوئری نویسی را سخت میکند و همچنین به دلیل عدم امکان تعریف constraints، کنترلی بر روی صحت دیتاهای وارده شد نخواهیم داشت. در نهایت با برنامه‌ای روبرو خواهیم شد که درک صحیحی از ماهیت دیتا ندارد. اما اگر در شرایطی مجبور به استفاده‌ی از این مدل هستید، بهتر است از فرمت JSON برای ذخیره‌سازی دیتای داینامیک استفاده کنید. بیشتر دیتابیس‌های رابطه‌ایی  ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="سری بررسی SQL Smell در EF Core - استفاده از مدل Entity Attribute Value - بخش دوم">
+    <meta property="og:description" content="در  مطلب قبلی ، مدل EAV را معرفی کردیم و گفتیم که این نوع پیاده‌سازی در واقع یک SQL Smell است؛ زیرا کوئری نویسی را سخت میکند و همچنین به دلیل عدم امکان تعریف constraints، کنترلی بر روی صحت دیتاهای وارده شد نخواهیم داشت. در نهایت با برنامه‌ای روبرو خواهیم شد که درک صحیحی از ماهیت دیتا ندارد. اما اگر در شرایطی مجبور به استفاده‌ی از این مدل هستید، بهتر است از فرمت JSON برای ذخیره‌سازی دیتای داینامیک استفاده کنید. بیشتر دیتابیس‌های رابطه‌ایی  ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="سری بررسی SQL Smell در EF Core - استفاده از مدل Entity Attribute Value - بخش دوم">
+    <meta name="twitter:description" content="در  مطلب قبلی ، مدل EAV را معرفی کردیم و گفتیم که این نوع پیاده‌سازی در واقع یک SQL Smell است؛ زیرا کوئری نویسی را سخت میکند و همچنین به دلیل عدم امکان تعریف constraints، کنترلی بر روی صحت دیتاهای وارده شد نخواهیم داشت. در نهایت با برنامه‌ای روبرو خواهیم شد که درک صحیحی از ماهیت دیتا ندارد. اما اگر در شرایطی مجبور به استفاده‌ی از این مدل هستید، بهتر است از فرمت JSON برای ذخیره‌سازی دیتای داینامیک استفاده کنید. بیشتر دیتابیس‌های رابطه‌ایی  ...">
+    <meta name="twitter:card" content="در  مطلب قبلی ، مدل EAV را معرفی کردیم و گفتیم که این نوع پیاده‌سازی در واقع یک SQL Smell است؛ زیرا کوئری نویسی را سخت میکند و همچنین به دلیل عدم امکان تعریف constraints، کنترلی بر روی صحت دیتاهای وارده شد نخواهیم داشت. در نهایت با برنامه‌ای روبرو خواهیم شد که درک صحیحی از ماهیت دیتا ندارد. اما اگر در شرایطی مجبور به استفاده‌ی از این مدل هستید، بهتر است از فرمت JSON برای ذخیره‌سازی دیتای داینامیک استفاده کنید. بیشتر دیتابیس‌های رابطه‌ایی  ...">
+    <meta property="article:published_time" content="Tue, 04 Aug 2020 12:35:02 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫سری بررسی SQL Smell در EF Core - استفاده از مدل Entity Attribute Value - بخش دوم";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-3236.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫روشی برای محدود کردن API ها که هر درخواست با یک Key جدید و منحصر به فرد قابل فراخوانی باشد ( Time-based One-time Password )</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-3234.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫کوئری نویسی در EF Core - قسمت هشتم - کوئری‌های بازگشتی</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫سری بررسی SQL Smell در EF Core - استفاده از مدل Entity Attribute Value - بخش دوم</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>سیروان عفیفی<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۹/۰۵/۱۴ ۱۲:۳۵</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-3235.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><div>در&nbsp;<a href="www.dntips.ir-posts-3233.html">مطلب قبلی</a>، مدل EAV را معرفی کردیم و گفتیم که این نوع پیاده‌سازی در واقع یک SQL Smell است؛ زیرا کوئری نویسی را سخت میکند و همچنین به دلیل عدم امکان تعریف constraints، کنترلی بر روی صحت دیتاهای وارده شد نخواهیم داشت. در نهایت با برنامه‌ای روبرو خواهیم شد که درک صحیحی از ماهیت دیتا ندارد. اما اگر در شرایطی مجبور به استفاده‌ی از این مدل هستید، بهتر است از فرمت JSON برای ذخیره‌سازی دیتای داینامیک استفاده کنید. بیشتر دیتابیس‌های رابطه‌ایی به صورت native از نوع داده‌ایی JSON پشتیبانی میکنند:&nbsp;&nbsp;</div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="Sql" name="code">CREATE TABLE EmployeeJsonAttributes (
+  Id int NOT NULL AUTO_INCREMENT,
+  EmployeeId int NOT NULL,
+  Attributes json DEFAULT NULL,
+  PRIMARY KEY (Id),
+  FOREIGN KEY (EmployeeId) REFERENCES EmployeeEav (Id) ON DELETE CASCADE
+)</pre> </div>
+همانطور که مشاهده می‌کنید در اینجا تایپ ستون Attributes، به JSON تنظیم شده است. بنابراین می‌توانیم از قابلیت‌های توکار دیتابیس (MySQL در مطلب جاری) برای ذخیره و بازیابی داده‌های JSON استفاده کنیم. در ادامه دو روش ذخیره JSON&nbsp; را مشاهده میکنید:&nbsp; <br> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="Sql" name="code">INSERT INTO EmployeeJsonAttributes VALUES (
+101, 
+  '{
+  "name": "Jon",
+    "lastName": "Doe",
+    "dateOfBirth": "1989-01-01 10:10:10+05:30",
+    "skills": [ "C#", "JS" ],
+    "address":  {
+  "country": "UK",
+      "city": "London",
+      "email": "jon.doe@example.com"
+    }
+  }'
+)
+
+INSERT INTO efcoresample.EmployeeJsonAttributes VALUES (
+101, 
+  JSON_OBJECT(
+"name", "Jon", 
+"lastName", "Doe",
+"dateOfBirth", "1989-01-01 10:10:10+05:30",
+"skills", JSON_ARRAY("C#", "JS"),
+    "address", JSON_OBJECT(
+  "country", "UK",
+      "city", "London",
+  "email", "jon.doe@example.com"
+    )
+  )
+)</pre> </div> <br> </div> <div>به عنوان مثال&nbsp;در ادامه میخواهیم کشور محل تولد یک کاربر خاص را نمایش دهیم. برای اینکار می‌توانیم از JSON_EXTRACT استفاده کنیم: <br> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="Sql" name="code">SELECT JSON_EXTRACT(Attributes, '$.address.country') as Country 
+FROM EmployeeJsonAttributes
+WHERE EmployeeId = 101;
+
+-- Conutry
+-- "UK"</pre> </div> <br> </div> <div>همچنین می‌توانیم از عملگر column-path نیز به جای JSON_EXTRACT استفاده کنیم: <br> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="Sql" name="code">SELECT Attributes -&gt; '$.address.country' as Country 
+FROM EmployeeJsonAttributes
+WHERE EmployeeId = 101;
+
+-- Conutry
+-- "UK"</pre> </div> <br> </div> <div>بنابراین به راحتی می‌توانیم کوئری مطلب قبل را اینگونه بازنویسی کنیم: <br> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="Sql" name="code">SELECT EmployeeId, Attributes -&gt;&gt; '$.DateOfBirth' AS BirthDate FROM EmployeeJsonAttributes
+WHERE Attributes -&gt;&gt; '$.DateOfBirth' &gt; DATE_SUB(CURRENT_DATE(), INTERVAL 25 YEAR)</pre> </div>
+همانطور که مشاهده می‌کنید در کوئری فوق یک عملگر &lt; دیگر نیز اضافه کرده‌ایم. هدف از آن حذف “” از خروجی نهایی می‌باشد.&nbsp; <br> </div> <div> <br> </div> <div> <b>استفاده از JSON در EF Core&nbsp;<br> </b> </div> <div>متاسفانه در EF Core به صورت مستقیم نمی‌توانیم از JSON درون کلاس‌های سی‌شارپ استفاده کنیم (<a href="https://github.com/dotnet/efcore/issues/4021">+</a>&nbsp;)، در نتیجه در سمت کلاس‌های سی‌شارپ باید از string استفاده کنیم و به نوعی به EF Core اطلاع دهیم که تایپ ستون موردنظرمان JSON است. در نتیجه خروجی نهایی درون دیتابیس، یک فیلد با تایپ JSON خواهد بود. برای اینکار به دو شیوه می‌توانیم تایپ ستون موردنظر را تعیین کنیم:&nbsp;</div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">// Fluent API
+protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+    modelBuilder.Entity&lt;Employee&gt;(entity =&gt;
+    {
+        entity.Property(e =&gt; e.Attributes).HasColumnType("json");
+    });
+}
+
+// Data Annotations
+[Column(TypeName = "json")]
+public string Attributes { get; set; }</pre> </div> <br> </div> <div>در نهایت برای تشکیل بانک اطلاعاتی، به مدلی با ساختار زیر نیاز خواهیم داشت: <br> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">public class EmployeeJsonAttribute
+{
+    public int Id { get; set; }
+    public virtual EmployeeEav Employee { get; set; }
+    public int EmployeeId { get; set; }
+    [Column(TypeName = "json")]
+    public string Attributes { get; set; }
+}</pre> </div>
+در اینجا به جای تعریف ستون‌ها و مقادیر داینامیک‌شان از یک فیلد از نوع رشته‌ایی با نام Attributes استفاده شده است. از آنجائیکه نوع ستون در سمت دیتابیس به JSON تنظیم خواهد شد، در نتیجه هر نوع ساختار JSON معتبری را می‌توانیم درون آن ذخیره کنیم: <br> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">dbContext.EmployeeJsonAttributes.Add(new EmployeeJsonAttribute
+{
+    EmployeeId =  101,
+    Attributes = JsonSerializer.Serialize(new
+    {
+        FirstName = "Sirwan",
+        LastName = "Afifi",
+        DateOfBirth = DateTime.Now.AddYears(-31)
+    })
+});
+
+dbContext.SaveChanges();</pre> </div>
+همانطور که اشاره شده به دلیل عدم پشتیبانی از JSON در حال حاضر در EF Core امکان کوئری نویسی بر روی ستون JSON را نداریم. در همین حد که براساس فیلدهای دیگر جستجو را انجام داده و خروجی را Deserialize کنیم: <br> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">var employee = dbContext.EmployeeJsonAttributes.Find(201);
+Console.WriteLine(JsonSerializer.Deserialize&lt;Employee&gt;(employee.Attributes).DateOfBirth);</pre> </div> <br> </div> <div>برای نوشتن کوئری روی ستون JSON می‌توانید از&nbsp;<a href="www.dntips.ir-posts-2502.html">Query Types</a>&nbsp; نیز استفاده کنید.&nbsp; <br> </div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-8325.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>پروژه‌ی KendoGridBinderEx</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20174.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>بهبود پارامترسازی کوئری‌ها در Entity Framework Core 9.0</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3233.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>سری بررسی SQL Smell در EF Core - استفاده از مدل Entity Attribute Value - بخش اول</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2350.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Delegate در سی شارپ</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3552.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>استفاده از JSON در EF Core 8</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1478.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با SQL Server Common Table Expressions - CTE</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3647.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>پشتیبانی از نوع داده JSON در EF Core 10: تحولی در مدیریت داده‌های ساخت‌یافته</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3266.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>کار با دیتاتایپ JSON در MySQL - قسمت دوم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-840.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>EF Code First #10</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3627.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>Domain-Driven Design (DDD)؛ بخش یازدهم: DDD با EF Core؛ قسمت سوم</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۹/۰۵/۱۴ ۱۲:۳۹</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div> <b>چند نکته‌ی تکمیلی</b> </div> <div>در نگارش‌های اخیر EF-Core:<br> </div> <ul> <li>می‌توان برای فیلدهای از نوع JSON <a href="www.dntips.ir-posts-3015.html">تبدیلگر نوشت</a>.</li> <li>همچنین می‌توان برای آن‌ها <a href="www.dntips.ir-posts-3197.html">توابع سفارشی</a>   را نیز تهیه کرد.</li> </ul></div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>محسن خان</strong>  در  <span dir='ltr'>۱۳۹۹/۰۶/۰۵ ۱۰:۳۵</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>با تشکر از شما؛ آیا از منبع خاصی برای این سری استفاده کردید؟</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>سیروان عفیفی</strong>  در  <span dir='ltr'>۱۳۹۹/۰۶/۰۵ ۱۵:۴۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div>از این مطالب کمک گرفتم البته یکسری مطالب دیگه هم بودن من فقط اینا رو تونستم از History مرورگرم استخراج کنم (بوک‌مارک نکرده بودم):</div> <div> <br> </div> <ul> <li> <a href="https://blog.greglow.com/2018/02/12/sql-design-entity-attribute-value-tables-part-1/">https://blog.greglow.com/2018/02/12/sql-design-entity-attribute-value-tables-part-1/&nbsp; </a> <br> </li> <li> <a href="https://blog.greglow.com/2018/02/19/sql-design-entity-attribute-value-tables-part-2-pros-cons/">https://blog.greglow.com/2018/02/19/sql-design-entity-attribute-value-tables-part-2-pros-cons/&nbsp; </a> <br> </li> <li> <a href="https://ekobit.com/blog/designing-an-entity-attribute-value-model-with-ef-core/">https://ekobit.com/blog/designing-an-entity-attribute-value-model-with-ef-core/&nbsp; </a> <br> </li> <li> <a href="https://sqlblog.org/2009/11/19/what-is-so-bad-about-eav-anyway">https://sqlblog.org/2009/11/19/what-is-so-bad-about-eav-anyway&nbsp; </a> <br> </li> <li> <a href="https://modern-sql.com/use-case/pivot">https://modern-sql.com/use-case/pivot&nbsp; </a> <br> </li> <li> <a href="https://mariadb.com/kb/en/entity-attribute-value-implementation/">https://mariadb.com/kb/en/entity-attribute-value-implementation/&nbsp; </a> <br> </li> <li> <a href="https://vladmihalcea.com/how-to-store-schema-less-eav-entity-attribute-value-data-using-json-and-hibernate/">https://vladmihalcea.com/how-to-store-schema-less-eav-entity-attribute-value-data-using-json-and-hibernate/&nbsp; </a> <br> </li> <li> <a href="https://www.2ndquadrant.com/en/blog/postgresql-anti-patterns-unnecessary-jsonhstore-dynamic-columns/">https://www.2ndquadrant.com/en/blog/postgresql-anti-patterns-unnecessary-jsonhstore-dynamic-columns/&nbsp; </a> <br> </li> <li> <a href="https://coussej.github.io/2016/01/14/Replacing-EAV-with-JSONB-in-PostgreSQL/">https://coussej.github.io/2016/01/14/Replacing-EAV-with-JSONB-in-PostgreSQL/&nbsp; </a> <br> </li> <li> <a href="https://davidlaprade.github.io/storing-arbitrary-model-attributes">https://davidlaprade.github.io/storing-arbitrary-model-attributes&nbsp; </a> <br> </li> <li> <a href="https://inviqa.com/blog/understanding-eav-data-model-and-when-use-it">https://inviqa.com/blog/understanding-eav-data-model-and-when-use-it&nbsp; </a> <br> </li> <li> <a href="https://mikesmithers.wordpress.com/2013/12/22/the-anti-pattern-eavil-database-design/">https://mikesmithers.wordpress.com/2013/12/22/the-anti-pattern-eavil-database-design/&nbsp; </a> <br> </li> <li> <a href="http://duhallowgreygeek.com/entity-attribute-value-eav-model-sql-smell/">http://duhallowgreygeek.com/entity-attribute-value-eav-model-sql-smell/&nbsp; </a> </li> </ul> <div> <br> </div> <div>+ قبلاً با این نوع مشکلات در طراحی دیتابیس مواجه شده بودم.</div></div>
+</div></li></ul></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

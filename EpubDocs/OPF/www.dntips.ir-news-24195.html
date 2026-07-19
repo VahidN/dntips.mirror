@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫بهینه‌سازی و تقویت یک میکروسرویس جستجوی پرواز و فروش در .NET</title>     <meta name="description" content="این مقاله به بررسی عمیق بهینه‌سازی و تقویت یک میکروسرویس جستجوی پرواز و فروش می‌پردازد که با چندین ارائه‌دهنده داده‌های هوانوردی و سیستم‌های قیمت‌گذاری داخلی یکپارچه شده است. هدف اصلی، کاهش ترافیک شبکه، بهبود تأخیر و صرفه‌جویی در هزینه‌های ابری بوده است.
+
+تیم توسعه‌دهنده با بازآرایی و بهینه‌سازی این میکروسرویس، موفق به کاهش 55 درصدی ترافیک شبکه، کاهش 40 درصدی تأخیر P95 و صرفه‌جویی تقریبی 80 میلیون تومان در سال در هزینه‌های ابری شده است. علاوه بر این، فشار GC کاهش یافته و ایمنی و سهولت استقرار بهبود یافته است. این بهبودها شامل تغییرات در پشته HTTP، JSON، مدیریت حافظه، الگوهای ناهمگام، انعطاف‌پذیری، کش، پیکربندی، فشرده‌سازی، ثبت وقایع ساختاریافته و استراتژی استقرار است.
+
+در این مقاله، تغییرات معماری از یک ساختار قدیمی با استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;HttpClient&lt;/code&gt; جدید در هر درخواست و تجزیه و تحلیل پویا با &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Newtonsoft.Json&lt;/code&gt; به یک معماری بهینه‌سازی شده با استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IHttpClientFactory&lt;/code&gt;، &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Polly&lt;/code&gt; برای بازیابی خطا، &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;System.Text.Json&lt;/code&gt; با تولید کد و &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;HashSet/Dictionary&lt;/code&gt; برای جستجوهای سریع‌تر، بررسی می‌شود. همچنین، استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;MemoryCache&lt;/code&gt; برای داده‌های استاتیک، ثبت وقایع ساختاریافته و فشرده‌سازی &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Brotli/Gzip&lt;/code&gt; نیز در این بهینه‌سازی‌ها نقش داشته‌اند.
+
+به‌روزرسانی به &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;.NET 8&lt;/code&gt; نیز به عنوان بخشی از این فرآیند بهینه‌سازی در نظر گرفته شده است. این مقاله برای مهندسان ارشد بک‌اند و معماران پلتفرم طراحی شده است و با ارائه کدهای عملی، جزئیات فنی مربوط به بهبودهای تولیدی را شرح می‌دهد. در نهایت، این تغییرات منجر به بهبود عملکرد و کاهش هزینه‌ها در سیستم جستجوی پرواز و فروش شده است.">
+    <meta name="author" content="راویAI">
+    <meta itemprop="name" content="بهینه‌سازی و تقویت یک میکروسرویس جستجوی پرواز و فروش در .NET">
+    <meta itemprop="description" content="این مقاله به بررسی عمیق بهینه‌سازی و تقویت یک میکروسرویس جستجوی پرواز و فروش می‌پردازد که با چندین ارائه‌دهنده داده‌های هوانوردی و سیستم‌های قیمت‌گذاری داخلی یکپارچه شده است. هدف اصلی، کاهش ترافیک شبکه، بهبود تأخیر و صرفه‌جویی در هزینه‌های ابری بوده است.
+
+تیم توسعه‌دهنده با بازآرایی و بهینه‌سازی این میکروسرویس، موفق به کاهش 55 درصدی ترافیک شبکه، کاهش 40 درصدی تأخیر P95 و صرفه‌جویی تقریبی 80 میلیون تومان در سال در هزینه‌های ابری شده است. علاوه بر این، فشار GC کاهش یافته و ایمنی و سهولت استقرار بهبود یافته است. این بهبودها شامل تغییرات در پشته HTTP، JSON، مدیریت حافظه، الگوهای ناهمگام، انعطاف‌پذیری، کش، پیکربندی، فشرده‌سازی، ثبت وقایع ساختاریافته و استراتژی استقرار است.
+
+در این مقاله، تغییرات معماری از یک ساختار قدیمی با استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;HttpClient&lt;/code&gt; جدید در هر درخواست و تجزیه و تحلیل پویا با &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Newtonsoft.Json&lt;/code&gt; به یک معماری بهینه‌سازی شده با استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IHttpClientFactory&lt;/code&gt;، &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Polly&lt;/code&gt; برای بازیابی خطا، &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;System.Text.Json&lt;/code&gt; با تولید کد و &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;HashSet/Dictionary&lt;/code&gt; برای جستجوهای سریع‌تر، بررسی می‌شود. همچنین، استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;MemoryCache&lt;/code&gt; برای داده‌های استاتیک، ثبت وقایع ساختاریافته و فشرده‌سازی &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Brotli/Gzip&lt;/code&gt; نیز در این بهینه‌سازی‌ها نقش داشته‌اند.
+
+به‌روزرسانی به &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;.NET 8&lt;/code&gt; نیز به عنوان بخشی از این فرآیند بهینه‌سازی در نظر گرفته شده است. این مقاله برای مهندسان ارشد بک‌اند و معماران پلتفرم طراحی شده است و با ارائه کدهای عملی، جزئیات فنی مربوط به بهبودهای تولیدی را شرح می‌دهد. در نهایت، این تغییرات منجر به بهبود عملکرد و کاهش هزینه‌ها در سیستم جستجوی پرواز و فروش شده است.">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="بهینه‌سازی و تقویت یک میکروسرویس جستجوی پرواز و فروش در .NET">
+    <meta property="og:description" content="این مقاله به بررسی عمیق بهینه‌سازی و تقویت یک میکروسرویس جستجوی پرواز و فروش می‌پردازد که با چندین ارائه‌دهنده داده‌های هوانوردی و سیستم‌های قیمت‌گذاری داخلی یکپارچه شده است. هدف اصلی، کاهش ترافیک شبکه، بهبود تأخیر و صرفه‌جویی در هزینه‌های ابری بوده است.
+
+تیم توسعه‌دهنده با بازآرایی و بهینه‌سازی این میکروسرویس، موفق به کاهش 55 درصدی ترافیک شبکه، کاهش 40 درصدی تأخیر P95 و صرفه‌جویی تقریبی 80 میلیون تومان در سال در هزینه‌های ابری شده است. علاوه بر این، فشار GC کاهش یافته و ایمنی و سهولت استقرار بهبود یافته است. این بهبودها شامل تغییرات در پشته HTTP، JSON، مدیریت حافظه، الگوهای ناهمگام، انعطاف‌پذیری، کش، پیکربندی، فشرده‌سازی، ثبت وقایع ساختاریافته و استراتژی استقرار است.
+
+در این مقاله، تغییرات معماری از یک ساختار قدیمی با استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;HttpClient&lt;/code&gt; جدید در هر درخواست و تجزیه و تحلیل پویا با &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Newtonsoft.Json&lt;/code&gt; به یک معماری بهینه‌سازی شده با استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IHttpClientFactory&lt;/code&gt;، &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Polly&lt;/code&gt; برای بازیابی خطا، &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;System.Text.Json&lt;/code&gt; با تولید کد و &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;HashSet/Dictionary&lt;/code&gt; برای جستجوهای سریع‌تر، بررسی می‌شود. همچنین، استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;MemoryCache&lt;/code&gt; برای داده‌های استاتیک، ثبت وقایع ساختاریافته و فشرده‌سازی &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Brotli/Gzip&lt;/code&gt; نیز در این بهینه‌سازی‌ها نقش داشته‌اند.
+
+به‌روزرسانی به &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;.NET 8&lt;/code&gt; نیز به عنوان بخشی از این فرآیند بهینه‌سازی در نظر گرفته شده است. این مقاله برای مهندسان ارشد بک‌اند و معماران پلتفرم طراحی شده است و با ارائه کدهای عملی، جزئیات فنی مربوط به بهبودهای تولیدی را شرح می‌دهد. در نهایت، این تغییرات منجر به بهبود عملکرد و کاهش هزینه‌ها در سیستم جستجوی پرواز و فروش شده است.">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="بهینه‌سازی و تقویت یک میکروسرویس جستجوی پرواز و فروش در .NET">
+    <meta name="twitter:description" content="این مقاله به بررسی عمیق بهینه‌سازی و تقویت یک میکروسرویس جستجوی پرواز و فروش می‌پردازد که با چندین ارائه‌دهنده داده‌های هوانوردی و سیستم‌های قیمت‌گذاری داخلی یکپارچه شده است. هدف اصلی، کاهش ترافیک شبکه، بهبود تأخیر و صرفه‌جویی در هزینه‌های ابری بوده است.
+
+تیم توسعه‌دهنده با بازآرایی و بهینه‌سازی این میکروسرویس، موفق به کاهش 55 درصدی ترافیک شبکه، کاهش 40 درصدی تأخیر P95 و صرفه‌جویی تقریبی 80 میلیون تومان در سال در هزینه‌های ابری شده است. علاوه بر این، فشار GC کاهش یافته و ایمنی و سهولت استقرار بهبود یافته است. این بهبودها شامل تغییرات در پشته HTTP، JSON، مدیریت حافظه، الگوهای ناهمگام، انعطاف‌پذیری، کش، پیکربندی، فشرده‌سازی، ثبت وقایع ساختاریافته و استراتژی استقرار است.
+
+در این مقاله، تغییرات معماری از یک ساختار قدیمی با استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;HttpClient&lt;/code&gt; جدید در هر درخواست و تجزیه و تحلیل پویا با &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Newtonsoft.Json&lt;/code&gt; به یک معماری بهینه‌سازی شده با استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IHttpClientFactory&lt;/code&gt;، &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Polly&lt;/code&gt; برای بازیابی خطا، &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;System.Text.Json&lt;/code&gt; با تولید کد و &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;HashSet/Dictionary&lt;/code&gt; برای جستجوهای سریع‌تر، بررسی می‌شود. همچنین، استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;MemoryCache&lt;/code&gt; برای داده‌های استاتیک، ثبت وقایع ساختاریافته و فشرده‌سازی &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Brotli/Gzip&lt;/code&gt; نیز در این بهینه‌سازی‌ها نقش داشته‌اند.
+
+به‌روزرسانی به &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;.NET 8&lt;/code&gt; نیز به عنوان بخشی از این فرآیند بهینه‌سازی در نظر گرفته شده است. این مقاله برای مهندسان ارشد بک‌اند و معماران پلتفرم طراحی شده است و با ارائه کدهای عملی، جزئیات فنی مربوط به بهبودهای تولیدی را شرح می‌دهد. در نهایت، این تغییرات منجر به بهبود عملکرد و کاهش هزینه‌ها در سیستم جستجوی پرواز و فروش شده است.">
+    <meta name="twitter:card" content="این مقاله به بررسی عمیق بهینه‌سازی و تقویت یک میکروسرویس جستجوی پرواز و فروش می‌پردازد که با چندین ارائه‌دهنده داده‌های هوانوردی و سیستم‌های قیمت‌گذاری داخلی یکپارچه شده است. هدف اصلی، کاهش ترافیک شبکه، بهبود تأخیر و صرفه‌جویی در هزینه‌های ابری بوده است.
+
+تیم توسعه‌دهنده با بازآرایی و بهینه‌سازی این میکروسرویس، موفق به کاهش 55 درصدی ترافیک شبکه، کاهش 40 درصدی تأخیر P95 و صرفه‌جویی تقریبی 80 میلیون تومان در سال در هزینه‌های ابری شده است. علاوه بر این، فشار GC کاهش یافته و ایمنی و سهولت استقرار بهبود یافته است. این بهبودها شامل تغییرات در پشته HTTP، JSON، مدیریت حافظه، الگوهای ناهمگام، انعطاف‌پذیری، کش، پیکربندی، فشرده‌سازی، ثبت وقایع ساختاریافته و استراتژی استقرار است.
+
+در این مقاله، تغییرات معماری از یک ساختار قدیمی با استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;HttpClient&lt;/code&gt; جدید در هر درخواست و تجزیه و تحلیل پویا با &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Newtonsoft.Json&lt;/code&gt; به یک معماری بهینه‌سازی شده با استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;IHttpClientFactory&lt;/code&gt;، &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Polly&lt;/code&gt; برای بازیابی خطا، &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;System.Text.Json&lt;/code&gt; با تولید کد و &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;HashSet/Dictionary&lt;/code&gt; برای جستجوهای سریع‌تر، بررسی می‌شود. همچنین، استفاده از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;MemoryCache&lt;/code&gt; برای داده‌های استاتیک، ثبت وقایع ساختاریافته و فشرده‌سازی &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Brotli/Gzip&lt;/code&gt; نیز در این بهینه‌سازی‌ها نقش داشته‌اند.
+
+به‌روزرسانی به &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;.NET 8&lt;/code&gt; نیز به عنوان بخشی از این فرآیند بهینه‌سازی در نظر گرفته شده است. این مقاله برای مهندسان ارشد بک‌اند و معماران پلتفرم طراحی شده است و با ارائه کدهای عملی، جزئیات فنی مربوط به بهبودهای تولیدی را شرح می‌دهد. در نهایت، این تغییرات منجر به بهبود عملکرد و کاهش هزینه‌ها در سیستم جستجوی پرواز و فروش شده است.">
+    <meta property="article:published_time" content="Sun, 22 Feb 2026 05:47:16 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫بهینه‌سازی و تقویت یک میکروسرویس جستجوی پرواز و فروش در .NET";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-news-24196.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫اصل مسئولیت واحد در C#: بخش اول</span>
+   </h6>
+</a><a href='www.dntips.ir-news-24194.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫مقایسه اتصال به پایگاه داده در C# (ADO.NET) و Java (JDBC)</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫بهینه‌سازی و تقویت یک میکروسرویس جستجوی پرواز و فروش در .NET</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>راویAI<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۴/۱۲/۰۳ ۰۹:۱۷</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-news-24195.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>این مقاله به بررسی عمیق بهینه‌سازی و تقویت یک میکروسرویس جستجوی پرواز و فروش می‌پردازد که با چندین ارائه‌دهنده داده‌های هوانوردی و سیستم‌های قیمت‌گذاری داخلی یکپارچه شده است. هدف اصلی، کاهش ترافیک شبکه، بهبود تأخیر و صرفه‌جویی در هزینه‌های ابری بوده است.
+
+تیم توسعه‌دهنده با بازآرایی و بهینه‌سازی این میکروسرویس، موفق به کاهش 55 درصدی ترافیک شبکه، کاهش 40 درصدی تأخیر P95 و صرفه‌جویی تقریبی 80 میلیون تومان در سال در هزینه‌های ابری شده است. علاوه بر این، فشار GC کاهش یافته و ایمنی و سهولت استقرار بهبود یافته است. این بهبودها شامل تغییرات در پشته HTTP، JSON، مدیریت حافظه، الگوهای ناهمگام، انعطاف‌پذیری، کش، پیکربندی، فشرده‌سازی، ثبت وقایع ساختاریافته و استراتژی استقرار است.
+
+در این مقاله، تغییرات معماری از یک ساختار قدیمی با استفاده از <code dir='ltr' style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">HttpClient</code> جدید در هر درخواست و تجزیه و تحلیل پویا با <code dir='ltr' style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Newtonsoft.Json</code> به یک معماری بهینه‌سازی شده با استفاده از <code dir='ltr' style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IHttpClientFactory</code>، <code dir='ltr' style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Polly</code> برای بازیابی خطا، <code dir='ltr' style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">System.Text.Json</code> با تولید کد و <code dir='ltr' style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">HashSet/Dictionary</code> برای جستجوهای سریع‌تر، بررسی می‌شود. همچنین، استفاده از <code dir='ltr' style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">MemoryCache</code> برای داده‌های استاتیک، ثبت وقایع ساختاریافته و فشرده‌سازی <code dir='ltr' style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Brotli/Gzip</code> نیز در این بهینه‌سازی‌ها نقش داشته‌اند.
+
+به‌روزرسانی به <code dir='ltr' style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">.NET 8</code> نیز به عنوان بخشی از این فرآیند بهینه‌سازی در نظر گرفته شده است. این مقاله برای مهندسان ارشد بک‌اند و معماران پلتفرم طراحی شده است و با ارائه کدهای عملی، جزئیات فنی مربوط به بهبودهای تولیدی را شرح می‌دهد. در نهایت، این تغییرات منجر به بهبود عملکرد و کاهش هزینه‌ها در سیستم جستجوی پرواز و فروش شده است.</div><br><br><a href='https://dev.to/jaydeep_kr_sahu/hardening-optimizing-a-net-flight-search-sell-microservice-2ffe'>مشاهده مطلب اصلی</a></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20527.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>هزینه واقعی LLMهای متن‌باز: بازنگری هزینه‌های پنهان تولید</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-23313.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>Azure Functions: یک راهکار قدرتمند بی‌سرور</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20501.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>بهبود مدیریت حافظه در Kestrel با دات‌نت 10</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20120.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>مقایسه میکروسرویس‌ها با مونولیت‌های ماژولار (Microservices vs. Modular Monoliths)</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-21708.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>بنیان‌گذار Tailwind CSS: با وجود محبوبیت، درآمد ۸۰٪ کاهش یافته است</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20100.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>APIهای هوش مصنوعی در سال 2025: مروری بر ارائه‌دهندگان کلیدی</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-21674.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>هنر عوامل سریع: ۱۷ راهکار برای رفع تأخیر</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3390.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>تفاوت سیستم‌های یکپارچه با میکروسرویس‌ها (Monolithic vs Microservices architecture)</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3274.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>یک سرویس (میکروسرویس) چیست؟ و چگونه آن را مستند کنیم؟ (قسمت اول)</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3275.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>یک سرویس (میکروسرویس) چیست؟ و چگونه آن را مستند کنیم؟ (قسمت دوم)</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

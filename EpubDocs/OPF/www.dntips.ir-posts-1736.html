@@ -1,0 +1,2088 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫انجام کارهای زمانبندی شده در برنامه‌های ASP.NET توسط DNT Scheduler</title>     <meta name="description" content="اگر به دو مطلب استفاده از Quartz.Net ( ^   و  ^ ) و خصوصا نظرات آن دقت کرده باشید به این نتیجه خواهید رسید که ... این کتابخانه‌ی در اصل جاوایی گنگ طراحی شده‌است. در سایت جاری برای انجام کارهای زمانبندی شده (مانند ارسال ایمیل‌های روزانه خلاصه مطالب، تهیه خروجی PDF و XML سایت، تبدیل پیش نویس‌ها به مطالب، بازسازی ایندکس‌های جستجو و امثال آن) از یک Thread timer استفاده می‌شود که حجم نهایی کتابخانه‌ی محصور کننده و مدیریت کننده‌ی وظایف آن جمعا 8 ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="انجام کارهای زمانبندی شده در برنامه‌های ASP.NET توسط DNT Scheduler">
+    <meta itemprop="description" content="اگر به دو مطلب استفاده از Quartz.Net ( ^   و  ^ ) و خصوصا نظرات آن دقت کرده باشید به این نتیجه خواهید رسید که ... این کتابخانه‌ی در اصل جاوایی گنگ طراحی شده‌است. در سایت جاری برای انجام کارهای زمانبندی شده (مانند ارسال ایمیل‌های روزانه خلاصه مطالب، تهیه خروجی PDF و XML سایت، تبدیل پیش نویس‌ها به مطالب، بازسازی ایندکس‌های جستجو و امثال آن) از یک Thread timer استفاده می‌شود که حجم نهایی کتابخانه‌ی محصور کننده و مدیریت کننده‌ی وظایف آن جمعا 8 ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="انجام کارهای زمانبندی شده در برنامه‌های ASP.NET توسط DNT Scheduler">
+    <meta property="og:description" content="اگر به دو مطلب استفاده از Quartz.Net ( ^   و  ^ ) و خصوصا نظرات آن دقت کرده باشید به این نتیجه خواهید رسید که ... این کتابخانه‌ی در اصل جاوایی گنگ طراحی شده‌است. در سایت جاری برای انجام کارهای زمانبندی شده (مانند ارسال ایمیل‌های روزانه خلاصه مطالب، تهیه خروجی PDF و XML سایت، تبدیل پیش نویس‌ها به مطالب، بازسازی ایندکس‌های جستجو و امثال آن) از یک Thread timer استفاده می‌شود که حجم نهایی کتابخانه‌ی محصور کننده و مدیریت کننده‌ی وظایف آن جمعا 8 ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="انجام کارهای زمانبندی شده در برنامه‌های ASP.NET توسط DNT Scheduler">
+    <meta name="twitter:description" content="اگر به دو مطلب استفاده از Quartz.Net ( ^   و  ^ ) و خصوصا نظرات آن دقت کرده باشید به این نتیجه خواهید رسید که ... این کتابخانه‌ی در اصل جاوایی گنگ طراحی شده‌است. در سایت جاری برای انجام کارهای زمانبندی شده (مانند ارسال ایمیل‌های روزانه خلاصه مطالب، تهیه خروجی PDF و XML سایت، تبدیل پیش نویس‌ها به مطالب، بازسازی ایندکس‌های جستجو و امثال آن) از یک Thread timer استفاده می‌شود که حجم نهایی کتابخانه‌ی محصور کننده و مدیریت کننده‌ی وظایف آن جمعا 8 ...">
+    <meta name="twitter:card" content="اگر به دو مطلب استفاده از Quartz.Net ( ^   و  ^ ) و خصوصا نظرات آن دقت کرده باشید به این نتیجه خواهید رسید که ... این کتابخانه‌ی در اصل جاوایی گنگ طراحی شده‌است. در سایت جاری برای انجام کارهای زمانبندی شده (مانند ارسال ایمیل‌های روزانه خلاصه مطالب، تهیه خروجی PDF و XML سایت، تبدیل پیش نویس‌ها به مطالب، بازسازی ایندکس‌های جستجو و امثال آن) از یک Thread timer استفاده می‌شود که حجم نهایی کتابخانه‌ی محصور کننده و مدیریت کننده‌ی وظایف آن جمعا 8 ...">
+    <meta property="article:published_time" content="Mon, 17 Mar 2014 11:40:02 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫انجام کارهای زمانبندی شده در برنامه‌های ASP.NET توسط DNT Scheduler";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-1737.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫ساخت کاربر ویندوز توسط SQL Server</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-1735.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫مسیریابی تو در تو در Angularjs با استفاده از UI-Router</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫انجام کارهای زمانبندی شده در برنامه‌های ASP.NET توسط DNT Scheduler</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۲/۱۲/۲۶ ۱۱:۴۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-1736.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'>اگر به دو مطلب استفاده از Quartz.Net (<a href="www.dntips.ir-posts-997.html">^</a>  و <a href="www.dntips.ir-posts-999.html">^</a>) و خصوصا نظرات آن دقت کرده باشید به این نتیجه خواهید رسید که ... این کتابخانه‌ی در اصل جاوایی گنگ طراحی شده‌است. در سایت جاری برای انجام کارهای زمانبندی شده (مانند ارسال ایمیل‌های روزانه خلاصه مطالب، تهیه خروجی PDF و XML سایت، تبدیل پیش نویس‌ها به مطالب، بازسازی ایندکس‌های جستجو و امثال آن) از یک Thread timer استفاده می‌شود که حجم نهایی کتابخانه‌ی محصور کننده و مدیریت کننده‌ی وظایف آن جمعا 8 کیلوبایت است؛ متشکل از ... سه کلاس. در ادامه کدهای کامل و نحوه‌ی استفاده از آن را بررسی خواهیم کرد.<br> <br> <br> <b>
+
+دریافت کتابخانه DNT Scheduler و مثال آن</b> <br> <br> <a href="https://github.com/VahidN/DNTScheduler">DNTScheduler</a>&nbsp; <br>
+
+
+
+
+
+
+
+در این بسته، کدهای کتابخانه‌ی DNT Scheduler و یک مثال وب فرم را، ملاحظه خواهید کرد. از این جهت که برای ثبت وظایف این کتابخانه، از فایل global.asax.cs استفاده می‌شود، اهمیتی ندارد که پروژه‌ی شما وب فرم است یا MVC. با هر دو حالت کار می‌کند.<br> <br> <br> <br> <b>
+
+نحوه‌ی تعریف یک وظیفه‌ی جدید</b> <br> <br>
+
+
+
+
+
+
+
+کار با تعریف یک کلاس و پیاده سازی ScheduledTaskTemplate شروع می‌شود:<br> <div dir="ltr" align="left"> <pre language="CSharp" name="code"> public class SendEmailsTask : ScheduledTaskTemplate</pre> </div>
+
+
+
+
+
+برای نمونه :<br> <div dir="ltr" align="left"> <pre language="CSharp" name="code">using System;
+
+namespace DNTScheduler.TestWebApplication.WebTasks
+{
+    public class SendEmailsTask : ScheduledTaskTemplate
+    {
+        /// &lt;summary&gt;
+        /// اگر چند جاب در یک زمان مشخص داشتید، این خاصیت ترتیب اجرای آن‌ها را مشخص خواهد کرد
+        /// &lt;/summary&gt;
+        public override int Order
+        {
+            get { return 1; }
+        }
+
+        public override bool RunAt(DateTime utcNow)
+        {
+            if (this.IsShuttingDown || this.Pause)
+                return false;
+
+            var now = utcNow.AddHours(3.5);
+            return now.Minute % 2 == 0 &amp;&amp; now.Second == 1;
+        }
+
+        public override void Run()
+        {
+            if (this.IsShuttingDown || this.Pause)
+                return;
+
+            System.Diagnostics.Trace.WriteLine("Running Send Emails");
+        }
+
+        public override string Name
+        {
+            get { return "ارسال ایمیل"; }
+        }
+    }
+}</pre> </div>
+
+
+
+
+
+- در اینجا Order، ترتیب اجرای وظیفه‌ی جاری را در مقایسه با سایر وظیفه‌هایی که قرار است در یک زمان مشخص اجرا شوند، مشخص می‌کند.<br>
+
+
+
+
+
+
+
+- متد RunAt ثانیه‌ای یکبار فراخوانی می‌شود (بنابراین بررسی now.Second را فراموش نکنید). زمان ارسالی به آن UTC است و اگر برای نمونه می‌خواهید بر اساس ساعت ایران کار کنید باید 3.5 ساعت به آن اضافه نمائید. این مساله برای سرورهایی که خارج از ایران قرار دارند مهم است. چون زمان محلی آن‌ها برای تصمیم گیری در مورد زمان اجرای کارها مفید نیست.<br>
+
+
+
+
+
+
+
+در متد RunAt فرصت خواهید داشت تا منطق زمان اجرای وظیفه‌ی جاری را مشخص کنید. برای نمونه در مثال فوق، این وظیفه هر دو دقیقه یکبار اجرا می‌شود. یا اگر خواستید اجرای آن فقط در سال 23 و 33 دقیقه هر روز باشد، تعریف آن به نحو ذیل خواهد بود:<br> <div dir="ltr" align="left"> <pre language="CSharp" name="code">        public override bool RunAt(DateTime utcNow)
+        {
+            if (this.IsShuttingDown || this.Pause)
+                return false;
+
+            var now = utcNow.AddHours(3.5);
+            return now.Hour == 23 &amp;&amp; now.Minute == 33 &amp;&amp; now.Second == 1;
+        }</pre> </div>
+
+
+
+
+
+- خاصیت IsShuttingDown موجود در کلاس پایه ScheduledTaskTemplate، توسط کتابخانه‌ی DNT Scheduler مقدار دهی می‌شود. این کتابخانه قادر است زمان خاموش شدن پروسه‌ی فعلی IIS را تشخیص داده و خاصیت IsShuttingDown را true کند. بنابراین در حین اجرای وظیفه‌ای مشخص، به مقدار IsShuttingDown دقت داشته باشید. اگر true شد، یعنی فقط 30 ثانیه وقت دارید تا کار را تمام کنید.<br>
+
+
+
+
+
+
+
+خاصیت Pause هر وظیفه را برنامه می‌تواند تغییر دهد. به این ترتیب در مورد توقف یا ادامه‌ی یک وظیفه می‌توان تصمیم گیری کرد. خاصیت ScheduledTasksCoordinator.Current.ScheduledTasks، لیست وظایف تعریف شده را در اختیار شما قرار می‌دهد.<br>
+
+
+
+
+
+
+
+- در متد Run، منطق وظیفه‌ی تعریف شده را باید مشخص کرد. برای مثال ارسال ایمیل یا تهیه‌ی بک آپ.<br>
+
+
+
+
+
+
+
+- Name نیز نام وظیفه‌ی جاری است که می‌تواند در گزارشات مفید باشد.<br> <br>
+
+
+
+
+
+
+
+همین مقدار برای تعریف یک وظیفه کافی است.<br> <br> <br> <b>
+
+نحوه‌ی ثبت و راه اندازی وظایف تعریف شده</b> <br> <br>
+
+
+
+
+
+
+
+پس از اینکه چند وظیفه را تعریف کردیم، برای مدیریت بهتر آن‌ها می‌توان یک کلاس ثبت و معرفی کلی را مثلا به نام ScheduledTasksRegistry ایجاد کرد:<br> <div dir="ltr" align="left"> <pre language="CSharp" name="code">using System;
+using System.Net;
+
+namespace DNTScheduler.TestWebApplication.WebTasks
+{
+    public static class ScheduledTasksRegistry
+    {
+        public static void Init()
+        {
+            ScheduledTasksCoordinator.Current.AddScheduledTasks(
+                new SendEmailsTask(),
+                new DoBackupTask());
+
+            ScheduledTasksCoordinator.Current.OnUnexpectedException = (exception, scheduledTask) =&gt;
+            {
+                //todo: log the exception.
+                System.Diagnostics.Trace.WriteLine(scheduledTask.Name + ":" + exception.Message);
+            };
+
+            ScheduledTasksCoordinator.Current.Start();
+        }
+
+        public static void End()
+        {
+            ScheduledTasksCoordinator.Current.Dispose();
+        }
+
+        public static void WakeUp(string pageUrl)
+        {
+            try
+            {
+                using (var client = new WebClient())
+                {
+                    client.Credentials = CredentialCache.DefaultNetworkCredentials;
+                    client.Headers.Add("User-Agent", "ScheduledTasks 1.0");
+                    client.DownloadData(pageUrl);
+                }
+            }
+            catch (Exception ex)
+            {
+                //todo: log ex
+                System.Diagnostics.Trace.WriteLine(ex.Message);
+            }
+        }
+    }
+}</pre> </div>
+
+
+
+
+
+- شیء ScheduledTasksCoordinator.Current، نمایانگر تنها وهله‌ی مدیریت وظایف برنامه است.<br>
+
+
+
+
+
+
+
+- توسط متد ScheduledTasksCoordinator.Current.AddScheduledTasks، تنها کافی است کلاس‌های وظایف مشتق شده از ScheduledTaskTemplate، معرفی شوند. <br>
+
+
+
+
+
+
+
+- به کمک متد ScheduledTasksCoordinator.Current.Start، کار Thread timer برنامه شروع می‌شود.<br>
+
+
+
+
+
+
+
+- اگر در حین اجرای متد Run، استثنایی رخ دهد، آن‌را توسط یک Action delegate به نام ScheduledTasksCoordinator.Current.OnUnexpectedException می‌توانید دریافت کنید. کتابخانه‌ی DNT Scheduler برای اجرای وظایف، از یک ترد با سطح تقدم Below normal استفاده می‌کند تا در حین اجرای وظایف، برنامه‌ی جاری با اخلال و کندی مواجه نشده و بتواند به درخواست‌های رسیده پاسخ دهد. در این بین اگر استثنایی رخ دهد، می‌تواند کل پروسه‌ی IIS را خاموش کند. به همین جهت این کتابخانه کار try/catch استثناهای متد Run را نیز انجام می‌دهد تا از این لحاظ مشکلی نباشد.<br>
+
+
+
+
+
+
+
+- متد ScheduledTasksCoordinator.Current.Dispose کار مدیر وظایف برنامه را خاتمه می‌دهد.<br>
+
+
+
+
+
+
+
+- از متد WakeUp تعریف شده می‌توان برای بیدار کردن مجدد برنامه استفاده کرد. <br> <br> <br> <b>
+
+استفاده از کلاس ScheduledTasksRegistry تعریف شده</b> <br> <br>
+
+
+
+
+
+
+
+پس از اینکه کلاس ScheduledTasksRegistry را تعریف کردیم، نیاز است آن‌را به فایل استاندارد global.asax.cs برنامه به نحو ذیل معرفی کنیم:<br> <div dir="ltr" align="left"> <pre language="CSharp" name="code">using System;
+using System.Configuration;
+using DNTScheduler.TestWebApplication.WebTasks;
+
+namespace DNTScheduler.TestWebApplication
+{
+    public class Global : System.Web.HttpApplication
+    {
+        protected void Application_Start(object sender, EventArgs e)
+        {
+            ScheduledTasksRegistry.Init();
+        }
+
+        protected void Application_End()
+        {
+            ScheduledTasksRegistry.End();
+            //نکته مهم این روش نیاز به سرویس پینگ سایت برای زنده نگه داشتن آن است
+            ScheduledTasksRegistry.WakeUp(ConfigurationManager.AppSettings["SiteRootUrl"]);
+        }
+    }
+}</pre> </div>
+
+
+
+
+
+- متد ScheduledTasksRegistry.Init در حین آغاز برنامه فراخوانی می‌شود.<br>
+
+
+
+
+
+
+
+- متد ScheduledTasksRegistry.End در پایان کار برنامه جهت پاکسازی منابع باید فراخوانی گردد.<br>
+
+
+
+
+
+
+
+همچنین در اینجا با فراخوانی ScheduledTasksRegistry.WakeUp، می‌توانید برنامه را مجددا زنده کنید! IIS مجاز است یک سایت ASP.NET را پس از مثلا 20 دقیقه عدم فعالیت (فعالیت به معنای درخواست‌های رسیده به سایت است و نه کارهای پس زمینه)، از حافظه خارج کند (این عدد در application pool برنامه <a href="www.dntips.ir-posts-516.html">قابل تنظیم است</a>). در اینجا در فایل web.config برنامه می‌توانید آدرس یکی از صفحات سایت را برای فراخوانی مجدد تعریف کنید:<br> <div dir="ltr" align="left"> <pre language="XML" name="code"> &lt;?xml version="1.0"?&gt;
+&lt;configuration&gt;
+  &lt;appSettings&gt;
+      &lt;add key="SiteRootUrl" value="http://localhost:10189/Default.aspx" /&gt;
+  &lt;/appSettings&gt;
+&lt;/configuration&gt;</pre> </div>
+
+
+
+
+
+همینکه درخواست مجددی به این صفحه برسد، مجددا برنامه توسط IIS بارگذاری شده و اجرا می‌گردد. به این ترتیب وظایف تعریف شده، در طول یک روز بدون مشکل کار خواهند کرد.<br> <br> <br> <b>
+
+گزارشگیری از وظایف تعریف شده</b> <br> <br>
+
+
+
+
+
+
+
+برای دسترسی به کلیه وظایف تعریف شده، از خاصیت ScheduledTasksCoordinator.Current.ScheduledTasks استفاده نمائید:<br> <div dir="ltr" align="left"> <pre language="CSharp" name="code">var jobsList = ScheduledTasksCoordinator.Current.ScheduledTasks.Select(x =&gt; new
+{
+   TaskName = x.Name,
+   LastRunTime = x.LastRun,
+   LastRunWasSuccessful = x.IsLastRunSuccessful,
+   IsPaused = x.Pause,
+}).ToList();</pre> </div>
+
+
+
+
+
+لیست حاصل را به سادگی می‌توان در یک Grid نمایش داد.</div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20403.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>استفاده از قفل‌های توزیع‌شده برای جلوگیری از اجرای مجدد وظایف پشت‌صحنه</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/learning-paths/details/6'><span class='badge bg-danger rounded-pill me-2'>مسیرراه‌ها</span>اجرای وظایف زمانبندی شده</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-999.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>اجرای وظایف زمان بندی شده با Quartz.NET - قسمت دوم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1736.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>انجام کارهای زمانبندی شده در برنامه‌های ASP.NET توسط DNT Scheduler</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2997.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>پشتیبانی توکار از انجام کارهای پس‌زمینه در ASP.NET Core 2x</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1558.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>تبدیل برنامه‌های کنسول ویندوز به سرویس ویندوز ان تی</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1736.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>انجام کارهای زمانبندی شده در برنامه‌های ASP.NET توسط DNT Scheduler</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1736.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>انجام کارهای زمانبندی شده در برنامه‌های ASP.NET توسط DNT Scheduler</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1736.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>انجام کارهای زمانبندی شده در برنامه‌های ASP.NET توسط DNT Scheduler</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1736.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>انجام کارهای زمانبندی شده در برنامه‌های ASP.NET توسط DNT Scheduler</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>محمد رعیت پیشه</strong>  در  <span dir='ltr'>۱۳۹۲/۱۲/۲۶ ۱۹:۲۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>آیا یکی از کاربرد‌های این مطلب می‌تونه مثلا ارسال یک ایمیل یک هفته قبل از اتمام زمان شارژ کاربری باشه؟</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۲/۱۲/۲۶ ۱۹:۳۷</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>بله. می‌توانید یک وظیفه‌ی جدید تعریف کنید که هر شب ساعت مثلا 11 و 15 دقیقه اجرا شود (نحوه‌ی تعریف متد RunAt). سپس در متد Run آن یک کوئری از دیتابیس گرفته، لیست موارد مدنظر را واکشی کرده و به آن‌ها ایمیل بزنید.</div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>پیمان مهربانی</strong>  در  <span dir='ltr'>۱۳۹۲/۱۲/۲۷ ۱۱:۴۷</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>کتابخانه سبکی بود اما نگرانی هایی مانند پیش آمدن همزمانی در اجرای وظایف را دارم.پیش از این از کتابخانه quartz scheduler<span> </span> در یک پروژه بزرگ استفاده کرده بودیم و نتیجه کار بسیار راضی کننده بود ، حتی می‌توان از Scheduler خود ویندوز و یا Jon‌های SQL Server هم بهره برد.<br> <br>
+این روش چه مزایا و معایبی نسبت به روش‌های موجود دارد و آیا توصیه شده برای استفاده در پروژه‌های بزرگ هست؟</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۲/۱۲/۲۷ ۱۲:۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>- «پیش آمدن همزمانی در اجرای وظایف»<br>
+
+
+
+
+
+
+
+
+
+خاصیت Order را برای وظایفی که قرار است در یک زمان مشخص اجرا شوند، مقدار دهی کنید. 1و 2 و 3 و الی آخر.<br>
+
+
+
+
+
+
+
+
+
+
+
+- «حتی می‌توان از Scheduler خود ویندوز و یا Jon‌های SQL Server هم بهره برد». <br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+بله. به شرطی‌که سرور در اختیار شما باشد و <a href="www.dntips.ir-posts-1558.html">دسترسی کافی برای انجام اینکار را</a>  داشته باشید. البته در این حالت خاص، مدیریت آن یکپارچه با یک برنامه‌ی وب نیست. <br>
+
+
+
+
+
+
+
+
+
+در سرورهای اشتراکی روش ارائه شده در این مطلب بدون نیاز به سطح دسترسی خاصی کار می‌کند. ضمنا برای ASP.NET نوشته شده است و این قابلیت را دارد که به شما اعلام کند مثلا تا 30 ثانیه دیگر برنامه از سرور unload می‌شود؛ توسط خاصیت IsShuttingDown. همچنین حق تقدم ترد آن طوری تنظیم شده که سبب اختلال در عملیات و عملکرد متداول سایت نشود.<br>
+
+
+
+
+
+
+
+
+
+- «آیا توصیه شده برای استفاده در پروژه‌های بزرگ هست؟»<br>
+
+
+
+
+
+
+
+یک به اشتراک گذاری بود از قسمتی از کدهای زیر ساخت سایت جاری که هم اکنون مورد استفاده است (مقدمه بحث).</div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>ابوذر تهرانی</strong>  در  <span dir='ltr'>۱۳۹۲/۱۲/۲۸ ۱:۳۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سوالی که واسه من پیش اومده اینه که من یک نرم افزار Web Form&nbsp; دارم . هدفم اینه که یک روز قبل از تاریخ تولد اعضا ایمیلی با عنوان تولدتان مبارک ارسال شه .حالا من باید این کد‌های گفته شده را در برنامه خود بیاورم یا یک وب سرویس بنویسم که اینکارو انجام بده؟اگه بخوام که در برنامه انجام بشه خوب کجا باید نوشت ؟ یا به عبارتی دیگه باید حتما برنامه اجرا بشه و اگه برنامه اصلا Run نشه چی میشه؟</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۲/۱۲/۲۸ ۸:۵۹</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>- وب سرویس فقط با یک درخواست رسیده کار می‌کند. کار کتابخانه‌ی فوق، اجرا در پس زمینه‌ی برنامه به صورت مداوم است.<br>
+
+
+
+- فقط دو حالت وجود دارد که برنامه اجرا نشود:<br>
+
+
+
+الف) protected void Application_End فراخوانی شود. متد WakeUp نوشته شده برای این منظور و راه اندازی مجدد برنامه توسط آن، کافی است.<br>
+
+ب) کل سرور ری استارت شود (نه فقط برنامه). در این حالت کافی است آدرس برنامه را <a href="https://www.pulse.me/">به یکی از</a>  سرویس‌هایی که هر از چندگاهی برنامه را ping می‌کنند، معرفی کنید.</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۹۳/۰۱/۲۸ ۹:۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>در حالتی که "کل سرور ری استارت شود (نه فقط برنامه) " ، بعد از بالا آمدن سرور و شروع به کار IIS، تابع Application_Start کار شروع برنامه را خود به خود انجام نمی‌دهد؟ <span>&nbsp;</span></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۳/۰۱/۲۸ ۹:۱۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>نه تا زمانیکه اولین درخواستی به برنامه برسد. <br>
+
+
+
+
+کل سرور ری استارت شده. IIS برنامه را فقط زمانی مجددا بارگذاری می‌کند که درخواست نمایش یکی از قسمت‌های سایت به آن ارسال شود.<br>
+
+
+
+
+البته IISهای جدید قابلیت <a href="http://msdn.microsoft.com/en-us/library/ee677260%28v=azure.10%29.aspx">Auto-Start</a>  هم دارند؛ ولی باید در تنظیمات Application pool برنامه انتخاب شود:<br> <br> <p> <img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/png;base64,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"> </p> <p>همچنین <a href="http://www.iis.net/downloads/microsoft/application-initialization">Application Initialization Module</a>  نیز برای اجرا خودکار برنامه پس از ری‌استارت سرور <a href="http://www.iis.net/learn/get-started/whats-new-in-iis-8/iis-80-application-initialization">طراحی شده</a>. <br> </p></div>
+</div></li></ul></li></ul></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>امیرحسین جلوداری</strong>  در  <span dir='ltr'>۱۳۹۳/۰۱/۰۱ ۲۳:۲۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>خیلی خیلی ممنون ... کتابخانه‌ی ساده و مفیدی است.&nbsp;<div>سوال من اینه که میشه کاری کرد که آدرس روت تعریف شده در فایل کانفیگ جهت بیدار شدن IIS را در کد نوشت مثل کد زیر :&nbsp;</div> <div> <div align="left" dir="ltr"> <pre language="CSharp" name="code">var urlToWakeup = Request.Url.Scheme + Uri.SchemeDelimiter + Request.Url.Host +
+            (Request.Url.IsDefaultPort ? "" : ":" + Request.Url.Port);</pre> </div>
+
+
+که مجبور نباشی در هر سایتی که طراحی میکنیم &nbsp;آدرس رو در فایل کانفیگ ست کنیم !</div> <div>پی نوشت : من این کار رو در متد&nbsp;Application_End نوشتم و خطای در دسترس نبودن Request رو دریافت کردم ! (هر چند که میدونستم این خطا رو میده !)</div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۳/۰۱/۰۲ ۰:۵۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>می‌شود در Application_BeginRequest<span> اطلاعات آدرس ریشه سایت را در یک متغیر استاتیک ذخیره کرد. مقدار آن در Application_End قابل استفاده است:<span> </span> </span> <br> <div dir="ltr" align="left"> <pre language="CSharp" name="code">namespace TestApp
+{
+    public static class App
+    {
+        public static string SiteRootUrl;
+    }
+
+    public class TestApplication : HttpApplication
+    {
+        protected void Application_BeginRequest(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(App.SiteRootUrl))
+            {
+                App.SiteRootUrl = Request.Url.GetLeftPart(UriPartial.Authority) + Request.ApplicationPath;
+            }
+        }
+
+        protected void Application_End()
+        {
+            // use App.SiteRootUrl
+        }
+    }
+}</pre> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>امیرحسین جلوداری</strong>  در  <span dir='ltr'>۱۳۹۳/۰۱/۰۲ ۱۳:۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>خیلی خیلی ممنون :) ... اگه میشه نسخه‌ی nuget کتایخانه را هم بذارید&nbsp;</div>
+</div></li></ul></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهدی پایروند</strong>  در  <span dir='ltr'>۱۳۹۳/۰۱/۲۵ ۱۴:۳۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>1.برای زنده نگهداشتن سایت میشه از خود همین کتابخانه استفاده کرد؟<br>
+2.برای چه تعداد جاب بنظرتون منطقیه که استفاده بشه؟<br>
+ممنون</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۳/۰۱/۲۵ ۱۶:۴۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>- کمی بالاتر توضیح دادم «<a href="www.dntips.ir-posts-1736.html">فقط دو حالت وجود دارد که برنامه اجرا نشود: ...</a> <span> </span>»<br>
+- این مورد فقط بستگی به توان سرور شما دارد.</div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۳/۰۲/۱۷ ۹:۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><b>یک نکته‌ی تکمیلی</b> <br>
+
+
+
+در دات نت <i> <b>4.5.2</b> </i>، متدی به نام <a href="http://blogs.msdn.com/b/dotnet/archive/2014/05/05/announcing-the-net-framework-4-5-2-release.aspx">HostingEnvironment.QueueBackgroundWorkItem</a>  اضافه شده‌است تا درخواست اجرای کارهای پس زمینه در ASP.NET به سادگی و همچنین با اطمینان بیشتری قابل انجام باشد.</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۹۳/۰۲/۱۷ ۱۳:۴۰</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>یعنی با استفاده از این متد جدیدی که در دات نت 4.5.2 اضافه شده ، دیگه نیازی به&nbsp;&nbsp; Quartz.net&nbsp; و یا&nbsp; DNT&nbsp; scheduler&nbsp; نیست ؟ و میتوان برای کارهایی که نیاز به زمانبندی دارند از این متد استفاده کرد ؟</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۳/۰۲/۱۷ ۱۳:۴۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>فقط قسمت مدیریت تردهای آن با یک سطر QueueBackgroundWorkItem جایگزین می‌شود. مابقی قسمت‌های آن (مانند اینکه یک WorkItem<span> چه زمانی در </span>Queue<span> قرار گیرد</span>) تفاوتی نمی‌کند و مانند قبل است.</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۹۳/۰۲/۱۷ ۱۴:۱۰</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>منظور شما این خط هست ؟<br> <div dir="ltr" align="left"> <pre language="CSharp" name="code">ScheduledTasksCoordinator.Current.AddScheduledTasks(
+                new SendEmailsTask(),
+                new DoBackupTask());</pre> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۳/۰۲/۱۷ ۱۴:۲۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>این‌ها باقی خواهند ماند. قسمت new Thread<span> و مدیریت آن جایگزین می‌شود.</span></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۹۳/۰۳/۲۵ ۱۳:۴۸</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام.<div>منظورتون فقط همین یک خط توی متد Start کلاس ScheduledTasksCoordinator بود که&nbsp;تغییر میکنه؟<div> <div>یعنی فقط متد Start به شکل زیر بازنویسی میشه دیگه؟</div> <div> <div dir="ltr" align="left"> <pre language="CSharp" name="code">public void Start()
+        {
+            _timer.OnTimerCallback = () =&gt;
+            {
+                var now = DateTime.UtcNow;
+                var taskToRun = _tasks.Where(x =&gt; !x.IsRunning &amp;&amp; x.RunAt(now)).OrderBy(x =&gt; x.Order).ToList();
+                if (_isShuttingDown || !taskToRun.Any())
+                    return;
+
+                HostingEnvironment.QueueBackgroundWorkItem(x =&gt; taskAction(taskToRun));
+            };
+        }</pre> </div> <br> </div> </div> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۳/۰۳/۲۵ ۱۵:۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>- بله. قسمت‌های HostingEnvironment.RegisterObject و IRegisteredObject<span>&nbsp;</span>آن هم باید حذف شوند چون در QueueBackgroundWorkItem وجود دارند و یک <a href="http://blogs.msdn.com/b/webdev/archive/2014/06/04/queuebackgroundworkitem-to-reliably-schedule-and-run-long-background-process-in-asp-net.aspx">CancellationToken</a>  را تنظیم می‌کند.<br>
+
+
+
+
+
+
+
+
+
+
++ زمانیکه از&nbsp; DNTScheduler استفاده می‌کنید، عملا نیازی به QueueBackgroundWorkItem ندارید. چون نکته‌ی HostingEnvironment.RegisterObject و IRegisteredObject<span>&nbsp;</span>در آن لحاظ شده. این نکته که خاموش شدن IIS را گزارش می‌کند، چند سال قبل، توسط یکی از اعضای قبلی تیم ASP.NET <a href="http://haacked.com/archive/2011/10/16/the-dangers-of-implementing-recurring-background-tasks-in-asp-net.aspx/">منتشر شده بود</a>. دقیقا از همین نکته در <a href="http://blogs.msdn.com/b/webdev/archive/2014/06/04/queuebackgroundworkitem-to-reliably-schedule-and-run-long-background-process-in-asp-net.aspx">QueueBackgroundWorkItem</a>  استفاده شده.<br> <br>
+
+
+
+
+
+
+
+
+
+
+به صورت خلاصه، DNTScheduler با دات نت 4 به بعد سازگار است و نکات QueueBackgroundWorkItem دات نت 4.5.2 را به صورت توکار پیاده سازی کرده‌است.</div>
+</div></li></ul></li></ul></li></ul></li></ul></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۳/۰۲/۲۹ ۹:۲۵</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><b>یک نکته</b> <br> <a href="http://blog.mariusschulz.com/2014/05/07/scheduling-background-jobs-from-an-asp-net-application-in-net-4-5-2">مثالی از نحوه‌ی استفاده</a> از متد جدید HostingEnvironment.QueueBackgroundWorkItem <br>
++ <a href="http://blogs.msdn.com/b/webdev/archive/2014/06/04/queuebackgroundworkitem-to-reliably-schedule-and-run-long-background-process-in-asp-net.aspx">یک مثال رسمی</a></div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۹۳/۰۳/۱۹ ۲۳:۱۰</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>با سلام<div>من روی یه پروژه مالی دارم با ASP WebForm کار میکنم و میخواستم در اول هر ماه یک سری دستورات ویرایش یا update &nbsp;را که به صورت رکورد در یک جدول ذخیره می‌کنم انجام بشن. سوالم اینه که برای این که مجموعه دستورات من انجام بشن باید برنامه جتما Run باشه و چه جوری میشه اونو به صورت پس زمینه در حال اجرا نگه داشت.</div> <div>با تشکر</div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۳/۰۳/۲۰ ۰:۱۹</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>- به اندازه کافی در نظرات این بحث در مورد زنده نگه داشتن یک برنامه ASP.NET بحث شده. کمی وقت بگذارید و آن‌ها را مطالعه کنید.<br>
+
+
++ اگر برنامه مالی است، احتمالا دسترسی کاملی به سرور و همچنین SQL Server (اگر با آن کار می‌کنید) دارید. در این حالت برای به روز رسانی زمانبندی شده‌ی چند رکورد شاید بهتر باشد از سرویس معروف و همیشه در حال اجرای <a href="http://www.mssqltips.com/sql-server-tip-category/27/sql-server-agent/">SQL Server agent</a>  استفاده کنید. در اینجا نیز می‌شود یک job را که متشکل از دستورات T-SQL است، در فواصل زمانی مشخصی اجرا کرد.</div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۹۳/۰۴/۱۷ ۱۱:۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام. اگر بخواهیم یک کار نسبتاً زمانبر که IO هم هست را توسط این کتابخانه در فواصل زمانی معین اجرا کنیم، میشه از async و await استفاده کرد؟</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۳/۰۴/۱۷ ۱۱:۲۰</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>بله. از روش و کتابخانه معرفی شده در مطلب «<a href="https://www.dntips.ir/courses/topic/14/e011311d-df6b-496e-99c1-c129b60223a2">استفاده از async و await در برنامه‌های کنسول و سرویس‌های ویندوز NT</a> » استفاده کنید.</div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>حمید حسین وند</strong>  در  <span dir='ltr'>۱۳۹۳/۰۵/۰۹ ۱۰:۱۹</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام<br>
+من برای این سری کار‌ها از ویندوز سرویس استفاده می‌کنم. مثلا ویندوز سرویس من از ساعت 8 صبح شروع به کار می‌کنه و رویدادهایی مثل سالروز تولد رو با استفاده از پیامک به کاربران پیام تبریک ارسال می‌کنه.<br>
+مهمترین عاملی که باعث شد من از ویندوز سرویس استفاده کنم اجرای مداوم وهمیشگی بدون ارسال درخواست به وب سایت من بود. ولی فکر می‌کنم این کتابخانه شما هم مثل ویندوز سرویس عمل می‌کنه و خودش همیشه در حال اجراست.<br>
+حالا به نظرتون آیا از ویندوز سرویس استفاده کنم بهتره و یا اینکه از این کتابخانه استفاده کنم؟<br>
+ممنون</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>محسن خان</strong>  در  <span dir='ltr'>۱۳۹۳/۰۵/۰۹ ۱۱:۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>فرض کن داری از یک هاست اشتراکی استفاده می‌کنی. دسترسی ادمین هم روی سرور نداری برای اجرا سرویس ویندوز یا&nbsp;فرض کن در یک سازمان&nbsp;بهت گفتن ما فقط اجازه می‌دیم فایل‌های سایتت رو روی سرور کپی کنی. دسترسی بیشتری بهت نمی‌دیم. اون وقت چکار می‌کنی؟</div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۹۳/۰۵/۱۵ ۲:۵۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><p>
+سلام. ممنون.</p> <p>دوستان برای من وقتی به صورت ساعت می‌دم درست کار نمیکنه.مثلا من می‌خوام در ساعت دو و&nbsp;بیست و چهار&nbsp;دقیقه بامداد یه کاری رو انجام بده اینجوری نوشتم:در صورتی اگه بگم دو دقیقه دو دقیقه درست انجام میشه.به نظرتون مشکل از کجاست؟ممنون</p> <div dir="ltr" align="left"> <pre language="CSharp" name="code">  var now = utcNow.AddHours(3.5);
+    return now.Hour == 2 &amp;&amp; now.Minute == 24 &amp;&amp; now.Second == 1;</pre> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۳/۰۵/۱۵ ۸:۴۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>مشکل از تنظیم نبودن ساعت سرور است. مقدار DateTime.UtcNow را روی سرور بررسی کنید و با مقدار واقعی تطابق بدید. بعد اختلافش را باید در همینجا اعمال کنید. مثلا اگر پس از بررسی متوجه شدید ساعت سرور یک ساعت عقب هست، now.Hour == 2<span> می‌شود now.Hour == 1</span> و امثال این نوع محاسبات.</div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۹۳/۰۶/۱۵ ۱۸:۳۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><p>ممنون. مفید بود. اگه بخواهیم یه کاری مثلا هر سه روز یکبار انجام بشه باید چه جوری زمان رو تعیین کنیم؟ ممنون</p></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۳/۰۶/۱۵ ۱۹:۵۷</span>
+  </div>
+  <div style='text-align: left; font-family:inherit; font-size:inherit;' dir='ltr'><div dir="ltr" align="left"> <pre language="CSharp" name="code">        public override bool RunAt(DateTime utcNow)
+        {
+            if (this.IsShuttingDown || this.Pause)
+                return false;
+
+            var now = utcNow.AddHours(3.5);
+            return (now.Day % 3 == 0) &amp;&amp; (now.Hour == 0 &amp;&amp; now.Minute == 1 &amp;&amp; now.Second == 1);
+        }</pre> </div></div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۹۳/۰۶/۱۷ ۲۲:۲۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>یه سوال:اختلاف زمانی ساعت گرینویچ با تهران همیشه 3:30 هست؟</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۳/۰۶/۱۷ ۲۳:۸</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>اگر سرور شما تنظیمات <a href="www.dntips.ir-posts-1033.html">daylight saving time</a> <span> صحیحی داشته باشد، بله. اگر نه، خودتان این یک ساعت تفاوت را 6 ماه یکبار باید محاسبه و اعمال کنید.<br> </span></div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۹۳/۰۶/۱۸ ۹:۵۷</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام.<div>چرا هیچ ارجاعی به متد Stop در کلاس&nbsp;JobsRunnerTimer<span>&nbsp; وجود نداره؟ برای این کار دلیلی دارید؟</span> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۳/۰۶/۱۸ ۱۰:۱۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>نیازی نیست. چون طول عمر کل این ماژول دقیقا معادل طول عمر برنامه‌ی وب است. خاتمه‌ی آن هم به صورت خودکار با از حافظه خارج کردن AppDomain برنامه توسط IIS انجام می‌شود. تا زمانیکه برنامه در حال اجرا است این ماژول هم به همین ترتیب. هر زمان که IIS تصمیم به خاتمه‌ی برنامه گرفت، نه این ماژول، هیچ ماژول دیگری هم فرصت مقاومت پیدا نمی‌کند و راسا به همراه AppDomain جاری خاتمه می‌یابد.</div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>سیروان عفیفی</strong>  در  <span dir='ltr'>۱۳۹۳/۰۸/۰۷ ۱۸:۴۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div>ممنون، عالیه</div> <div>فقط یه سوال:</div> <div>چطور می‌تونیم یک Task خاص رو خودمون فراخوانی کنیم، مثلاً بعداً از اینکه کاربر در سایت ثبت‌نام کرد به صورت هفتگی براش ایمیل ارسال بشه یا مواردی از این دست، در مطلب بالا این طوری که من متوجه شدم، توسط دستور ScheduledTasksRegistry.Init(); در Application_Start تمام وظایف به صورت همزمان شروع میشن، در این حالت باید برای هر وظیفه یک کلاس برای ریجستر کردن اون بنویسیم؟ درسته؟</div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۳/۰۸/۰۷ ۱۸:۴۸</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>بله. هر وظیفه نیاز به طراحی مجزا دارد. ثبت و معرفی آن توسط متد ScheduledTasksCoordinator.Current.AddScheduledTasks<span> </span>در ScheduledTasksRegistry.Init<span> </span>انجام می‌شود.</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>سیروان عفیفی</strong>  در  <span dir='ltr'>۱۳۹۳/۰۸/۰۷ ۲۳:۵۰</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>ممنون،<div>آیا انجام چنین کاری توسط این کتابخانه میسر است؟<div style="direction: rtl;">به عنوان مثال: ابتدا یک وظیفه را توسط ScheduledTasksRegistry.Init اجرا می‌کنم، این وظیفه قرار است به مدت 6 روز، روزانه کاری را انجام دهد، بعد از پایان روز 6 یعنی در روز هفتم یک وظیفه دیگر شروع خواهد شد(تعداد روزها توسط کاربر انجام می‌گیرد). و در نهایت وظایف یکی پس از دیگری بعد زمان تعیین شده برای آنها متوقف خواهند شد.&nbsp;</div> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۳/۰۸/۰۸ ۰:۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>در متد RunAt بازه زمانی را مشخص کنید. در این مثال‌ها یک سری عدد ثابت است؛ شما آن‌ها را از دیتابیس بخوانید. فقط دقت داشته باشید که خروجی true/false این متد ثانیه‌ای یکبار بررسی می‌شود. بنابراین مباحث caching را جهت واکشی اطلاعات از بانک اطلاعاتی در متد RunAt اعمال کنید تا بی‌جهت رفت و برگشت اضافی صورت نگیرد.</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>سید امید موسوی</strong>  در  <span dir='ltr'>۱۳۹۶/۰۶/۱۲ ۱۵:۲۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>وظیفه ای دارم که هر 1 ثانیه انجام میشه ، حال اگر در این یک ثانیه این وظیفه به اتمام نرسیده باشه آیا نیاز به اضافه کردن تاخیر دارم ؟<br>
+در واقع مشکلی به صورت local نیست ، ولی وقتی رو سرور قرار میگیره به مشکل تاخیر در اجرا عملیات می‌خوره ؟</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۶/۰۶/۱۲ ۱۸:۴۸</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>در اینجا از یک thread timer استفاده شده‌است و callback آن در هربار فراخوانی، در یک thread pool thread مجزا اجرا می‌شود.
+            یعنی هر وظیفه به موازات وظیفه‌‌های موجود در حال اجرا و خاتمه نیافته، اجرا خواهد شد (البته بسته به تعداد هسته‌های CPU سرور و همچنین آزاد بودن تردهای موجود در thread pool)  .</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>سید امید موسوی</strong>  در  <span dir='ltr'>۱۳۹۶/۰۶/۱۲ ۱۹:۲۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سپاسگذارم پس از بررسی ، مشکل از تعداد هسته‌های CPU و همچنین ناکافی بودن میزان Ram سرور بود.&nbsp;</div>
+</div></li></ul></li></ul></li></ul></li></ul></li></ul></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۹۳/۰۸/۰۸ ۱:۴۵</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام<div>ایا میشه از این کتابخانه به صورت ثانیه ای استفاده کرد ؟ در هر ثانیه چک کنه و در صورت داشتن وظایف در این ساعت و دقیقه و ثانیه (که لیست اونها در دیتابیس هست) بهشون عمل کنه !</div> <div>مثلا اینطوری اگر کار کنه مشکلی پیش نمیاد ؟</div> <div> <div dir="ltr" align="left"> <pre language="CSharp" name="code">   return now.Second  % 1 == 0 &amp;&amp; now.Second == 1;</pre> </div> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۳/۰۸/۰۸ ۱:۵۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>برای این حالت در متد RunAt فقط بنویسید return true. چون این متد ثانیه‌ای یکبار فراخوانی می‌شود.</div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>سعید شیرعلی</strong>  در  <span dir='ltr'>۱۳۹۳/۰۹/۰۲ ۲۳:۳۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام؛ فایلی که برای دانلود گذاشتین پر از اشکاله. وقتی بازش میکنم با asp زیر خیلی از کداش خط قرمز میکشه، مشکل از کجاست، آیا سورس مشکل داره؟</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۳/۰۹/۰۳ ۰:۲۸</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>دقیقا چه خطایی گرفتید؟</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>سعید شیرعلی</strong>  در  <span dir='ltr'>۱۳۹۳/۰۹/۰۳ ۱۰:۱۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>چند بار بازو بستش کردم خیلی از خطاهاش رفتم نمیدونم دلیلش چیه اما هنوز یک خطا داره<br>
+
+
+
+
+
+خط اول Default.aspx <br> <div dir="ltr" align="left"> <pre language="XML" name="code"> &lt;%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="DNTScheduler.TestWebApplication.Default" %&gt;</pre> </div>
+&nbsp;
+
+<span> خطا</span> <div dir="ltr" align="left"> <pre language="CSharp" name="code">Error 1 Could not load type 'DNTScheduler.TestWebApplication.Default'. C:\Users\KING\Desktop\DNTScheduler\DNTScheduler.TestWebApplication\Default.aspx 1</pre> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۳/۰۹/۰۳ ۱۰:۵۵</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>- این پروژه باید یکبار کامل کامپایل شود و همچنین پوشه‌ی bin آن موجود باشد.<br>
+- خطای Could not load type <span>صرفا به معنای عدم کامپایل شدن برنامه و یا نبود فایل‌های dll مرتبط در پوشه‌ی bin است. مراجعه کنید به منوی Build و گزینه‌ی Rebuild solution را انتخاب کنید. </span></div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>سعید شیرعلی</strong>  در  <span dir='ltr'>۱۳۹۳/۰۹/۰۳ ۱۰:۵۵</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>مشکل را حل کردم. وارد قسمت پروپرتیس شدم و استارترشو عوض کردم درست شد.</div>
+</div></li></ul></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>سعید شیرعلی</strong>  در  <span dir='ltr'>۱۳۹۳/۰۹/۰۳ ۱۲:۴۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام؛ میخوام هر 15 ثانیه یک بار کدم اجرا بشه. این کارو کردم اما نشد:<br> <div dir="ltr" align="left"> <pre language="CSharp" name="code">return now.Second % 15 == 0 &amp;&amp; now.Second == 1;</pre> </div>
+
+
+
+لطفا راهنمایی کنید.<br> <br> <div dir="ltr" align="left"> <pre language="XML" name="code">&lt;add key="SiteRootUrl" value="http://localhost:10189/Default.aspx" /&gt;</pre> </div>
+«همینکه درخواست مجددی به این صفحه برسد، مجددا برنامه توسط IIS بارگذاری 
+شده و اجرا می‌گردد. به این ترتیب وظایف تعریف شده، در طول یک روز بدون 
+مشکل کار خواهند کرد.» <br> <br>
+- یعنی صفحه ایندکس سایت را بهش بدیم مشکلی پیش نمیاد.<br>
+- اگر برنامه در حال انجام کار باشه بعد یک کاربری وارد سایت بشه کد در حال اجرا از کار میفته یا فقط تایمرو زنده نگه میداره<br> <br>
+
+با تشکر</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۳/۰۹/۰۳ ۱۲:۵۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>- در شرطی که نوشتید «now.Second == 1<span>» اضافی است.</span> <br>
+- خیر؛ مشکلی نخواهد بود.<br>
+- این کارها پس زمینه هستند. اصلا ارتباطی به UI برنامه ندارند و در ترد دیگری اجرا می‌شوند.</div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهدی خیراندیش</strong>  در  <span dir='ltr'>۱۳۹۳/۰۹/۰۹ ۱۶:۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>ممنون؛ اما من یه مشکلی دارم ساعت اجرا رو 1 بامداد تنظیم کردم ساعت سرور رو هم چک کردم تنظیمه اما فکر کنم اجرای ترد به اون موقع نمیرسه! اوایل ترد اجرا میشه اما همیشه موقعی که متد بیدارکننده! رو صدا میزنه&nbsp; خطاهای 503 Server Unavailable و 500 Internal Server Error پرت (throw میشه).</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۳/۰۹/۰۹ ۱۸:۱۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>- از <a href="https://www.dntips.ir/search?term=elmah">ELMAH</a>  برای ثبت خودکار&nbsp;ریز جزئیات خطاهای مدیریت نشده و بررسی آتی آن‌ها استفاده کنید.<br>
+
+
+- همچنین در کتابخانه‌ی فوق به قسمت ScheduledTasksCoordinator.Current.OnUnexpectedException<span> هم دقت داشته باشد؛ مطابق مثال ارائه شده.</span></div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهدی سعیدی فر</strong>  در  <span dir='ltr'>۱۳۹۴/۰۴/۰۳ ۱۸:۱۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>اگر بخواهیم در هنگام اجرای وظیفه‌ی مورد نظر به نمونه ای از HttpContext دسترسی پیدا کنیم چه باید کرد؟<div>به این علت که من برای اجرای کدهای job احتیاج به نمونه ای از HttpContext دارم که Null هست و به دلیل متفاوت بودن thread‌ها نمی‌تونم به آن دسترسی پیدا کنم.</div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۴/۰۴/۰۳ ۱۹:۲۷</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>بله. امکان پذیر نیست؛ چون این وظایف در ترد اصلی یک برنامه‌ی وب اجرا نمی‌شوند. رفتار با آ‌ن‌ها باید شبیه به رفتار با برنامه‌های دسکتاپ یا کنسول ویندوزی باشد. البته به اطلاعاتی مانند HttpRuntime.AppDomainAppPath<span> دسترسی خواهید داشت.</span></div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>سامان هاشمی</strong>  در  <span dir='ltr'>۱۳۹۴/۰۴/۱۹ ۲۱:۱۰</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>از&nbsp;StructureMap3 توی پروژه استفاده میکنم ،میخوام توی Run به دیتابیس متصل بشم اما وقتی از کد زیر استفاده میکنم با خطای&nbsp;Object reference not set to an instance of an object&nbsp; مواجهه میشم <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">DependencyResolver.Current.GetService&lt;IService&gt;()</pre> </div>
+
+
+
+
+
+اینکار امکانپذیر است؟ نیاز به تنظیمات خاصی برای&nbsp;StructureMap هست؟&nbsp;&nbsp;(درضمن از تنظیمات پیش فرض&nbsp;StructureMap که بهنگام نصب تولید میشود استفاده میکنم)</div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۴/۰۴/۱۹ ۲۱:۲۵</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>«اینکار امکانپذیر است؟»<br>
+
+
+
+
+
+
+بله. من خودم استفاده می‌کنم. به این صورت:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">SmObjectFactory.Container.GetInstance&lt;T&gt;()</pre> </div>
+
+
+
+
+
+
+در مورد SmObjectFactory&nbsp;<a href="https://www.dntips.ir/courses/topic/5/0e4b9958-38fc-4aaa-8569-6086e4887bcd#comment-367">اینجا بحث</a>  شده. چند مثال از تعریف و بکارگیری SmObjectFactory <a href="https://www.dntips.ir/search?term=SmObjectFactory">در اینجا</a>.</div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مقدسی مهدی</strong>  در  <span dir='ltr'>۱۳۹۴/۰۶/۰۲ ۱۴:۱۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>اگه زمان اجرا به عنوان مثال هر 2 ثانیه باشه و ما تابعی اجرا کنیم که ممکنه زمان اجرا اون بیشتر از 2 ثانیه باشه آیا در اجرا بار بعد&nbsp; تداخل به وجود نمیاد؟</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۴/۰۶/۰۲ ۱۵:۱۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>خیر. در اینجا از یک thread timer استفاده شده‌است و callback آن در هربار فراخوانی، در یک thread pool thread مجزا اجرا می‌شود (<a href="https://msdn.microsoft.com/en-us/library/system.threading.timercallback%28v=vs.110%29.aspx">^</a>).</div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>حمیدرضا م</strong>  در  <span dir='ltr'>۱۳۹۴/۰۶/۲۰ ۱۲:۳۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام،<br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ابتدا از مطلب بسیار کاربردیتون تشکر می‌کنم.<br> <br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+سناریوی بنده بدین صورت است که یک task ارسال ایمیل دارم که روزی یکبار به کل کاربرام یک ایمیل رو ارسال می‌کنم. حال از آنجایی که می‌ترسم میل سرور crash کنه و نتونه با سرعت بالا به یکباره همه ایمیل‌ها رو ارسال کنه، بنده می‌خوام بین ارسال هر ایمیل یک تاخیر مثلا 1 ثانیه ای بذارم تا بدین صورت میل سرور زمان تنفس داشته باشه.<br> <br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+به نظر دوستان&nbsp; آیا اصلا نیاز به ایجاد تاخیر زمانی هست ؟<br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+اگر هست، آیا کد زیر درست است ؟<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">public override void Run()
+{
+    if (this.IsShuttingDown || this.Pause)
+        return;
+ 
+    var _myService = StructureMapObjectFactory.Container.GetInstance&lt;IMyService&gt;();
+    var sendingEmailsData = _myService.GetSendingEmailsData();
+ 
+    if (sendingEmailsData.Count &gt; 0)
+    {
+        var reader = new StreamReader(SiteCoreManager.SCHEDULE_BODY_PATTERN_FILE_PATH);
+        string bodyPattern = reader.ReadToEnd();
+ 
+        foreach (var sendingEmailItem in sendingEmailsData)
+        {
+            MailSender.Send(bodyPattern, sendingEmailItem   );
+ 
+            // ایجاد تاخیر
+            Task.Delay(1000);                   
+        }
+ 
+    }
+             
+}</pre> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۴/۰۶/۲۰ ۱۲:۵۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>- «آیا اصلا نیاز به ایجاد تاخیر زمانی هست؟»<br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+بله؛ نیاز هست: «<a href="www.dntips.ir-posts-1489.html">راه‌های کم کردن احتمال اسپم شدن ایمیل‌های ارسالی توسط  SMTP Client</a>»
+
+                &nbsp; <br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+- «آیا کد زیر درست است؟»<br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+می‌تواند بهتر باشد. مثلا بجای 0&lt;Count بنویسید Any (سریعتر است). یا اگر قرار است فایلی یکجا خوانده شود، بهتر است از متد <a href="https://msdn.microsoft.com/en-us/library/ms143368%28v=vs.110%29.aspx">File.ReadAllText</a>  استفاده کنید تا درگیر مباحث dispose کردن منابع نشوید. به علاوه هرچند در اینجا نام Task عنوان شده‌است، اما این‌ها واقعا از نوع کلاس Task دات نت نیستند. بنابراین بجای Task.Delay از Thread.Sleep استفاده کنید. متد Task.Delay <a href="http://social.technet.microsoft.com/wiki/contents/articles/21177.visual-c-thread-sleep-vs-task-delay.aspx">یک متد blocking نیست</a>  و نحوه‌ی فراخوانی آن باید به صورت await Task.Delay باشد و همانطور که عنوان شد، در اینجا Task ایی نداریم و صرفا اجرای عملیات در یک ترد مجزا است.</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>حمیدرضا م</strong>  در  <span dir='ltr'>۱۳۹۴/۰۶/۲۰ ۱۳:۱۰</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>با تشکر از راهنماییتون.<br> <br>
+
+
+
+
+- «مثلا بجای Count بنویسید Any (سریعتر است). »<br>
+
+
+بله، حق با شماست. حواسم نبود که دارم LinqToObject میزنم.<br> <br>
+
+
+در زمینه LinqToEntity‌ها و کار با دیتابیس، چقدر با این گفته موافقید که "متد Any بهینه نبوده و کند می‌باشد و بهتر است از متد Count استفاده نماییم" ؟<br>
+
+
+چون در یک ویدئوی Clean Coding بیان شد که متد Any مختص LinqToObject است و برای LinqToEntity و کار با دیتابیس مناسب نمی‌باشد.<br> <br>
+
+
+پ.ن: با عرض پوزش اگر سوال زیاد مرتبط با بحث جاری نیست.<br>
+البته نظرات زیادی مثل (<a href="http://stackoverflow.com/questions/12429185/linq-to-entities-any-vs-first-vs-exists">^</a> و^) وجود دارد که همگی ویدئویی که بنده دیدم رو نقص می‌کنن!</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۴/۰۶/۲۰ ۱۳:۱۷</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>«... <a href="www.dntips.ir-posts-472.html">حین کار با بانک‌های اطلاعاتی برای مثال توسط LINQ to Entities ، در SQL نهایی تولیدی به EXISTS ترجمه خواهد شد</a>  ... » و این exists روش مناسب <a href="http://sqlblog.com/blogs/andrew_kelly/archive/2007/12/15/exists-vs-count-the-battle-never-ends.aspx">و بسیار سریعی هست</a>  در حین کار با بانک‌های اطلاعاتی (This is now almost <a href="http://sqlblog.com/blogs/andrew_kelly/archive/2007/12/15/exists-vs-count-the-battle-never-ends.aspx">250 times</a>  more expensive to do a COUNT(*) vs. an EXISTS).</div>
+</div></li></ul></li></ul></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>احمد رضایی</strong>  در  <span dir='ltr'>۱۳۹۴/۰۷/۰۵ ۲۰:۲۹</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام وقتتون بخیر<div>من میخواستم یه خبرنامه بسازم که به کل کاربران ایمیل بفرسته، ولی هاستی که سایت من روش هست در ساعت 40 تا ایمیل بیشتر نمیتونم بفرستم،&nbsp;<span style="line-height: 1.5em; font-size: 9pt;">چطور میتونم با این Schedule چنین چیزی بسازم</span> </div> <div> <span style="line-height: 1.5em; font-size: 9pt;">یک مورد دیگه، ممکنه خبرنامه گاهی غیر فعال بشه، این مورد رو ندیدم، امکانش نیست؟</span> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>محسن خان</strong>  در  <span dir='ltr'>۱۳۹۴/۰۷/۰۵ ۲۱:۱۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><p>- یک جاب تعریف کن که بازه‌ی اجراش یک ساعت یکبار باشه. هر بار هم که اجرا شد، یک حلقه‌ی 40 تایی رو اجرا کن.</p> <p>- یک فیلد&nbsp;وضعیت&nbsp;در دیتابیس براش&nbsp;تعریف کن. هر بار که جاب اجرا شد، اول چک کن که&nbsp;این فیلد، فعال بودن یا نبودنش تنظیم شده یا نه.</p></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>احمد رضایی</strong>  در  <span dir='ltr'>۱۳۹۴/۰۷/۰۵ ۲۲:۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>ممنون از پاسختون&nbsp;<div>- چنین حالتی نداره که مثل کد زیر که جاب رو استارت میزنه حالتی باشه که با یه بار چک کردن فیلد فعال یا غیر فعال بودن، کلا جاب رو استوپ کنه و دیگه RunAt اجرا نشه!</div> <div style="direction: ltr;">ScheduledSendEmailsTaskRegistry.Init();<span>&nbsp;</span> <br> </div> <div style="direction: rtl;"> <br> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>محسن خان</strong>  در  <span dir='ltr'>۱۳۹۴/۰۷/۰۵ ۲۲:۳۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>&nbsp;ScheduledTasksCoordinator.Current یک متد AddScheduledTasks داره. این لیست رو می‌تونی کم و زیاد کنی در زمان اجرا. از این لیست هست که هر بار کوئری گرفته میشه برای اجرا یا عدم اجرا (لیست قسمت گزارشگیری از وظایف تعریف شده در آخر بحث).</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>احمد رضایی</strong>  در  <span dir='ltr'>۱۳۹۴/۰۷/۰۵ ۲۲:۴۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>چطور میتونم حذف کنم؟ پیدا نکردم</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>محسن خان</strong>  در  <span dir='ltr'>۱۳۹۴/۰۷/۰۵ ۲۳:۱۵</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>در کلاس ScheduledTasksCoordinator یک متد Remove از لیست اضافه کن:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">public void RemoveTask(string taskName)
+{
+    lock (_syncLock)
+    {
+       var task = _tasks.FirstOrDefault( x =&gt; x.Name == taskName);
+       if (task != null)
+       {
+            _tasks.Remove(task);
+       }   
+    }
+}</pre> </div> </div> </div></div>
+</div></li></ul></li></ul></li></ul></li></ul></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>تسنیم</strong>  در  <span dir='ltr'>۱۳۹۴/۰۷/۱۸ ۹:۱۷</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>باسلام و احترام.<div>من این زمانبندی رو به پروژم اضافه کردم اما یه مشکلی پیش اومده و اونم اینکه زمانی که برنامه اجرا شد صفحه لاگین باز میشه ولی دکمه ورود کار نمیکنه. مشکل از اینجاست که در تابع زیر&nbsp;</div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code"> protected void Application_EndRequest(object sender, EventArgs e)
+        {
+          
+
+            HttpContextLifecycle.DisposeAndClearAll();
+            ScheduledTasksRegistry.End();
+            ////نکته مهم این روش نیاز به سرویس پینگ سایت برای زنده نگه داشتن آن است
+            ScheduledTasksRegistry.WakeUp(ConfigurationManager.AppSettings["SiteRootUrl"]);
+        }</pre> </div>
+
+زمانی که دستورات&nbsp;</div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">            ScheduledTasksRegistry.End();
+            ////نکته مهم این روش نیاز به سرویس پینگ سایت برای زنده نگه داشتن آن است
+            ScheduledTasksRegistry.WakeUp(ConfigurationManager.AppSettings["SiteRootUrl"]);</pre> </div>
+
+برداشته میشه دکمه‌ها عمل میکنه ولی وقتی این کد‌ها هست هم برنامه دیر اجرا میشه هم دکمه‌ها دیگه کار نمیکنن!</div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۴/۰۷/۱۸ ۹:۵۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>«Application_End» ذکر شده در مطلب که فقط یکبار در پایان کار برنامه فراخوانی خواهد شد، متفاوت هست با «Application_End<b>Request</b>» ایی که در انتهای هر درخواست اجرا می‌شود.</div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>کامران سادین</strong>  در  <span dir='ltr'>۱۳۹۴/۰۹/۲۱ ۱۴:۴۷</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام،بسیار مفید و زیبا و از همه مهمتر برای بنده سبک بودن!<div>یک سوال داشتم،جسارتا اگر من بخوام برای مثلا ارسال مطلب استفاده کنم چطور میشه؟یعنی زمان بدم که تو اون زمان مطلب منتشر بشه،این مثالهایی که فرمودید همه به صورت دوره ای بودند من میخام فقط یک بار انجام بشه و تموم شه وظیفه.یا مثلا بگم اگه فلان فیلد توی دیتابیس true شد این کارو انجام بده.میشه راهنمایی کنید؟</div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۴/۰۹/۲۱ ۱۵:۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>از متد <a href="www.dntips.ir-posts-1736.html">RemoveTask</a> برای حذف یک وظیفه‌ی مشخص<span> استفاده کنید.</span></div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۴/۱۰/۱۳ ۱۴:۵۵</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><b>یک نکته‌ی تکمیلی</b> <br>
+
+
+
+- این پروژه در GitHub قرار گرفت. <a href="https://github.com/VahidN/DNTScheduler">در اینجا</a> <br>
+
+
+
+- بسته‌ی نیوگت آن‌را نیز به این صورت می‌توانید نصب کنید:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">Install-Package DNTScheduler</pre> </div>
+
+
+
+چند مورد اصلاحیه در این بسته هست:<br>
+
+
+
+- تعریف صحیح الگوی singleton در آن<br>
+
+
+
+- همچنین می‌توانید public override Task RunAsync را نیز برای زمانیکه نیاز است از متدهای async استفاده کنید، تعریف کنید (از تعریف async void پرهیز کنید).</div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>قادری</strong>  در  <span dir='ltr'>۱۳۹۴/۱۱/۰۴ ۱۱:۴۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام و خسته نباشید؛&nbsp; زمانی که در ترد ایجاد شده ، خطایی رخ می‌دهد در هاست‌های اشتراکی app pool ظاهرا 20 تا40 دقیقه طول می‌کشد تا این ترد را ببندد و این باعث down&nbsp; شدن سیستم طی 20 تا 40 دقیقه می‌شود باید چکار کنیم که در try cash خودمان بتوانیم ترد موجود را بندیم و در کل بر این مورد مدیریت کامل داشته باشیم ؟<br>
+ خطای در یافتی من بیشتر از 100 باز در یک روز در یکی از وظیفه‌های تعریف شده :<br>
+
+a task was canceled<br>
+ نکته : فقط روی هاست این مشکل به وجود می‌اید و در لوکال مشکلی ندارم حتی بالای 2 ساعت هم چک شده بدون خطا .<br>
+ نکته 2 : دات نت فریورک سرور 4.5 هست ولی من با 4.6 برنامه را در لوکال اجرا می‌کنم.</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۴/۱۱/۰۴ ۱۲:۲۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>«a task was canceled» صرفا مرتبط هست به <a href="www.dntips.ir-posts-516.html">زنده نگه داشتن app pool برنامه</a>؛ در زمانیکه سایت بازدید کننده‌ای ندارد. نظرات بحث را از ابتدا دنبال کنید؛ در مورد سرویس ping و امثال آن بحث شده.</div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>کمال ح</strong>  در  <span dir='ltr'>۱۳۹۵/۰۴/۰۷ ۱۸:۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>برای استفاده از متد‌های Async، آیا روش زیر صحیح است:<div> <div align="left" dir="ltr" style="direction: ltr;"> <pre language="CSharp" name="code">        public override Task RunAsync()
+        {
+            MainAsync().Wait();
+            return base.RunAsync();
+        }
+
+        private static async Task MainAsync()
+        {
+            var smsService = ObjectFactory.Container.GetInstance&lt;ISmsService&gt;();
+            await smsService.CheckForDelivery();
+        }</pre> </div>
+
+
+&nbsp;روش بالا جواب میده، ولی از درست بودنش مطمئن نیستم!<span>&nbsp;</span> <br> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۵/۰۴/۰۷ ۱۹:۲۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>نیازی به Wait در اینجا ندارید چون این Wait در خود کتابخانه‌ی اصلی <a href="https://github.com/VahidN/DNTScheduler/blob/master/DNTScheduler/ScheduledTasksCoordinator.cs#L186">انجام می‌شود</a>. به عبارتی محتوای MainAsync را به RunAsync منتقل کنید، کافی است.</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>کمال ح</strong>  در  <span dir='ltr'>۱۳۹۵/۰۴/۰۸ ۹:۳۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>پس در این صورت از کلمه کلیدی await و async استفاده نمیکنیم، درسته؟ چون باعث بروز خطا میشه.<div> <div align="left" dir="ltr" style="direction: ltr;"> <pre language="CSharp" name="code">        public override Task RunAsync()
+        {
+            var smsService = ObjectFactory.Container.GetInstance&lt;ISmsService&gt;();
+            smsService.CheckForDelivery();
+            return base.RunAsync();
+        }</pre> </div> <br> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۵/۰۴/۰۸ ۹:۴۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>چه خطایی گرفتید؟</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>کمال ح</strong>  در  <span dir='ltr'>۱۳۹۵/۰۴/۰۸ ۱۰:۵۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>فکر کنم من در استفاده از کدها اشتباه کردم.&nbsp;<div>چون وقتی از کلمه‌های کلید async و await استفاده میکردم به این صورت بود:</div> <div> <div align="left" dir="ltr" style="direction: ltr;"> <pre language="CSharp" name="code">        public override async Task RunAsync()
+        {
+            var smsService = ObjectFactory.Container.GetInstance&lt;ISmsService&gt;();
+            await smsService.CheckForDelivery();
+            return base.RunAsync();
+        }</pre> </div> </div> <div>که در خط&nbsp;base.RunAsync خطا ایجاد میشد:</div> <div> <div align="left" dir="ltr" style="direction: ltr;"> <pre language="CSharp" name="code">Error1Since 'RegisterCompany.Web.DNTScheduler.JobsTask.CheckForDeliveryTask.RunAsync()' is an async method that returns 'Task', a return keyword must not be followed by an object expression. Did you intend to return 'Task&lt;T&gt;'?</pre> </div> <br> </div> <div>لذا کدها را به این صورت نوشتم:</div> <div> <div align="left" dir="ltr" style="direction: ltr;"> <pre language="CSharp" name="code">        public override async Task RunAsync()
+        {
+            var smsService = ObjectFactory.Container.GetInstance&lt;ISmsService&gt;();
+            await smsService.CheckForDelivery();
+            await base.RunAsync();
+        }</pre> </div> <br> </div> <div>آیا درسته؟</div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۵/۰۴/۰۸ ۱۱:۳۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>شما نیازی به فراخوانی base.RunAsync<span> ندارید (فقط جهت مثال بود).</span></div>
+</div></li></ul></li></ul></li></ul></li></ul></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>کیانی مقدم علیرضا</strong>  در  <span dir='ltr'>۱۳۹۵/۰۴/۱۱ ۹:۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام اگر بخواهیم در مثال طراحی افزونه پذیر اینترفیس Iplugin را به نحوی تغییر دهیم که افزونه‌ها قادر به معرفی جابهای خود باشند(با استفاده از کتابخانه فوق) به چه نحوی عمل کنیم بهتره؟&nbsp;</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۵/۰۴/۱۱ ۹:۱۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><a href="https://github.com/VahidN/DNTScheduler/blob/master/DNTScheduler.TestWebApplication/WebTasks/ScheduledTasksRegistry.cs#L10">ScheduledTasksCoordinator.Current.AddScheduledTasks</a>&nbsp;را با <a href="https://www.dntips.ir/courses/topic/5/9ffb5aa9-7b98-4827-ae46-fc070904c948">Scanner مربوط به StructureMap</a>  جایگزین کنید (جهت یافتن کلاس پایه <a href="https://github.com/VahidN/DNTScheduler/blob/master/DNTScheduler/ScheduledTaskTemplate.cs">ScheduledTaskTemplate</a>).</div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>کیانی مقدم علیرضا</strong>  در  <span dir='ltr'>۱۳۹۵/۰۴/۱۱ ۱۸:۱۷</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>شرط رو به این صورت گذاشتم : return now.Minute % 50 == 0&nbsp; &amp;&amp; now.Second==1&nbsp; <span> <br>
+انتظار این بود که در لحظاتی که دقیقه صفر و ثانیه یک و یا دقیقه 50 و ثانیه یک باشد عملیات مورد نظر (در اینجا تهیه نسخه پشتیبان صورت پذیرد ) به عبارتی در هر ساعت دو بار این شرایط مهیا می‌شود ولی نتیجه به صورت ذیل شد :<br>
+12:50:01&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>12:50:02</b>&nbsp;&nbsp; 13:00:01&nbsp;&nbsp; <b>13:00:02</b>&nbsp;&nbsp; 13:50:01&nbsp;&nbsp; <b>13:50:02</b>&nbsp;&nbsp;&nbsp; 14:00:01&nbsp;&nbsp; 14:50:01&nbsp;&nbsp; 15:00:01&nbsp;&nbsp; <b>15:00:02</b> <br> <br>
+زمانهایی که بولد شدند قاعدتا نباید جاب اجرا می‌شد . احتمالا مشکل چی می‌تونه باشه ؟<br> </span></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۵/۰۴/۱۱ ۱۹:۳۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>چه تعدادی job تعریف کردید؟ این لاگ کردن‌ها کجا انجام شده؟ آیا یکبار در متد Run و یکبار در متد RunAsync کار لاگ کردن انجام شده؟ بله. ابتدا Run اجرا می‌شود و بعد از آن RunAsync. اگر چند job تعریف شده، بله، متدهای Run هر کدام به ترتیب اجرا می‌شوند.</div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>عثمان رحیمی</strong>  در  <span dir='ltr'>۱۳۹۵/۰۶/۲۵ ۱۰:۵۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>مطلب مفید و کاربردی می‌باشد ، ممنون.<br>
+آیا سنارویو زیر با این کتابخانه قابل&nbsp; انجام می‌باشد :<br>
+بنده میخوام بعد از اینکه کاربر به درگاه پرداخت فرستاده شده ، تا نیم ساعت بعد از آن اگر پاسخی از بانک دریافت نشد&nbsp; تا سه مرتبه هر ده دقیه یک بار وضعیت پرداخت رو بررسی کنم .</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۵/۰۶/۲۵ ۱۱:۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>- در جدول مرتبط باید فیلدهای «وضعیت پاسخ بانک» و «تاریخ و زمان ارسال به درگاه» وجود داشته باشند.<br>
+- سپس یک جاب تعریف کنید که هر 10 دقیقه یکبار اجرا شود. در هر بار اجرای آن، در طی یک کوئری لیست مواردی را که «به درگاه پرداخت فرستاده شده»اند و «وضعیت پاسخ بانک» آن‌ها مشخص نیست را واکشی کنید. در اینجا تنها کافی است زمان ارسال واکشی شده را با تاریخ و زمان فعلی مقایسه کنید و عکس العمل لازم (مانند بررسی وضعیت پرداخت) را انجام دهید.</div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مجید بصیرتی</strong>  در  <span dir='ltr'>۱۳۹۵/۰۶/۲۹ ۱۲:۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>تشکر از مقالتون<div>سوالی که برام پیش اومده اینه که آیا در انجام تسک‌های زمانبر (مثلا تسکی که شاید چند ده دقیقه اجراش طول بکشه) مشکلی بوجود نمیاد؟</div> <div>من الان از این کتابخونه توی پروژم استفاده کردم ولی نتیجه مطابق میل من نیست. یعنی فکر میکنم هرشب که تسک رو اجرا میکنه، تسک رو کامل اجرا نمیکنه. من یه سری تغییرات رو هرشب میخوام روی چندده هزار رکورد انجام بدم. ولی وقتی بررسی میکنم مثلا تغییری که باید 5 روز پیش روی یه رکورد انجام میشده شب گذشته انجام شده.</div> <div>از الماه هم استفاده میکنم ولی توی لاگ خطاها که بررسی میکردم توی تایمی که تسک اجرا میشه خطایی نداشتم.</div> <div>نکته ای وجود داره که من بهش توجه نکردم؟</div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۵/۰۶/۲۹ ۱۳:۳۹</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>یک متد الحاقی لاگ ELMAH را ایجاد کنید:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">using System;
+using System.Text;
+using Elmah;
+
+namespace Common.WebToolkit
+{
+    public static class ElmahLogEx
+    {
+        public static void LogException(this string ex)
+        {
+            if (string.IsNullOrWhiteSpace(ex))
+                return;
+            LogException(new Exception(ex));
+        }
+
+        public static void LogException(this Exception ex)
+        {
+            if (ex == null) return;
+            try
+            {
+                ErrorSignal.FromCurrentContext().Raise(ex);
+            }
+            catch
+            {
+                ErrorLog.GetDefault(null).Log(new Error(ex));
+            }
+        }
+    }
+}</pre> </div>
+
+
+
+
+
+
+
+
+سپس <br>
+
+
+
+
+
+
+
+
+- در کتابخانه‌ی فوق به قسمت ScheduledTasksCoordinator.Current.OnUnexpectedException هم دقت داشته باشد؛ مطابق مثال ارائه شده. این موارد را هم لاگ کنید:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code"> ScheduledTasksCoordinator.Current.OnUnexpectedException =
+                    (exception, scheduledTask) =&gt; (scheduledTask.Name + ":" + exception).LogException();</pre> </div>
+
+ - ابتدا و انتهای هر Task را لاگ کنید (متد الحاقی فوق را به صورت معمولی و با پیام‌هایی مشخص، در ابتدا و انتهای هر Task فراخوانی کنید؛ تا در لاگ‌های ELMAH ظاهر شوند).<br>
+
+
+
+
+
+
+
+
+- شروع به کار برنامه و خاتمه‌ی آن‌را لاگ کنید (متد الحاقی فوق را با پیام‌هایی مشخص، در متدهای Application_Start و Application_End فایل Global.asax.cs<span> فراخوانی کنید تا مشخص شود که آیا برنامه  خاتمه یافته‌است یا خیر). <br> </span></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مجید بصیرتی</strong>  در  <span dir='ltr'>۱۳۹۵/۰۷/۰۱ ۱۱:۲۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>کاری که گفتید رو انجام دادم و بعد از بررسی لاگ الماه متوجه شدم دوتا تسکی که نوشتم هیچکدوم به پایان نمیرسن. یکی از خطاها توی متد WakeUp صورت میگیره:<div> <br> <div style="direction: ltr;"> <span style="font-family: Verdana; font-size: 11.2px;">exception occured in wakeup methode:System.ArgumentNullException: Value cannot be null. Parameter name: address at System.Net.WebClient.DownloadData(String address) at xxx.Web.WebTasks.ScheduledTasksRegistry.WakeUp(String pageUrl)</span> <br> </div> <div style="direction: ltr;"> <br> </div> <div style="text-align: right; direction: rtl;">در حالیکه من توی فایل کانفیگ برنامه آدرس سایت رو به این صورت دادم:</div> <div style="direction: rtl;"> <div align="left" dir="ltr" style="direction: ltr;"> <pre language="XML" name="code">&lt;add key="SiteRootUrl" value="http://xxx.com" /&gt;</pre> </div> </div> <div style="direction: rtl;"> <br> </div> <div style="direction: rtl;">و یکی دیگه از خطاهایی که اتفاق افتاده اینه:</div> <div style="direction: rtl;"> <br> </div> <div style="direction: ltr;"> <span style="font-family: Verdana; font-size: 11.2px;">System.Threading.ThreadAbortException: Thread was being aborted</span> <br> </div> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۵/۰۷/۰۱ ۱۱:۴۹</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>- هر دو خطا به این معنا هستند که برنامه‌ی شما <a href="www.dntips.ir-posts-1736.html">به علت نرسیدن درخواستی به آن</a>  توسط IIS خاتمه پیدا می‌کند.<br>
+- SiteRootUrl را <a href="www.dntips.ir-posts-1736.html">به این صورت</a>  هم می‌توان مقدار دهی کرد.</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مجید بصیرتی</strong>  در  <span dir='ltr'>۱۳۹۵/۰۷/۰۱ ۱۲:۴۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>ممنون، تست میکنم امیدوارم مشکل حل بشه<div>- فقط دوتا سوال برام پیش اومده: شما میفرمایید که به دلیل نرسیدن درخواست، IIS برنامه من رو متوقف میکنه. خب تسک من شروع شده و داره پشت صحنه کار انجام میده، با این حال بازم طبیعیه که&nbsp;IIS برنامم رو متوقف کنه؟<span>&nbsp;</span> </div> <div>- و سوال دوم اینه که برای تسکای زمانبر (که ممکنه حتی چندساعت طول بکشه) نیازی به انجام کار خاص دیگه ای نیست؟</div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>محسن خان</strong>  در  <span dir='ltr'>۱۳۹۵/۰۷/۰۱ ۱۴:۵۷</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div>کارهای پس زمینه اهمیتی برای IIS ندارن: <a href="www.dntips.ir-posts-1814.html">انجام کارهای پس زمینه در ASP.NET 4.5.2</a> <span>&nbsp;</span> </div> <div>حداقل کاری که می‌تونی انجام بدی این هست که خودت یک وظیفه‌ی Ping درست کنی. یک Task درست کن که هر 30 ثانیه یکبار صفحه اول سایت رو واکشی کنه. مثل کاری که RSS Readerها انجام می‌دن. اینطوری برنامه‌ات همیشه زنده می‌مونه؛ مگر اینکه یک نفر کل سرور رو ری‌استارت کنه. یا <a href="www.dntips.ir-posts-516.html">یکی از حالت‌های ری‌استارت برنامه‌های ASP.NET رخ بده</a>.</div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مجید بصیرتی</strong>  در  <span dir='ltr'>۱۳۹۵/۰۷/۰۱ ۱۵:۲۷</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>"<span style="color: rgb(51, 51, 51); text-align: right;">حداقل کاری که می‌تونی انجام بدی این هست&nbsp;<span>&nbsp;..."</span> </span> <div> <span style="color: #333333;">خب این کار رو همون قطعه کدی که توی Application_End قرار میدیم انجام میده دیگه؟ درسته؟</span> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>محسن خان</strong>  در  <span dir='ltr'>۱۳۹۵/۰۷/۰۱ ۱۸:۱۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>اون قسمت&nbsp;فقط برنامه‌ای رو که توسط IIS خاتمه یافته، مجددا از صفر بارگذاری می‌کنه. اما اگر این وظیفه‌ی مخصوص&nbsp;Ping رو اضافه کنید، کار به خاتمه یافتن برنامه&nbsp;نمی‌رسه.</div>
+</div></li></ul></li></ul></li></ul></li></ul></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>امین بحیرائی</strong>  در  <span dir='ltr'>۱۳۹۷/۰۹/۱۹ ۱۱:۱۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>اگر برای elmah ارسال ایمیل نیز تنظیم شده باشد برای این متد الحاقی باید به صورت دستی ارسال ایمیل را تنظیم کرد؟</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۷/۰۹/۱۹ ۱۲:۰</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div>بله. <a href="www.dntips.ir-posts-514.html">از امکانات توکار ELMAH استفاده کرده و با آن یکپارچه است</a> ولی در کل <a href="https://github.com/elmah/Elmah/blob/master/src/Elmah.AspNet/ErrorMailModule.cs#L81">ماژول ارسال ایمیل‌های آن</a> یک HttpModule است و&nbsp; نیاز به HttpContext جاری را دارد تا کار کند. زمانیکه از ErrorLog.GetDefault(null) استفاده می‌شود، ایمیلی توسط آن ارسال نخواهد شد؛ چون درخواستی به این HttpModule نمی‌رسد. <br> </div></div>
+</div></li></ul></li></ul></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۵/۰۷/۰۱ ۲۰:۳۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><b>به روز رسانی</b> <br> <a href="https://www.nuget.org/packages/DNTScheduler">نگارش 1.1</a> این کتابخانه منتشر شد.<br> <br> <b> <a href="https://github.com/VahidN/DNTScheduler/commits/master"> تغییرات </a> </b> <br>
+
+- یک وظیفه‌ی توکار Ping به این کتابخانه اضافه شد تا به صورت خودکار دقیقه‌ای یکبار برنامه را Ping کند تا دیگر برنامه توسط IIS (به سادگی) از حافظه خارج نشود.<br>
+
+- همچنین یک HTTP Module توکار هم به آن اضافه شد تا فایل global.asax.cs نهایی شما را خلوت کند. این ماژول به صورت خودکار در برنامه ثبت خواهد شد و نیازی به هیچگونه تنظیماتی از طرف شما ندارد.<br> <br> <b>برای نصب</b> <br>
+
+- برای نصب بار اول:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">PM&gt; Install-Package DNTScheduler</pre> </div>
+
+- برای به روز رسانی نصب فعلی:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">PM&gt; Update-Package</pre> </div> <br> <b>پس از نصب</b> <br>
+
+- فایل <a href="https://github.com/VahidN/DNTScheduler/blob/master/DNTScheduler.TestWebApplication/Global.asax.cs">global.asax</a>  قدیمی خود را خلوت کنید (دیگر نیازی به متد application end نیست و HTTP module توکار آن این مورد را پوشش می‌دهد).<br>
+
+- همچنین دیگر نیازی به ذکر SiteRootUrl در فایل <a href="https://github.com/VahidN/DNTScheduler/blob/master/DNTScheduler.TestWebApplication/Web.config">وب کانفیگ</a>  نیست.</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>جواد غدیری</strong>  در  <span dir='ltr'>۱۳۹۹/۰۴/۲۳ ۱۸:۵۸</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div>متغیر SiteRootUrl <span>&nbsp;رو کجا باید تنظیم کنیم تا ببینیم در کلاس <a href="https://github.com/VahidN/DNTScheduler.Core/blob/1e4c553c175c5bd95c17ba278c9317c5a764bf64/src/DNTScheduler.Core/ThisApplication.cs#L32">ThisApplication</a>  درست صدا زده میشه یا نه؟<br> </span> </div> <div> <br> <span> </span> </div> <div> <span> </span> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۹/۰۴/۲۳ ۱۹:۴۸</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><a href="https://github.com/VahidN/DNTScheduler.Core/blob/1e4c553c175c5bd95c17ba278c9317c5a764bf64/src/DNTScheduler.Core/SiteRootUrlMiddleware.cs#L33">تنظیمش به صورت خودکار هست</a>.</div>
+</div></li></ul></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۵/۰۷/۲۱ ۱۸:۴۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><b>جهت اطلاع</b> <br>
+
+
+این کتابخانه برای ASP.NET Core نیز بازنویسی شد: <strong> <a href="https://github.com/VahidN/DNTScheduler.Core" data-pjax="#js-repo-pjax-container">DNTScheduler.Core</a> </strong> <span>&nbsp;</span></div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مجید بصیرتی</strong>  در  <span dir='ltr'>۱۳۹۵/۰۸/۲۰ ۱:۴۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>من از نسخه 1.1 این کتابخونه استفاده میکنم. توی لاگ الماه چنین خطایی دارم:<div style="direction: ltr;"> <span style="font-family: Verdana; font-size: 11.2px;">Ping Task:System.Net.WebException: The remote server returned an error: (500) Internal Server Error. at System.Net.WebClient.DownloadDataInternal(Uri address, WebRequest&amp; request) at System.Net.WebClient.DownloadData(Uri address) at System.Net.WebClient.DownloadData(String address) at DNTScheduler.ThisApp.WakeUp() at DNTScheduler.PingTask.Run() at DNTScheduler.ScheduledTasksCoordinator.taskAction(IEnumerable`1 taskToRun)</span> <br> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۵/۰۸/۲۰ ۱:۵۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>مهم نیست. زمان application end از این خطاها خواهید دید (Internal Server Error). در اینجا server همان برنامه‌ی شما است که قابلیت Ping را در آن لحظه نداشته.</div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>قادری</strong>  در  <span dir='ltr'>۱۳۹۵/۰۹/۲۱ ۶:۵</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام؛ من یه سیستم ماژولار بیس نوشتم که تمام اجزا اون جداست و بروی چهار چوب اصلی یا همون هسته سوار میشه و اجرا میشه .<br>
+
+
+
+
+
+
+
+
+
+یه ماژول دارم ارسال ایمیل‌های زمانبندی شده که همین کلاس شما رو قرار دادم و مستقل داره کار می‌کنه .<br>
+
+
+
+
+
+
+
+
+
+الان می‌خوام دو سه ماژول دیگه ایجاد کنم که کاری رو بر مبنای زمانبندی انجام میدن .<br>
+
+
+
+
+
+
+
+
+
+حالا مشکل اینجاست چطوری از این کلاس استفاده کنم که بتونه تداخل انجام تسک نداشته باشه ؟<br>
+
+
+
+
+
+
+
+
+
+اولین و بهترین حالتی که به ذهنم رسید سوار کردن این کلاس بروی هسته هست که بتونه کل تسک‌ها رو مدیرت کنه و این کار با قرار دادن کلاس "ScheduledTasksRegistry&nbsp;" در هسته و قرار دادن کلاس "ScheduledTaskTemplate&nbsp;" برای هر ماژول قابل اجراست .<br>
+
+
+
+
+
+اما مشکل اینجاست که فایل ScheduledTasksRegistry&nbsp;<span> کامپایل شده و نمی‌توان متد :<br> </span> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">ScheduledTasksCoordinator.Current.AddScheduledTasks(
+new Listener(),
+new Sender()
+);</pre> </div>
+
+را تغییر داد .<br>
+
+مجدد توی ذهنم overwrite کردن این متد امد ولی چطوری ؟ ایا امکانپدیر هست ؟<br>
+
+دقیقا من باید بتونم این قسمت رو runtime تغییر بدم و کلاس‌های دیگر رو اضافه کنم .<span> <br> </span></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۵/۰۹/۲۱ ۸:۴۷</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>ScheduledTasksCoordinator.Current<span> یک وهله‌ی Singleton است و هر زمانیکه متد <a href="https://github.com/VahidN/DNTScheduler/blob/master/DNTScheduler/ScheduledTasksCoordinator.cs#L69">AddScheduledTasks</a> <span> </span>و یا AddScheduledTasks<span>&nbsp;</span>بر روی آن فراخوانی شوند، به لیست موجود، موارد جدید را اضافه خواهد کرد و محدودیتی در مورد تعداد بار فراخوانی آن وجود ندارد.<br> </span></div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۶/۰۱/۰۵ ۱۲:۱۷</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><b>یک نکته: روش صحیح Dispose سرویس‌ها داخل وظایف تعریف شده</b> <br> <br>
+
+
+
+
+
+
+
+با توجه به اینکه داخل وظایف، چرخه‌ی طول عمر یک درخواست وب رخ نمی‌دهد، کار Dispose سرویس‌های HybridHttpOrThreadLocalScoped مانند IUnitOfWork&nbsp;را باید دستی انجام دهید:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">    public static class IoCWrapper
+    {
+        public static void RunAndDispose(Action action)
+        {
+            try
+            {
+                action();
+            }
+            finally
+            {
+                // اگر در درخواست وب بودیم، به صورت خودکار در پایان کار همه چیز تمام می‌شود
+                if (!HttpContextLifecycle.HasContext())
+                {
+                    new HybridLifecycle().FindCache(null).DisposeAndClear();
+                }
+            }
+        }
+
+        public static T GetInstance&lt;T&gt;()
+        {
+            return SmObjectFactory.Container.GetInstance&lt;T&gt;();
+        }
+    }</pre> </div>
+
+
+
+
+
+
+
+و سپس برای استفاده‌ی از آن داخل وظایف:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">        public override void Run()
+        {
+            IoCWrapper.RunAndDispose(() =&gt;
+            {
+                var draftsService = IoCWrapper.GetInstance&lt;IBlogPostDraftsService&gt;();
+                draftsService.RunConvertDraftsToPostsJob();
+            });
+        }</pre> </div>
+
+
+
+
+
+
+
+به این ترتیب کار Dispose وهله‌ی Context برنامه به درستی صورت گرفته و هم برنامه دچار نشتی حافظه نخواهد شد و هم Context دریافتی حالت singleton و «کش شده» را پیدا نمی‌کند (اگر dispose نشود، هربار درخواست آن معادل است با دریافت همان وهله‌ی قبلی).</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>حسن حقی</strong>  در  <span dir='ltr'>۱۳۹۸/۰۲/۲۲ ۱۵:۳۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام؛ وقتی در قسمت: <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">IoCWrapper.RunAndDispose(() =&gt;
+{
+     var draftsService = IoCWrapper.GetInstance&lt;IBlogPostDraftsService&gt;();
+     draftsService.RunConvertDraftsToPostsJob();
+});</pre> </div>
+
+
+
+یک متد Async قرار می‌دم</div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">IoCWrapper.RunAndDispose(async&nbsp;() =&gt;
+{
+     var draftsService = IoCWrapper.GetInstance&lt;IBlogPostDraftsService&gt;();
+     await draftsService.RunConvertDraftsToPostsJobAsync();
+});</pre> </div> </div> <div>دفعه اول به درستی اجرا میشه، ولی دفعه دوم خطای زیر میده</div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">System.ObjectDisposedException
+  HResult=0x80131622
+  Message=The ObjectContext instance has been disposed and can no longer be used for operations that require a connection.
+  Source=EntityFramework</pre> </div> </div> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۸/۰۲/۲۲ ۱۸:۳۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div>چون یک async void را ایجاد کردید و به صورت fire-and-forget<span>&nbsp;کار می‌کند. یعنی IoCWrapper.RunAndDispose<span> </span>بلافاصله خاتمه پیدا خواهد. <br> </span> </div> <div>امضای مدنظر شما چنین چیزی باید باشد:</div> <div> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">public static Task RunAndDispose(Func&lt;Task&gt; action)</pre> </div>
+
+
+تا خود RunAndDispose<span> هم </span>قابلیت await پیدا کند.<br> <span> </span> </div> <div> <span> </span> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>حسن حقی</strong>  در  <span dir='ltr'>۱۳۹۸/۰۲/۲۴ ۱۳:۱۷</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>من این تغییرات رو اعمال کردم<br> <div> <div align="left" dir="ltr" style="direction: ltr;"> </div> <div align="left" dir="ltr" style="direction: ltr;"> <pre language="CSharp" name="code">public static Task RunAndDispose(Func&lt;Task&gt; action)
+{
+        try
+        {
+                action();
+        }
+        finally
+        {
+                System.Diagnostics.Trace.WriteLine("Finaly");
+
+                if (!HttpContextLifecycle.HasContext())
+                {
+                    new HybridLifecycle().FindCache(null).DisposeAndClear();
+                }
+        }
+        return  Task.FromResult(0);
+}</pre> </div> <br> </div> <div>و&nbsp; متد&nbsp;RunAsync<span>&nbsp;</span> </div> <div> <div align="left" dir="ltr" style="direction: ltr;"> <pre language="CSharp" name="code">public override async Task RunAsync()
+{
+        await SemaphoreSlim.WaitAsync();
+
+        try
+        {
+                if (this.IsShuttingDown || this.Pause)
+                    return;
+
+                await IoCWrapper.RunAndDispose(async () =&gt;
+                {
+                    var draftsService = IoCWrapper.GetInstance&lt;IBlogPostDraftsService&gt;();
+                    await draftsService.RunConvertDraftsToPostsJobAsync();
+                });
+        }
+        finally
+        {
+                SemaphoreSlim.Release();
+        }
+}</pre> </div>
+ولی بعد از دومین بار اجرا، توی ایونت‌ها این خطارو دارم</div> <div> <div align="left" dir="ltr" style="direction: ltr;"> <pre language="CSharp" name="code">ActivatedEventTimeDurationThread
+Activated Historical Code ContextException thrown: 'System.ObjectDisposedException' in mscorlib.dll ("The ObjectContext instance has been disposed and can no longer be used for operations that require a connection.") Exception thrown: 'System.ObjectDisposedException' in mscorlib.dll ("The ObjectContext instance has been disposed and can no longer be used for operations that require a connection.") Hyperlink: Activate Historical Debugging346.49s[14880] Worker Thread</pre> </div> <br>
+به نظرتون جایی از کد رو اشتباه نوشتم؟</div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۸/۰۲/۲۴ ۱۴:۵۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>()action باید بشود ()await action.</div>
+</div></li></ul></li></ul></li></ul></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>طرفدار منصور</strong>  در  <span dir='ltr'>۱۳۹۶/۰۸/۲۰ ۱۰:۸</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام؛ من این&nbsp; Library روگرفتم و توی یه پروژه استفاده کردم. در محیط طراحی مشکلی نبود ولی وقتی روی سرور نسخه رو منتشر کردم به یه مشکل برخوردم. وقتی تعداد worker‌ها بیش از یکی می‌شه به ازای هر worker یه scheduler&nbsp; ایجاد میشه که فکر کنم عادیه اما من نیاز دارم فقط یه worker اون scheduler رو اجرا کنه . راه کاری توی خود Library وجود داره که بشه این مسئله رو کنترل کرد؟ اگه پاسختون خیر هست پیشنهاد شما چیه ؟</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۶/۰۸/۲۰ ۱۰:۱۷</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">// فقط یک ترد امکان دسترسی به کد را داشته باشد
+private static readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1,1);
+
+public override async Task RunAsync()
+{
+   // شروع تمام تردها معلق خواهند شد تا این سمافور به پایان برسد
+   // پس از پایان کار ترد جاری، فقط یک ترد در حال انتظار، مجوز دسترسی به قطعه کد بعدی را خواهد یافت و به همین ترتیب برای سایر تردها
+   await _semaphoreSlim.WaitAsync(); 
+   try
+   {
+       await Task.Delay(20000); // Your code here
+   }
+   finally
+   {
+      _semaphoreSlim.Release();
+   }
+}</pre> </div> </div> </div> </div> </div> </div></div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>امین بحیرائی</strong>  در  <span dir='ltr'>۱۳۹۶/۰۸/۲۴ ۹:۱۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام&nbsp;<div>ممنون از کتابخانه خوبتون</div> <div style="direction: rtl;">برای توقف و یا اجرای کل task در برنامه توسط کاربر چکار باید انجام داد؟</div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۶/۰۸/۲۴ ۹:۲۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>- برای <a href="https://github.com/VahidN/DNTScheduler/blob/master/DNTScheduler.TestWebApplication/Default.aspx.cs#L10">گزارشگیری</a>  از وظایف موجود از لیست ScheduledTasksCoordinator.Current.ScheduledTasks استفاده کنید.<br>
+
+- برای حذف و خاتمه‌ی یک Task از متد ScheduledTasksCoordinator.Current.RemoveTask(name) استفاده کنید.<br>
+
+- برای افزودن یک Task جدید از متدهای ScheduledTasksCoordinator.Current.AddScheduledTasks(params)/AddScheduledTask(task) استفاده کنید.</div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>امین بحیرائی</strong>  در  <span dir='ltr'>۱۳۹۶/۰۹/۰۵ ۱۰:۴۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>برای اجرای هر چند ساعت یکبار (به طور مثال هر 3 ساعت) باید مقدار دقیقه هم اعمال کرد؟<div>کد زیر هر دقیقه اجرا می‌شود&nbsp;</div> <div> <div align="left" dir="ltr" style="direction: ltr;"> <pre language="CSharp" name="code"> return now.Hour % 3 == 0 &amp;&amp; now.Second == 1;</pre> </div>
+ولی با اعمال مقدار دقیقه ظاهرا مشکل برطرف شد</div> <div> <div align="left" dir="ltr" style="direction: ltr;"> <pre language="CSharp" name="code"> return now.Hour % 3 == 0 &amp;&amp; now.Minute == 0 &amp;&amp; now.Second == 1;</pre> </div> <br> </div></div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>رضا چونک</strong>  در  <span dir='ltr'>۱۳۹۷/۱۰/۱۸ ۱۴:۵۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div>زمانی که وظیفه ای میخواهد اجرا شود همزمان با آن کنترلر Home هم فراخوانی می‌شود</div> <div>این درخواست هایی هست که لاگ VS قسمت Output ثبت می‌شود</div> <div> <span> </span> <br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">Application Insights Telemetry (unconfigured): {"name":"Microsoft.ApplicationInsights.Dev.Metric","time":"2019-01-08T11:23:01.0000000Z","tags":{"ai.cloud.roleInstance":"BAHARI-PC","ai.internal.sdkVersion":"m-agg2:2.8.1-22898"},"data":{"baseType":"MetricData","baseData":{"ver":2,"metrics":[{"name":"Dependency duration","kind":"Aggregation","value":4143.777,"count":1,"min":4143.777,"max":4143.777,"stdDev":0}],"properties":{"_MS.MetricId":"dependencies/duration","_MS.IsAutocollected":"True","_MS.AggregationIntervalMs":"60000","Dependency.Type":"Http","DeveloperMode":"true","Dependency.Success":"True"}}}}
+Application Insights Telemetry (unconfigured): {"name":"Microsoft.ApplicationInsights.Dev.Metric","time":"2019-01-08T11:23:01.0000000Z","tags":{"ai.cloud.roleInstance":"BAHARI-PC","ai.internal.sdkVersion":"m-agg2:2.8.1-22898"},"data":{"baseType":"MetricData","baseData":{"ver":2,"metrics":[{"name":"Server response time","kind":"Aggregation","value":4136.7653,"count":1,"min":4136.7653,"max":4136.7653,"stdDev":0}],"properties":{"_MS.MetricId":"requests/duration","_MS.IsAutocollected":"True","_MS.AggregationIntervalMs":"60000","DeveloperMode":"true","Request.Success":"True"}}}}
+Application Insights Telemetry (unconfigured): {"name":"Microsoft.ApplicationInsights.Dev.Metric","time":"2019-01-08T11:23:01.0000000Z","tags":{"ai.cloud.roleInstance":"BAHARI-PC","ai.internal.sdkVersion":"m-agg2:2.8.1-22898"},"data":{"baseType":"MetricData","baseData":{"ver":2,"metrics":[{"name":"Dependency duration","kind":"Aggregation","value":3972.6929,"count":3,"min":12.8297,"max":2687.0447,"stdDev":1092.34881420812}],"properties":{"_MS.MetricId":"dependencies/duration","_MS.IsAutocollected":"True","_MS.AggregationIntervalMs":"60000","Dependency.Type":"SQL","DeveloperMode":"true","Dependency.Success":"True"}}}}</pre> </div>
+این هم نمونه ای از وظیفه:</div> <div> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">#region Using
+
+using Autofac;
+using CHK.ServiceLayer.Interfaces;
+using DNTScheduler;
+using System;
+
+#endregion
+
+namespace CHK.Web.Scheduler
+{
+    public class InventoryTask : ScheduledTaskTemplate
+    {
+        #region Properties
+
+        public override int Order =&gt; 1;
+        public override string Name =&gt; "Inventory-DiscountCoupon-GiftCard";
+        public IContainer Container { get; set; }
+
+        #endregion
+
+        #region Methods
+
+        public override bool RunAt(DateTime utcNow)
+        {
+            if (IsShuttingDown || Pause) return false;
+            var currentDateTime = utcNow.AddHours(3.5);
+            return (currentDateTime.Minute % 15 == 0 &amp;&amp; currentDateTime.Second &gt; 5 &amp;&amp; currentDateTime.Second &lt; 15);
+        }
+
+        public override void Run()
+        {
+            if (IsShuttingDown || Pause) return;
+            Pause = true;
+            using (var scope = Container.BeginLifetimeScope())
+            {
+                var schedulerService = scope.Resolve&lt;ISchedulerService&gt;();
+                schedulerService.UpdateInventory();
+            }
+            Pause = false;
+        }
+
+        #endregion
+    }
+}</pre> </div> <br> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۷/۱۰/۱۸ ۱۵:۵</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div>این مسایل ربطی به این کتابخانه ندارد.</div> <div align="left">The <em>unconfigured</em> reference in each instance of Application 
+Insights telemetry indicates that this application isn't associated with
+ an ikey. The data that's generated while your app is running isn't sent
+ to Azure. The data is available only for local search and analysis.<span> <br> </span> </div> <div> <span> <a href="https://docs.microsoft.com/en-us/azure/azure-monitor/app/asp-net-core#application-insights-search-continued">Application Insights Search continued</a> <span>&nbsp;</span> </span> </div></div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>جواد غدیری</strong>  در  <span dir='ltr'>۱۳۹۸/۰۲/۲۴ ۱۷:۲۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام؛ در نسخه قبلی که بر روی ASP .NET MVC بود برای پروژه ای که روی سرور هاست کرده بودم و سرور "فقط" از TLS1.2 استفاده می‌کرد (سرور از طریق نرم افزار <a href="https://www.nartac.com/Products/IISCrypto/">NARTAC</a>  کانفیگ شده و همه نسخه‌های SSL و Tls1.0 و Tls1.1 بر روی آن غیر فعال شده است به دلیل موارد امنیتی) مجبور بودم دو خط کد زیر را در متد WakeUp قبل از کد دانلود صفحه اضافه کنم<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) =&gt; true;
+ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;</pre> </div> <br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+تا خطایی برای دانلود صفحه دریافت نکنم و کد به درستی کار کند<br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+برای نسخه جدید که بر روی dot NET Core زحمت آن را کشیده اید کد آن کمی تغییر کرده و به جای استفاده از شئ WebClient و دانلود صفحه از شئ HttpClient استفاده شده.<br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+ممنون میشم راهنمایی بفرمایید در اینجا برای فعال سازی Tls1.2 به چه نحوی باید عمل کنم تا خطا نده؟ آیا باید دوباره همین دو خط کد بالا را قبل از خط کد <br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">await _client.GetStringAsync(SiteRootUrl);</pre> </div>
+
+
+
+
+
+که در کلاس <a href="https://github.com/VahidN/DNTScheduler.Core/blob/master/src/DNTScheduler.Core/ThisApplication.cs">ThisApplication</a>  نوشته شده صدا بزنم؟  <br> <br> <br>
+
+
+
+
+
+
+
+
+
+
+
+ضمنا به چه نحوی باید متد LogError که در قطعه کد زیر در کلاس <a href="https://github.com/VahidN/DNTScheduler.Core/blob/master/src/DNTScheduler.TestWebApp/Startup.cs">Startup</a>  نوشته شده رو شخصی سازی کنم تا همه لاگهای خطا در جدولی در بانک اطلاعاتی ذخیره شود؟ (چون از بانک اطلاعاتی مونگو استفاده کردم می‌خواستم این بخش رو برای مونگو پیاده سازی کنم)<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">var logger = loggerFactory.CreateLogger(typeof(Startup));
+app.UseDNTScheduler(onUnexpectedException: (ex, name) =&gt;
+{
+      logger.LogError(0, ex, $"Failed running {name}");
+});</pre> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۸/۰۲/۲۴ ۱۸:۵۹</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div>تاریخچه‌ی پشتیبانی از TLS <b>1.2</b> در NET. به این صورت است:</div> <div> <table> <tbody> <tr> <td> <b>وضعیت پشتیبانی از TLS 1.2 </b> <br> </td> <td> <b>&nbsp;نگارش دات نت</b> <br> </td> </tr> <tr> <td>&nbsp;پشتیبانی نمی‌شود. راه حلی هم ندارد.<br> </td> <td>&nbsp;NET 3.5. یا قبل از آن<br> </td> </tr> <tr> <td>&nbsp;پشتیبانی نمی‌شود. اما اگر نگارش بالاتری نصب است، قطعه کد زیر را استفاده کنید:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">ServicePointManager.SecurityProtocol = 
+  (SecurityProtocolType)3072;</pre> </div> </td> <td>&nbsp;NET 4.0. <br> </td> </tr> <tr> <td>&nbsp;پشتیبانی می‌شود، اما حالت پیش‌فرض نیست و باید دستی انتخاب شود:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">ServicePointManager.SecurityProtocol = 
+  SecurityProtocolType.Tls12;</pre> </div> </td> <td>&nbsp;NET 4.5. <br> </td> </tr> <tr> <td>&nbsp;حالت پیش‌فرض است و نیاز به تنظیمات خاصی ندارد.<br> </td> <td>&nbsp;NET 4.6. و یا بالاتر <br> </td> </tr> </tbody> </table>
+
+
+
+
+
+
+
+- بنابراین اگر از Full .NET استفاده می‌شود، فقط کافی است که <b>Target Framework</b> برنامه را به بالاتر از NET 4.6. تنظیم کنید (الان نگارش 4.8 ارائه شده) و سرور هم همان نگارش را نصب کند. نیاز به تنظیم بیشتری ندارد. در مورد NET Core. هم به همین صورت است و HttpClient آن برای دریافت صفحات ارائه شده‌ی با TLS 1.2 هیچ مشکلی ندارد.<br> </div> <div>- سطر ServerCertificateValidationCallback که true کردید یعنی مجوز SSL سرور شما حتی اگر معتبر نبود (و همچنین کل اینترنت؛ چون این تنظیم سراسری است)، معتبر تشخیص داده شود که غیرضروری است.</div> <div>- مورد لاگ کردن، وابستگی به بانک اطلاعاتی خاصی ندارد. این سطرها را حذف کنید و بجای آن کدهای بانک اطلاعاتی خودتان را قرار دهید. یا اگر logger پیش‌فرض سیستم شما اطلاعات را بجای کنسول یا صفحه‌ی Debug، در بانک اطلاعاتی ذخیره می‌کند (<a href="https://github.com/imperugo/Microsoft.Extensions.Logging.MongoDb">^</a>  یا <a href="https://github.com/ByNeo/NLog.MongoDB.NetCore">^</a>)، این قسمت نیازی به تغییر ندارد.<br> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>جواد غدیری</strong>  در  <span dir='ltr'>۱۳۹۹/۰۴/۲۳ ۱۸:۱۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>در حال حاضر با اینکه یک Certificate معتبر گرفتم و روی IIS فعال کردم و در کروم هم گواهینامه رو سبز نمایش میده ولی برای ping خطای زیر رو در Event Viewer ویندوز می‌بینم برای هر دقیقه که اجرا میشه؟!!<br>
+
+
+آخرین نسخه که asp . net Core 3.1.5 هست روی سرور نصب هست همینطور dot net framework 4.8<br>
+
+
+همه موارد دیگر پروژه درست کار می‌کنه و خطایی ندارم غیر از این بخش که در Event Viewer هم میشه دید<br>
+
+
+ممنون میشم راهنمایی بفرمایید چطور رفعش کنم<br> <br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">Category: DNTScheduler.Core.ScheduledTasksCoordinator
+EventId: 0
+
+Failed running DNTScheduler.Core.PingTask
+
+Exception: 
+System.AggregateException: One or more errors occurred. (The SSL connection could not be established, see inner exception.)
+ ---&gt; System.Net.Http.HttpRequestException: The SSL connection could not be established, see inner exception.
+ ---&gt; System.Security.Authentication.AuthenticationException: The remote certificate is invalid according to the validation procedure.
+</pre> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۹/۰۴/۲۳ ۱۹:۴۹</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>اینکه عنوان می‌کند مجوز مدنظر غیرمعتبر است، مشکل این کتابخانه نیست. اگر این قسمت برای شما کار نمی‌کند، آن‌را غیرفعال کنید: options.AddPingTask = false<span>&nbsp;</span></div>
+</div></li></ul></li></ul></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهران گلزاری</strong>  در  <span dir='ltr'>۱۳۹۸/۰۳/۰۱ ۱۲:۵۸</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>وظیفه ای دارم با این تنظیمات&nbsp;<div> <div align="left" dir="ltr" style="direction: ltr;"> <pre language="CSharp" name="code">services.AddDNTScheduler(options =&gt;
+            {
+                // DNTScheduler needs a ping service to keep it alive. Set it to false if you don't need it.
+                options.AddPingTask = true;
+                options.AddScheduledTask&lt;DoFillDataTask&gt;(
+                    runAt: utcNow =&gt;
+                    {
+                        var schedulerTask = _config.GetSection("SchedulerTask");
+                        var now = utcNow.AddHours(4.5);
+                         return  now.Hour == 10 &amp;&amp; now.Minute == 0 &amp;&amp; now.Second == 0;
+                    },
+                    order: 1);
+            });</pre> </div>
+
+
+
+
+
+
+
+
+
+
+که هر ثانیه پیغامی با سطح fatal میده. در صورتی که وظیفه با موفقیت انجام میشه.</div> <div>پیغام :<span>Failed running DNTScheduler.Core.PingTask</span>&nbsp;<span>&nbsp;</span> </div> <div>با تغییر&nbsp;PingTask = false مشکل برطرف نمیشه.<span>&nbsp;</span> </div> <div> <span>شرح کامل پیغام:&nbsp;<a href="https://www.dntips.ir/file/userfile?name=error.txt">error.txt</a>&nbsp;<span> <br> </span> </span> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۸/۰۳/۰۱ ۱۳:۲۰</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>«هر ثانیه؟» خیر. تنظیم شده <a href="https://github.com/VahidN/DNTScheduler.Core/blob/3e7becaaaa3d5c642535ec1062173b0e6ab1eb73/src/DNTScheduler.Core/SchedulerServiceCollectionExtensions.cs#L41">هر دقیقه</a>  یکبار آدرس root سایت شما را فراخوانی کند. 400 Bad Request<span> هم یعنی این آدرس root سایت قابل دسترسی نیست و خطا می‌دهد. AddPingTask هم اگر false باشد، این job اصلا <a href="https://github.com/VahidN/DNTScheduler.Core/blob/3e7becaaaa3d5c642535ec1062173b0e6ab1eb73/src/DNTScheduler.Core/SchedulerServiceCollectionExtensions.cs#L39">اضافه نخواهد شد</a>. بنابراین این تنظیم در زمان راه اندازی اولیه‌ی برنامه تاثیر دارد و نه پس از آن.<span> <span>&nbsp;</span> </span> </span></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهران گلزاری</strong>  در  <span dir='ltr'>۱۳۹۸/۰۳/۰۱ ۱۴:۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>کلمه هر ثانیه اشتباه من بود و هر دقیقه صحیح هست. این وظیفه برای یک web API&nbsp; نوشته شده و آدرس root خاصی نداره و مطابق ذیل هست:&nbsp; <div> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">" {context.Request.Scheme}://{context.Request.Host.Value}"</pre> </div> <span style="color: rgb(36, 41, 46);Liberation Mono&quot;, Menlo, Courier, monospace; white-space: pre;">منتها وقتی آدرس root درخواست میشه در browser تبدیل به چنین آدرسی میشه به خاطر swagger :&nbsp;</span> </div> <div> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">https://domain.com/index.html</pre> </div>
+authorize خاصی هم نداره.</div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۸/۰۳/۰۱ ۱۵:۸</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>HttpClient کار Auto Redirect را به صورت خودکار انجام می‌دهد. بنابراین مشکلی با این redirect ندارد. سایر لاگ‌های سرور را بررسی کنید تا علت bad request مشخص شود. یک مثال جدید Api هم با Swagger <a href="https://github.com/VahidN/DNTScheduler.Core/tree/master/src/DNTScheduler.TestApi">اضافه شد</a>  و با آن هم مشکلی نیست و PingTask بدون خطا کار می‌کند.</div>
+</div></li></ul></li></ul></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>سحر کاراندیش</strong>  در  <span dir='ltr'>۱۳۹۸/۰۵/۰۶ ۲۲:۵۵</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام<div>من برای .net core از لینک زیر استفاده کردم :</div> <div> <a href="https://github.com/VahidN/DNTScheduler.Core">https://github.com/VahidN/DNTScheduler.Core<span>&nbsp;</span> </a> <br> </div> <div>اما در ویو مقدار IsRunning تسک dobackups برابر با false هست lastRun هم خالی ست . ممنون میشم بگید کجا رو دارم اشتباه میکنم ؟<br> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۸/۰۵/۰۶ ۲۳:۱۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>به نحوه‌ی تعریف آن وظیفه و خصوصا <a href="https://github.com/VahidN/DNTScheduler.Core/blob/master/src/DNTScheduler.TestWebApp/Startup.cs#L29">بازه‌ی زمانی اجرای آن</a>  دقت کنید؛ برای مثال قسمت now.<b>Day</b> % 3 == 0&nbsp;آن یعنی صرفا یکسری روزهای خاص اجرا شود، نه تمام روزها. بعد now.Hour == 0 &amp;&amp; now.Minute == 1 &amp;&amp; now.Second == 1<span> آن یعنی، در آن روزهای خاص، فقط در اولین دقیقه‌ی روز اجرا شود و نه هیچ وقت دیگری.</span></div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>سحر کاراندیش</strong>  در  <span dir='ltr'>۱۳۹۸/۰۵/۰۷ ۲۳:۵۸</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>آیا می‌شود برای نسخه core هم کاری کرد که کاربر بتواند بصورت دستی تسکی را به دلخواه در زمانهای متفاوت زمانبندی کند یا غیرفعال کند؟ بطور مثال به تسک x از امروز تا سه روز دیگر نیاز دارد آنرا امروز فعال کند و سه روز بعد بصورت دستی آنرا غیر فعال نماید .</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۸/۰۵/۰۸ ۰:۲۹</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div>- runAt را طوری تنظیم کنید که در طی یک بازه زمانی کار کند.</div> <div>- و یا سرویس IOptions&lt;ScheduledTasksStorage&gt; storage را به قسمتی از برنامه‌ی خودتان <a href="https://github.com/VahidN/DNTScheduler.Core/blob/master/src/DNTScheduler.TestWebApp/Controllers/HomeController.cs#L11">تزریق کرده</a>  و از متد <a href="https://github.com/VahidN/DNTScheduler.Core/blob/master/src/DNTScheduler.Core/ScheduledTasksStorage.cs#L62">RemoveScheduledTask</a> <span> آن استفاده کنید. </span> <br> </div></div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>سحر کاراندیش</strong>  در  <span dir='ltr'>۱۳۹۸/۰۵/۲۱ ۱۹:۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>آیا این امکان وجود دارد که در زمان اجرای برنامه تسکی را به مجموعه تسک‌ها اضافه نمود ؟ من در یک متد بصورت زیر تسکی را به مجموعه اضافه می‌کنم اما ارور وجود نداشتن سرویس برای تسک اضافه شده را دارم .<div> <br> </div> <div> <div align="left" dir="ltr" style="direction: ltr;"> <pre language="CSharp" name="code">     public bool AddTask()
+        {
+            _tasksStorage.Value.AddScheduledTask&lt;DoEnableProductTasks&gt;(
+            runAt: utcNow =&gt;
+            {
+                var now = utcNow.AddHours(4.5);
+                return now.Hour == 18 &amp;&amp; now.Minute == 57 &amp;&amp; now.Second == 1;
+            },
+            order: 1);
+
+            return true;
+        }</pre> </div> <br> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۸/۰۵/۲۱ ۱۹:۲۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div>- بجای اینکار (اضافه و حذف کردن سرویس‌ها در زمان اجرای برنامه که با <a href="www.dntips.ir-posts-516.html">ری‌استارت برنامه در سمت سرور</a>  غیرمعتبر می‌شود)، بهتر است با توجه به اینکه این وظایف به صورت یک سرویس ثبت می‌شوند، یک سرویس سفارشی فعال یا غیرفعالسازی را تعریف کنید و آن‌را به 
+سازنده‌ی این وظایف تزریق و استفاده کنید. سپس زمانیکه حلقه‌ی انجام 
+وظایف به RunAsync&nbsp;رسید، در اینجا فرصت خواهید داشت تا 
+سرویس سفارشی جدید تزریق شده را بررسی کرده و از فعال بودن یا نبودن این 
+وظیفه مطلع شوید (برای مثال این سرویس بر اساس نامی که به آن ارسال 
+می‌کنید، به بانک اطلاعاتی مراجعه کرده و روشن و یا خاموش بودن آن‌را بررسی
+ کند. تنظیم بانک اطلاعاتی آن‌را هم واگذار کنید به قسمت مدیریتی برنامه).&nbsp;&nbsp;</div> <div>+ این نوع Taskهای پویا را باید در ابتدای کار برنامه و در کلاس آغازین آن، به صورت زیر معرفی کنید:</div> <div> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">services.AddTransient&lt;DoEnableProductTasks&gt;();</pre> </div> </div> </div></div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>جواد غدیری</strong>  در  <span dir='ltr'>۱۳۹۹/۰۳/۲۱ ۱۱:۳۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>چطوری میشه موقع Stop کردن IIS و یا stop شدن پروژه به هر دلیلی (قبل از Stop کامل) متدی call شود که آخرین اطلاعاتی که در رم و در job‌ها اجرا شده رو در دیتابیس ذخیره کرد؟<br>
+
+مثلا تعداد کاربران آنلاین رو در یک متغیر static ذخیره می‌کنم که وقتی پروژه به هر دلیلی Stop شد میخوام آخرین اطلاعات متغیر استاتیک رو در دیتابیس ذخیره کنم.<br>
+
+البته در یک وظیفه (job) در پایان هر روز کل تعداد بازدید‌ها رو به تاریخ همان روز در دیتابیس ذخیره می‌کنم ولی می‌خواستم اگر به هر دلیلی پروژه Stop شد آخرین تعداد رو تا لحظه Stop شدن در دیتابیس ذخیره کنم.<br> <br>
+
+برای حل این مشکل چه راهکاری پیشنهاد می‌کنید؟</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۹/۰۳/۲۱ ۱۱:۳۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>راهکار امنی وجود ندارد. متد رویدادگردان Application_End<span> در فایل global.asax.cs ممکن است در این موارد فراخوانی شود یا خیر.</span></div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>علی یگانه مقدم</strong>  در  <span dir='ltr'>۱۳۹۹/۰۷/۰۵ ۱۲:۲۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام. روی هاستی که آپلود شده متد RunAsync در زمان‌های موعد دو مرتبه اجرا میشه</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>علی یگانه مقدم</strong>  در  <span dir='ltr'>۱۳۹۹/۰۸/۱۱ ۱۰:۵۸</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>در واقع متد RunAt با توجه به لاگ هایی که گرفتم دو بار اجرا میشه که هر ثانیه دوبار لاگ میندازه که باعث میشه RunAsync هم دوباره اجرا بشه ، همین پروژه روی یک هاست قرار دادم مشکلی دیده نشد ولی روی سرور اختصاصی این مشکل دیده میشه. همچنین هر دو اجرا هر کدام یک وهله جدایی از دیگری هستند که مقادیر داخلی هر کدام جداگانه تغییر میکند و تاثیری روی هم ندارند.</div>
+</div></li></ul></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Roslyn #7</title>     <meta name="description" content="معرفی Workspace API     
+ 
+ 
+ Workspace، در حقیقت نمایش اجزای یک Solution در ویژوال استودیو است و یک Solution متشکل است از تعدادی پروژه به همراه وابستگی‌های بین آن‌ها. هدف از وجود Workspace API در Roslyn، دسترسی به اطلاعات لازم جهت انجام امور Refactoring در سطح یک Solution است. برای مثال اگر قرار است نام خاصیتی تغییر کند و این خاصیت در چندین پروژه‌ی دیگر در حال استفاده است، این نام باید در سراسر Solution جاری یافت شده و تغییر یابد. همچ ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="Roslyn #7">
+    <meta itemprop="description" content="معرفی Workspace API     
+ 
+ 
+ Workspace، در حقیقت نمایش اجزای یک Solution در ویژوال استودیو است و یک Solution متشکل است از تعدادی پروژه به همراه وابستگی‌های بین آن‌ها. هدف از وجود Workspace API در Roslyn، دسترسی به اطلاعات لازم جهت انجام امور Refactoring در سطح یک Solution است. برای مثال اگر قرار است نام خاصیتی تغییر کند و این خاصیت در چندین پروژه‌ی دیگر در حال استفاده است، این نام باید در سراسر Solution جاری یافت شده و تغییر یابد. همچ ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="Roslyn #7">
+    <meta property="og:description" content="معرفی Workspace API     
+ 
+ 
+ Workspace، در حقیقت نمایش اجزای یک Solution در ویژوال استودیو است و یک Solution متشکل است از تعدادی پروژه به همراه وابستگی‌های بین آن‌ها. هدف از وجود Workspace API در Roslyn، دسترسی به اطلاعات لازم جهت انجام امور Refactoring در سطح یک Solution است. برای مثال اگر قرار است نام خاصیتی تغییر کند و این خاصیت در چندین پروژه‌ی دیگر در حال استفاده است، این نام باید در سراسر Solution جاری یافت شده و تغییر یابد. همچ ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="Roslyn #7">
+    <meta name="twitter:description" content="معرفی Workspace API     
+ 
+ 
+ Workspace، در حقیقت نمایش اجزای یک Solution در ویژوال استودیو است و یک Solution متشکل است از تعدادی پروژه به همراه وابستگی‌های بین آن‌ها. هدف از وجود Workspace API در Roslyn، دسترسی به اطلاعات لازم جهت انجام امور Refactoring در سطح یک Solution است. برای مثال اگر قرار است نام خاصیتی تغییر کند و این خاصیت در چندین پروژه‌ی دیگر در حال استفاده است، این نام باید در سراسر Solution جاری یافت شده و تغییر یابد. همچ ...">
+    <meta name="twitter:card" content="معرفی Workspace API     
+ 
+ 
+ Workspace، در حقیقت نمایش اجزای یک Solution در ویژوال استودیو است و یک Solution متشکل است از تعدادی پروژه به همراه وابستگی‌های بین آن‌ها. هدف از وجود Workspace API در Roslyn، دسترسی به اطلاعات لازم جهت انجام امور Refactoring در سطح یک Solution است. برای مثال اگر قرار است نام خاصیتی تغییر کند و این خاصیت در چندین پروژه‌ی دیگر در حال استفاده است، این نام باید در سراسر Solution جاری یافت شده و تغییر یابد. همچ ...">
+    <meta property="article:published_time" content="Wed, 23 Sep 2015 15:25:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "Roslyn #7";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-2227.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫افزونه مدیریت فایل های رایگان Roxy FileMan برای TinyMce و CkEditor</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-2225.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='ltr'>Roslyn #6</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='ltr'>Roslyn #7</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۴/۰۷/۰۱ ۱۵:۲۵</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-2226.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><b>معرفی Workspace API</b> <br> <br>
+
+
+Workspace، در حقیقت نمایش اجزای یک Solution در ویژوال استودیو است و یک Solution متشکل است از تعدادی پروژه به همراه وابستگی‌های بین آن‌ها. هدف از وجود Workspace API در Roslyn، دسترسی به اطلاعات لازم جهت انجام امور Refactoring در سطح یک Solution است. برای مثال اگر قرار است نام خاصیتی تغییر کند و این خاصیت در چندین پروژه‌ی دیگر در حال استفاده است، این نام باید در سراسر Solution جاری یافت شده و تغییر یابد. همچنین برفراز Workspace API تعدادی سرویس زبان مانند فرمت کننده‌های کدها، تغییرنام دهنده‌های سیمبل‌ها و توصیه کننده‌ها نیز تهیه شده‌اند.<br>
+
+
+همچنین این سرویس‌ها و API تهیه شده، منحصر به ویژوال استودیو نیستند و VS 2015 تنها از آن‌ها استفاده می‌کند. برای مثال نگارش‌های جدیدتر mono-develop لینوکسی نیز <a href="http://tirania.org/blog/archive/2015/Sep-21.html">شروع به استفاده‌ی از Roslyn</a>  کرده‌اند.<br> <br> <br> <b>
+
+نمایش اجزای یک Solution</b> <br> <br>
+
+
+&nbsp;در ادامه مثالی را مشاهده می‌کنید که توسط آن نام Solution و سپس تمام پروژه‌های موجود در آن‌ها به همراه نام فایل‌های مرتبط و همچنین ارجاعات آن‌ها در صفحه نمایش داده می‌شوند:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">var&nbsp;ws&nbsp;=&nbsp;MSBuildWorkspace.Create();
+var&nbsp;sln&nbsp;=&nbsp;ws.OpenSolutionAsync(@"..\..\..\Roslyn.sln").Result;
+
+
+//&nbsp;Print&nbsp;the&nbsp;root&nbsp;of&nbsp;the&nbsp;solution.
+Console.WriteLine(Path.GetFileName(sln.FilePath));
+ 
+ 
+//&nbsp;Get&nbsp;dependency&nbsp;graph&nbsp;to&nbsp;perform&nbsp;a&nbsp;sort.
+var&nbsp;g&nbsp;=&nbsp;sln.GetProjectDependencyGraph();
+var&nbsp;ps&nbsp;=&nbsp;g.GetTopologicallySortedProjects();
+ 
+ 
+//&nbsp;Print&nbsp;all&nbsp;projects,&nbsp;their&nbsp;documents,&nbsp;and&nbsp;references.
+foreach&nbsp;(var&nbsp;p&nbsp;in&nbsp;ps)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;proj&nbsp;=&nbsp;sln.GetProject(p);
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;Console.WriteLine("&gt;&nbsp;"&nbsp;+&nbsp;proj.Name);
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;Console.WriteLine("&nbsp;&nbsp;&gt;&nbsp;References");
+&nbsp;&nbsp;&nbsp;&nbsp;foreach&nbsp;(var&nbsp;r&nbsp;in&nbsp;proj.ProjectReferences)
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Console.WriteLine("&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"&nbsp;+&nbsp;sln.GetProject(r.ProjectId).Name);
+&nbsp;&nbsp;&nbsp;&nbsp;}
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;foreach&nbsp;(var&nbsp;d&nbsp;in&nbsp;proj.Documents)
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Console.WriteLine("&nbsp;&nbsp;-&nbsp;"&nbsp;+&nbsp;d.Name);
+&nbsp;&nbsp;&nbsp;&nbsp;}
+}</pre> </div>
+در ابتدا نیاز است یک وهله از MSBuildWorkspace را ایجاد کرد. اکنون با استفاده از این Workspace می‌توان solution خاصی را گشود و آنالیز کرد. قسمتی از خروجی آن چنین شکلی را دارد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code"> Roslyn.sln
+&gt; Roslyn01
+  &gt; References
+  - Program.cs
+  - AssemblyInfo.cs
+  - .NETFramework,Version=v4.6.AssemblyAttributes.cs</pre> </div> <br> <br> <b>
+
+ایجاد یک Syntax highlighter با استفاده از Classification service</b> <br> <br>
+
+
+هدف از Classification service، رندر کردن فایل‌ها در ادیتور جاری است. برای این منظور نیاز است بتوان واژه‌های کلیدی، کامنت‌ها، نام‌های نوع‌ها و امثال آن‌ها را به صورت کلاسه شده در اختیار داشت و سپس برای مثال هرکدام را با رنگی مجزا نمایش داد و رندر کرد.<br>
+
+
+در ادامه مثالی از آن‌را ملاحظه می‌کنید:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">var&nbsp;ws&nbsp;=&nbsp;MSBuildWorkspace.Create();
+var&nbsp;sln&nbsp;=&nbsp;ws.OpenSolutionAsync(@"..\..\..\Roslyn.sln").Result;
+
+//&nbsp;Get&nbsp;the&nbsp;Tests\Bar.cs&nbsp;document.
+var&nbsp;proj&nbsp;=&nbsp;sln.Projects.Single(p&nbsp;=&gt;&nbsp;p.Name&nbsp;==&nbsp;"Roslyn04.Tests");
+var&nbsp;test&nbsp;=&nbsp;proj.Documents.Single(d&nbsp;=&gt;&nbsp;d.Name&nbsp;==&nbsp;"Bar.cs");
+ 
+var&nbsp;tree&nbsp;=&nbsp;test.GetSyntaxTreeAsync().Result;
+var&nbsp;root&nbsp;=&nbsp;tree.GetRootAsync().Result;
+ 
+//&nbsp;Get&nbsp;all&nbsp;the&nbsp;spans&nbsp;in&nbsp;the&nbsp;document&nbsp;that&nbsp;are&nbsp;classified&nbsp;as&nbsp;language&nbsp;elements.
+var&nbsp;spans&nbsp;=&nbsp;Classifier.GetClassifiedSpansAsync(test,&nbsp;root.FullSpan).Result.ToDictionary(c&nbsp;=&gt;&nbsp;c.TextSpan.Start,&nbsp;c&nbsp;=&gt;&nbsp;c);
+ 
+//&nbsp;Print&nbsp;the&nbsp;source&nbsp;text&nbsp;with&nbsp;appropriate&nbsp;colorization.
+var&nbsp;txt&nbsp;=&nbsp;tree.GetText().ToString();
+ 
+var&nbsp;i&nbsp;=&nbsp;0;
+foreach&nbsp;(var&nbsp;c&nbsp;in&nbsp;txt)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;span&nbsp;=&nbsp;default(ClassifiedSpan);
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(spans.TryGetValue(i,&nbsp;out&nbsp;span))
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;color&nbsp;=&nbsp;ConsoleColor.Gray;
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;switch&nbsp;(span.ClassificationType)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case&nbsp;ClassificationTypeNames.Keyword:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;color&nbsp;=&nbsp;ConsoleColor.Cyan;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case&nbsp;ClassificationTypeNames.StringLiteral:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case&nbsp;ClassificationTypeNames.VerbatimStringLiteral:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;color&nbsp;=&nbsp;ConsoleColor.Red;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case&nbsp;ClassificationTypeNames.Comment:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;color&nbsp;=&nbsp;ConsoleColor.Green;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case&nbsp;ClassificationTypeNames.ClassName:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case&nbsp;ClassificationTypeNames.InterfaceName:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case&nbsp;ClassificationTypeNames.StructName:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case&nbsp;ClassificationTypeNames.EnumName:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case&nbsp;ClassificationTypeNames.TypeParameterName:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case&nbsp;ClassificationTypeNames.DelegateName:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;color&nbsp;=&nbsp;ConsoleColor.Yellow;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case&nbsp;ClassificationTypeNames.Identifier:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;color&nbsp;=&nbsp;ConsoleColor.DarkGray;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Console.ForegroundColor&nbsp;=&nbsp;color;
+&nbsp;&nbsp;&nbsp;&nbsp;}
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;Console.Write(c);
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;i++;
+}</pre> </div>
+با این خروجی:<br> <br> <p style="display:block; margin-left: auto; margin-right: auto;"> <img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAqUAAAGkCAMAAAA/sqw4AAADAFBMVEUAAAAAgADci2wgAACXdTSqAAAAgKoAAEDUgADb3OQ6QSahoqAA1Kr/qgArVWuZqmQAgCtVa2sAKwCgYCAoKCgVQGsrVQBrp2WtwVk+dU0A1P+q/wBZmZRVAACnum3c5MMAgIAA1ABrQBVAgMAAVaorVYCnuH2sv3CtwXEAABVVqgD/AAD39/iAgGvGRB8AVQCtjlmAVSs+KCi5xZSBwVlVKwAAqv8AK0Ctp00A/9QA1IAA//8gQEBVa1VnbmZTVmZAAAC7vb7w9OcAK4CtjkAAFUD//wDUAACAQADUSBuAAACbs8vc3NxUKChAa4AgYKB9orkAqgAA/wCAKwDv7/GXo31ra4BVa0Ceq3rViW3Kysp4d3c7OjoVAACqVQBVgIAAgNQAQIAAACu2xJEAVVXAgECA1AAAVSvU/wCAVVUoKEBrQihVVQCxv4bs7O2XwVmAgFXdSRlUKDRggMAAIGArgABgYGBAFQAAICD+/v4rAAA+KED49/ZUm4f/1ADw8PA+W1mPl3dLi5KAwMBgIABVQEAAqlXy8O5VVSsAACCtwWWgwKAAAFXAwIAAqqpRloxgoMCAa0DE0qI+dWXk5OTU3bhUKEAoW0BUQjRrgFWmqq4AVYCPtaMoKDRYXE9UjnGBjnGcrWxrgGuny76Xp01rQjSXwXGv1bUrK1VFTS0rKwAA/6rhSRkVFRVrgIDn5+kAK1WgsXTLRR4+Qk2+wcNAQICBwXFYYD6OUUWRkJDT09WwsLDAwKCyuMEgIAA+KDSBWyjkjWm1w41smq1rjnFUjlkVFUBVKxVAFRXV59VZo4HAoGBra1VTi51irnYVKyvAwMBra0Csraysr7IoQk0VACsVFQCAgIBxemZpkLIoW1nM0NRVgGvCzaFrjk1UQk2Jnr6XwWWgwIBAVYDKytIAKyufsHKgwMBeqXtrp3E+QkC7vsHS0txPk44+QjRAa1X5+PdblJ1UdU2LsKlUWzSBwWWLpLtxoqq+y5prdUChs2n3+Pmoun+iqKBUW0CjtHhrAGTtAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAe+0lEQVR42u2dC3xcWV3Hb9xmuysiMSRaUoO0TTDdbHfM6oxtBik1TVIDTW1ABLFNGnB3YTXWtZu6wd2wdM3aJUC7reAKWEUpW6Mlwrq7sovUBXksPsa1OlBRHrqUCigIIiqK//953XNfM3cmjznT+f0+7dy595z7mJlvfud/ztzzH+8MBLku78z3QVC1+s0fTVDlBTFV9VmY0h4IqlJnHntarH7uzDeSCl563XXXvfvd7/4x0i+Qft8Wb+ACKr/uupeeUScBpRAohUApKIUcp/Tj240+nkDpw1T2sHoEpVANKN1+m9H2BEq5yvaHxSMohRylVAIqUAWlUI0ole19MqUSUwFpOkpf8hO2XvL9+BSgJVI6O7vdXsb2nh6m0lmGNB2lf/P3Ru973/t+47/xKUCpKH2u30l6bpDSqant9jKB0ikqTk3pA7f9j6/bvvC02r36nW3nf/f9l9bdcimw8YL/sG53W1vbCb+E1992KeFgtMvOVz3Yc8/NbW2n+NhyxzXnT6tCLhArKS5MnvlUYGPoOtPXC1+KqrD1/ZciRzpR4mRVn1HusZOfnzsRs3taSmPCT0XpyZMSXlomt/gnWalb/MLVn/7017/+9S9OnTw59fzn15DSdbtPRd/je95xyX/gonW7L5gSXl8TTxqV3nPzm9/0YM+63+rZ+uoH6Z847rrdXJ2Pt/V6OtvWD6a5MHUmZr4kpenqrXtT6FJiCAy/1iRKqzmjLj53qmfre04n4Z+G0imjEKUvMEruPXEh/0/Ze3rg6k984gMf+E8HKJVvWPB92/oa60EUEXC6RHyS8W+z2IU+HvUprSEvEf///T2nReE9N6c3kPgzRU+crh77eOBSYl5B+LWWeJUVn1EXE6IEalWUvlxbppaE8bEkSh+LjkQJQMVjOkp3XP3jH/jKV75XUHrxd2pIKbU9J+hN4/dt6/Vtr3pQtElrGCb9IN5S4kuXqE9o3S1fe9WDtAu3XLR4BtcSuyhK6VNSlG59zdb3yF3N5y/3s470HyJEEFegogV1Jj6rrC22r7vle5j0ned//pb/ki1qunp8KXRF/qWsu+Ufr6ft4vTBI4m/JXElfp0e9f7oV1nxGQ2Ya/71Qk91lP7gb7PsuFRsIErF0h7VVwVLHtXfcfVfvPa1b7xdUPrOd9bYSyWl4p0/we+94Mw82JTqdWrx1+0+IcIFiux4sYZCVcmneFzTJiPUe24+QQ0kf1C8WX5gPWY/dW46koiB1RVcUFYsYrkLprauwstzp7hd5jY3ZT3JjHUp3BDLSwgcSb1WeSV+HXmZ/qus9IwyLuUQQUUBcqWyFv8PPxenl5/5h88lFCz5G9IdV7/2S2+8/XFB6Uc/6gSl7AttgpCdJ+wH+cm945IuUW+xcBf2xnOnxCcvPtcey0vpA13T9ravnWA3pQpcaOIGuZ9/bjKlE9Jh2y6Ip/rMXFOf5Xq5iQO+T53WBpeynmTGuhTxqsQlhI4kXqu8Er+OOIX1Kis9o2+f5/7v/OnqvPSxb8Xq5WfuTSpYBkq/dPvtj39eUPrlL7tBqW6OA32nHjtW89d7YihVJCtKuaPAj3/G/dm28595h2pL4yll9z2lr4CemjPxxyxri+1y0xrTDKetJ6LEZ1iXwtulaYaPpPp9PXYdi9JqznjavGs7z3/m5mrj0m8++5vPjuobZ+59dqy+sRyU3v7445//S0Hp7N1utPi7hYdRI/eaQAdK9ntPmRKLUtHiUUdetoWiVFL6A6rxFMGb6DPIwp0iiv2g2o+hJctVB1xzQl6BeOqfWTa1Eps1J8Tfxr/8+iVdlrqeGm4wl8LnkhsjR6LDyCtRdfRlWq+ywjOaP0UxzqELKqT03gSd+bWkgpeSvk3oT+MlC6lWAqVf+OJXv/rWt771nwWlU05QKhrcC4RVoO8kW3geH9Ul9qgA7SKK2rhfseaUoVT1jnar6Is+KFXIBbLXofZ7swqIRRQhr4Cf+meiEFjWFttlI3zBXHfaerz1lH0p1GVTHbjAkfRYsLgSVUddpv0qKzyjAJpHYrmcKgWHZVNSWoW+PXW9BC+97e67756dvXv2l2dnp2pJaQy3nzptP4RLkgaOXv1DJUpL7lpx9XOnKq1X/tjpLrDMq0w4Y/0oROn/fkHqgQf48SlP66l3nTt/erVOpUcKlqve8r3KFThjTSl9ZvCWgWfW9Wvj8cJKB1aWcLK3XVrOesv3Kpf9jDWnFIJAKQSBUgiUQhAohSBQCoFSCFp5SpGZC3JOUUrvfAiCXNKdMZQ+5EU1sa3Vg6BV0W10jxNrdmpWaOohUApdNpSW1uR4sVjccjiyffDth/GeQ25Qunl0Iz/+HSiFVo/SgXzG83JznteVz+epqZ+nxQLtPZC/sSPPZZO0eJYfA0yOZyWsfbxoP75vUVircNhikQluLxYPzlDJP235yOgWWj908WNX4NOAloPSeV5KdUlKacMEPcv1E6g+pZtHBYreIpHIyCpqfS9tp4Lu4/vai9nuP//IKCiFlpHSyY7+EKUt4pmgt8vuT5FX9qmWn6x08+jxfTalk+MbBcJU1N23eRQfA5SK0ul0LT6755xNaUY8G2BAu4K9/slx8ksicfMo++jgWaZWU0prIgQApVAFlE5PT5ejdLJD4in8M0xpxEsVkWSmi9pGz24MeqmMWEEplJLS6WmNaTyl80Rmjkz0LcShik0DlDLB83mr9/SrKvb0Fre8mKz0hw+rHpUOULu5zKYUcSlUhlJGVGGaMBI1Qd0kavG5iy+tNEgpBwILYotu7YuiD8/P2EoXddee41XR9LeHWnxQCpWllHpPJSlNI4tSOzrNpruQPT+DDwMqSano4y+F0ic9E7cG1a6i0nI69Lq78GFASxqJKnsYigjy/dHN3bLZhyAXKIUgUAqBUlAKgVIIAqXQ5U7pE1KPPPEI6YknQCnkIqWz15qfjbp2FpRCblLKbf21117LzT0ohVylVIWk/ASUQq5S+iIB6YtAKQRKIQiUQqAUgkApBJWilBF918mTV7+35pTyPf5bkFcCiqP0p6df9rKX/fEjL3DBSxOyn3TLiSiemTIFNRql00+hb0d3/NTqUSpmOsffxR9PqZjTLxNRWDdWU3IKoeiRkOkHLf4yUJo1s53T8CVmT4lEKYP33R/00u6+ChwZupxbfJMPakImiJroz217UmTcmZAJo1T+KFFPbRbbxROrnkWp8EZ2QzEh2qTok7P4VX6pD539MFXISuhkSXYxltJ2+zh+PqrFIgLdhmnxTT6oV/B8/BZiLpP7jic7WnSOKJ0/aoCJpHVdz2Q5VfVsStu3MHTUWFO+KGumqQBS55eiyCDL8/oXmTSxU58XS6nKOxXOR5V6Bit0GbT4Oh+U+ORpruhEP+XjmexomVfbdf4oO8eJzCQhJ+/PW/vruHSLskemz+SRUpt0fimRD2XRp3TwvplYSnXeqXA+Kuu4UAO0+Co7BKeEzPuUDvCqaNFl/ihDqao3YDxW1zNeys7oCfqE4ak8UpovlV9KVjo4o1v8dtlbilCq806F81FZx4XqndLiIzt27Ci8tzyl7IkRL1VivxX1Jvx6AS8N9Z64kdZeKrdt9ClV+aU0pX7vyUv2UnPsjYHekzou1AAtfsZkgJy3vNTLyVZc548ayM8pOmU9DmBFhdxChFLuIum41OSRMnzJ/FKaUmskSlFqMvbIuFQNoobzUVnHheqc0vLfkJoWn7vqXfl+Q6nqw+v8UQP5N8jsEaqeLNeDA4EWX5qc6uP7eaT8fg9HlIZSa1Q/llKVdyqcj8o6LnTZU5r2aAN+ruglCg4IuU9pOzrnkOOUIr8UVBWlhy4WkGEUcpvSo8eejjcLqh2l7zKUvqsUpbvwZkG1pFRgSlZaglJvE7wUqiGltpIpRUZxqIaUBgUvhRykNF3OvU0FhKVQ7SidDQleCtUvpYhLIXgpBC2ZUoyXQvVAKbwUcr7FX3sE3+NDrlMKQZcZpfoOvnn/Dv0J/079qOYDd/JD0GpSyk/TUGrVg6DaUVp2lzT1Wm8aGhq6AzdIg1K3Kd3veeuvwscGSqugVOeHEnTm5vx8UYq+eZ02KjSX1FqXlOr8UirvlFnalN7wVM+7lTx1qJPXrxka2o+PEZSmolTmh/IpVfmifI+U+XfC0am/Luup/FLzpveViXhpZuiFnvfdM8JTKQLY710DSkFpOkpl5h2fUpMvKkBpOMeJtW5afM46ofNO6aUdlz5Vr5Cntt6E1h+ULjel4TmmkfhV5ZfSeaf8pe2lzOn6IeZVRAAQKE1PKeWH4iV7oV6v1Et1fil5zJbA0sSlt1JAyj2oG0ApKK2M0jmTvSwncu3NadpCcWnITP11RanML6XzTullgNJrmFLu64NSUFoZpX5+qAy3+NuulOthSk3eKLuPL9ZNH5/zS+m8U3ppx6VD3HviPv7PDt3xe6AUlFbW4kMQKIVAKSiFLnNKPeSRguqAUtzLD9UDpZgXBTnf4mOOKeQ+pZivD8FLIVC6VEqRRwqCl0KgFHEpBC+FICcoxXgpVA+Uwksh51t85JGC3KcUgi4zSivNI1VCaffz63UtpDvynsKuAwXEMaDUS59HarUpPXrs9c/jR4QxoDRthp5wraXkPrMoHTxbJG05HFNrk8Tz6DGMA4PSWlOaTah06HV3hZ5AlzulVeeRknmiRC4JMZlU5pEy60n7TfD81ckOntwvKph6tL7tyhhKN48WxY+d66W3R7f0GGJrIEqryyNl5uLrWiqPlOWl8fvx6sCCzOAjzyPr0fPJjiilm0eP7/O6j+9TS27wTUO/CU1+w1BaXR4pkyfKauFFNooQpeH9vAmqM9Eiq8nwQtXLxMSlWW/w7YcFsmoZCEc3of8ESkvmkTJ5onQtnUcqRGlkP/JR9tOubSY5iqwnsk1GvXSRO1CT41m1hJc2LqVV5JGS+/otvMkjVc5LvVxLl65meelAxEslpREvRVzakJRWl0fK5IlSAarOI2Ulj4rPP+V19ecyXiQulX8haeJS9PEbkdLq8kj5eaImZEuv8kiZ9cT8UyqiVX18U48CiP6uNH18jJc2aItfX5LfPa09gr4TKHVZ+B4flEKQY5R6yCMF1QGlGNCB6oFSzIuCnG/xMccUcp9SzNeH4KUQKF0yo8gjBcFLIVCKuBSCl0KQC5RivBSqB0rhpZDzLT7ySEHuUwpBoBQCpZefgmMOewqFAobKQOnySkz2LFVOE+03VkDpc66gG2DRvwOlq0kpz7qbHN9YYsSh8PQDhUfvCm6DmYLSUjJ5nWQeKJ6BkgtMCeW5nb/CZLbzHM/JcU5JUsIsu/voof3gjJgjSiuLRdqwKCeHKib/5JeuCJPLXnroIkYiQGm8dF4nnQdqgBHNWZSKufKUeITI4+dhLz1QENJfHEgbpTqaUsI0O/lJe5dNH/vFEI4HeM4oKAWlJcxU5nUSiInMDqF8UeNZkSZH4MeeWLrFF9VFrhJNqde+5cW29VIuiLVHAt+GITsEKC0nlddJ54EKzzkVUBKlJituOUrDXiqzl5QQIAWl5SXzOuk8UBFKz1peGtN7CrX4gbh086hYeeV4X4nT4zYDUJpCMq+TzgMVppRJmxwnD+1WPSDZppfs4w+e3ShMtVv1nCg0Td7BJC9DXApKSzTSMq+TygMVyTJBTf3B+5nQdpUHn5d9pTAtCiipWpaMVXhxezKmNDKlhvVBKShdkgIjSeU1eLZ0JJrkqhg1BaVV6g88FV9WoHIdJvSiQOnyihv4qqwRAqWrrvVDQ0MvTMf1lsNVlu8p0EPviDfc7G+zny+PZugMsRru7fUjm5He3k7xJHQ9Ae1doVRx5Y+7WjkJ6+57/NabVpZSmbe0dpSODItFZ29vr6o3U4bS1g0CqaZlQrMpeNzSWqXfFnSF0mvIJIc6q6R086jovQ/+dSQmCI2rJv8KmZHKAT3c6TWPsJUJzSw/pUkaadZsKl4lpfJ6Slje8lNaykrN+7o69+g4Qun6O+izyFRLqdctBvsX+7wlU6p7T4aKzt6V8dIkdQo2m/l8orGf6fVKUyosb8NYU2ZsrHXJZ7eOU9JK/fd1VbqbblB6zR06FLtBWGrrTfvpyX4Cd0gFojdoq1WU3hqw3vaNfA9K+0aisJsHSvmmKRq3su6dEvdSGUpVOa1/eNQMrAZ/M89QoyglW20W0OhIUbXHct2U8/qIMkRveEbXH27ulOVKzfowsn4gEhB7jugHSW0JNUnzaw0g2jRGoo1jmQ1jY+SJGV5v9TZkNH9NunyvKLegbw0eV7dWSfekqWmXKzvO7Aal66/SkBKuhGzrTYTorYTh+v2B7YZSLrvmDrP/Yt/m0YMz3XR3CSHXLUiUo6v6b17dS2V56aKklOpzmSz3Yn7dSVFKiM0QV/y/0+rdzNDT5mG/vLlZGyLXGjb1ubwz6MeC0ubmeC8V5A43+16arDHZPG/Ya3sfgzfWRBQSgk1UQ5FIzTlVyzSJbfRMlAdadv84Y4HGKvmeNPmONQSl+63mnIy09aar2Ec7BZ3WdkPpelHuU3r8b3/kuw5/52H+VtSmUL+b+l6qKKVyuyqPC7MUpcOSq+ZhzZcVSfb65SOSYEKrublzptnUH446ojjKSO9M6GzNXpBSttvyVtpKRjkWiiM37KXNTeyj9Fyi17SXnzVlPLVdlAec1BwnYKWl7klbjd8WdMtLM6J1X79fAMmUEpRDT/W3+8ByJOBTOnjf/X3dN/9bhEL9bup7qaKUZhW9oryEl6o4cbg31ERz093rl4uBJNHlGe5s7hwx9WPiWsX6cAhC6aV+i1/OS8cSNpOY0oyklF1zLz3d0Lp3b2Zva+uYUGvrWCbVcUvdk7Yavy3oSFyqYkzfSzWlvHpVvJfaf+uf3J5dfOVP7kuiVN9LlUSpP/skMS61vNQSr48EKJW+OkyR6fCIXz+ZUi/ks5JKv/dUJi5tiu/as0dusCn1hG/S/0ymaYMsF9syqY5b4p60VUkH4kofX2Fq4lJJaUZbaDgu1VireIhjpsGzfREKzb1T6l6qJErNvVbRLmuQ0s5Qa880NVuUjpht3MrPmPpJlI5EYlNJpT8SFfLStUfEcK7frMf365k+y0szrXobtfLc+u8dK0Np8Lgl7klTb1gjxKVqvPSFVh9fUspbr/IS+vhD/rvTzX4YQ6m5d6pdtfjcYomSIKWyPC7MClIqO/UjgT5+px5PpXIuHRZ7zQiP1fWTKNX1w+Ol/qi+F4xcQ5Rm9iZYIbXnmbENhlJu35tE50h4rBoESG7xw8dNvCdNB/KNQakzUt891UwjoRZ+JtS/OhCgYUPrylxF3HHj7knzf1twRe8lA6URie/xa6fm0Pf4IyEsdqWw0qUqctyEe9L87/FXdnAflEIpVON70laHUroXvrbtKFTXWr2M5ZipATlP6QFQCrnvpZhPBDlPKX79AYKXQqB0OQJTpLGF4KUQKEVcCsFLIaj2lGK8FKoDLwWlkNuU0vf4jyL/EuS8l0IQKIVAKQSBUggCpRAohSBQCoFSUAqBUggCpRAoBaUQKIUgUAqBUggCpRBUM0r1bzbP5/P5bTIJ4cS26pIcJu1X7fEgUBqilJ+CUqhuKC2zQ6jWQIUMhutzUuiN+PRBqcuUcqZy/xcfIFAqqbyxgwNQQWduzqxrfjg+XZANtR+psrrEKheTWmTxgmfWk/bT28V58hl/f6VukWpf/f4TrSxyjvi4jNxQQ1FKBOX6LUrluuVyXQsx0eS89lxd6xW8rcX2xtj99PYBQtSbWAh7qbRR+jUYTSlhmp385GHg0OCUEm1d21p9SuV6mNJ5y+8ETh39kRZ7smMuQml4P5/SFvksTGlWNvuGUvoh8hcjAAClqSi14lWzZ37OqiXa7iil0f2s7V0pvJR+26CGaeMhdyillpeX7IV6vZyXetoPVS0ur8xLYykNxKXytzfaXzneBxoandI5QRfTlMvPmfVoXBo0xbe0qthUBai8mGcvNQFr/H4RSueD5Uwn/1Ium2q36jktFrPAocEpfUM+3y+74hlu8bddKdfDlIq+uk9Ul+maT8iWnhYLXbynWk/YL0KpX19jWhRQ0i/EZLvVb+61A1O0+K5p8CwiUVDqOqXoMIHSOqAUAqVhHbpYQG5IyG1Kjx5DxnLIfUp34c2GXG/x8esPkPuU4tcfIHgpBEqXzGgBYSkEL4VAKeJSCF4KQQ5QivFSqB4ohZdCzrf4a4/ge3zIdUohCJRCoBSCQGlYA8hFBoFSCJRWrElK5/QsJnMikAcKghyilHJGTXYQpZxJgvNHwUsh5yidVxl55uPzOkGg1AFKBZQij1ReZngEpZB7lNpeit4T5CSlMocU5zRdsEIACHKq9zTA+Z90PifV17fzOkGg1I3xUpWXDIIcpfRJT2eKhCBXKeUGvh+fBuR4i488UpDzlOJefqgeKMW8KMj5Fh9zTCH3KcV8fQheCoHSJTOKPFIQvBQCpYhLIXgpBEoxXgqB0nSUwksh51t85JGC3KcUgkApBEod1qbXP4/GuQqFAoa6QOnqKv0c0wMFpvQ5V9ANrOifgVI3KT302T9iSsUoAswUlK4olPlMLi8mPwfzSIl5/Lk5Uz6Qv7Ejb0+SpmHYA4ZS9tJDFzGSAEpXilJCL0f0hfJI+ZTKcrGcsOai0veumlK5BKWgdOUolTlPwnmkfEpb/HrWjOlDn32epvTQ6+7Cpw1KV7jF154ayCNltfh+PYtS7tqTdgFSULp6lIbzSPF2nsefRKlp6XGbAChdNUrDeaSY2lw+BaV7dDSKuBSUrjil4TxStMjkylN69FhBDeuDUlBaB8Ld1qDUeaEXBUoh6PKllOJGNfYOQQ576R70aiDnKT0ASiH3vRR9b8h5SjHTGYKXQqB0OQJTTPmA4KUQKEVcCsFLIVCK8VIIlKbwUlAKuU0pfY//KO5Vgpz3UgiqMaW45wmqCy9F3Am5Tyn68FAdeCnGQyHnKcV3SxC8FAKlyxGY4p4nCF4KgVLEpRC8FIJqTynGS6E68FJQCrlNKe55gurCSyEIlEKgFIJAKQSBUgiUQhAohUApKIVAKQSBUgiUglIIlEIQKIVAKQSBUgiqGaX+793LX2gmTahlpUq7n18v9JvPidpT2HWggNlaoJSfOkrp0WOcf+3oMUwxAKU+pWV2CNUaqJLpEKWDZ4vF4vF9cbU2STyPHsOsQlBaa0qz3uT4xphK5hfK8VPlDUPpQP7GDg5ABZ25ObOueeP4VLIz4UeqgiixysWkFlm84Jn1pP0m+ulhsqOF/osKph6tb7sySOnm0T7PaydPPThDxNKyuMWzJhMePYbQtGEoJYJy/Ralct1yRelwoShzXnuurvUK3tZie2n8frw6sEBQ0jnkeWQ9ej7ZEaR0ccthz/urfcZTJ8f7uME3Df0mNPkNQynR1rWt1adUrocpFQRaEpSFWvjJjrkIpeH9vAmqM9Eiq8nwQtXLROLSPvVceCovOE61wtFN6D+B0gClVrxq9szPWbVEWx+lNLIf+Sj7aZcMJwylYrdQXLrInIqmvk9ASg0/vLRxKZ1YEEv2Qr1ezkvlvn4Lz+WpvNTLtXTpapaXDkS8NEsx6cEZbu2ll3Zz+4+4tEEpnRN0MU25/JxZj8alQVN8i7ZCFaDyYp691ASs8fvR5v5cxovEpfIvJERpN1OalfFodzGLPn7jUvqGfL5fdsUz3OJvu1KuhykVfXWfuC7VtZfb58RioYv3VOsJ+5mIVvXxTT0KIPrD46XsntTHP3h/8fiHeL1YtMJRjJc2WItfX5LfPa09gr4TKHVZ+B4flEKQY5RyL+RiAY0n5DalGNCB6oHSXXizIddbfPz6A+Q+pfj1BwheCoHSJTNaQFgKwUshUIq4FIKXQpADlGK8FKoHSuGlkPMt/toj+B4fcp1SCLqcKcV9nqDUdUqRrwlyhFIx/6iopm8GhflHkDOUZhNKMJcTco7SzaMiX5NZRubFH7qIph+U1pZSkf6m+/g+tfSiOUZAKSitbVya9Qbfflggq5bI1wQ56KUi/x0lGlFLD/maIPcojXgp8jVBdRCXhvv4iEtBqXt9/PB4KSgFpc5+9+Tna8Ld1KDU+e/xMbgPSnFPFNS4lB49VuB2G4Lc9tI96PVAzlN6AJRC7nsp+uaQ85RipjMEL4VA6XIEpgVwCsFLIVCKuBSCl0JQzSnFeClUB14KSiG3KaXv8R/FvUyQ814KQTWmFPc8QXXhpYg7IfcpRR8eqgMvxXgo5Dyl+G4JgpdCoHQZRqJwzxMEL4VAKeJSCF4KQQ5QivFSqA68FJRCblOKe56guvBSCKoxpbjnCaoLL0XcCblPKfrwUB14KcZDIecpxXdLELwUgpZOKe55guClEIS4FIKXQpALlGK8FKoDLwWlUM0oPXlyijU7JSGdSvoeH/c8QY5TivcJAqUQBEohUApBoBQCpUTptKB0GpRCLlM6TZROg1LIbUqnZ6dBKeR2XDo9rSAFpZCTlE5xv0lDCkohdymdVZCCUshNSgM3m4BSyEVKZ0EpBEohCJRCDdF7CiiO0jsfgiCXdGcMpRDkmiKUQpCjAqUQKIUgUAqBUggCpRCUmlIIcltEKQS5rv8HlFtPDncOvXkAAAAASUVORK5CYII="> </p> <br> <b>
+
+توضیحات:</b> <br>
+
+
+در اینجا نیز کار با ایجاد یک Workspace و سپس گشودن Solution ایی مشخص در آن آغاز می‌شود. سپس در آن به دنبال پروژه‌ای به نام Roslyn04.Tests می‌گردیم. این پروژه حاوی تعدادی کلاس، جهت بررسی و آزمایش هستند. برای مثال در اینجا فایل Bar.cs آن قرار است آنالیز شود. پس از یافتن آن، ابتدا syntax tree آن دریافت می‌گردد و سپس به سرویس Classifier.GetClassifiedSpansAsync ارسال خواهد شد. خروجی آن شامل لیستی از Classified Spans است؛ مانند کلمات کلیدی، رشته‌ها، کامنت‌ها و غیره. در ادامه این لیست تبدیل به یک دیکشنری می‌شود که کلید آن محل آغاز این span و مقدار آن، مقدار span است. سپس متن syntax tree دریافت شده و حرف به حرف آن در طی یک حلقه بررسی می‌شود. در این حلقه، مقدار i به محل حروف جاری مورد آنالیز اشاره می‌کند. اگر این محل در دیکشنری Classified Spans وجود داشت، یعنی یک span جدید شروع شده‌است و بر این اساس، نوع آن span را می‌توان استخراج کرد و سپس بر اساس این نوع، رنگ متفاوتی را در صفحه نمایش داد.<br> <br> <br> <b>
+
+سرویس فرمت کردن کدها</b> <br> <br>
+
+
+این سرویس کار فرمت خودکار کدهای بهم ریخته را انجام می‌دهد؛ مانند تنظیم فاصله‌های خالی و یا ایجاد indentation و امثال آن. در حقیقت Ctlr K+D در ویژوال استودیو، دقیقا از همین سرویس زبان استفاده می‌کند.<br>
+
+
+کار کردن با این سرویس از طریق برنامه نویسی به نحو ذیل است:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">var&nbsp;ws&nbsp;=&nbsp;MSBuildWorkspace.Create();
+var&nbsp;sln&nbsp;=&nbsp;ws.OpenSolutionAsync(@"..\..\..\Roslyn.sln").Result;
+
+
+//&nbsp;Get&nbsp;the&nbsp;Tests\Qux.cs&nbsp;document.
+var&nbsp;proj&nbsp;=&nbsp;sln.Projects.Single(p&nbsp;=&gt;&nbsp;p.Name&nbsp;==&nbsp;"Roslyn04.Tests");
+var&nbsp;qux&nbsp;=&nbsp;proj.Documents.Single(d&nbsp;=&gt;&nbsp;d.Name&nbsp;==&nbsp;"Qux.cs");
+ 
+Console.WriteLine("Before:");
+Console.WriteLine();
+Console.WriteLine(qux.GetSyntaxTreeAsync().Result.GetText());
+ 
+Console.WriteLine();
+Console.WriteLine();
+ 
+ 
+//&nbsp;Apply&nbsp;formatting&nbsp;and&nbsp;print&nbsp;the&nbsp;result.
+var&nbsp;res&nbsp;=&nbsp;Formatter.FormatAsync(qux).Result;
+ 
+Console.WriteLine("After:");
+Console.WriteLine();
+Console.WriteLine(res.GetSyntaxTreeAsync().Result.GetText());
+Console.WriteLine();</pre> </div>
+با این خروجی:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">Before:
+
+using System;
+
+namespace Roslyn04.Tests
+{
+    class Qux {
+        public void Baz()
+        { Console.WriteLine(42);
+            return;  }
+    }
+}
+
+
+After:
+
+using System;
+
+namespace Roslyn04.Tests
+{
+    class Qux
+    {
+        public void Baz()
+        {
+            Console.WriteLine(42);
+            return;
+        }
+    }
+}</pre> </div>
+همانطور که ملاحظه می‌کنید، فایل Qux.cs که فرمت مناسبی ندارد. بنابراین باز شده و syntax tree آن به سرویس Formatter.FormatAsync جهت فرمت شدن ارسال می‌شود.<br> <br> <br> <b>
+
+سرویس یافتن سیمبل‌ها</b> <br> <br>
+
+
+یکی دیگر از قابلیت‌هایی که در ویژوال استودیو وجود دارد، امکان یافتن سیمبل‌ها است. برای مثال این نوع یا کلاس خاص، در کجاها استفاده شده‌است و به آن ارجاعاتی وجود دارد. مواردی مانند Find all references، Go to definition و نمایش Call hierarchy از این سرویس استفاده می‌کنند.<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">var&nbsp;ws&nbsp;=&nbsp;MSBuildWorkspace.Create();
+var&nbsp;sln&nbsp;=&nbsp;ws.OpenSolutionAsync(@"..\..\..\Roslyn.sln").Result;
+
+
+//&nbsp;Get&nbsp;the&nbsp;Tests&nbsp;project.
+var&nbsp;proj&nbsp;=&nbsp;sln.Projects.Single(p&nbsp;=&gt;&nbsp;p.Name&nbsp;==&nbsp;"Roslyn04.Tests");
+ 
+//&nbsp;Locate&nbsp;the&nbsp;symbol&nbsp;for&nbsp;the&nbsp;Bar.Foo&nbsp;method&nbsp;and&nbsp;the&nbsp;Bar.Qux&nbsp;property.
+var&nbsp;comp&nbsp;=&nbsp;proj.GetCompilationAsync().Result;
+ 
+var&nbsp;barType&nbsp;=&nbsp;comp.GetTypeByMetadataName("Roslyn04.Tests.Bar");
+ 
+var&nbsp;fooMethod&nbsp;=&nbsp;barType.GetMembers().Single(m&nbsp;=&gt;&nbsp;m.Name&nbsp;==&nbsp;"Foo");
+var&nbsp;quxProp&nbsp;=&nbsp;barType.GetMembers().Single(m&nbsp;=&gt;&nbsp;m.Name&nbsp;==&nbsp;"Qux");
+ 
+ 
+//&nbsp;Find&nbsp;callers&nbsp;across&nbsp;the&nbsp;solution.
+Console.WriteLine("Find&nbsp;callers&nbsp;of&nbsp;Foo");
+Console.WriteLine();
+ 
+var&nbsp;callers&nbsp;=&nbsp;SymbolFinder.FindCallersAsync(fooMethod,&nbsp;sln).Result;
+foreach&nbsp;(var&nbsp;caller&nbsp;in&nbsp;callers)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;Console.WriteLine(caller.CallingSymbol);
+&nbsp;&nbsp;&nbsp;&nbsp;foreach&nbsp;(var&nbsp;location&nbsp;in&nbsp;caller.Locations)
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Console.WriteLine("&nbsp;&nbsp;&nbsp;&nbsp;"&nbsp;+&nbsp;location);
+&nbsp;&nbsp;&nbsp;&nbsp;}
+}
+ 
+Console.WriteLine();
+Console.WriteLine();
+ 
+//&nbsp;Find&nbsp;all&nbsp;references&nbsp;across&nbsp;the&nbsp;solution.
+Console.WriteLine("Find&nbsp;all&nbsp;references&nbsp;to&nbsp;Qux");
+Console.WriteLine();
+ 
+var&nbsp;references&nbsp;=&nbsp;SymbolFinder.FindReferencesAsync(quxProp,&nbsp;sln).Result;
+foreach&nbsp;(var&nbsp;reference&nbsp;in&nbsp;references)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;Console.WriteLine(reference.Definition);
+&nbsp;&nbsp;&nbsp;&nbsp;foreach&nbsp;(var&nbsp;location&nbsp;in&nbsp;reference.Locations)
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Console.WriteLine("&nbsp;&nbsp;&nbsp;&nbsp;"&nbsp;+&nbsp;location.Location);
+&nbsp;&nbsp;&nbsp;&nbsp;}
+}</pre> </div>
+در این مثال، پروژه‌ی Roslyn04.Tests که حاوی کلاس‌های Foo و Qux است، جهت آنالیز باز شده‌است. در اینجا برای رسیدن به Symbols نیاز است ابتدا به Compilation API دسترسی یافت و سپس متادیتاها را بر اساس آن استخراج کرد. سپس متدهای Foo و خاصیت Qux آن یافت شده‌اند. <br>
+
+
+اکنون با استفاده از سرویس&nbsp;SymbolFinder.FindCallersAsync تمام فراخوان‌های متد Foo را در سراسر Solution جاری می‌یابیم.<br>
+
+
+سپس با استفاده از سرویس SymbolFinder.FindReferencesAsync تمام ارجاعات به خاصیت Qux را در Solution جاری نمایش می‌دهیم.<br> <br> <br> <b>
+
+سرویس توصیه کننده</b> <br> <br>
+
+
+Intellisense در ویژوال استودیو از سرویس توصیه کننده‌ی Roslyn استفاده می‌کند.<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">var&nbsp;ws&nbsp;=&nbsp;MSBuildWorkspace.Create();
+var&nbsp;sln&nbsp;=&nbsp;ws.OpenSolutionAsync(@"..\..\..\Roslyn.sln").Result;
+
+//&nbsp;Get&nbsp;the&nbsp;Tests\Foo.cs&nbsp;document.
+var&nbsp;proj&nbsp;=&nbsp;sln.Projects.Single(p&nbsp;=&gt;&nbsp;p.Name&nbsp;==&nbsp;"Roslyn04.Tests");
+var&nbsp;foo&nbsp;=&nbsp;proj.Documents.Single(d&nbsp;=&gt;&nbsp;d.Name&nbsp;==&nbsp;"Foo.cs");
+ 
+ 
+//&nbsp;Find&nbsp;the&nbsp;'dot'&nbsp;token&nbsp;in&nbsp;the&nbsp;first&nbsp;Console.WriteLine&nbsp;member&nbsp;access&nbsp;expression.
+var&nbsp;tree&nbsp;=&nbsp;foo.GetSyntaxTreeAsync().Result;
+var&nbsp;model&nbsp;=&nbsp;proj.GetCompilationAsync().Result.GetSemanticModel(tree);
+var&nbsp;consoleDot&nbsp;=&nbsp;tree.GetRoot().DescendantNodes().OfType&lt;MemberAccessExpressionSyntax&gt;().First().OperatorToken;
+ 
+ 
+//&nbsp;Get&nbsp;recommendations&nbsp;at&nbsp;the&nbsp;indicated&nbsp;cursor&nbsp;position.
+//
+//&nbsp;&nbsp;&nbsp;Console.WriteLine
+//&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;^
+var&nbsp;res&nbsp;=&nbsp;Recommender.GetRecommendedSymbolsAtPosition(
+
+                    model,&nbsp;consoleDot.GetLocation().SourceSpan.Start&nbsp;+&nbsp;1,&nbsp;ws).ToList();
+ 
+foreach&nbsp;(var&nbsp;rec&nbsp;in&nbsp;res)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;Console.WriteLine(rec);
+}</pre> </div>
+در این مثال سعی شده‌است لیست توصیه‌های ارائه شده در حین تایپ دات، توسط سرویس Recommender.GetRecommendedSymbolsAtPosition دریافت و نمایش داده شوند. در ابتدای کار، کلاس Foo گشوده شده و سپس Syntax tree و Semantic model آن استخراج می‌شود. این model پارامتر اول متد سرویس توصیه کننده‌است. سپس نیاز است محل مکانی را به آن معرفی کنیم تا کار توصیه کردن را بر اساس آن شروع کند. برای نمونه در اینجا OperatorToken در حقیقت همان دات مربوط به Console.WriteLine است. پس از یافتن این توکن، امکان دسترسی به مکان آن وجود دارد.<br>
+
+
+تعدادی از خروجی‌های مثال فوق به صورت زیر هستند:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code"> System.Console.Beep()
+System.Console.Beep(int, int)
+System.Console.Clear()</pre> </div> <br> <br> <b>
+
+سرویس تغییر نام دادن</b> <br> <br>
+
+
+هدف از سرویس Renamer.RenameSymbolAsync، تغییر نام یک identifier در کل Solution است. نمونه‌ای از نحوه‌ی کاربرد آن‌را در مثال ذیل مشاهده می‌کنید:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">var&nbsp;ws&nbsp;=&nbsp;MSBuildWorkspace.Create();
+var&nbsp;sln&nbsp;=&nbsp;ws.OpenSolutionAsync(@"..\..\..\Roslyn.sln").Result;
+
+
+//&nbsp;Get&nbsp;Tests\Bar.cs&nbsp;before&nbsp;making&nbsp;changes.
+var&nbsp;oldProj&nbsp;=&nbsp;sln.Projects.Single(p&nbsp;=&gt;&nbsp;p.Name&nbsp;==&nbsp;"Roslyn04.Tests");
+var&nbsp;oldDoc&nbsp;=&nbsp;oldProj.Documents.Single(d&nbsp;=&gt;&nbsp;d.Name&nbsp;==&nbsp;"Bar.cs");
+ 
+Console.WriteLine("Before:");
+Console.WriteLine();
+ 
+var&nbsp;oldTxt&nbsp;=&nbsp;oldDoc.GetTextAsync().Result;
+Console.WriteLine(oldTxt);
+ 
+Console.WriteLine();
+Console.WriteLine();
+ 
+ 
+//&nbsp;Get&nbsp;the&nbsp;symbol&nbsp;for&nbsp;the&nbsp;Bar.Foo&nbsp;method.
+var&nbsp;comp&nbsp;=&nbsp;oldProj.GetCompilationAsync().Result;
+ 
+var&nbsp;barType&nbsp;=&nbsp;comp.GetTypeByMetadataName("Roslyn04.Tests.Bar");
+var&nbsp;fooMethod&nbsp;=&nbsp;barType.GetMembers().Single(m&nbsp;=&gt;&nbsp;m.Name&nbsp;==&nbsp;"Foo");
+ 
+ 
+//&nbsp;Perform&nbsp;the&nbsp;rename.
+var&nbsp;newSln&nbsp;=&nbsp;Renamer.RenameSymbolAsync(sln,&nbsp;fooMethod,&nbsp;"Foo2",&nbsp;ws.Options).Result;
+ 
+ 
+//&nbsp;Get&nbsp;Tests\Bar.cs&nbsp;after&nbsp;making&nbsp;changes.
+var&nbsp;newProj&nbsp;=&nbsp;newSln.Projects.Single(p&nbsp;=&gt;&nbsp;p.Name&nbsp;==&nbsp;"Roslyn04.Tests");
+var&nbsp;newDoc&nbsp;=&nbsp;newProj.Documents.Single(d&nbsp;=&gt;&nbsp;d.Name&nbsp;==&nbsp;"Bar.cs");
+ 
+Console.WriteLine("After:");
+Console.WriteLine();
+ 
+var&nbsp;newTxt&nbsp;=&nbsp;newDoc.GetTextAsync().Result;
+Console.WriteLine(newTxt);</pre> </div>
+در این مثال، متد Foo کلاس Bar، قرار است به Foo2 تغییرنام یابد. به همین منظور ابتدا پروژه‌ی حاوی فایل Bar.cs باز شده و اطلاعات این کلاس استخراج می‌گردد. سپس اصل این کلاس تغییر نیافته نمایش داده می‌شود. در ادامه با استفاده از API کامپایل، به متادیتای متد Foo یا به عبارتی Symbol آن دسترسی پیدا می‌کنیم. سپس این Symbol به متد یا سرویس Renamer.RenameSymbolAsync ارسال می‌شود تا کار تغییر نام صورت گیرد. پس از اینکار مجددا متن کلاس تغییر یافته نمایش داده خواهد شد.<br> <br> <br> <b>
+
+سرویس ساده کننده</b> <br> <br>
+
+
+هدف از سرویس ساده کننده، ساده‌کردن و کاهش کدهای ارائه شده، از دید Semantics است. برای مثال اگر فضای نامی در قسمت using ذکر شده‌است، دیگر نیازی نیست تا این فضای نام به ابتدای فراخوانی یک متد آن اضافه شود و می‌توان این قطعه از کد را ساده‌تر کرد و کاهش داد.<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">var&nbsp;ws&nbsp;=&nbsp;MSBuildWorkspace.Create();
+var&nbsp;sln&nbsp;=&nbsp;ws.OpenSolutionAsync(@"..\..\..\Roslyn.sln").Result;
+
+
+//&nbsp;Get&nbsp;the&nbsp;Tests\Baz.cs&nbsp;document.
+var&nbsp;proj&nbsp;=&nbsp;sln.Projects.Single(p&nbsp;=&gt;&nbsp;p.Name&nbsp;==&nbsp;"Roslyn04.Tests");
+var&nbsp;baz&nbsp;=&nbsp;proj.Documents.Single(d&nbsp;=&gt;&nbsp;d.Name&nbsp;==&nbsp;"Baz.cs");
+ 
+Console.WriteLine("Before:");
+Console.WriteLine();
+Console.WriteLine(baz.GetSyntaxTreeAsync().Result.GetText());
+ 
+Console.WriteLine();
+Console.WriteLine();
+ 
+var&nbsp;oldRoot&nbsp;=&nbsp;baz.GetSyntaxRootAsync().Result;
+
+ 
+var&nbsp;memberAccesses&nbsp;=&nbsp;oldRoot.DescendantNodes().OfType&lt;CastExpressionSyntax&gt;();
+var&nbsp;newRoot&nbsp;=&nbsp;oldRoot.ReplaceNodes(memberAccesses,&nbsp;(_,&nbsp;m)&nbsp;=&gt;&nbsp;m.WithAdditionalAnnotations(Simplifier.Annotation));
+ 
+var&nbsp;newDoc&nbsp;=&nbsp;baz.WithSyntaxRoot(newRoot);
+ 
+ 
+//&nbsp;Invoke&nbsp;the&nbsp;simplifier&nbsp;and&nbsp;print&nbsp;the&nbsp;result.
+var&nbsp;res&nbsp;=&nbsp;Simplifier.ReduceAsync(newDoc).Result;
+ 
+Console.WriteLine("After:");
+Console.WriteLine();
+Console.WriteLine(res.GetSyntaxTreeAsync().Result.GetText());
+Console.WriteLine();</pre> </div>
+در این مثال نحوه‌ی ساده سازی cast‌های اضافی را ملاحظه می‌کنید. برای مثال اگر نوع متغیری int است، دیگر نیازی نیست در سراسر کد در کنار این متغیر، cast به int را هم ذکر کرد و می‌توان این کد را ساده‌تر نمود.<br> <br> <br> <b>
+
+کدهای کامل این سری را از اینجا می‌توانید دریافت کنید:</b> <br> <a href="https://www.dntips.ir/file/userfile?name=Roslyn-Samples.zip">Roslyn-Samples.zip</a></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/courses/topic/14/07e2b743-b90d-4ff9-b3ea-96f91a004158#comment-693'><span class='badge bg-light text-dark bg-gradient rounded-pill me-2'>بازخوردهای دوره</span>متدهای async تقلبی</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/courses/topic/9/17a6c38a-0738-4011-a046-cd21fdb6038e#comment-142'><span class='badge bg-light text-dark bg-gradient rounded-pill me-2'>بازخوردهای دوره</span>ایجاد یک کلاس جدید پویا و وهله‌ای از آن در زمان اجرا توسط Reflection.Emit</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2223.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Roslyn #5</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2607.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>C# 7 - Pattern matching and switch expressions</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1692.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>استفاده از EF در اپلیکیشن های N-Tier : قسمت چهارم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-953.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>استفاده از خاصیت Local در Entity Framework</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2642.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>ویژگی های کمتر استفاده شده در NET. - بخش پنجم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2342.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>آموزش Linq - بخش ششم : عملگرهای پرس و جو قسمت دوم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2507.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>شروع به کار با EF Core 1.0 - قسمت 13 - بررسی سیستم ردیابی تغییرات</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2883.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>پشتیبانی از انقیاد پویا در سی‌شارپ</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

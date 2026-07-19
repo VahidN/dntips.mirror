@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫Domain-Driven Design (DDD)؛ بخش دوازهم: سرویس‌های دامنه</title>     <meta name="description" content=" Domain Services: قهرمانان خاموش در دنیای دامنه 🦸‍♂️     تا به حال به این فکر کرده‌اید که چه اتفاقی می‌افتد وقتی یک منطق تجاری، به تنهایی به یک  Aggregate  یا  Entity  خاص تعلق ندارد؟ فرض کنید در یک سیستم بانکی، می‌خواهید پولی را از یک حساب به حساب دیگر انتقال دهید.   آیا این منطق باید در کلاس  Account  (حساب مبدا) قرار گیرد؟ خیر، زیرا به یک حساب دیگر هم مربوط است.  آیا باید در کلاس  Transaction  قرار گیرد؟ خیر، زیرا منطق انتقال، فراتر از ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="Domain-Driven Design (DDD)؛ بخش دوازهم: سرویس‌های دامنه">
+    <meta itemprop="description" content=" Domain Services: قهرمانان خاموش در دنیای دامنه 🦸‍♂️     تا به حال به این فکر کرده‌اید که چه اتفاقی می‌افتد وقتی یک منطق تجاری، به تنهایی به یک  Aggregate  یا  Entity  خاص تعلق ندارد؟ فرض کنید در یک سیستم بانکی، می‌خواهید پولی را از یک حساب به حساب دیگر انتقال دهید.   آیا این منطق باید در کلاس  Account  (حساب مبدا) قرار گیرد؟ خیر، زیرا به یک حساب دیگر هم مربوط است.  آیا باید در کلاس  Transaction  قرار گیرد؟ خیر، زیرا منطق انتقال، فراتر از ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="Domain-Driven Design (DDD)؛ بخش دوازهم: سرویس‌های دامنه">
+    <meta property="og:description" content=" Domain Services: قهرمانان خاموش در دنیای دامنه 🦸‍♂️     تا به حال به این فکر کرده‌اید که چه اتفاقی می‌افتد وقتی یک منطق تجاری، به تنهایی به یک  Aggregate  یا  Entity  خاص تعلق ندارد؟ فرض کنید در یک سیستم بانکی، می‌خواهید پولی را از یک حساب به حساب دیگر انتقال دهید.   آیا این منطق باید در کلاس  Account  (حساب مبدا) قرار گیرد؟ خیر، زیرا به یک حساب دیگر هم مربوط است.  آیا باید در کلاس  Transaction  قرار گیرد؟ خیر، زیرا منطق انتقال، فراتر از ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="Domain-Driven Design (DDD)؛ بخش دوازهم: سرویس‌های دامنه">
+    <meta name="twitter:description" content=" Domain Services: قهرمانان خاموش در دنیای دامنه 🦸‍♂️     تا به حال به این فکر کرده‌اید که چه اتفاقی می‌افتد وقتی یک منطق تجاری، به تنهایی به یک  Aggregate  یا  Entity  خاص تعلق ندارد؟ فرض کنید در یک سیستم بانکی، می‌خواهید پولی را از یک حساب به حساب دیگر انتقال دهید.   آیا این منطق باید در کلاس  Account  (حساب مبدا) قرار گیرد؟ خیر، زیرا به یک حساب دیگر هم مربوط است.  آیا باید در کلاس  Transaction  قرار گیرد؟ خیر، زیرا منطق انتقال، فراتر از ...">
+    <meta name="twitter:card" content=" Domain Services: قهرمانان خاموش در دنیای دامنه 🦸‍♂️     تا به حال به این فکر کرده‌اید که چه اتفاقی می‌افتد وقتی یک منطق تجاری، به تنهایی به یک  Aggregate  یا  Entity  خاص تعلق ندارد؟ فرض کنید در یک سیستم بانکی، می‌خواهید پولی را از یک حساب به حساب دیگر انتقال دهید.   آیا این منطق باید در کلاس  Account  (حساب مبدا) قرار گیرد؟ خیر، زیرا به یک حساب دیگر هم مربوط است.  آیا باید در کلاس  Transaction  قرار گیرد؟ خیر، زیرا منطق انتقال، فراتر از ...">
+    <meta property="article:published_time" content="Fri, 29 Aug 2025 04:40:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫Domain-Driven Design (DDD)؛ بخش دوازهم: سرویس‌های دامنه";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-3629.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫Domain-Driven Design (DDD)؛ بخش آخر: یک پروژه</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-3627.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫Domain-Driven Design (DDD)؛ بخش یازدهم: DDD با EF Core؛ قسمت سوم</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫Domain-Driven Design (DDD)؛ بخش دوازهم: سرویس‌های دامنه</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۴/۰۶/۰۷ ۰۸:۱۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-3628.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;">Domain Services: قهرمانان خاموش در دنیای دامنه 🦸‍♂️</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">تا به حال به این فکر کرده‌اید که چه اتفاقی می‌افتد وقتی یک منطق تجاری، به تنهایی به یک <strong>Aggregate</strong> یا <strong>Entity</strong> خاص تعلق ندارد؟ فرض کنید در یک سیستم بانکی، می‌خواهید پولی را از یک حساب به حساب دیگر انتقال دهید.</div><ul><li>آیا این منطق باید در کلاس <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Account</code> (حساب مبدا) قرار گیرد؟ خیر، زیرا به یک حساب دیگر هم مربوط است.</li><li>آیا باید در کلاس <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Transaction</code> قرار گیرد؟ خیر، زیرا منطق انتقال، فراتر از یک تراکنش ساده است.</li></ul><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در این موارد، منطق به یک <strong>سرویس دامنه (Domain Service)</strong> تعلق دارد.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>Domain Service چیست؟</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>Domain Service</strong> یک سرویس بدون وضعیت (Stateless) است که عملیات مربوط به چندین <strong>Aggregate</strong> را هماهنگ می‌کند. این سرویس، یک واسط (Interface) برای عملیات‌هایی است که به صورت طبیعی در هیچ یک از <strong>Entities</strong> یا <strong>Value Objects</strong> قرار نمی‌گیرند.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">به عبارت ساده، Domain Service یک &quot;هماهنگ‌کننده&quot; است که منطق‌هایی را در خود نگه می‌دارد که از مرز یک Aggregate فراتر می‌روند.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>چرا به Domain Service نیاز داریم؟</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">استفاده از Domain Service، چندین مزیت کلیدی دارد:</div><ul><li><strong>حفظ کپسوله‌سازی:</strong> با قرار دادن منطق در Domain Service، از آلوده شدن Aggregate ها با منطق نامربوط جلوگیری می‌کنیم. این کار باعث می‌شود Aggregate ها ساده و متمرکز باقی بمانند.</li><li><strong>ایجاد یک لایه انتزاعی:</strong> Domain Service یک لایه انتزاعی ایجاد می‌کند که به ما امکان می‌دهد تا به جای جزئیات پیاده‌سازی، روی مفهوم اصلی (مثلاً &quot;انتقال وجه&quot;) تمرکز کنیم.</li><li><strong>تست‌پذیری:</strong> Domain Service ها به دلیل نداشتن وضعیت، به راحتی قابل تست هستند.</li></ul><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>مثال عملی:</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">بیایید به مثال انتقال وجه بازگردیم. یک Domain Service به نام TransferService می‌تواند این عملیات را مدیریت کند.</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public class TransferService
+{
+    private readonly IAccountRepository _accountRepository;
+
+    public TransferService(IAccountRepository accountRepository)
+    {
+        _accountRepository = accountRepository;
+    }
+
+    public async Task Transfer(int fromAccountId, int toAccountId, decimal amount)
+    {
+        var fromAccount = await _accountRepository.GetByIdAsync(fromAccountId);
+        var toAccount = await _accountRepository.GetByIdAsync(toAccountId);
+
+        if (fromAccount == null || toAccount == null)
+        {
+            throw new ArgumentException(&quot;One of the accounts does not exist.&quot;);
+        }
+
+        fromAccount.Withdraw(amount);
+        toAccount.Deposit(amount);
+
+        // Here, the repository would save changes
+    }
+}</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در این مثال، کلاس <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">TransferService</code> از دو <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Account</code> Aggregate استفاده می‌کند و منطق اصلی انتقال را در خود دارد. این سرویس، وابستگی‌ها را به شکل درستی مدیریت می‌کند و منطق را در یک مکان متمرکز نگه می‌دارد.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>به این فکر کنید:</strong> در پروژه‌تان، آیا متدهایی دارید که منطق مربوط به چندین کلاس را در خود دارند؟ آیا می‌توانید آن‌ها را به یک Domain Service مستقل منتقل کنید تا کد شما تمیزتر و قابل نگهداری‌تر شود؟</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">Domain Service ها، ابزارهای قدرتمندی برای مدیریت منطق‌های پیچیده‌ای هستند که از مرز Aggregate ها فراتر می‌روند. آن‌ها به ما کمک می‌کنند تا مدل دامنه‌مان را تمیز، متمرکز و خوانا نگه داریم و در عین حال، تمام قوانین تجاری را به درستی پیاده‌سازی کنیم.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>Application Services: پل ارتباطی بین دنیای بیرون و مدل دامنه 🌉</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">تا به حال به این فکر کرده‌اید که چگونه یک درخواست از سمت کاربر (مثلاً کلیک روی دکمه &quot;ثبت سفارش&quot;) به مدل دامنه‌ی پیچیده شما در پشت صحنه مرتبط می‌شود؟ آیا منطق UI باید مستقیماً با <strong>Aggregates</strong> یا <strong>Repositories</strong> صحبت کند؟ قطعا خیر، زیرا این کار باعث ایجاد وابستگی‌های سفت و سخت می‌شود و لایه‌های مختلف را در هم می‌آمیزد.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در DDD، ما از یک لایه میانی به نام <strong>Application Services</strong> (سرویس‌های کاربردی) استفاده می‌کنیم تا این ارتباط را به صورت سالم و مدیریت‌شده برقرار کنیم.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>Application Service چیست؟</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>Application Service</strong> یک لایه نازک است که به عنوان یک هماهنگ‌کننده عمل می‌کند. این سرویس، یک واسط (Interface) برای دنیای بیرون (مثلاً کنترلرها در ASP.NET Core) فراهم می‌کند و تمام فرآیندهای مربوط به یک عملیات خاص را مدیریت می‌نماید.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">وظیفه اصلی Application Service این است که:</div><ul><li><strong>دریافت ورودی</strong> از لایه ارائه (Presentation Layer) یا UI.</li><li><strong>فراخوانی منطق دامنه</strong> (Domain Logic) برای اجرای عملیات.</li><li><strong>مدیریت تراکنش‌ها</strong> و ذخیره تغییرات.</li><li><strong>بازگرداندن نتیجه</strong> به دنیای بیرون.</li></ul><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">این سرویس هیچ منطق تجاری (Business Logic) پیچیده‌ای را در خود ندارد. تمام منطق، در داخل <strong>Domain Model</strong> (مدل دامنه) و <strong>Domain Services</strong> قرار دارد.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>Application Service در برابر Domain Service</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">تفاوت بین این دو نوع سرویس بسیار مهم است:</div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>Application Service:</strong></div><ul><li><strong>محل:</strong> در لایه کاربردی (Application Layer).</li><li><strong>مسئولیت:</strong> مدیریت فرآیندها، هماهنگی با Repository ها و Domain Services و مدیریت تراکنش‌ها.</li><li><strong>زبان:</strong> با <strong>زبان کاربرد</strong> (Application Language) صحبت می‌کند (مثلاً <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CreateOrder</code> یا <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">RegisterUser</code>).</li></ul><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>Domain Service:</strong></div><ul><li><strong>محل:</strong> در لایه دامنه (Domain Layer).</li><li><strong>مسئولیت:</strong> اجرای منطق تجاری مربوط به چندین Aggregate.</li><li><strong>زبان:</strong> با <strong>زبان مشترک (Ubiquitous Language)</strong> دامنه صحبت می‌کند (مثلاً <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">TransferFunds</code> یا <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CalculateShippingCost</code>).</li></ul><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>مثال عملی:</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">فرض کنید یک API برای ثبت سفارش جدید داریم.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">Application Service:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public class OrderService
+{
+    private readonly IOrderRepository _orderRepository;
+
+    public OrderService(IOrderRepository orderRepository)
+    {
+        _orderRepository = orderRepository;
+    }
+
+    public async Task CreateOrder(CreateOrderCommand command)
+    {
+        var order = new Order(command.CustomerId, command.ProductId, command.Quantity);
+
+        // This method contains no business logic
+        await _orderRepository.AddAsync(order);
+    }
+}</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>Application Controller:</strong></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public class OrderController : ControllerBase
+{
+    private readonly OrderService _orderService;
+
+    public OrderController(OrderService orderService)
+    {
+        _orderService = orderService;
+    }
+
+    [HttpPost(&quot;create&quot;)]
+    public async Task&lt;IActionResult&gt; Create([FromBody] CreateOrderCommand command)
+    {
+        await _orderService.CreateOrder(command);
+        return Ok();
+    }
+}</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در این مدل، <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">OrderController</code> هیچ اطلاعی از جزئیات Repository و Domain Model ندارد و فقط با <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">OrderService</code> صحبت می‌کند. این جداسازی، باعث می‌شود که هر لایه بر روی مسئولیت‌های خود تمرکز کند و کد شما تمیزتر و قابل نگهداری‌تر باشد.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>به این فکر کنید:</strong> آیا در پروژه‌تان، کنترلرها یا Endpoint ها مستقیماً با Repository ها صحبت می‌کنند؟ چگونه می‌توانید یک Application Service را به عنوان واسط بین آن‌ها قرار دهید تا کدتان ساختار یافته‌تر شود؟</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">Application Service ها، یک لایه حیاتی برای جداسازی مسئولیت‌ها هستند. آن‌ها به ما کمک می‌کنند تا یک خط جداکننده واضح بین منطق تجاری و لایه‌های فنی مانند UI یا دیتابیس ایجاد کنیم. این کار، ساخت نرم‌افزارهای پیچیده را به یک فرآیند قابل مدیریت تبدیل می‌کند.</div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3629.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Domain-Driven Design (DDD)؛ بخش آخر: یک پروژه</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3632.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>چه زمانی نباید از DDD استفاده کنیم؟ راهنمای عملی برای توسعه‌دهندگان دات‌نت</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3626.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Domain-Driven Design (DDD)؛ بخش دهم: DDD با EF Core؛ قسمت دوم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3617.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Domain-Driven Design (DDD)؛ بخش اول: مقدمه و آشنایی با مفاهیم پایه DDD </a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3624.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Domain-Driven Design (DDD)؛ بخش هشتم: الگوهای Repository و Specification</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1261.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>معماری لایه بندی نرم افزار #2</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3628.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>Domain-Driven Design (DDD)؛ بخش دوازهم: سرویس‌های دامنه</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3629.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>Domain-Driven Design (DDD)؛ بخش آخر: یک پروژه</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3617.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>Domain-Driven Design (DDD)؛ بخش اول: مقدمه و آشنایی با مفاهیم پایه DDD </a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3629.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>Domain-Driven Design (DDD)؛ بخش آخر: یک پروژه</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۴۰۴/۰۶/۰۷ ۰۹:۵۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>یک مثال از Domain Services و Application Services در سیستم پرداخت شارژ آپارتمان</strong></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;">تصور کنید در حال قدم زدن در یک ساختمان آپارتمانی هستید، جایی که هر طبقه و هر واحد، بخشی از یک سیستم پیچیده اما هماهنگ را تشکیل می‌دهد. حالا فکر کنید اگر بخواهیم این ساختمان را به یک نرم‌افزار تبدیل کنیم – مثلاً سیستمی برای مدیریت و پرداخت شارژ ماهانه واحدها. چه چیزی این سیستم را زنده و کارآمد نگه می‌دارد؟ آیا فقط داده‌ها و دیتابیس کافی‌اند، یا نیاز به لایه‌هایی داریم که منطق واقعی زندگی در این ساختمان را بازتاب دهند؟</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;">در Domain-Driven Design (DDD)، که یک رویکرد طراحی نرم‌افزار است، تمرکز روی “دامنه” (Domain) است – همان هسته اصلی مشکل، مثل قوانین پرداخت شارژ در یک آپارتمان. اینجا، نه فقط کد می‌نویسیم، بلکه جهان واقعی را مدل‌سازی می‌کنیم. دو مفهوم کلیدی در این جهان، Domain Services و Application Services هستند. Domain Services مثل قوانین نانوشته ساختمان عمل می‌کنند: منطق خالص دامنه، بدون وابستگی به دنیای بیرون. Application Services اما، <strong>مثل مدیر ساختمان</strong> هستند: هماهنگ‌کننده جریان کارها، که از دامنه استفاده می‌کنند و با ابزارهایی مثل دیتابیس (اینجا EF-Core) ارتباط برقرار می‌کنند.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;">فرض کنید در حال طراحی سیستمی هستیم برای پرداخت شارژ آپارتمان. ساکنان واحدها باید شارژ ماهانه‌شان را بپردازند، که بر اساس متراژ واحد، هزینه‌های مشترک (مثل آب و برق) و شاید جریمه‌های دیرکرد محاسبه می‌شود. شاید در ذهنتان سؤال‌هایی شکل بگیرد: “اگر منطق محاسبه شارژ پیچیده‌تر شود، چه؟” عالی، همین سؤال‌ها ما را جلو می‌برند.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>گام اول: مدل‌سازی دامنه – جایی که داستان شروع می‌شود</strong></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;">ابتدا، فکر کنید به موجودیت‌های اصلی (Entities) در این دامنه. یک Apartment (واحد آپارتمانی) داریم، با Resident (ساکن)، Charge (شارژ ماهانه) و Payment (پرداخت). این‌ها نه فقط کلاس‌های ساده، بلکه اشیایی با رفتار هستند. مثلاً Charge می‌تواند خودش را محاسبه کند، اما اگر محاسبه نیاز به هماهنگی بین چند موجودیت داشته باشد، Domain Service وارد میدان می‌شود.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;">در DDD از Domain Services برای عملیات‌هایی استفاده می‌شوند که به یک موجودیت خاص تعلق ندارند، اما بخشی از منطق دامنه‌اند. مثلاً محاسبه شارژ کلی ساختمان، که نیاز به جمع‌آوری داده از همه واحدها دارد. این سرویس‌ها خالص‌اند: هیچ وابستگی به دیتابیس یا وب‌سرویس ندارند. فقط منطق دامنه.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;">حالا تصور کنید کد زیر را در لایه Domain بنویسیم (در C#، با تمرکز روی DDD):</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">// در namespace Domain.Entities
+public class Apartment
+{
+    public Guid Id { get; private set; }
+    public double Area { get; private set; } // متراژ واحد
+    public List&lt;Charge&gt; Charges { get; private set; } = new List&lt;Charge&gt;();
+
+    public Apartment(double area)
+    {
+        Id = Guid.NewGuid();
+        Area = area;
+    }
+
+    public void AddCharge(Charge charge)
+    {
+        Charges.Add(charge);
+    }
+}
+
+public class Charge
+{
+    public Guid Id { get; private set; }
+    public DateTime Month { get; private set; }
+    public double Amount { get; private set; } // مبلغ شارژ
+    public bool IsPaid { get; private set; }
+
+    public Charge(DateTime month, double amount)
+    {
+        Id = Guid.NewGuid();
+        Month = month;
+        Amount = amount;
+        IsPaid = false;
+    }
+
+    public void MarkAsPaid()
+    {
+        IsPaid = true;
+    }
+}
+
+// حالا Domain Service: ChargeCalculationService
+// این سرویس منطق محاسبه شارژ را مدیریت می‌کند، بدون وابستگی به ذخیره‌سازی
+public interface IChargeCalculationService
+{
+    double CalculateMonthlyCharge(Apartment apartment, double commonCosts, double penaltyRate);
+}
+
+public class ChargeCalculationService : IChargeCalculationService
+{
+    public double CalculateMonthlyCharge(Apartment apartment, double commonCosts, double penaltyRate)
+    {
+        // منطق دامنه: شارژ = (متراژ * نرخ پایه) + سهم هزینه‌های مشترک + جریمه اگر دیرکرد داشته باشد
+        double baseCharge = apartment.Area * 1000; // فرض نرخ پایه 1000 تومان per متر
+        double shareOfCommon = commonCosts / /* تعداد واحدها، که می‌تواند از repository بیاید اما اینجا ساده */ 10;
+        double penalty = apartment.Charges.Any(c =&gt; !c.IsPaid &amp;&amp; c.Month &lt; DateTime.Now.AddMonths(-1)) ? baseCharge * penaltyRate : 0;
+        
+        return baseCharge + shareOfCommon + penalty;
+    }
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;">در اینجا ChargeCalculationService فقط روی منطق تمرکز دارد. هیچ صحبتی از دیتابیس نیست. حالا فکر کنید: اگر قوانین شارژ تغییر کند (مثل اضافه شدن مالیات)، کجا باید تغییر دهیم؟ دقیقاً اینجا، در قلب دامنه. این جداسازی، سیستم را انعطاف‌پذیر می‌کند – انگار ساختمان‌تان را طوری ساخته‌اید که دیوارها را بدون تخریب کل بنا جابه‌جا کنید.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>گام دوم: ورود به دنیای کاربرد – Application Services و EF-Core</strong></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;">حالا که دامنه‌مان محکم است، نیاز به لایه‌ای داریم که این دامنه را به دنیای واقعی وصل کند. اینجا Application Services وارد می‌شوند. این سرویس‌ها جریان اپلیکیشن را مدیریت می‌کنند: ورودی‌ها را می‌گیرند، از دامنه استفاده می‌کنند، و خروجی‌ها را برمی‌گردانند. مثلاً وقتی ساکنی می‌خواهد شارژش را بپردازد، Application Service مسئولیت هماهنگی را بر عهده می‌گیرد – از جمله ذخیره تغییرات در دیتابیس با EF-Core.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;">Application Services معمولاً در لایه Application قرار می‌گیرند و از Repositoryها (برای دسترسی به داده) و Domain Services استفاده می‌کنند. EF-Core اینجا نقش persistence را بازی می‌کند: یک ORM قدرتمند که مدل‌های دامنه را به جدول‌های دیتابیس map می‌کند.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;">بیایید یک Application Service تصور کنیم: PaymentApplicationService. این سرویس پرداخت را پردازش می‌کند، شارژ را محاسبه می‌کند (با کمک Domain Service)، و سپس تغییرات را ذخیره می‌کند.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;">ابتدا، یک Repository ساده برای Apartment:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">// در namespace Infrastructure.Persistence (با EF-Core)
+public class ApartmentRepository : IApartmentRepository
+{
+    private readonly ApartmentDbContext _context; // DbContext EF-Core
+
+    public ApartmentRepository(ApartmentDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task&lt;Apartment&gt; GetByIdAsync(Guid id)
+    {
+        return await _context.Apartments.Include(a =&gt; a.Charges).FirstOrDefaultAsync(a =&gt; a.Id == id);
+    }
+
+    public async Task SaveChangesAsync()
+    {
+        await _context.SaveChangesAsync();
+    }
+}
+
+// DbContext نمونه:
+public class ApartmentDbContext : DbContext
+{
+    public DbSet&lt;Apartment&gt; Apartments { get; set; }
+    public DbSet&lt;Charge&gt; Charges { get; set; }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.UseSqlServer(&quot;your-connection-string&quot;); // یا هر دیتابیس دیگر
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        // Config برای mapping، مثل Owned Types اگر لازم
+        modelBuilder.Entity&lt;Apartment&gt;().OwnsMany(a =&gt; a.Charges);
+    }
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;">حالا Application Service:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">// در namespace Application.Services
+public interface IPaymentApplicationService
+{
+    Task ProcessPaymentAsync(Guid apartmentId, double paymentAmount);
+}
+
+public class PaymentApplicationService : IPaymentApplicationService
+{
+    private readonly IApartmentRepository _repository;
+    private readonly IChargeCalculationService _chargeCalculator; // تزریق Domain Service
+
+    public PaymentApplicationService(IApartmentRepository repository, IChargeCalculationService chargeCalculator)
+    {
+        _repository = repository;
+        _chargeCalculator = chargeCalculator;
+    }
+
+    public async Task ProcessPaymentAsync(Guid apartmentId, double paymentAmount)
+    {
+        var apartment = await _repository.GetByIdAsync(apartmentId);
+        if (apartment == null) throw new Exception(&quot;واحد یافت نشد!&quot;);
+
+        // استفاده از Domain Service برای محاسبه
+        double dueCharge = _chargeCalculator.CalculateMonthlyCharge(apartment, 500000, 0.05); // commonCosts=500k, penalty=5%
+
+        if (paymentAmount &lt; dueCharge) throw new Exception(&quot;مبلغ ناکافی!&quot;);
+
+        // ایجاد Charge جدید و مارک پرداخت
+        var newCharge = new Charge(DateTime.Now, dueCharge);
+        newCharge.MarkAsPaid();
+        apartment.AddCharge(newCharge);
+
+        // ذخیره با EF-Core
+        await _repository.SaveChangesAsync();
+    }
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;">ببینید چطور Application Service مثل یک پل عمل می‌کند: ورودی (paymentAmount) را می‌گیرد، از دامنه (محاسبه) استفاده می‌کند، و با EF-Core ذخیره می‌کند. </div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;">نکته‌ی مهم: اگر بخواهیم این سیستم را تست کنیم، چقدر آسان است؟ Domain Service را می‌توانیم مستقل تست کنیم، بدون دیتابیس. این جداسازی، کلید DDD است.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>چند پرسش و پاسخ برای درک بهتر موضوع</strong></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;">سؤال: اگر بخواهیم شارژ هر واحد را <strong>بر اساس متراژ یا مساوی</strong> محاسبه کنیم، این منطق کجا باید برود؟</div><ul><li>نه در <strong>Entity</strong> (چون مربوط به یک واحد نیست، بلکه به کل ساختمان مربوط است).</li><li>نه در <strong>Application Service</strong> (چون بخشی از منطق دامنه است، نه صرفاً هماهنگی).</li></ul><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;">پس نیاز به <strong>Domain Service</strong> داریم.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;">سؤال: چه کسی مسئول است که سرویس محاسبه شارژ را صدا بزند، خروجی را بگیرد، و در دیتابیس (از طریق EF-Core) ذخیره کند؟</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;">این همان <strong>Application Service</strong> است.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;">Application Service مانند یک <strong>رهبر ارکستر</strong> است: هماهنگ می‌کند.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;">Domain Service مانند یک <strong>نوازنده متخصص</strong> است: محاسبات تخصصی را انجام می‌دهد.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;">چند سؤال:</div><ul><li>اگر کل ساختمان فقط یک قانون ساده «تقسیم مساوی» داشت، آیا باز هم Domain Service لازم بود؟</li><li>اگر قرار بود علاوه بر محاسبه شارژ، پیامکی هم برای ساکنان ارسال شود، این وظیفه در Application Service قرار می‌گیرد یا Domain Service؟</li></ul><div dir="rtl" style="text-align: right;" class="ql-align-right ql-direction-rtl">پاسخ‌ها:</div><ul><li>هر جا منطق «دامنه» بود (مثل فرمول تقسیم شارژ)، باید در <strong>Domain Service</strong> بماند.</li><li>هر جا «هماهنگی با جهان بیرون» بود (مثل دیتابیس یا SMS)، در <strong>Application Service</strong> است.</li></ul><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;">بنابراین</div><ul><li><strong>Domain Service</strong> = مغز محاسباتی و منطقی دامنه.</li><li><strong>Application Service</strong> = هماهنگ‌کننده عملیات و استفاده از Domain.</li></ul><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;">اینجا به شکل ساده دیدیم که چطور در یک سیستم شارژ آپارتمان، این دو نقش مکمل هم می‌شوند.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div></div>
+</div></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

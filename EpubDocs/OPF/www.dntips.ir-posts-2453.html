@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫ارتقاء به ASP.NET Core 1.0 - قسمت 9 - بررسی تغییرات مسیریابی</title>     <meta name="description" content="فعال سازی تنظیمات مسیریابی     
+ 
+ 
+ 
+ 
+ یکی دیگر از تغییرات عمده‌ی ASP.NET Core با نگارش‌های قبلی آن، نحوه‌ی مدیریت مسیریابی‌های سیستم است. در نگارش‌های قبلی مبتنی بر HTTP Moduleها، مسیریابی‌ها توسط یک HTTP Module مخصوص، با pipeline اصلی ASP.NET یکپارچه شده‌اند و زمانیکه مسیر درخواستی با تنظیمات سیستم تطابق داشته باشد، پردازش کار به HTTP Handler مخصوص ASP.NET MVC منتقل می‌شود:           
+ 
+ 
+ 
+ 
+ اما در ASP.NET Core مبتنی بر  م ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="ارتقاء به ASP.NET Core 1.0 - قسمت 9 - بررسی تغییرات مسیریابی">
+    <meta itemprop="description" content="فعال سازی تنظیمات مسیریابی     
+ 
+ 
+ 
+ 
+ یکی دیگر از تغییرات عمده‌ی ASP.NET Core با نگارش‌های قبلی آن، نحوه‌ی مدیریت مسیریابی‌های سیستم است. در نگارش‌های قبلی مبتنی بر HTTP Moduleها، مسیریابی‌ها توسط یک HTTP Module مخصوص، با pipeline اصلی ASP.NET یکپارچه شده‌اند و زمانیکه مسیر درخواستی با تنظیمات سیستم تطابق داشته باشد، پردازش کار به HTTP Handler مخصوص ASP.NET MVC منتقل می‌شود:           
+ 
+ 
+ 
+ 
+ اما در ASP.NET Core مبتنی بر  م ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="ارتقاء به ASP.NET Core 1.0 - قسمت 9 - بررسی تغییرات مسیریابی">
+    <meta property="og:description" content="فعال سازی تنظیمات مسیریابی     
+ 
+ 
+ 
+ 
+ یکی دیگر از تغییرات عمده‌ی ASP.NET Core با نگارش‌های قبلی آن، نحوه‌ی مدیریت مسیریابی‌های سیستم است. در نگارش‌های قبلی مبتنی بر HTTP Moduleها، مسیریابی‌ها توسط یک HTTP Module مخصوص، با pipeline اصلی ASP.NET یکپارچه شده‌اند و زمانیکه مسیر درخواستی با تنظیمات سیستم تطابق داشته باشد، پردازش کار به HTTP Handler مخصوص ASP.NET MVC منتقل می‌شود:           
+ 
+ 
+ 
+ 
+ اما در ASP.NET Core مبتنی بر  م ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="ارتقاء به ASP.NET Core 1.0 - قسمت 9 - بررسی تغییرات مسیریابی">
+    <meta name="twitter:description" content="فعال سازی تنظیمات مسیریابی     
+ 
+ 
+ 
+ 
+ یکی دیگر از تغییرات عمده‌ی ASP.NET Core با نگارش‌های قبلی آن، نحوه‌ی مدیریت مسیریابی‌های سیستم است. در نگارش‌های قبلی مبتنی بر HTTP Moduleها، مسیریابی‌ها توسط یک HTTP Module مخصوص، با pipeline اصلی ASP.NET یکپارچه شده‌اند و زمانیکه مسیر درخواستی با تنظیمات سیستم تطابق داشته باشد، پردازش کار به HTTP Handler مخصوص ASP.NET MVC منتقل می‌شود:           
+ 
+ 
+ 
+ 
+ اما در ASP.NET Core مبتنی بر  م ...">
+    <meta name="twitter:card" content="فعال سازی تنظیمات مسیریابی     
+ 
+ 
+ 
+ 
+ یکی دیگر از تغییرات عمده‌ی ASP.NET Core با نگارش‌های قبلی آن، نحوه‌ی مدیریت مسیریابی‌های سیستم است. در نگارش‌های قبلی مبتنی بر HTTP Moduleها، مسیریابی‌ها توسط یک HTTP Module مخصوص، با pipeline اصلی ASP.NET یکپارچه شده‌اند و زمانیکه مسیر درخواستی با تنظیمات سیستم تطابق داشته باشد، پردازش کار به HTTP Handler مخصوص ASP.NET MVC منتقل می‌شود:           
+ 
+ 
+ 
+ 
+ اما در ASP.NET Core مبتنی بر  م ...">
+    <meta property="article:published_time" content="Wed, 13 Jul 2016 12:50:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫ارتقاء به ASP.NET Core 1.0 - قسمت 9 - بررسی تغییرات مسیریابی";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-2454.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫Performance در AngularJS 1.x قدم ششم</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-2452.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫ارتقاء به ASP.NET Core 1.0 - قسمت 8 - فعال سازی ASP.NET MVC</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫ارتقاء به ASP.NET Core 1.0 - قسمت 9 - بررسی تغییرات مسیریابی</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۵/۰۴/۲۳ ۱۲:۵۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-2453.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><b>فعال سازی تنظیمات مسیریابی</b> <br> <br>
+
+
+
+
+یکی دیگر از تغییرات عمده‌ی ASP.NET Core با نگارش‌های قبلی آن، نحوه‌ی مدیریت مسیریابی‌های سیستم است. در نگارش‌های قبلی مبتنی بر HTTP Moduleها، مسیریابی‌ها توسط یک HTTP Module مخصوص، با pipeline اصلی ASP.NET یکپارچه شده‌اند و زمانیکه مسیر درخواستی با تنظیمات سیستم تطابق داشته باشد، پردازش کار به HTTP Handler مخصوص ASP.NET MVC منتقل می‌شود:<br> <br> <p style="display:block; margin-left: auto; margin-right: auto;"> <img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/png;base64,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"> </p> <br>
+
+
+
+
+اما در ASP.NET Core مبتنی بر <a href="www.dntips.ir-posts-2443.html">میان افزارها</a>، زیر ساخت مسیریابی به صورت زیر تغییر کرده‌است:<br> <br> <p style="display:block; margin-left: auto; margin-right: auto;"> <img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAlgAAAElCAMAAAAP7GxsAAADAFBMVEUCAgOt2ZMoRH+rXwZckcnx4L94sY62ocJuZwy+2eachJKxyu4wORz8+fB0rZ7/uhVllHNvc4DIttGhuNfz+v3///9iQAb/pgKdm5o1YV7G2vZweaXB37V/pNoYFxjX0crWwakvOE6yekh5YVcSHjm5w8epkbVCbo52i5+rw4JXOjiMpMvCtaOqwt7Qvtg5IgtHPwjkmQWmh4n/xiHJycfr5e2IZ1NzmotoXzmOseUrPmDCsI/S4/nazOFGb6LK48Th39tkX1CQx6H/sg2YsG253auWuOdHODKa0XzBrsvhqRqQcZ9YTlP38ugbICa70vIjJ05WPSaxxN1FWX+QjZ+wn7GtwXWMamehha42IyNidVOFpNG2n4WlnsMpMT5dlIK1sbRDSF+VaTlJSUyq1pIuKDlzdpDJ1eWsra3U59JzcnL/wh09PD1agaaWYwmNbZ2lw+wnIiaMjIuNjLLt1pmZfai03KRxTD7P5cuUv4GKRgW8q3GmlRH/qgXa6fuKruKiv+p1msiljKZGJySMh1S/lhDMu9Wqz6DB1fPhrjKh04ZyU1DM3vdnamuUteZXYIXg1OaffGyNwW8sQ3AoGwaumbxccH9GeWx2nbfTxNsRCw1EREP479s1SlDs8vesx+7z8/LG4by9qMc0NTRfYG+1mpwxWIxXIgtycj6cgqqAf3/PwNcuQ0G7u7vo8eMeJGZ3fVrU2tz69vO01KGUdqPx9vpqPieYr7i+37Ohs8islLmRkZGKeI9GXZAfJDPp6eaioqGe04ORgg+Kn7XFss5cSD1EOSFdb6CZblXn8OIqKyrDw8PL0NP+rglDKTeSq8+l1Yz/yiXc2dScu+mwimrP0c6HgT+rvtbLy8vs7OxcVGl6quSli7LCz9+SnF6Le291nNTYtoz+thHU1NTHwLjc3NxIYWVBS27WyN12i7LPv9hffG7b3eKFqdxYh7f/vhmEquGPfYCv2pzEycpdc5Pg0Lbk5OSQvHZfXl61zvGymr66eg1aKiEgJj99nGgoHBo/Lp/TAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAixElEQVR42u3dDUATZ54/cGBRXJTtugiN0kZTEAXJH2XbgNGlylJzuiHyEpYGeTXEpjQogdtS9A5fgKVXRP5sBNkENCWAmMKp2/5BXmulEf+hile9Cm6FKiLl6HFVETEauGcSQHB5yWAyIvl91cnMMzOR/PjkmcmEJ5jYvCzpk8heeJT9UhuITjF5ab7SDkHLC0+zoAXIzD5YL/5raJdBjwWwABbAAlgAC2BBABbAAlgAC2ABLAjAAlgAC2ABLIAFAVgAC2ABLIAFsCAAC2ABLIAFsGYgLJ+jaPK3MT81ZfWlpu2t//ePG46Xv72F1vj0LRpvC4BlrLCs3ug9amN1s3DJqLabfjGobV3Y/tEb5iVYT3APewRNaB/JNp91mUkAyxhh/W1D+/uLrL7sa/9pkU1LS/tprEey2h6QhBBxl/h0tCMWPt/+eNTmpuvJJTY+2026NF3RUZs8tIPV1eJfvvXWhpFOTDrSO81JMF+ENlvnu2SOxw8AywhhWYUIBJGH3qZxGZSmDUH9grD6oxisWgxWpH+IRHbnhk8Wo7T34M1k8bZFc8rrdrR1JeVtz32gkFEq3xZs+yidycQ6NivsuFi049pQ9/QgXdPbPbj0S6urAUkAy/hgzbGPWbrdzOU4fXmKKM2Pfi0rLPYprDRBw21F7k1e7jpOzE2un2fSTW5319XIJQ+E9eWiMtoKl07/B66UCgRnGam6upoUx5DlVJxGXZXNMqYWFodqc5MZC7CMD5bPOrncz8yl3HzRHF/3S6hPSjcfORR2Lk+gyNk33lAvbDsv2hNJoi/f3mtpd1NC3WPmkrxpUd79EPrWB8nbMEhFbdHR0fIlPi5tCu7KJKsH6ZnrNedg2wOoy5w3ASxj7LHy+xUI1g82GCzqojx7DNYbZgjWnoCkdfYKXtcb6v5+5so9kcv9cvy8rjbkpbsnmC9LjrXx+QmDxdGcvuc1Ykmy8XmwXSxab7WMUas5/vm8QbdeJgBYRgjr5qWmPJqZyxPPRTdPVjxBBzuB9dIbR/fwth19UO75qdw/rzzgDdHBOW1deyJvvCGkv5/V8Ler532XLPUz9wnpdTp5YwhWyEaEr9CaxJQUsm8sQr2d9lA4J7lpERwKjbPHcg6TMBzCj7MkvJiPnrAkshVJWZkH8y7UcTknqXMSeNxL6Dw9n1FqvSdy601OT16Wnc0/Jxcn+VzlSGS5n3KtHyRre6w3m5ubP8vi7eCvH3vyvsQqJHIJwDLCV4UPSIGNLmfLV5wNTJpziX02cL3NUtTl5BXFoZ7HaimpujLJ5gEJzefdOOpze73Vt+ttrG6/hw5yLqTKJJ/tMadvj3rNt3T58PWGB4q12J0vU/8yjxazCGAZ4XUsTZY9Mcd6Lw51Eb57m0Ohjr8ij4atWcYoRi8kl8B1LKOFlVe0RHMd6iDOe7Ny+eUEa/IiTqN+i7/e6sHyRQDLaGERG4AFsAAWwAJYAAtgARmABbAAFsACWAALArAAFsACWAALYEEAFsACWAALYAEsCMACWAALYAEsgAWZBqyka5XWRKXyWhIuWNLfFBCYdt1hEVk0a+v38Hyjf0dkyTa/NTEs6qGPiYu1Py5Yb33/f4jLb77XHdZ72wgsGrUJDyyLAgJr9v1fJ4Z1jZpEXKhUnLA+/r+E5Xc4YN1YRWDRtq7CA0v1Z+JK9nHV5LDWExYqzh7r3d8Rl7/igkVczdbPxwfrawJrNimsfesBFsB6yWHtA1jGA8saYAEsw/RYB4kKflg/Ehd8sA4SVzScsDYTV7IZA+sgblh/JS5/xgNrG3E1O4gXFnEl+3HSyw3WBwEWwJpeZgwsXS+QtvRJAdZwjuGDVTBzYC0hKgetdbxAWiaIbpdqYH1GWPDCIqxoVLywCCvZpLCoRMLS9VDYwRWTozsQrP/6M2H5DS5YS4gLXljElWzUWzotzc+mvr6SuNTXN08ZvqyxuTnDxISslH/2LnFF+vPXuN4rBFhYnsKKEAifCYvYCKeOWChUkk1QyNEzFxaRb0K/DLDQj6I8k2uHPt5KWA5dk06ZdgGayBErCakPYL08sP7xx2aWEFejQzqeYzUryVxSCzrH+g1x2YwPFmFPRtywiCvZpLCI7bF0hFXGrG7RXG74mrjgg0VczbbuwwfLgsCavTsprK0zD5ZUOnSBFGABLH3CGrnyTmCRCgCWMcHaTFhmDSziSjYVrEcTZevWoal2k+Hp1on3mDz4YW2eobD2E1g0nLBUBNZsclgTPaL5/tRj6AZN/bHbR5rpfP9j8zXN0wpuWE8HhKiwTDJgRLsSTVUWmhlto0WBhc5DTnDBmvAhaquDpvOpmkXN0nzqcxTtCk5YY0s22eMfKpXF0EbDU5XOJZseLP82B89jj/ztWeZ3a1FVttrHxD56dCPaLI3Zc4xwWG6DZDK5rhc9dtS3DI09Cqx5uhiY4GCHpuWshekxm9GqJw1oVZEg80Jx6KhdtPtpljY/26wnWCRyceyj+W2DntVmm1DR7mai6fw4kXV/bSwxsKqGH0/gE1QyVmf86Aeqqgl9WoEslhkq4IXBBlqxRcHmr4Ouh27eHJFFZzPtNo9bsrFzU8Lai55Q4+WR/ykT0aZHfA7ZPLDr2LX6JoVn7LX6+o1mFZKeY5X1q2KvVR6jVsbOr7zijy3Nr6xcdYWaXX/o2PwJgxvWiZGHkDXYy65JUMcXONawQwscqyxUBwJpdfEFgZbs7IJAR8cahUlAKMZvx934zWib4w0Fjuy7lwJoZqEFB3bFWwQ6WgSesChwDA20rIm3UDk6WoZqdn0aC3ywJniEj+LEDmsfLVeYeFbYxfrXN0UHbPKvrz9Fb2Kaoept2+dfGetfeeVR5aH56P2tK6ho9dhc02RFmy6souRONjuIU2uBHrJjgeoAevSObpxerB4nsAqwL4gdVhUU+ZnU1thhdUzvDFVZsmm+NQo79Jxlh6oOhKocs9FOBUU1bOzWMltTSj3AEvv+8ChukGweV2u9kVwq9KzsZ9WRMViBCpZvTBz3dZLA3FrRE8dgqXuozHyeuZzDou+fpEh4Yf1p5CG0CbsKCq7yuoqcyayAwPTM0KLkwmSTAMf0QVanYxZFQJGI6fEFNDJ5ob2dmzOZJ24oUrCE4lqamaNbMtnXLqgz/gLam2lHE5LVdkXOAt5KmlDzdJ4erAkfYpyYZf6IdF7sya5tahPKeAFr24TqQVETs7iJKXRYUaEw5ws8qfYNZyUslic1WiCMYQtYlK7JijZtWA0WBUXOZoH2QjI93o27LTD9ukLsG5/FIft2FXEF6o1kVkOBG0dcG1QbSBvkcTodaYOsQQxWkWKwLrPG2a6IkZmdkOnGIAszA9MFnIa7yah4o2SdmBzWsfFDjabke1KZd3g90WbR6h7Uu7epe+RKBKtXYrYqWpgjMKeh+gm77GubNorqGeoYNsezwo++af4Ed3hs/t5pw8oajCy8nkyPL6ew7et6FZGhRYd7g3hse57dXdfMC+TOGiZP3Rv4hMspVPQmqO3sxZkJDjvsyQE00V3XgBMJlEJfu3JxQ5bvSmam5ZPOIo56h73QzjI5IHSasCZ6iMfiHO6YxdpLOJ5xJxei4+H5Yvc6TzYD9ViijfT9cZwYRS3psKjiUgwtoCmaZ65g9dYnFzfZU/4+YdGOTR8W5fp1Ba+Bxsu0ZIjaeF2BCZF3L/Wielgm0GsGfXcEqZmdoehLrU0waxPWtiWLgoSZd5MxWAm+dm2DmeW1WWIRm5NJ62TTeHbOrMya5AB2Ai9eV1gTPSDqKVF3Zz13paBHfjKjNtZfsUJRfMx/o6hCkqEU5fQLe/sDmEKz7pNr2Zk5DHouw5PaxgrIYfj+96MJa4QblsVQVFlinkBwmG7JaSgoSujEYLk2WPqSFOrr/a6iC+pVRc50v043XiGClSnItCg6nulXXFCEDoUie3FkobM6k3f9klBEEwUGXWe60kmchsAE1vV+jqiqYOS/0BMsX3fKfm4AA8HqPxk7vy2g32zt/DYEi1JKyekWFkeLFgpFC+n72Tk5EnWPQnSFRA7IYarN9Qdr+AEVJbMEAo7aLkG0qiDLVwOrk3SpKwirh+9CYYNFlm+0YCXzunNtuhntZGhEemcCvUp1AcFa6EcpZIoDaHR7Dh09Iy2v9wvUvc6doVfJaFeh3UjJLP402XuFk8AyY+dLRBUMLSyqYoVf8bFr/QhWYR298E7nfrmSnkPhFVcqKJkCUS6jZ18bq7MwsvbQMQPAQodCVWCCWs5psChSYLDcXHvbeCcU6kgmN1MDS0QT+InuDhYqCrkYrMLkYoshWPlMZifbWXjSvo6DunUKk0N308DCdh35NugPVi6TTu95CotptpY6BOtOYWQPW5ifGanEOqk7XAzWJhIq2p2A14/pC5bjU1i12So3ToCic5VFkG+0BpalBhaqh1zYoAryZTtTKDtGYEU606sCNbCc1Uwm186SExYpEIriE3hMZ/UO587sLCHaNTL+eWFdOyWyVohrvRjoUHiKvpbPWeFB+Zl/Hh0Kc3iesdWUv7MPi3KTWeaByebUjRgsapzanNofoE9YKm0sVEHCLguLCzz2E1FoFiczgRJPEyNY7AR08iAYguWWLO7FYGU607OzxJnlvlVZgwhW0GCDyj4y/sJhUY0rqyuLZ1eUrIGVXhdf5JyZrRqJvg6Fa4NNRNswWBmsH64pirvV5tblCBada7aJn29e4eqwf6PYs+kJOsFywGDxhT1Ueeff9Qbr++HHg8GycGMEpKu7AstFbZwGN1eRZbJdm7gh0L6zRtibfUEdny6mkJzRoZBW11XkJ7KvsysqR7B2KERVbgI7t+MOdgniWtJxdArm0OvXWeUmrFUFUeILhv+HqWDFjp9r0Waxp1g9aQxzuVm9ICyM7FnPCCtlmVVwexaqKTJUJkbx2gTftZUKNSXMoZfRE1vJVJeqPWMnusPYacNSqYI4XSpVFqchSBgmpMcHcXiD4gZL184aHo+Dzsx9MVjoikO8JWehogGtFaLzKQ6Pw6qlidgJdQJhQKgbp9ax/GSVWzIvjIN1fCo3hvqS2u4prCpcsCZ6iLFxvpviBj2pAs84s3qFupRcvA1NlaJtzGJ3HkVG/9laoV7bpt5PTQ/LD2Oh3mTTtX6HUl7tpomLNn1YmdkWB5zpNcl1DDV6RVPHEXee8OPtwOqRaclryA7yjQ8aDAjEeiy0lkcWsZ3rGMKT6BwrS8jjUOIdFep4Wp1dINqBx+p07qxCT0aBsLPq6XNxerBiK/fGVjZdoTZdObQ3tqkrd9Wh2MqVuU17UYN1fdf+Q7HUJtTShLbr6mqqb0ILsZXxXduuxE6c6cNyPFGFTdBrXnnNiWzHmppd7CpHy/gqt5qa+GzHE9mqAyeyD8RXoS0OoHY5WhuITb9H+znW7NhVhe2bjbapsqzZdeIPmns7ULMjflSRqt7VCyzrJvT3ELXykPXefVg5DmnKsxc17Kvv6tobi1XMuukKVqqmVauwomHFnKxo04WletcRPW0OnKjCHigqUE0NG9Vol6OmHoEnHFFJUOUcVQccsdrd1ayVo6mmgjU12ppilcL2/AP7BGrQllJXWLG4ciz2OYIbVvZw0KPQTLNVVVVoTqVpwP5ma/sczbz2H7bNyFRrRqXS7ovdVKlG5rC9R6InWPoPXlijajZUMk0BhsukGl7Mzh6uynD5RlWzamhl9tN1mgVNKUcyKaym2H26JHbUFN3GPrMudrz2f7gP3LCqiIsjPli6FS12TFHGVCdWx6rhhkVgzfQBSy+ZybC+xwVrH4FFwwfr3ZkCa9u+K0QFPyxH4oITFoFFwwmLwJpNDusKcdk2a2ARWLSXCZZU+pLA+p7AzBJYJwgs2RdjYbXwMyIAFsDSMyzpWSZZWQaw/sEVwHoeWFI+V2hiktEykmvbNh0iLNv8W6ZMs2Bk9qeZC2sTccEJ608vBhZJiQ1eF0pGEqYOIy7qMMmUEZBHZrnp7xKXE7hgEfdkPPTfOGERWLNRsFrihGLUY/WNpHL/NuKyv7JvyjTKRmZ//AJgvSywbKTtchlZ0Dzyhfi/TmCNXsd7jnWCuPxppsJ6HScsAmv2zKvCjmgh6enJ+w+H1hKVQz/MHljEFQ0fLIsvXhwsG5u+vlGw1hIX3LCIDC5YBBYNLywCS/bFZFfeAdZQkWYHLNUMgrWXqMwiWHuJy0sLi8Aa4Yb1BYGZLbCIzOSwfiYsswcWcTV7eWH9DLBmMqyffwBYeodFZI3+MEtg7SKwZrteWli7dv2BqOyaLbAIK9muXS8zLOIya2ARmElg+e//gbjsx3uOpe9CoGFj+oD1MaFFw/fLxgmF9ePEsNZXNhGXyvW4YEk3qybMF1WqaaSGOfG6r3WHlURk0Zpu4IH1VxWBKUiaGNaMyyhYk23VXzadOz8r0WmzqWBBRjLbYEWTJS0AC2DpG1a7zMQkAmABLH3DkqOfVuS2ACyApV9YzQLsl4PxARbA0i8suZhsIhZLABbA0iusloz+ZklZnKQDYAEsvfZYLVIpt0MK51gAS++XG2y4HdO5c4AFsAAWwAJYAAtgASyABbAAFsACWAALYAEsgAWwABbAAlgAC2ABLIAFsAAWwAJYAAtgASyABbAAFsACWAALYAEsgAWwABbAel5Y0g4pgjXqE6MBFsDSB6xGmTxaRpLJpQALYOkTVp/ERMdxrgALYOFJBAarvwVgASz9wmqR6DgwH2ABLFwpI+vUYQEsgIWzy+Lq9kkiAGuWw7KSTpR/556W4o8PP/rLidZZWQEsY4HlE/VwwpR4P5xGvCfZKw1gGQus/5/4NnH5NBFgGQ+s94nLRwDLmGB9RFjeBlhGBOsjgAWwABbAAlgAC2ARFHhVaFSw4HIDwILrWAALYAEsgAWwAJYBYH1KVF4DWEYE61PicgZgASyABbAMDwsdLbUnSQALYOkR1rpur89Pbdy4sdvrzOjmd9LOACyANSGs16bKp3tYv3LiLA4OZlB+hXVdmvNw9M9Jckaz+JqmQYe8A7CMCJYOIPYIEaxfvXOmVRj+TqtE4v4Oyf3Ma21zPcQr0pw8uO5lTt3BhWcAFsAaC+vMVEGw5iJYn3+eUufeKuwucQgvyfd6jRF+ihXemnwneDC8lVwXfkaHACxjgqUDCAyWK1mpJNMT/Y6kRSkWY7DOh3vzvEpYc538FqeQ3T8HWABrDKyH6Ps9RTBYf+SEJyaWOLhzws98aE95CkuMuC1OYXlNeSeaACwjgqWDBw0sdI7lre5OXnFG22Ot08DyKPX6vM29leX1DsACWPhhsdy1sITh2+u6S3jhKcojfuJw78HuAc6dYFm4rrA+BFgAa3Sc+r2cgpEdJw/3KA+ZLPxMVLBMIvmVk8edtBSZrDvN6Q7AAljTgDUGR1oaNv18ePnzNBz7AiyANZkP9GdkFteOAMuIYH1IXD4HWMYK6/OpbERFpeGA9My29wCWkcJqDU4skaEc8RrrYXjx8im0cvHQ0ieKuSl3Rm/nlJiWEj7m7phj7ufDNIBlnLCcFItN/RYPDJwaXPzhvbS0NDTBup1PFoRrF01LBrsTW121K+85cdBbO9oV2oaEfC9v9+EdsamTohtgGS2se0/TynA3PX8EkfGjR6UsGMyf6y3xMk0JLiGHzfVmKEvR+zp30j6Mas3waj0/WIpdjEcXSlvPK/Pnoq2V+adcTY6kdGtm5/7Rw2NBnfu9lHyvUXd/D2AZD6x/HwXLtKTUS9tjLTjSyrnTuoDeOjjXtGTxAOeIt2v+gF/pQF04tt2H3ucXD5zPf4jB8l6weGDBYm9XtFG+X517yRHvQbQONZSeOk/50Ls0fDSsKIBllLAuoyObqR95wYJBVjh6r+bDVocBDFZ+IsO9lXxkwKMuWAMryulU6dx7rWHeCFZpsLJ7wENdIvMybR3wKE38bvF3pV73visdkM01TVF7ecsAFsC65+SBwTqS6IR6JA90EBsNSyyTMO6cEh5B/VrrxmCEx1sLq4RcilakUNDeiVpY+fcwWJRE0+/qvP4oyAFYAOsydigcOscqQV2OB2VgMPyhX37i+V+3ksNN0UtGP9ncKO/z+afQTUnpXzBYp7CuqbtVOdfJoxvBKlncKpt72WMYFvRYRgwraiSmKYy5CFYUglU6cJ61gBWe6MdaIF6MpgMeLNng4q+8z5Nl6LTdyY8lIx956Ppr1Jv5CWWsI6hhgTL8u8EjHosfYjt2e4clXkawWmXhplGjArCMCJbp03gzjpi2JkaZRnkPfOUdHPzrr6LQtHvuZdRXOaGZRLRFcHDwXNMozcrLA4ne7qaaWWw6EOU04O49V7vOKe6rqMSBT0oWfzXq7k0vAyyj7LGiLpdIEB6s7zJFuob/mg4vapdHrxmznWZZ0zC0kWkrY2yHBbCMFJbpw4HEMRKeL6ao44sCWMYK67IhEzV2EWABLIMEYAEsQ+QTgAWwDJGvAJbxwPoLwAJYBumxPiEuAMuYeqyvABbAMggs4vJPAAtgASyA9Xyw/onAACyABbAAFsACWMYN6yHAAlgAC2A9F6yHfyEwAMtoYFl9NP7HuhsmHwEsY4E1Xo5GEPA1ACyjgyUlycoAFsDSO6w+mUm/FGABLH3DqiabKCMAFsDSMyyp0sTEpB9gASz9wpLGkREsYRnAAlh6hdUnEwrEEnK0FGABLH3C6ogua1f2kapbRlpamg0RvqRs3PYWgDRbT95tmpVjvrv8uLPEJS4CIM1aWO1jYZEibKRExSaCD5CMB1YLceEDLIA1Ol/2JX3ZhyUJYAEsHWHxW/qmzDJ763UMpVJJXzW2eflPfbhyFmAZESwdQLgw9l8N20EiedRZ97Uvbf+pr6Ojb0NHxwW6dV/H0vYOtNj+4/sAC2CNylk+YjFFNLDo1hs61nGabqcrS7u+ubry9AP5Dj+TFY1tnLDe+yFMxo73OqYOwDIiWGd1ALGOkXuVspJ/NsGXv51Sf6Gua/uKH5dtjElQ56YoV7axYi6IIyt+BFgAayys9qmigTUYJhAMikL8YjoeJOdsX/Gei0fPhXx+OUXedj6ARrH+tl2HkACW8ZxjnZ3aw2kMFr3+zds0tdwv99sHfgHbV3zjokCwKp6wBIKwXnsKtR1gAawxPRapfco3aNpDGLlZ9Kb2pSF1ceUrvlnH6d1evDyL13WBUlEuWu5i706jXFuqwxs9AMuoYE0N4j9DLiFY9c3NIYMrUzhcBr3iqpDLcYi5ylmRlcwVqHNpYdY6vYUIsADWmJSR+C7s5c1vutytuN3WnxN4/3Zb4cI4vsvdlWVu/RnxjUVopS6pBlhGBKsRZ243TjsAy4hgVTcSF4BlTLDKiAvAAlgGSRzAMh5YcoP8SB9/3FY5wDIaWM3VcQaIvF8+XnN1O0AyFliGSbsMfrodYBkEFozSAVgAC2ABLIAFsCAAC2ABLIAFsF4GWFKDDCBsFHSM2w6OjAZWmbzaAImTx43XLG8ESMYCixQhJS4wYNWYYMEQe4D1wmChMzFNlwOwAJausHQZYr/U0n9ZW0ZGxg7/Mc3t37yPa4R9C4wrNCZYOg6x592Jjmbk+2OfC4I+HOQt1Prl1cyhxT7sc0NgiD3AGgtLxyH2TR3fhgiblrZJ7lScDqnvWEpil4tjvglRRNafLpKnrzw99UBogGVEsHQZYv++ZsBqRTMasFqRErYwwbf+uxWnsSH2rJVXOTkb63KzxGH1MMQeYD0DS8ch9iyhkGzmUt7Qvkw7xH4jNhK6nM4vUgTQeJW6DITumGxcoU8egfEBWIaHpeMQe/ShIHwPddyT3I5RQ+z5T1gyGS9HD0Psff5tC4H5rRXAMjysqYaZftNehB0K0RD7q+o4v5h2F07O9uL7IZd6sCH2Actv32WjIfbtzznEPm/LfxCYfwNYBoel0xD75JEh9rSwboVvfYq60Bl9epGw9wIvI52HGq2XPucQe4BlhLCaXaIrQhZWoiH26fUuGxmUlfdd0gWRGWi+14UmoPQud1v43EPsCYX1W4BFACxdhjDfb2x8E7ttRv/KlmNzy+83a1dhi/fffO6R0ABrtsGaIUPsAdasgzUzhtgjWL8lLgBrdsGKgx7LeGDF8Q2RiHFbJ4VFYIf1AcAyOKyyaIMkY9zWSX6CFGDNMliG+RVNzYK+8X9NE8AyGlgGCf5ROnlbPiAwAAtgASyABbAAlnHD+h+ABbAA1ksCqxlgAayXGFYLflj/Q1wAlv5hdTDHdCaNcoOkf/zmZuixZu85luCZX4TZYYj04R1MkbeFwA7rFYBlAFiSjtGL6LMbZsQQe4D18h8K28fC0kXEUYMPsZ8a1geavxOvxg5xAOvFwerLGPNOsC5D7L/81uW9pUWkanbge2PaN3T06W2Ifd6WVybPrcc7d54bu9GtW6PmU7esmeoungZg6R9WS1y19nYYli5D7J33XxWWSiSyOzcQj5HR9CE7sEUNzKQ+PEPsR5/lDb0zPRWsi7tdbW1d56GtPvhA04CmqTu1t1jLRdt5tmjt0EqARTwsm8Z+zY08unEIlq5D7Jc27xE2bQjpz/HvcOH/tNSFn8CKOe1iv7BygwupjX16g65D7Bujo0e9MC3rPyvVAdZj13O3bj0mp77yGPOT+ninbepFW/I5NJO6ZrftOS2sW6/uRLOvpj4+dwtgEQ6rL7pMA0sswF796/Kq8H2XoXGFrbyKEAaX0Vn5GA2xD+4tJ/eGKLiS/IqsQeHK93QcYt8sF4jlo2A1Ksn9fOlUsC7uXq05HG557Gq7enXq7sO2x1en2pLn7XZ13Wm72tb1nAbWGjS7+tya1YfnASziYdmUZaBvpE2f0sREmdGuy2c3DA2xVyrREPuE2vvY74TWDrGnVCR0LnfBhtjXf6PLZzeQItr7sf92zJW0ahMTsoQ/BaxXd8/DDnIfvHp83pY1rjt3r05d43ru8eotu11THx9OvbgTKUOwfoFmd9s+1hwxARbhsKSN8ox+rkRsYmIiZkbzdRxiz8uRy/0ocX5dzwyxFzCEAWiI/be6DLE/G800wf5X7ugosSZl3FSwbDU9FjoiDp1O3dp97rHtK7uRrdW3XlmjhbVTvHq16+rHq1OneiEAsAwBC508d3S0NwrRd1jGr9bhsxva140ZYq/5UJBvihjYh4I86eSf1Q6x1+mzG87ylcizckyjHH0dZPnbW25Nkldu/WIB0rLm8Lnj6BxKA+siBgup2vKLBbdeeTwE63DqmsepGKxbkwdgGQaW5pI7mSw726LjEHsGGmJfgYbYC9ke+RU09crtFLaHQ9cFXu523/osTi+NovMQ+5azMjKZP+a6mlgY3SHN2zL5adEadE712HVB6u4Fqb9wPTcEyzUVwULHxFRbW0039vgwmp2XCj3Wi4SVISD12eg6xJ5Zf7UQwVrn3BWlUPJ6l69j8Hjc3BBFAD9ByQtIa7t+Tfch9n0kQf+okyy+Mrpdir0qnKKTeWzr6mqbemvNcVf0+nD3OQTrX9Ycn7d73pbf73R1XY3Orc7tPndxJ7bNq/Ogx3qBsDq031wES4chzM2faUfUN3/WeDuiDPtV9hH3URvWFFF2v/F+M76R0O1jDstD17FuTZVXt9z6PbrZchE7NKJ/2AJ2lRRbgTVhsxcv3tKunTS/B1iGgzV8RCTNlCH2t4gLwCIAVnXjDBli/3sCA7AIgDVThtgDLIAFsADWVImQE5mymQHrIsAyOCxpnyHSKGgft10KPZaxwDJMpjNKB3osgGUQWBcJDMCCHgt6LIAFPRbAAlgAC2DpPf8KsIwI1r8SGIAFsAAWwAJYAAtgASyABbAA1ssB61WAZUSwXiUwAAtgASyABbAAlqG/hml8BinAmuHpE/S/8DC5+HusNQQGYE0j0oi4F57qRrxftdWcfyYwc2wAFmR2538BBQOCT7/ARNcAAAAASUVORK5CYII="> </p> <br>
+
+
+
+
+میان افزار ASP.NET MVC را که <a href="www.dntips.ir-posts-2452.html">در قسمت قبل</a>  فعال کردیم، باید بتواند کنترلر و اکشن متد متناظر با URL درخواستی را مشخص کند. این تصمیم گیری نیز بر اساس تنظیماتی به نام Routing انجام می‌شود. در قسمت قبل، حالت ساده و پیش فرض این تنظیمات را مورد استفاده قرار دادیم<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code"> app.UseMvcWithDefaultRoute();</pre> </div>
+
+
+که مطابق سورس ASP.NET Core، معادل است با فراخوانی متد app.UseMvc، با قالب پیش فرضی به صورت زیر:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">    public static IApplicationBuilder UseMvcWithDefaultRoute(this IApplicationBuilder app)
+    {
+      if (app == null)
+        throw new ArgumentNullException("app");
+      return app.UseMvc((Action&lt;IRouteBuilder&gt;) (routes =&gt; routes.MapRoute("default", "{controller=Home}/{action=Index}/{id?}")));
+    }</pre> </div>
+
+
+قالب مشخص شده‌ی در اینجا به ASP.NET MVC می‌گوید که از کدام قسمت‌های URL باید نام کلاس کنترلر (کلاس ویژه‌ای که به کلمه‌ی Controller ختم می‌شود) و نام اکشن متد متناظر با آن‌را انتخاب کند (اکشن متد، متدی است عمومی در آن کلاس).<br>
+
+
+
+
+روش دیگر معرفی این تنظیمات، استفاده از Attribute routing است:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code"> [Route("[controller]/[action]")]</pre> </div> <br> <br> <b>مسیریابی‌های قراردادی</b> <br> <br> <a href="www.dntips.ir-posts-2452.html"> در قسمت قبل</a>، یک POCO Controller را به صورت ذیل تعریف کردیم و این کنترلر، بدون تعریف هیچ نوع مسیریابی خاصی در دسترس بود:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">namespace&nbsp;Core1RtmEmptyTest.Controllers
+{
+ &nbsp;public&nbsp;class&nbsp;HomeController
+ &nbsp;{
+   public&nbsp;string&nbsp;Index()
+   {
+    return&nbsp;"Running&nbsp;a&nbsp;POCO&nbsp;controller!";
+   }
+ &nbsp;}
+}</pre> </div>
+
+
+علت کار کردن مسیریابی آن نیز به ذکر متد app.UseMvcWithDefaultRoute در کلاس آغازین برنامه بر می‌گردد و همانطور که عنوان شد، این فراخوانی را می‌توان با فراخوانی واضح‌تر ذیل جایگزین کرد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">app.UseMvc(routes&nbsp;=&gt;
+{
+ &nbsp;routes.MapRoute(
+   name:&nbsp;"default",
+   template:&nbsp;"{controller=Home}/{action=Index}/{id?}");
+});</pre> </div>
+
+
+پارامتر این متد که جایگزین متد ConfigureRoutes، در نگارش‌های قبلی ASP.NET MVC شده‌است، از نوع IRouteBuilder می‌باشد.<br>
+
+
+
+
+در این تعاریف، هر کدام از قسمت‌های قرارگرفته‌ی داخل {}، مشخص کننده‌ی قسمتی از URL دریافتی بوده و نام‌های controller و action در اینجا جزو نام‌های از پیش مشخص شده هستند و برای نگاشت اطلاعات مورد استفاده قرار می‌گیرند. برای مثال اگر آدرس home/index/ درخواست شد، برنامه به کلاس HomeController و متد عمومی Index آن هدایت می‌شود. همچنین قسمت آخر این پردازش به ?id ختم شده‌است. وجود&nbsp; ?، به معنای اختیاری بودن این پارامتر است و اگر در URL ذکر شود، به پارامتر id این اکشن متد، نگاشت خواهد شد. مواردی که پس از = ذکر شده‌اند، مقادیر پیش فرض مسیریابی هستند. برای مثال اگر صرفا آدرس home/ درخواست شود، مقدار اکشن متد آن با مقدار پیش فرض index جایگزین خواهد شد و اگر تنها مسیر / درخواست شود، کنترل Home و اکشن متد Index آن پردازش می‌شوند.<br>
+
+
+
+
+در اینجا به هر تعدادی که نیاز است می‌توان متدهای routes.MapRoute را فراخوانی و استفاده کرد؛ اما ترتیب تعریف آن‌ها حائز اهمیت است. هر مسیریابی که در ابتدای لیست اضافه شود، حق تقدم بالاتری خواهد داشت و هر تطابقی با یکی از مسیریابی‌های تعریف شده، در همان سطح سبب خاتمه‌ی پردازش سایر مسیریابی‌ها می‌شود.<br> <br> <br> <b>
+
+استفاده از Attributes برای تعریف مسیریابی‌ها</b> <br> <br>
+
+
+
+
+بجای تعریف قرار دادهای پیش فرض مسیریابی در کلاس آغازین برنامه، می‌توان از ویژگی Route نیز استفاده کرد. هرچند روش تعریف مسیریابی‌های قراردادی، از نگارش‌های آغازین ASP.NET MVC به همراه آن بوده‌اند، اما با زیاد شدن تعداد کنترلرها و مسیریابی‌های سفارشی هر کدام، اینبار با نگاه کردن به یک کنترلر، سریع نمی‌توان تشخیص داد که چه مسیریابی‌های خاصی به آن مرتبط هستند. برای ساده سازی مدیریت برنامه‌های بزرگ و ساده سازی تعاریف مسیریابی‌های خاص آن‌ها، استفاده از ویژگی Route نیز به ASP.NET MVC اضافه شده‌است.<br> <b>
+
+یک مثال:</b> کنترلر About را درنظر بگیرید:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">using&nbsp;Microsoft.AspNetCore.Mvc;
+ 
+namespace&nbsp;Core1RtmEmptyTest.Controllers
+{
+ &nbsp;public&nbsp;class&nbsp;AboutController&nbsp;:&nbsp;Controller
+ &nbsp;{
+   public&nbsp;ActionResult&nbsp;Hello()
+   {
+    return&nbsp;Content("Hello&nbsp;from&nbsp;DNT!");
+   }
+ 
+   public&nbsp;ActionResult&nbsp;SiteName()
+   {
+    return&nbsp;Content("DNT");
+   }
+ &nbsp;}
+}</pre> </div>
+
+
+این کلاس و کنترلر، به صورت پیش فرض نیاز به تعریف هیچ نوع مسیریابی جدیدی ندارد. همان مسیریابی پیش فرض ثبت شده‌ی در کلاس آغازین برنامه، تمام متدهای عمومی آن یا همان اکشن متدهای آن‌را پوشش می‌دهد. برای مثال جهت رسیدن به اکشن متد SiteName آن، می‌توان آدرس /About/SiteName/ را درخواست داد.<br>
+
+
+
+
+اما اگر آدرس /About/ را درخواست دهیم چطور؟ چون در مسیریابی پیش فرض، تعریف {action=Index} را داریم، یعنی هر زمانیکه در URL درخواستی، قسمت action آن ذکر نشد، آن‌را با index جایگزین کن و این کنترلر دارای متد Index نیست. در ادامه اگر بخواهیم متد Hello را تبدیل به متد پیش فرض این کنترلر کنیم، می‌توان با استفاده از ویژگی Route به صورت ذیل عمل کرد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">using&nbsp;Microsoft.AspNetCore.Mvc;
+ 
+namespace&nbsp;Core1RtmEmptyTest.Controllers
+{
+ &nbsp;[Route("About")]
+ &nbsp;public&nbsp;class&nbsp;AboutController&nbsp;:&nbsp;Controller
+ &nbsp;{
+   [Route("")]
+   public&nbsp;ActionResult&nbsp;Hello()
+   {
+    return&nbsp;Content("Hello&nbsp;from&nbsp;DNT!");
+   }
+ 
+   [Route("SiteName")]
+   public&nbsp;ActionResult&nbsp;SiteName()
+   {
+    return&nbsp;Content("DNT");
+   }
+ &nbsp;}
+}</pre> </div>
+
+
+در اینجا با اولین Route تعریف شده، مشخص کرده‌ایم که اگر قسمت اول URL درخواستی معادل about بود، پردازش برنامه باید به این کنترلر هدایت شود. بدیهی است الزامی به یکی بودن نام Route، با نام کنترلر، وجود ندارد. همچنین Route تعریف شده‌ی با رشته‌ی خالی، به معنای مسیریابی پیش فرض است. یعنی اگر آدرس /about/ درخواست داده شد، اکشن متد پیش فرض آن، متد Hello خواهد بود. در این حالت، ذکر Route بعدی برای اکشن متد SiteName الزامی است و اگر این‌کار صورت نگیرد، به استثنای ذیل خواهیم رسید:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code"> AmbiguousActionException: Multiple actions matched. The following actions matched route data and had all constraints satisfied:
+
+Core1RtmEmptyTest.Controllers.AboutController.Hello (Core1RtmEmptyTest)
+Core1RtmEmptyTest.Controllers.AboutController.SiteName (Core1RtmEmptyTest)</pre> </div>
+
+
+که عنوان کرده‌است در این حالت مشخص نیست که اکشن متد پیش فرض، کدام است.<br> <br>
+
+
+روش بهتر و refactoring friendly آن نیز به صورت ذیل است:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">using&nbsp;Microsoft.AspNetCore.Mvc;
+ 
+namespace&nbsp;Core1RtmEmptyTest.Controllers
+{
+ &nbsp;[Route("[controller]")]
+ &nbsp;public&nbsp;class&nbsp;AboutController&nbsp;:&nbsp;Controller
+ &nbsp;{
+   [Route("")]
+   public&nbsp;ActionResult&nbsp;Hello()
+   {
+    return&nbsp;Content("Hello&nbsp;from&nbsp;DNT!");
+   }
+ 
+   [Route("[action]")]
+   public&nbsp;ActionResult&nbsp;SiteName()
+   {
+    return&nbsp;Content("DNT");
+   }
+ &nbsp;}
+}</pre> </div>
+
+
+عموما مرسوم است که نام مسیریابی کنترلر همان نام کنترلر باشد و نام مسیریابی اکشن متد، همان نام اکشن متد مربوطه. به همین جهت می‌توان از توکن‌های ویژه‌ی [controller] و [action] نیز در اینجا استفاده کرد که دقیقا به همان نام کنترلر و اکشن متد متناظر با آن‌ها تفسیر خواهند شد. مزیت این‌کار این است که در صورت تغییر نام متدها یا کنترلرها، دیگر نیازی نیست تا نام‌های تعریف شده‌ی در ویژگی‌های Route را نیز تغییر داد.<br> <br> <b>یک نکته:</b> در حین تعریف مسیریابی یک کنترلر می‌توان پیشوندهایی را نیز ذکر کرد؛ برای مثال:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code"> [Route("api/[controller]")]</pre> </div>
+
+
+وجود api در اینجا به این معنا است که از این پس تنها آدرس /api/about/ پردازش خواهد شد و اگر صرفا آدرس /about/ درخواست شود، با خطای 404 و یا یافت نشد، کار خاتمه می‌یابد.<br> <br> <br> <b>
+
+تعریف قیود، برای مسیریابی‌های تعریف شده</b> <br> <br>
+
+
+
+
+فرض کنید به کنترلر About فوق، اکشن متد ذیل را که یک خروجی JSON را بازگشت می‌دهد، اضافه کرده‌ایم:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">//[Route("/Users/{userid}")]
+[Route("Users/{userid}")]
+public IActionResult GetUsers(int userId)
+{
+    return Json(new { userId = userId });
+}</pre> </div>
+
+
+در اینجا تعریف مسیریابی آن با users/ و user معانی کاملا متفاوتی را دارند. اگر مسیریابی Users/{userid}/ را تعریف کنیم، یعنی مسیر ذیل از ریشه‌ی سایت باید درخواست شود: http://localhost:7742/users/1<br>
+
+
+
+
+و اگر مسیریابی Users/{userid} را تعریف کنیم، یعنی این مسیریابی پس از ذکر کنترلر about، به عنوان یک اکشن متد آن مفهوم پیدا می‌کند:<br>
+
+
+
+
+http://localhost:7742/about/users/1<br>
+
+
+
+
+در هر دو حالت، ذکر پارامتر userid الزامی است (چون با ? مشخص نشده‌است)؛ مانند:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">[Route("/Users/{userid:int?}")]</pre> </div>
+
+
+در اینجا اگر بخواهیم نوع پارامتر درخواستی را نیز دقیقا مشخص و مقید کنیم، می‌توان به صورت ذیل عمل کرد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code"> [Route("Users/{userid:int}")]</pre> </div>
+
+
+اگر این کار را انجام ندهیم، با درخواست مسیر http://localhost:7742/dnt/about/users/test مقدار صفر به userId ارسال می‌شود (چون پارامتر test عددی نیست). اگر تنظیم فوق را انجام دهیم، کاربر خطای 404 را دریافت می‌کند.<br> <br>
+
+
+قیودی را که در اینجا می‌توان ذکر کرد به شرح زیر هستند:<br>
+
+
+
+
+• alpha - معادل است با&nbsp; (a-z, A-Z).<br>
+
+
+
+
+• bool - برای تطابق با مقادیر بولی.<br>
+
+
+
+
+• datetime - برای تطابق با تاریخ میلادی.<br>
+
+
+
+
+• decimal - برای تطابق با ورودی‌های اعشاری.<br>
+
+
+
+
+• double - برای تطابق با اعداد اعشاری 64 بیتی.<br>
+
+
+
+
+• float - برای تطابق با اعداد اعشاری 32 بیتی.<br>
+
+
+
+
+• guid - برای تطابق با GUID ها<br>
+
+
+
+
+• int - برای تطابق با اعداد صحیح 32 بیتی.<br>
+
+
+
+
+• length - برای تعیین طول رشته.<br>
+
+
+
+
+• long - برای تطابق با اعداد صحیح 64 بیتی.<br>
+
+
+
+
+• max - برای ذکر حداکثر مقدار یک عدد صحیح.<br>
+
+
+
+
+• maxlength - جهت ذکر حداکثر طول رشته‌ی مجاز ورودی.<br>
+
+
+
+
+• min - برای ذکر حداقل مقدار یک عدد صحیح.<br>
+
+
+
+
+• minlength - جهت ذکر حداقل طول رشته‌ی مجاز ورودی.<br>
+
+
+
+
+• range - ذکر بازه‌ی اعداد صحیح مجاز.<br>
+
+
+
+
+• regex - ذکر یک عبارت با قاعده جهت مشخص سازی الگوی قابل پذیرش.<br> <br>
+
+
+
+
+برای ترکیب چندین قید مختلف نیز می‌توان از : استفاده کرد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code"> [Route("/Users/{userid:int:max(1000):min(10)}")]</pre> </div> <br> <br> <b>ذکر نام Route برای ساده سازی تعریف آدرسی به آن</b> <br> <br>
+
+
+
+
+در حین تعریف یک Route می‌توان نام دلخواهی را نیز به آن انتساب داد (همانند نام default مسیریابی ثبت شده‌ی در کلاس آغازین برنامه):<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code"> [Route("/Users/{userid:int}", Name="GetUserById")]</pre> </div>
+
+
+مزیت آن این است که اکنون برای اشاره‌ی به این مسیریابی خاص می‌توان از این نام تعریف شده استفاده کرد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code"> string uri = Url.Link("GetUserById", new { userid = 1 });</pre> </div>
+
+
+پارامتر اول ذکر شده، نام مسیریابی و پارامتر دوم، پارامترهای مرتبط با این مسیریابی هستند.<br> <br> <br> <b>مشخص سازی ترتیب پردازش مسیریابی‌ها</b> <br> <br>
+
+
+
+
+ترتیب مسیریابی‌های ثبت شده‌ی در کلاس آغازین برنامه، همان ترتیب افزوده شدن و ذکر آن‌ها است. <br>
+
+
+
+
+در اینجا می‌توان از خاصیت order نیز استفاده کرد و اعداد کوچکتر، ابتدا پردازش می‌شوند (مقدار پیش فرض آن نیز صفر است):<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code"> [Route("/Users/{userid:int}", Name = "GetUserById", Order = 1)]</pre> </div> <br> <br> <b>امکان تعریف قیود سفارشی</b> <br> <br>
+
+
+
+
+اگر قیودی که تا اینجا ذکر شدند، برای کار شما مناسب نبودند و نیاز بود تا الگوریتم خاصی را جهت محدود سازی دسترسی به یک مسیریابی خاص پیاده سازی کنید، می‌توان به صورت ذیل عمل کرد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">using&nbsp;System;
+using&nbsp;System.Globalization;
+using&nbsp;Microsoft.AspNetCore.Http;
+using&nbsp;Microsoft.AspNetCore.Routing;
+ 
+namespace&nbsp;Core1RtmEmptyTest
+{
+ &nbsp;public&nbsp;class&nbsp;CustomRouteConstraint&nbsp;:&nbsp;IRouteConstraint
+ &nbsp;{
+   public&nbsp;bool&nbsp;Match(HttpContext&nbsp;httpContext,&nbsp;IRouter&nbsp;route,&nbsp;string&nbsp;routeKey,&nbsp;RouteValueDictionary&nbsp;values,
+    RouteDirection&nbsp;routeDirection)
+   {
+    object&nbsp;value;
+    if&nbsp;(!values.TryGetValue(routeKey,&nbsp;out&nbsp;value)&nbsp;||&nbsp;value&nbsp;==&nbsp;null)
+    {
+     &nbsp;return&nbsp;false;
+    }
+ 
+    long&nbsp;longValue;
+    if&nbsp;(value&nbsp;is&nbsp;long)
+    {
+     &nbsp;longValue&nbsp;=&nbsp;(long)value;
+     &nbsp;return&nbsp;longValue&nbsp;!=&nbsp;10;
+    }
+ 
+    var&nbsp;valueString&nbsp;=&nbsp;Convert.ToString(value,&nbsp;CultureInfo.InvariantCulture);
+    if&nbsp;(long.TryParse(valueString,&nbsp;NumberStyles.Integer,
+     &nbsp;CultureInfo.InvariantCulture,&nbsp;out&nbsp;longValue))
+    {
+     &nbsp;return&nbsp;longValue&nbsp;!=&nbsp;10;
+    }
+    return&nbsp;false;
+   }
+ &nbsp;}
+}</pre> </div>
+
+
+در اینجا یک کلاس جدید را که اینترفیس IRouteConstraint را پیاده سازی می‌کند تعریف کرده‌ایم:<span> <br> </span> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">public class CustomRouteConstraint : IRouteConstraint</pre> </div> </div>
+سپس در متد match آن بررسی کرده‌ایم که اگر userid=10 بود، خطای 404 صادر شود.<br>
+در آخر برای ثبت و معرفی آن باید به متد ConfigureServices کلاس آغازین برنامه مراجعه کرد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">public void ConfigureServices(IServiceCollection services)
+{
+    services.AddRouting(options =&gt;options.ConstraintMap.Add("Custom", typeof(CustomRouteConstraint)));</pre> </div>
+
+
+پس از آن، این نام جدید ثبت شده‌ی در اینجا، به نحو ذیل قابل استفاده است:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code"> [Route("/Users/{userid:int:custom}")]</pre> </div>
+
+
+به این ترتیب userid باید از نوع int بوده و همچنین قید custom را نیز پوشش دهد (یعنی userid=10 نباشد).<br> <br> <b>یک نکته:&nbsp; </b>اگر <a href="https://github.com/aspnet/Routing/blob/dev/src/Microsoft.AspNetCore.Routing/RouteOptions.cs#L41-L71">به سورس ASP.NET Core مراجعه کنید</a> ، تمام قیودی را که پیشتر نام بردیم (مانند int، guid و امثال آن) نیز به همین روش تعریف و پیشتر ثبت شده‌اند.<br> <br> <br> <b>
+
+معرفی بسته‌ی نیوگت Microsoft.AspNetCore.SpaServices</b> <br> <br>
+
+
+
+
+مسیریابی‌های پیش فرض ASP.NET Core با مسیریابی‌های برنامه‌های SPA مانند AngularJS (و امثال آن) تداخل دارند؛ از این جهت که درخواست‌های رسیده‌ی به سرور، ابتدا به موتور پردازشی ASP.NET وارد می‌شوند و اگر یافت نشدند، کاربر با پیام 404 مواجه خواهد شد و دیگر در اینجا برنامه به مسیریابی خاص مثلا AngularJS 2.0 هدایت نمی‌شود.<br>
+
+
+
+
+برای این موارد مرسوم است که یک fallback route را در انتهای مسیریابی‌های موجود اضافه کنند (به آن catch all هم می‌گویند)<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">app.UseMvc(routes =&gt;
+{
+ &nbsp;routes.MapRoute(
+   name: "default",
+   template: "{controller=Home}/{action=Index}/{id?}");
+&nbsp;
+ &nbsp;routes.MapRoute(
+   name: "spa-fallback",
+   template: "{*url}",
+   defaults: new { controller = "Home", action = "Index" });
+});</pre> </div>
+
+
+در اینجا هر درخواستی که با مسیریابی default تطابق نداشت، توسط الگوی عمومی {url*} پردازش می‌شود و این پردازش در نهایت سبب راه اندازی برنامه‌ی SPA می‌گردد. اما مشکل اینجا است که برای فایل‌های استاتیک غیرموجود مانند تصاویر، فایل‌های js و css نیز خروجی HTML ایی خواهیم داشت؛ بجای خروجی 404 و یافت نشد.<br>
+
+
+
+
+برای حل این مشکل مایکروسافت بسته‌ای را به نام Microsoft.AspNetCore.SpaServices ارائه داده است.<br>
+
+
+
+
+برای افزودن آن بر روی گره references کلیک راست کرده و گزینه‌ی manage nuget packages را انتخاب کنید. سپس در برگه‌ی browse آن Microsoft.AspNetCore.SpaServices را جستجو کرده و نصب نمائید:<br> <br> <p style="display:block; margin-left: auto; margin-right: auto;"> <img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/png;base64,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"> </p> <br>
+
+
+
+
+انجام این مراحل معادل هستند با افزودن یک سطر ذیل به فایل project.json برنامه:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="JScript" name="code">{
+    "dependencies": {
+       //same as before  
+       "Microsoft.AspNetCore.SpaServices": "1.0.0-beta-000007"
+ },</pre> </div>
+
+
+پس از بازیابی و نصب آن، اکنون catch all را حذف کرده و با یک سطر routes.MapSpaFallbackRoute ذیل جایگزین کنید:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">app.UseMvc(routes&nbsp;=&gt;
+{
+ &nbsp;routes.MapRoute(
+   name:&nbsp;"default",
+   template:&nbsp;"{controller=Home}/{action=Index}/{id?}");
+ 
+ &nbsp;routes.MapSpaFallbackRoute("spa-fallback",&nbsp;new&nbsp;{&nbsp;controller&nbsp;=&nbsp;"Home",&nbsp;action&nbsp;=&nbsp;"Index"&nbsp;});
+});</pre> </div>
+
+
+و برای یادآوری مطلب «<a href="www.dntips.ir-posts-2445.html">ارتقاء به ASP.NET Core 1.0 - قسمت 4 - فعال سازی پردازش فایل‌های استاتیک</a>» در AngularJS 2.0، علاوه بر عمومی کردن پوشه‌ی wwwroot توسط UseFileServer نیاز است پوشه‌ی node_modules را هم با تنظیمات ذیل عمومی کرد و در معرض دید عموم قرار داد (جایی که بسته‌های node.js نصب می‌شوند):<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">//&nbsp;Serve&nbsp;wwwroot&nbsp;as&nbsp;root
+app.UseFileServer();
+ 
+//&nbsp;Serve&nbsp;/node_modules&nbsp;as&nbsp;a&nbsp;separate&nbsp;root&nbsp;(for&nbsp;packages&nbsp;that&nbsp;use&nbsp;other&nbsp;npm&nbsp;modules&nbsp;client&nbsp;side)
+app.UseFileServer(new&nbsp;FileServerOptions
+{
+ &nbsp;//&nbsp;Set&nbsp;root&nbsp;of&nbsp;file&nbsp;server
+ &nbsp;FileProvider&nbsp;=&nbsp;new&nbsp;PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(),&nbsp;"node_modules")),
+ &nbsp;//&nbsp;Only&nbsp;react&nbsp;to&nbsp;requests&nbsp;that&nbsp;match&nbsp;this&nbsp;path
+ &nbsp;RequestPath&nbsp;=&nbsp;"/node_modules",
+ &nbsp;//&nbsp;Don't&nbsp;expose&nbsp;file&nbsp;system
+ &nbsp;EnableDirectoryBrowsing&nbsp;=&nbsp;false
+});</pre> </div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1539.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>چطور مسیریابی‌های ASP.NET MVC را دیباگ کنیم؟</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2424.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مسیریابی (Routing) در ASP.NET MVC 5.x</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1660.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Attribute Routing در ASP.NET MVC 5</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-806.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>ASP.NET MVC #4</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2395.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>شروع به کار با AngularJS 2.0 و TypeScript - قسمت نهم - مسیریابی</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2550.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>کار با Areas در ASP.NET Core</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1245.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مخفی کردن کوئری استرینگ‌ها در ASP.NET MVC توسط امکانات Routing</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2452.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>ارتقاء به ASP.NET Core 1.0 - قسمت 8 - فعال سازی ASP.NET MVC</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-980.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>سازگار کردن لینک‌های قدیمی یک سایت با ساختار جدید آن در ASP.NET MVC</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-812.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>ASP.NET MVC #9</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۶/۰۱/۰۶ ۱۹:۳۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><b>به روز رسانی<br> </b>با حذف فایل project.json در VS 2017، اکنون با کلیک راست بر روی گروه نام 
+پروژه (فایل csproj)، گزینه‌ی Edit آن ظاهر شده و مداخل ذکر شده‌ی در مطلب 
+فوق، چنین تعاریفی را پیدا می‌کنند:&nbsp; <span> <br> </span> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="XML" name="code">&lt;Project Sdk="Microsoft.NET.Sdk.Web"&gt;
+  &lt;ItemGroup&gt;
+    &lt;PackageReference Include="Microsoft.AspNetCore.SpaServices" Version="1.0.0-beta-000019" /&gt;
+  &lt;/ItemGroup&gt;
+&lt;/Project&gt;</pre> </div> <span> </span></div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>میلاد درویشی</strong>  در  <span dir='ltr'>۱۳۹۶/۰۵/۲۳ ۱:۱۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>آیا اضافه کردن پسوند به ادرس‌ها مانند http://samole.com/sitemap.xml که در واقع یک روتینگ به یک اکشن متد است برای ایجاد فایل‌های سایت مپ پویا یا .json چطور در core قابل تغییر میباشد ؟ در Mvc ۵ با این دستور :<div> <div align="left" dir="ltr" style="direction: ltr;"> <pre language="CSharp" name="code">&lt;configuration&gt;
+  &lt;system.webServer&gt;
+    &lt;handlers&gt;
+      &lt;add name="SitemapXml" path="sitemap.xml" verb="GET" type="System.Web.Handlers.TransferRequestHandler" preCondition="integratedMode,runtimeVersionv4.0" /&gt;
+    &lt;/handlers&gt;
+  &lt;/system.webServer&gt;
+&lt;/configuration&gt;</pre> </div>
+ولی خب گویا مشکل دارد و با خطا مواجه میشود . روش کار در Core به چه صورت می‌باشد؟</div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۶/۰۵/۲۳ ۱:۳۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>دقیقا مانند <a href="www.dntips.ir-posts-1539.html">ASP.NET MVC 5.x</a>  است:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">            app.UseMvc(routes =&gt;
+            {
+                routes.MapRoute(
+                    name: "siteMapRoute",
+                    template: "sitemap.xml",
+                    defaults: new { controller = "Sitemap", action = "index", area = "" }
+                );
+
+                routes.MapRoute(
+                    name: "default",
+                    template: "{controller=Home}/{action=Index}/{id?}");
+            });</pre> </div></div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۶/۰۶/۰۹ ۱۹:۲۷</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><b>یک نکته‌ی تکمیلی</b> <br>
+
+
+
+
+معادل مطلب «<a href="www.dntips.ir-posts-1539.html">چطور مسیریابی‌های ASP.NET MVC را دیباگ کنیم؟</a>» برای ASP.NET Core در اینجا
+
+                <span>«</span> <strong> <a href="https://github.com/ardalis/AspNetCoreRouteDebugger" data-pjax="#js-repo-pjax-container">AspNetCoreRouteDebugger</a> </strong>»<br> <br> <p style="display:block; margin-left: auto; margin-right: auto;"> <img src="data:image/png;base64,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tJnHvNGajVtJgtsOiIiIiGhxTJBfi1AaJ905jcxERERENBdbLIiIiIiIBEyQiYiIiIgETJCJiIiIiARMkImIiIiIBEyQiYiIiIgETJCJiIiIiARMkImIiIiIBEyQiYiIiIgETJCJiIiIiAR/maZpvvTgu7u7Va6FiIiIiOjZdnZ2nP8/PT0tPd/Sf2paXBAR0brc3d3x580KvcV4vsU9EwGv/9pfR8GWLRZERERERAImyEREREREAibIREREREQCJshERERERAImyEREREREAibIREREREQCJshERERERAImyEREREREAibIREREREQCJshERERERAImyEREREREAibIRERERESCzSbI/QpisRiy2mijp325PiqxLPzL7VdiqPSBkZZFLFZBf8rR88Z/OyMN2ayGEUbQsjHEYsH/KqvY0EhDNiC2C48HH2Sv+yUx977XIy2LWFbDeq5Ua51OHF+01yDB1ysRERE9zwYT5BG0WgOqqkIvnf85SeOEPtoNFamo/aV0j1pQItWvYLekb3htyxnpbSAlIWx/rdavcX09+e8wOnOaX6d/jhJUqFIDtT8pSwzLOL0+hRye/1IiIiJav80lyCMdbV1F6jAFFQ20AzLkfkWsVHqrgLPGrEpt0FgfFV/F01sZtCtuWiXg+D4qsX00oKO0K8zRb6OhpuDmiCmkttvQ/VXmtvXLgC8IE5VZt5o+ay1OEHzV3Okxympa8N6dY/2VxhGs/HjxLK1fcc8TWF0each61jtZ3bw9F9Y0szTd95wn6LX9dgNSag97KQl6W/f90jLrWpjyXuMW59mg90o4fsrepsdmBC27i5IONPbtOScqyDP2OjWm067XytQ1jrSsZ40r+WSAiIjoNTCX8Pfffy/82p/fv5qfjm9M0zTNm+NPzv8941+/mz8Dvp479unYvBHHnK9vzONPn0zxVN65rHH365/m96/i2m7M409fze8/3eNvjt35nLlujs2v4ovMG/P407F5c3MsrMU/93it4/nnrOXmWHit8Hp73B+Hm+NP5qdPAWt1N+J5vfnzu/nVd27fWzTBOoe7Js8afn43v3pib+9nfA57fOp+f343v/pi459rMub26z3HeuM1+1rw70V4vS/+8+I5Mzb++HrW69+b8PW8mPqvV/81E7SHiTj9vp7z84bme4vxfIt7JjLN13/t+/f3zz//LP1v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" style="cursor: default; display: block; margin-left: auto; margin-right: auto;" alt=""> </p> <span> </span></div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>میر احمد</strong>  در  <span dir='ltr'>۱۳۹۷/۰۱/۱۱ ۱۷:۱۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>با سلام؛ فرض کنید که اکشن متد ما دارای نامی با عنوان MyActionMethodAsync است. اما نمی‌خواهیم این نام در مرورگر نشان داده شود و به جای آن می‌خواهیم نام AAAA در مرورگر نشان داده شود. چه باید بکنیم؟</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۷/۰۱/۱۱ ۱۷:۴۷</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>یا از ویژگی Route استفاده کنید (در متن بحث شده) یا از ویژگی ActionName:<span> <br> </span> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">[ActionName("another_name")]
+//or
+[Route("Home/Contact")]</pre> </div></div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>هادی خزایی</strong>  در  <span dir='ltr'>۱۳۹۷/۱۱/۲۰ ۱۵:۴۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>با سلام؛ میخواستم بدونم آیا میشه یه مقداری رو از کوکی خوند و آن را در route بذاریم؟ سایت برای بار اول که بالا میاد مقداری در کوکی را بررسی کند اگر وجود داشت که آن را درون route قرار بده و اگر وجود نداشت، خودم یه مقدار پیش فرض مثلا کلمه تهران رو جایگزین کنم.</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۷/۱۱/۲۰ ۱۸:۷</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>وجود پارامترهای مسیریابی برای انتقال اطلاعات به صفحات دیگر است. اما زمانیکه با «<a href="www.dntips.ir-posts-2520.html">کوکی‌ها در ASP.NET Core</a>» کار می‌کنید، اطلاعات آن‌ها در تمام صفحات در دسترس هستند. بنابراین قرار دادن مقدار آ‌ن‌ها در سیستم مسیریابی با متدهایی مانند return RedirectToAction زائد است.</div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۸/۰۵/۱۵ ۹:۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div> <b>جهت اطلاع</b> </div> <div>بسته‌ی «Microsoft.AspNetCore.SpaServices» با توجه به وجود ابزارهایی مانند Angular CLI, create-react-app<span>،</span> <a href="https://github.com/aspnet/Announcements/issues/379">منسوخ شده اعلام شده</a>  و بهتر است یا از آن استفاده نکنید و یا از Microsoft.AspNetCore.SpaServices.Extensions<span> </span>استفاده نمائید.<br> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>علی مولوی</strong>  در  <span dir='ltr'>۱۳۹۸/۱۰/۲۲ ۱۸:۲۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>"در برنامه‌های SPA ،&nbsp;<span style="color: rgb(51, 51, 51);">مرسوم است که یک fallback route را در انتهای مسیریابی‌های موجود اضافه کنند (به آن catch all هم می‌گویند)"</span> <div> <span style="color: #333333;">یعنی در نسخه 3.1 دیگر احتیاج به اضافه کردن&nbsp;</span> <span style="color: rgb(51, 51, 51);">fallback route<span>&nbsp; نیست؟</span> </span> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۸/۱۰/۲۲ ۱۹:۳۸</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div>- این توضیح <a href="www.dntips.ir-posts-2453.html">جهت اطلاع</a>  مرتبط با نگارش 3x است.</div> <div>+ تفاوتی نمی‌کند و باید وجود داشته باشد. نمونه مثال Microsoft.AspNetCore.SpaServices.Extensions<span>&nbsp;جدید به صورت زیر است:</span> </div> <div> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">using Microsoft.AspNetCore.SpaServices.AngularCli;
+using Microsoft.AspNetCore.SpaServices.VueCli;
+// ...
+
+namespace Test
+{
+    public class Startup
+    {
+       // ...
+ 
+         public void ConfigureServices(IServiceCollection services)
+        {
+            // ...
+
+            // In production, the SPA files will be served from this directory
+            services.AddSpaStaticFiles(configuration =&gt;
+            {
+                configuration.RootPath = "ClientApp/dist";
+            });
+        }
+
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            // ...
+
+            app.UseRouting();
+            app.UseEndpoints(endpoints =&gt;
+            {
+              // ...   
+            });
+
+            app.UseSpa(spa =&gt;
+            {
+                spa.Options.SourcePath = "ClientApp";
+
+                if (env.IsDevelopment())
+                {
+                    // spa.UseAngularCliServer(npmScript: "start");
+                    // spa.UseVueCliServer(npmScript: "serve");
+                }
+            });
+        }
+    }
+}</pre> </div> </div></div>
+</div></li></ul></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۸/۰۵/۱۹ ۱۲:۵۰</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div> <b> <a href="www.dntips.ir-posts-3031.html">ارتقاء به ASP.NET Core 3.0 : تغییرات مورد نیاز در فایل آغازین برنامه جهت ارتقاء به Endpoint routing</a> &nbsp;</b> <br> </div> <div> <b> <a href="www.dntips.ir-posts-3031.html">ارتقاء به ASP.NET Core 3.0: تغییرات نام متدهای تعاریف مسیریابی</a> </b> <span>&nbsp;</span> <br> </div></div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهدی قاسمی</strong>  در  <span dir='ltr'>۱۴۰۰/۰۲/۳۰ ۱۱:۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>از آنجایی که مایکروسافت استفاده از قید regex رو مستعد حمله ddos میدونه، آیا راهی برای تنظیم پارامتر matchTimeout هنگام استفاده از قید regex پیشبینی شده است؟</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۴۰۰/۰۲/۳۰ ۱۲:۲۷</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div>- تمام APIهای ASP.NET Core که از Regex استفاده می‌کنند، به همراه timeout توکار هم هستند (<a href="https://github.com/dotnet/aspnetcore/blob/52eff90fbcfca39b7eb58baad597df6a99a542b0/src/Http/Routing/src/Constraints/RegexRouteConstraint.cs#L16">^</a>  و <a href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/best-practices">^</a> و <a href="https://github.com/dotnet/aspnetcore/search?q=regex">^</a>).</div> <div> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">ASP.NET Core framework APIs that use RegularExpressions pass a timeout.</pre> </div>
+
+
+
+- همچنین هر درخواستی، صرفنظر از نوع آن، یک timeout سراسری هم دارد که با رسیدن به آن، کل درخواست و عملیات مرتبط با آن، با استثنای System.Threading.Tasks.TaskCanceledException متوقف خواهد شد و مقدار آن در فایل web.config قابل تنظیم است:</div> <div> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="XML" name="code">&lt;aspNetCore requestTimeout="00:00:40"&gt;
+&lt;/aspNetCore&gt;</pre> </div> </div></div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهدی قاسمی</strong>  در  <span dir='ltr'>۱۴۰۰/۰۳/۲۴ ۰:۵۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>در Asp.net MVC هنگامی که می‌خواستیم آدرس یک اکشن از یک کنترلر را برای کار با Ajax بسازیم از Url.Action استفاده می‌کردیم، <br>
+در Asp.net core چطور این کار را انجام می‌دهیم؟</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۴۰۰/۰۳/۲۴ ۰:۵۹</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><a href="https://github.com/VahidN/DNTIdentity/search?q=url.action">این روش هنوز هم برقرار است.</a></div>
+</div></li></ul></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

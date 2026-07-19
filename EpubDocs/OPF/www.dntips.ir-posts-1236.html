@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫ایجاد ServiceLocator با استفاده از Ninject</title>     <meta name="description" content="در پست قبلی  روش استفاده از ServiceLocator رو با استفاده از Microsoft Unity بررسی کردیم. در این پست قصد دارم همون مثال رو با استفاده از Ninject پیاده سازی کنم. Ninject ابزاری برای پیاده سازی Dependency Injection در پروژه‌های دات نت است که کار کردن با اون واقعا راحته. برای شروع کلاس‌های Book و BookRepository  و BookService و اینترفیس IBookRepository از این پست  دریافت کنید.
+ 
+ 
+ 
+ 
+ 
+ حالا با استفاده از NuGet باید ServiceLocator رو بر ...">
+    <meta name="author" content="مسعود پاکدل">
+    <meta itemprop="name" content="ایجاد ServiceLocator با استفاده از Ninject">
+    <meta itemprop="description" content="در پست قبلی  روش استفاده از ServiceLocator رو با استفاده از Microsoft Unity بررسی کردیم. در این پست قصد دارم همون مثال رو با استفاده از Ninject پیاده سازی کنم. Ninject ابزاری برای پیاده سازی Dependency Injection در پروژه‌های دات نت است که کار کردن با اون واقعا راحته. برای شروع کلاس‌های Book و BookRepository  و BookService و اینترفیس IBookRepository از این پست  دریافت کنید.
+ 
+ 
+ 
+ 
+ 
+ حالا با استفاده از NuGet باید ServiceLocator رو بر ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="ایجاد ServiceLocator با استفاده از Ninject">
+    <meta property="og:description" content="در پست قبلی  روش استفاده از ServiceLocator رو با استفاده از Microsoft Unity بررسی کردیم. در این پست قصد دارم همون مثال رو با استفاده از Ninject پیاده سازی کنم. Ninject ابزاری برای پیاده سازی Dependency Injection در پروژه‌های دات نت است که کار کردن با اون واقعا راحته. برای شروع کلاس‌های Book و BookRepository  و BookService و اینترفیس IBookRepository از این پست  دریافت کنید.
+ 
+ 
+ 
+ 
+ 
+ حالا با استفاده از NuGet باید ServiceLocator رو بر ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="ایجاد ServiceLocator با استفاده از Ninject">
+    <meta name="twitter:description" content="در پست قبلی  روش استفاده از ServiceLocator رو با استفاده از Microsoft Unity بررسی کردیم. در این پست قصد دارم همون مثال رو با استفاده از Ninject پیاده سازی کنم. Ninject ابزاری برای پیاده سازی Dependency Injection در پروژه‌های دات نت است که کار کردن با اون واقعا راحته. برای شروع کلاس‌های Book و BookRepository  و BookService و اینترفیس IBookRepository از این پست  دریافت کنید.
+ 
+ 
+ 
+ 
+ 
+ حالا با استفاده از NuGet باید ServiceLocator رو بر ...">
+    <meta name="twitter:card" content="در پست قبلی  روش استفاده از ServiceLocator رو با استفاده از Microsoft Unity بررسی کردیم. در این پست قصد دارم همون مثال رو با استفاده از Ninject پیاده سازی کنم. Ninject ابزاری برای پیاده سازی Dependency Injection در پروژه‌های دات نت است که کار کردن با اون واقعا راحته. برای شروع کلاس‌های Book و BookRepository  و BookService و اینترفیس IBookRepository از این پست  دریافت کنید.
+ 
+ 
+ 
+ 
+ 
+ حالا با استفاده از NuGet باید ServiceLocator رو بر ...">
+    <meta property="article:published_time" content="Fri, 22 Feb 2013 20:05:03 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫ایجاد ServiceLocator با استفاده از Ninject";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-1237.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫پیاده سازی پروژه نقاشی (Paint) به صورت شی گرا 6#</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-1235.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫بررسی تفصیلی رابطه Many-to-Many در EF Code first</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫ایجاد ServiceLocator با استفاده از Ninject</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>مسعود پاکدل<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۱/۱۲/۰۴ ۲۰:۵</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-1236.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'>در <a href="www.dntips.ir-posts-1233.html">پست قبلی</a>  روش استفاده از ServiceLocator رو با استفاده از Microsoft Unity بررسی کردیم. در این پست قصد دارم همون مثال رو با استفاده از Ninject پیاده سازی کنم. Ninject ابزاری برای پیاده سازی Dependency Injection در پروژه‌های دات نت است که کار کردن با اون واقعا راحته. برای شروع کلاس‌های Book و BookRepository&nbsp; و BookService و اینترفیس IBookRepository از این <a href="www.dntips.ir-posts-1233.html">پست</a>  دریافت کنید.<br>
+
+
+
+
+
+حالا با استفاده از NuGet باید ServiceLocator رو برای Ninject دریافت کنید. برای این کار در Package Manager Console دستور زیر رو وارد کنید.<br><div dir="ltr" align="left"><pre language="CSharp" name="code">PM&gt; Install-Package CommonServiceLocator.NinjectAdapter</pre></div>
+
+
+
+
+
+بعد از دانلود و نصب Referenceهای زیر به پروژه اضافه می‌شوند.<br><ul><li>Ninject</li><li>NinjectAdapter</li><li>Microsoft.Practices.ServiceLocation&nbsp;</li></ul><p>اگر دقت کنید برای ایجاد ServiceLocator دارم از ServiceLocator؛Enterprise Library استفاده می‌کنم. ولی برای این کار به جای استفاده UnityServiceLocator باید از NinjectServiceLocator استفاده کنم.&nbsp;</p><p>ابتدا<br></p><p>برای پیاده سازی مثال قبل در کلاس Program&nbsp; کد‌های زیر رو وارد کنید.</p><div dir="ltr" align="left"><pre language="CSharp" name="code">using System;
+using Ninject;
+using NinjectAdapter;
+using Microsoft.Practices.ServiceLocation;
+
+namespace ServiceLocatorPattern
+{
+    class Program
+    {
+        static void Main( string[] args )
+        {
+            IKernel kernel = new StandardKernel();
+
+            kernel.Bind&lt;IBookRepository&gt;().To&lt;BookRepository&gt;();
+
+            ServiceLocator.SetLocatorProvider( () =&gt; new NinjectServiceLocator( kernel ) );
+
+            BookService service = new BookService();
+
+            service.PrintAllBooks();
+
+            Console.ReadLine();
+        }
+    }
+}</pre></div>
+
+همان طور که می‌بینید روال انجام کار دقیقا مثل قبل هست فقط Syntax کمی متفاوت شده. برای مثال به جای استفاده از IUnityContainer از IKernel استفاده کردم و به جای دستور RegisterType از دستور Bind استفاده شده. دز نهایت هم ServiceLocator به یک NinjectServiceLocator ای که IKernel&nbsp; رو دریافت کرده ست شد.<br>
+
+به تصویر زیر دقت کنید.<br><p><img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/png;base64,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"></p><p>همان طور که می‌بینید در هر جای پروژه که نیاز به یک Instance از یک کلاس داشته باشید می‌تونید با استفاده از ServiceLocator این کار خیلی راحت انجام بدید.</p><p>بعد از اجرای پروژه&nbsp; خروجی دقیقا مانند مثال قبل خواهد بود.<br></p>
+
+&nbsp;</div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/courses/topic/10/f6c2e5af-b7be-47cf-a962-3df63c8dc05c#comment-217'><span class='badge bg-light text-dark bg-gradient rounded-pill me-2'>بازخوردهای دوره</span>استفاده از RavenDB در ASP.NET MVC به همراه تزریق وابستگی‌ها</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/courses/topic/5/384b0d43-8424-40e3-b209-b6bb03d21ba2#comment-163'><span class='badge bg-light text-dark bg-gradient rounded-pill me-2'>بازخوردهای دوره</span>بایدها و نبایدهای استفاده از IoC Containers</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1233.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>پیاده سازی  ServiceLocator با استفاده از Microsoft Unity</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1695.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>پیاده سازی InstanceProvider برای سرویس های WCF</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1641.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>اعتبارسنجی سرویس های WCF</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1221.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آموزش MEF#1</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1387.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>استفاده از Lambda Expression در پروژه های مبتنی بر WCF</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1592.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>inject$ در AngularJs</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/news/details/1052#comment-744'><span class='badge bg-warning-subtle text-warning-emphasis bg-gradient rounded-pill me-2'>نظرات اشتراک‌ها</span>آیا الگوی Service Locator یک Anti-Pattern است؟</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2969.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>مهارت‌های تزریق وابستگی‌ها در برنامه‌های NET Core. - قسمت دوم - الگوی Service Locator</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>پیروز</strong>  در  <span dir='ltr'>۱۳۹۴/۰۴/۰۸ ۱:۴۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام؛ وقتی دستور<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code"> Install-Package CommonServiceLocator.NinjectAdapter</pre> </div>
+را وارد میکنم خطای زیر ظاهر می‌شود:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code"> Install-Package : Unable to find package 'CommonServiceLocator.NinjectAdapter'.
+At line:1 char:16
++ Install-Package &lt;&lt;&lt;&lt;  CommonServiceLocator.NinjectAdapter
++ CategoryInfo : NotSpecified: (:) [Install-Package], InvalidOperationException
++ FullyQualifiedErrorId : NuGetCmdletUnhandledException,NuGet.PowerShell.Commands.InstallPackageCommand</pre> </div>
+نمی‌تونم اسمبلی NinjetAdapter را نصب کنم. میشه لطفا در این خصوص بیشتر توضیح بدید و بفرمایید این dll رو از کجا باید دانلود کنم!</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۴/۰۴/۰۸ ۱:۵۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><a href="https://github.com/ninject/Ninject/tree/master/src/CommonServiceLocator.NinjectAdapter">این پروژه</a> هست در اصل یا <a href="https://www.nuget.org/packages/CommonServiceLocator.NinjectAdapter">اینجا (که حذف شده)</a></div>
+</div></li></ul></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

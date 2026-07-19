@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫پیاده سازی RabbitMQ</title>     <meta name="description" content="RabbitMq شبیه به یک صف FIFO عمل میکند؛ یعنی داده‌ها به ترتیب وارد queue میشوند و به ترتیب نیز به Consumer‌ها ارسال میشوند. برای شروع، یک سولوشن جدید را به نام RabbitMqExample ایجاد میکنیم و پروژه‌های زیر را به آن اضافه میکنیم.     یک پروژه از نوع Asp.Net Core Web Application ایجاد میکنیم به نام RabbiMqExample.Producer که همان ارسال کننده (Producer) میباشد.   یک پروژه از نوع Asp.Net Core Web Application به نام RabbitMqExample.Consumer برای ...">
+    <meta name="author" content="زمانی فرهاد">
+    <meta itemprop="name" content="پیاده سازی RabbitMQ">
+    <meta itemprop="description" content="RabbitMq شبیه به یک صف FIFO عمل میکند؛ یعنی داده‌ها به ترتیب وارد queue میشوند و به ترتیب نیز به Consumer‌ها ارسال میشوند. برای شروع، یک سولوشن جدید را به نام RabbitMqExample ایجاد میکنیم و پروژه‌های زیر را به آن اضافه میکنیم.     یک پروژه از نوع Asp.Net Core Web Application ایجاد میکنیم به نام RabbiMqExample.Producer که همان ارسال کننده (Producer) میباشد.   یک پروژه از نوع Asp.Net Core Web Application به نام RabbitMqExample.Consumer برای ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="پیاده سازی RabbitMQ">
+    <meta property="og:description" content="RabbitMq شبیه به یک صف FIFO عمل میکند؛ یعنی داده‌ها به ترتیب وارد queue میشوند و به ترتیب نیز به Consumer‌ها ارسال میشوند. برای شروع، یک سولوشن جدید را به نام RabbitMqExample ایجاد میکنیم و پروژه‌های زیر را به آن اضافه میکنیم.     یک پروژه از نوع Asp.Net Core Web Application ایجاد میکنیم به نام RabbiMqExample.Producer که همان ارسال کننده (Producer) میباشد.   یک پروژه از نوع Asp.Net Core Web Application به نام RabbitMqExample.Consumer برای ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="پیاده سازی RabbitMQ">
+    <meta name="twitter:description" content="RabbitMq شبیه به یک صف FIFO عمل میکند؛ یعنی داده‌ها به ترتیب وارد queue میشوند و به ترتیب نیز به Consumer‌ها ارسال میشوند. برای شروع، یک سولوشن جدید را به نام RabbitMqExample ایجاد میکنیم و پروژه‌های زیر را به آن اضافه میکنیم.     یک پروژه از نوع Asp.Net Core Web Application ایجاد میکنیم به نام RabbiMqExample.Producer که همان ارسال کننده (Producer) میباشد.   یک پروژه از نوع Asp.Net Core Web Application به نام RabbitMqExample.Consumer برای ...">
+    <meta name="twitter:card" content="RabbitMq شبیه به یک صف FIFO عمل میکند؛ یعنی داده‌ها به ترتیب وارد queue میشوند و به ترتیب نیز به Consumer‌ها ارسال میشوند. برای شروع، یک سولوشن جدید را به نام RabbitMqExample ایجاد میکنیم و پروژه‌های زیر را به آن اضافه میکنیم.     یک پروژه از نوع Asp.Net Core Web Application ایجاد میکنیم به نام RabbiMqExample.Producer که همان ارسال کننده (Producer) میباشد.   یک پروژه از نوع Asp.Net Core Web Application به نام RabbitMqExample.Consumer برای ...">
+    <meta property="article:published_time" content="Fri, 30 Apr 2021 21:00:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫پیاده سازی RabbitMQ";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-3334.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫روش آپلود فایل‌ها به همراه اطلاعات یک مدل در برنامه‌های Blazor WASM 5x</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-3332.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫کاربرد Action ها در Github - خودکار سازی فرآیند کامپایل و آپلود فایل در Release گیت‌هاب</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫پیاده سازی RabbitMQ</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>زمانی فرهاد<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۰/۰۲/۱۰ ۲۱:۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-3333.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><div>RabbitMq شبیه به یک صف FIFO عمل میکند؛ یعنی داده‌ها به ترتیب وارد queue میشوند و به ترتیب نیز به Consumer‌ها ارسال میشوند. برای شروع، یک سولوشن جدید را به نام RabbitMqExample ایجاد میکنیم و پروژه‌های زیر را به آن اضافه میکنیم.<div> <ul> <li>یک پروژه از نوع Asp.Net Core Web Application ایجاد میکنیم به نام RabbiMqExample.Producer که همان ارسال کننده (Producer) میباشد.</li> <li>یک پروژه از نوع Asp.Net Core Web Application به نام RabbitMqExample.Consumer برای دریافت کننده (Consumer).</li> <li>یک پروژه از نوع Class library .Net Core به نام RabbitMqExample.Common که شامل سرویس‌ها و مدل‌های مشترک بین Producer و Consumer میباشد.</li> </ul> <div>ابتدا در لایه Common یک کلاس برای دریافت اطلاعات RabbitMq از appsettings.json ایجاد میکنیم.</div> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">public class RabbitMqConfiguration
+{
+    public string HostName { get; set; }
+    public string Username { get; set; }
+    public string Password { get; set; }
+}</pre> </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+سپس یک سرویس را برای برقراری ارتباط با RabbitMq ایجاد میکنیم</div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">public interface IRabbitMqService
+{
+    IConnection CreateChannel();
+}
+
+public class RabbitMqService : IRabbitMqService
+{
+    private readonly RabbitMqConfiguration _configuration;
+    public RabbitMqService(IOptions&lt;RabbitMqConfiguration&gt; options)
+    {
+        _configuration = options.Value;
+    }
+    public IConnection CreateChannel()
+    {
+        ConnectionFactory connection = new ConnectionFactory()
+        {
+            UserName = _configuration.Username,
+            Password = _configuration.Password,
+            HostName = _configuration.HostName
+        };
+        connection.DispatchConsumersAsync = true;
+        var channel = connection.CreateConnection();
+        return channel;
+    }
+}</pre> </div> </div> <div> <div>در متد CreateChannel، اطلاعات موردنیاز برای ارتباط با RabbitMq را مانند هاست، نام کاربری و کلمه عبور، وارد میکنیم که از appsettings.json خوانده شده‌اند. مقدار پیش‌فرض نام کاربری و کلمه عبور، guest میباشد.</div> <div>&nbsp;اگر بخواهید Consumer شما داده‌های queue‌ها را به صورت async دریافت کند، باید مقدار پراپرتی&nbsp;DispatchConsumersAsync&nbsp;مربوط به ConnectionFactory را برابر true کنید. مقدار پیشفرض آن false است. &nbsp;  <br> </div> <div>در ادامه یک کلاس را برای رجیستر کردن سرویس‌ها ایجاد میکنیم؛ در لایه Common.</div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">public static class StartupExtension
+{
+    public static void AddCommonService(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure&lt;RabbitMqConfiguration&gt;(a =&gt; configuration.GetSection(nameof(RabbitMqConfiguration)).Bind(a));
+        services.AddSingleton&lt;IRabbitMqService, RabbitMqService&gt;();
+    }
+}</pre> </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+پکیج‌های مورد نیاز این لایه :</div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="XML" name="code">  &lt;ItemGroup&gt;
+    &lt;PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="5.0.0" /&gt;
+    &lt;PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="5.0.0" /&gt;
+    &lt;PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.0" /&gt;
+    &lt;PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0" /&gt;
+    &lt;PackageReference Include="Microsoft.Extensions.Options" Version="5.0.0" /&gt;
+    &lt;PackageReference Include="RabbitMQ.Client" Version="6.2.1" /&gt;
+  &lt;/ItemGroup&gt;</pre> </div> </div> <div>تا به اینجا موارد مربوط به لایه Common تمام شده؛ در ادامه باید یک Consumer و یک Producer را ایجاد کنیم.</div> <div>در لایه Consumer برای دریافت داده‌ها از RabbitMq؛ یک سرویس را به نام&nbsp;ConsumerService&nbsp;ایجاد میکنیم: </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">public interface IConsumerService
+{
+    Task ReadMessgaes();
+}
+
+public class ConsumerService : IConsumerService, IDisposable
+{
+    private readonly IModel _model;
+    private readonly IConnection _connection;
+    public ConsumerService(IRabbitMqService rabbitMqService)
+    {
+        _connection = rabbitMqService.CreateChannel();
+        _model = _connection.CreateModel();
+        _model.QueueDeclare(_queueName, durable: true, exclusive: false, autoDelete: false);
+        _model.ExchangeDeclare("UserExchange", ExchangeType.Fanout, durable: true, autoDelete: false);
+        _model.QueueBind(_queueName, "UserExchange", string.Empty);
+    }
+    const string _queueName = "User";
+    public async Task ReadMessgaes()
+    {
+        var consumer = new AsyncEventingBasicConsumer(_model);
+        consumer.Received += async (ch, ea) =&gt;
+        {
+            var body = ea.Body.ToArray();
+            var text = System.Text.Encoding.UTF8.GetString(body);
+            Console.WriteLine(text);
+            await Task.CompletedTask;
+            _model.BasicAck(ea.DeliveryTag, false);
+        };
+        _model.BasicConsume(_queueName, false, consumer);
+        await Task.CompletedTask;
+    }
+
+    public void Dispose()
+    {
+        if (_model.IsOpen)
+            _model.Close();
+        if (_connection.IsOpen)
+            _connection.Close();
+    }
+}</pre> </div> </div> <div> <div>ابتدا connection را ایجاد کرده‌ایم؛ توسط متد CreateChannel که آنرا در سرویس قبلی پیاده سازی کردیم.</div> <div>بعد از ایجاد IModel، باید queue مربوطه را معرفی کنیم که با استفاده از متد&nbsp;QueueDeclare&nbsp;این کار را انجام داده‌ایم.&nbsp; </div> <div>پارامترهای متد QueueDeclare:</div> <div> <ul> <li>پارامتر اول، اسم queue میباشد&nbsp; <br> </li> <li>پارامتر durable&nbsp;مشخص میکند که داده‌ها به صورت مانا باشند یا نه. اگر برابر true باشد، دیتاهای مربوط به queue‌ها، در دیسک ذخیره میشوند؛ اما اگر برابر false باشد، بر روی حافظه ذخیره میشوند. در محیط‌هایی که مانایی اطلاعات مهم میباشد، باید مقدار این پارامتر را true کنید. </li> <li>پارامتر سوم: <a href="https://www.rabbitmq.com/amqp-0-9-1-reference.html#queue.declare.exclusive">اطلاعات بیشتر</a> </li> <li>پارامتر autoDelete اگر برابر true باشد، زمانی که تمامی Consumer‌ها ارتباطشان با RabbitMq قطع شود، queue هم پاک میشود. اما اگر برابر true باشد، queue باقی میماند؛ حتی اگر هیچ Consumer ای به آن وصل نباشد.</li> </ul> </div> <div>در ادامه باید Exchange مربوط به queue را مشخص کنیم. متد&nbsp;ExchangeDeclare&nbsp;یک Exchange را ایجاد میکند. پارامتر‌های متد&nbsp;ExchangeDeclare: </div> <div> <ul> <li>نام Exchange</li> <li>نوع Exchange که میتواند Headers&nbsp;,&nbsp;Topic&nbsp;,&nbsp; Fanout یا Direct باشد. اگر برابر Fanout باشد و اگر داده‌ای وارد Exchange شود، آن‌را به تمامی queue هایی که به آن بایند شده‌است، ارسال میکند. اما اگر نوع آن Direct باشد، داده را به یک queue مشخص ارسال میکند؛ با استفاده از پارامتر routeKey.</li> <li>پارامتر‌های بعدی، durable و autoDelete هستند که همانند پارامترهای QueueDeclare عمل میکنند.</li> </ul> <div>سپس در ادامه با استفاده از متد&nbsp;QueueBind میتوانیم queue ایجاد شده را به exchange ایجاد شده، بایند کنیم. پارامتر اول، اسم queue و پارامتر دوم، اسم exchange میباشد و پارامتر سوم، routeKey میباشد و چون نوع Exchange ایجاد شده از نوع Fanout است، آنرا خالی میگذاریم.&nbsp; </div> <div> <br> </div> </div> </div> <div>چون هنگام تعریف queue مقدار پارامتر&nbsp;DispatchConsumersAsync&nbsp;مربوط به ConnectionFactory را برابر true کردیم، در اینجا نیز باید بجای&nbsp;EventingBasicConsumer، از&nbsp;AsyncEventingBasicConsumer استفاده کنیم. اگر مقدار  DispatchConsumersAsync برابر false باشد، باید از&nbsp;EventingBasicConsumer&nbsp;برای ایجاد Consumer استفاده کنید.&nbsp;  </div> <div> <br> </div> <div> سپس باید EventHandler مربوط به دریافت داده‌ها از queue را پیاده سازی کنیم. event مربوط به Received، زمانی اجرا میشود که داده‌ای به queue ارسال شود. زمانیکه داده‌ای ارسال میشود، وارد event مربوطه میشود و ابتدا آنرا به صورت byte دریافت میکنیم. سپس رشته‌ی ارسالی آن‌را توسط متد&nbsp;GetString، بدست می‌آوریم و داده‌ی ارسال شده را در صفحه‌ی کنسول نمایش میدهیم.    </div> <div> <br> </div> <div>&nbsp;در ادامه به RabbitMq اطلاع میدهیم که داده‌ای که ارسال شده برای queue، توسط Consumer دریافت شده؛ با استفاده از متد&nbsp;BasicAck. این کار یک delivery&nbsp; به RabbitMq ارسال میکند تا دیتای ارسال شده را را پاک کند. اگر این متد را فراخوانی نکنیم، هربار که برنامه اجرا میشود، تمامی دیتاهای قبلی را مجددا دریافت میکنیم و تا زمانیکه&nbsp;delivery را به RabbitMq نفرستیم، داده‌ها را پاک نمیکند.</div> <div> <br> </div> <div>نکته آخر در Consumer، متد&nbsp;BasicConsume&nbsp;است که عملا Consumer ایجاد شده را به RabbitMq معرفی میکند. برای دریافت داده‌ها و ثبت Consumer، نیازمند آن هستیم تا یکبار متد ReadMessage فراخوانی شود. برای همین یک HostedService ایجاد میکنیم تا یکبار این متد را فراخوانی کند: </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">public class ConsumerHostedService : BackgroundService
+{
+    private readonly IConsumerService _consumerService;
+
+    public ConsumerHostedService(IConsumerService consumerService)
+    {
+        _consumerService = consumerService;
+    }
+
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        await _consumerService.ReadMessgaes();
+    }
+}</pre> </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+در نهایت سرویس‌های ایجاد شده را رجیستر میکنیم؛ در Startup لایه Consumer</div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">public class Startup
+{
+    public Startup(IConfiguration configuration)
+    {
+        Configuration = configuration;
+    }
+
+    public IConfiguration Configuration { get; set; }
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddCommonService(Configuration);
+        services.AddSingleton&lt;IConsumerService, ConsumerService&gt;();
+        services.AddHostedService&lt;ConsumerHostedService&gt;();
+    }
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    {
+    }
+}</pre> </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+تا به اینجا کارهای مربوط به Consumer تمام شده و باید قسمت Producer آنرا پیاده سازی کنیم.</div> <div>در لایه Producer یک کنترلر به نام RabbitController را ایجاد میکنیم که شامل یک متد میباشد که داده‌ها را به Queue ارسال میکند:</div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">[Route("api/[controller]/[action]")]
+[ApiController]
+public class RabbitController : ControllerBase
+{
+    private readonly IRabbitMqService _rabbitMqService;
+
+    public HomeController(IRabbitMqService rabbitMqService)
+    {
+        _rabbitMqService = rabbitMqService;
+    }
+    [HttpPost]
+    public IActionResult SendMessage()
+    {
+        using var connection = _rabbitMqService.CreateChannel();
+        using var model = connection.CreateModel();
+        var body = Encoding.UTF8.GetBytes("Hi");
+        model.BasicPublish("UserExchange",
+                             string.Empty,
+                             basicProperties: null,
+                             body: body);
+
+        return Ok();
+    }
+}</pre> </div> </div> <div>
+
+
+
+در متد SendMessage، ابتدا ارتباط خود را با RabbitMq برقرار میکنیم و سپس دیتای "Hi" را به صورت byte، به RabbitMq ارسال میکنیم؛ توسط متد&nbsp;BasicPublish.</div> <div>پارامتر اول، اسم Exchange است و پارامتر دوم، routeKey و body هم دیتای ارسالی میباشد. در نهایت سرویس‌های مربوط به لایه Producer را رجیستر میکنیم؛ در Startup لایه Consumer:</div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">public class Startup
+{
+    public Startup(IConfiguration configuration)
+    {
+        Configuration = configuration;
+    }
+
+    public IConfiguration Configuration { get; set; }
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddControllers();
+        services.AddCommonService(Configuration);
+    }
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    {
+        app.UseRouting();
+
+        app.UseEndpoints(endpoints =&gt;
+        {
+            endpoints.MapDefaultControllerRoute();
+        });
+    }
+}</pre> </div>
+
+اکنون اگر هر دو پروژه را اجرا کنید و متد SendMessage مربوط به کنترلر Rabbit را فراخوانی کنید، بعد از آنکه پیام شما ارسال شد، در صفحه کنسول مربوط به Consumer، رشته ارسال شده را مشاهده میکنید.</div> <div>فایل appsetting.json مربوط به پروژه‌های Consumer و Producer:</div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="JScript" name="code">{
+  "RabbitMqConfiguration": {
+    "HostName": "localhost",
+    "Username": "guest",
+    "Password": "guest"
+  }
+}</pre> </div>
+
+
+
+
+
+
+فایل docker-compose.yml&nbsp;برای اجرای RabbitMq بر روی داکر:</div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">version: "3.2"
+services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq'
+    ports:
+        - 5672:5672
+        - 15672:15672</pre> </div>
+
+
+
+
+
+
+کدهای این مقاله را میتوانید از&nbsp;<a href="https://github.com/farhadzm/RabbitMq">گیت‌هاب&nbsp;</a>دانلود کنید.</div> </div> </div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20336.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>جایگزینی MediatR با System.Threading.Channels </a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2823.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>سیستم‌های توزیع شده در NET. - بخش هشتم- راه اندازی Apache Kafka</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3331.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>رفرنس تایپ‌ها چگونه به ورودی متدها ارسال می‌شوند</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2983.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>نگاشت خودکار اشیاء توسط AutoMapper و Reflection - ایده شماره 1</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3084.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>فراخوانی GraphQL API در یک کلاینت ASP.NET Core</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2606.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>MongoDb در سی شارپ (بخش هشتم)</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1418.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>ModelBinder سفارشی در ASP.NET MVC</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3333.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>پیاده سازی RabbitMQ</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2823.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>سیستم‌های توزیع شده در NET. - بخش هشتم- راه اندازی Apache Kafka</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2823.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>سیستم‌های توزیع شده در NET. - بخش هشتم- راه اندازی Apache Kafka</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>م شاکری</strong>  در  <span dir='ltr'>۱۴۰۰/۰۳/۰۲ ۱۵:۴۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><b>یک نکته تکمیلی:</b> <div>تعیین مقدار durable برابر با true ساعت می‌شود که تعریف صف بصورت مانا باشد نه دیتای داخل صف.</div> <div>برای اینکه دیتای داخل صف نیز بصورت مانا باشد باید مقدار ویژگی DevliveryMode اینترفیس IBasicProperties را برابر 2 قرار داد:</div> <div> <div align="left" dir="ltr" style="direction: ltr;"> </div> <div align="left" dir="ltr" style="direction: ltr;"> <pre language="CSharp" name="code">using var connection = _rabbitMqService.CreateChannel();
+using var model = connection.CreateModel();
+IBasicProperties props = model.CreateBasicProperties();
+props.DeliveryMode = 2;
+var body = Encoding.UTF8.GetBytes("Hi");
+model.BasicPublish("UserExchange",
+                             string.Empty,
+                             basicProperties: props,
+                             body: body);</pre> </div> <br> </div></div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>زمانی فرهاد</strong>  در  <span dir='ltr'>۱۴۰۰/۰۳/۰۳ ۱۴:۵۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><b>نکته تکمیلی :</b> <div>میتوانید با استفاده از متد&nbsp;BasicQos&nbsp;حداکثر تعداد داده‌های ارسالی به Consumer هارا مشخص کنید. </div> <div>&nbsp;برای مثال اگر از طرف Consumer متد BasicAck رو صدا نزنید و به RabbitMq اعلام نکنید که داده به Consumer رسیده است, داده‌ها در RabbitMq باقی خواهند ماند.( در این حالت هر داده جدیدی در RabbitMq وارد شود به Consumer ارسال میشود اما هیچ داده ای پاک نمیشود).</div> <div> &nbsp;اما میتوانیم با استفاده از متد&nbsp;BasicQos&nbsp;تعداد داده‌های دریافتی را مشخص کنیم.  </div> <div>برای مثال در کد زیر حداکثر 16 داده به Consumer ارسال میشود. یعنی اگر Consumer که&nbsp; 16 داده را دریافت کرده, ack را به RabbitMq ارسال نکنند, هیچ داده دیگری به Consumer ارسال نمیشود تا زمانی ack مربوط به داده‌های قبلی به RabbitMq ارسال شود.</div> <div> <div align="left" dir="ltr" style="direction: ltr;"> <pre language="CSharp" name="code">_model.BasicQos(0, 16, true);</pre> </div>
+
+این متد را میتوانید بعد از متد QueueBind در هنگام تعریف Consumer مربوط به Queue اضافه کنید.</div></div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>اختیاری</strong>  در  <span dir='ltr'>۱۴۰۰/۰۳/۰۴ ۷:۴۵</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div>با تشکر از مطالب بسیار خوبتون.</div> <div>در صورتی که نیاز باشه از IIS یه عنوان Revers Proxy استفاده کنیم راهکار به چه صورت هست ؟ ( سرور مربوطه ویندوزی می‌باشد و پشت پراکسی کلودفلیر قرار گرفته است ) <br> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>زمانی فرهاد</strong>  در  <span dir='ltr'>۱۴۰۰/۰۳/۰۴ ۱۶:۳۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>خواهش میکنم.<br> <span>مطلب درباره RabbitMq بود و در مورد Reverse proxy روی IIS&nbsp; اطلاعی ندارم.&nbsp;</span></div>
+</div></li></ul></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

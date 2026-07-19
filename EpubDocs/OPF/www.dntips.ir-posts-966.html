@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫نحوه کاهش مصرف حافظه EF Code first حین گزارشگیری از اطلاعات</title>     <meta name="description" content="تمام ORMهای خوب، دارای سطح اول کش  هستند. از این سطح جهت نگهداری اطلاعات تغییرات صورت گرفته روی اشیاء و سپس اعمال نهایی آن‌ها در پایان یک تراکنش استفاده می‌شود. بدیهی است جمع آوری این اطلاعات اندکی بر روی سرعت انجام کار و همچنین بر روی میزان مصرف حافظه برنامه تاثیرگذار است. به علاوه یک سری از اعمال مانند گزارشگیری نیازی به این سطح اول کش ندارند. اطلاعات مورد استفاده در آن‌ها مانند نمایش لیستی از اطلاعات در یک گرید، حالت فقط خواندنی دارد. د ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="نحوه کاهش مصرف حافظه EF Code first حین گزارشگیری از اطلاعات">
+    <meta itemprop="description" content="تمام ORMهای خوب، دارای سطح اول کش  هستند. از این سطح جهت نگهداری اطلاعات تغییرات صورت گرفته روی اشیاء و سپس اعمال نهایی آن‌ها در پایان یک تراکنش استفاده می‌شود. بدیهی است جمع آوری این اطلاعات اندکی بر روی سرعت انجام کار و همچنین بر روی میزان مصرف حافظه برنامه تاثیرگذار است. به علاوه یک سری از اعمال مانند گزارشگیری نیازی به این سطح اول کش ندارند. اطلاعات مورد استفاده در آن‌ها مانند نمایش لیستی از اطلاعات در یک گرید، حالت فقط خواندنی دارد. د ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="نحوه کاهش مصرف حافظه EF Code first حین گزارشگیری از اطلاعات">
+    <meta property="og:description" content="تمام ORMهای خوب، دارای سطح اول کش  هستند. از این سطح جهت نگهداری اطلاعات تغییرات صورت گرفته روی اشیاء و سپس اعمال نهایی آن‌ها در پایان یک تراکنش استفاده می‌شود. بدیهی است جمع آوری این اطلاعات اندکی بر روی سرعت انجام کار و همچنین بر روی میزان مصرف حافظه برنامه تاثیرگذار است. به علاوه یک سری از اعمال مانند گزارشگیری نیازی به این سطح اول کش ندارند. اطلاعات مورد استفاده در آن‌ها مانند نمایش لیستی از اطلاعات در یک گرید، حالت فقط خواندنی دارد. د ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="نحوه کاهش مصرف حافظه EF Code first حین گزارشگیری از اطلاعات">
+    <meta name="twitter:description" content="تمام ORMهای خوب، دارای سطح اول کش  هستند. از این سطح جهت نگهداری اطلاعات تغییرات صورت گرفته روی اشیاء و سپس اعمال نهایی آن‌ها در پایان یک تراکنش استفاده می‌شود. بدیهی است جمع آوری این اطلاعات اندکی بر روی سرعت انجام کار و همچنین بر روی میزان مصرف حافظه برنامه تاثیرگذار است. به علاوه یک سری از اعمال مانند گزارشگیری نیازی به این سطح اول کش ندارند. اطلاعات مورد استفاده در آن‌ها مانند نمایش لیستی از اطلاعات در یک گرید، حالت فقط خواندنی دارد. د ...">
+    <meta name="twitter:card" content="تمام ORMهای خوب، دارای سطح اول کش  هستند. از این سطح جهت نگهداری اطلاعات تغییرات صورت گرفته روی اشیاء و سپس اعمال نهایی آن‌ها در پایان یک تراکنش استفاده می‌شود. بدیهی است جمع آوری این اطلاعات اندکی بر روی سرعت انجام کار و همچنین بر روی میزان مصرف حافظه برنامه تاثیرگذار است. به علاوه یک سری از اعمال مانند گزارشگیری نیازی به این سطح اول کش ندارند. اطلاعات مورد استفاده در آن‌ها مانند نمایش لیستی از اطلاعات در یک گرید، حالت فقط خواندنی دارد. د ...">
+    <meta property="article:published_time" content="Fri, 27 Jul 2012 19:06:28 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫نحوه کاهش مصرف حافظه EF Code first حین گزارشگیری از اطلاعات";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-967.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫آموزش فایرباگ - #4 - JavaScript Development</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-965.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫معرفی پروژه Orchard</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫نحوه کاهش مصرف حافظه EF Code first حین گزارشگیری از اطلاعات</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۱/۰۵/۰۶ ۱۹:۶</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-966.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'>تمام ORMهای خوب، دارای <a href="www.dntips.ir-posts-844.html">سطح اول کش</a>  هستند. از این سطح جهت نگهداری اطلاعات تغییرات صورت گرفته روی اشیاء و سپس اعمال نهایی آن‌ها در پایان یک تراکنش استفاده می‌شود. بدیهی است جمع آوری این اطلاعات اندکی بر روی سرعت انجام کار و همچنین بر روی میزان مصرف حافظه برنامه تاثیرگذار است. به علاوه یک سری از اعمال مانند گزارشگیری نیازی به این سطح اول کش ندارند. اطلاعات مورد استفاده در آن‌ها مانند نمایش لیستی از اطلاعات در یک گرید، حالت فقط خواندنی دارد. در EF Code first برای یک چنین مواردی استفاده از متد الحاقی <a href="http://msdn.microsoft.com/en-us/library/gg679352%28v=vs.103%29.aspx">AsNoTracking</a>  تدارک دیده شده است که سبب خاموش شدن سطح اول کش می‌شود. در ادامه در طی یک مثال، اثر این متد را بر روی سرعت و میزان مصرف حافظه برنامه بررسی خواهیم کرد.<br>
+
+
+
+<br>
+
+
+
+کدهای کامل این مثال را در ذیل ملاحظه می‌کنید:<br>
+
+
+
+<br>
+
+<div dir="ltr" align="left">
+
+<pre language="CSharp" name="code">using System;
+using System.Data.Entity;
+using System.Data.Entity.Migrations;
+using System.Diagnostics;
+using System.Linq;
+
+namespace EFGeneral
+{
+    public class User
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+    }
+
+    public class MyContext : DbContext
+    {
+        public DbSet&lt;User&gt; Users { get; set; }
+    }
+
+    public class Configuration : DbMigrationsConfiguration&lt;MyContext&gt;
+    {
+        public Configuration()
+        {
+            AutomaticMigrationsEnabled = true;
+            AutomaticMigrationDataLossAllowed = true;
+        }
+
+        protected override void Seed(MyContext context)
+        {            
+            for (int i = 0; i &lt; 21000; i++)
+            {
+                context.Users.Add(new User { Name = "name " + i });
+                if (i % 1000 == 0)
+                    context.SaveChanges();
+            }
+            base.Seed(context);
+        }
+    }
+
+    public class PerformanceHelper
+    {
+        public static string RunActionMeasurePerformance(Action action)
+        {
+            GC.Collect();
+            long initMemUsage = Process.GetCurrentProcess().WorkingSet64;
+
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            action();
+
+            stopwatch.Stop();
+
+            var currentMemUsage = Process.GetCurrentProcess().WorkingSet64;
+            var memUsage = currentMemUsage - initMemUsage;
+            if (memUsage &lt; 0) memUsage = 0;
+
+            return string.Format("Elapsed time: {0}, Memory Usage: {1:N2} KB", stopwatch.Elapsed, memUsage / 1024);
+        }
+    }
+
+    public static class Test
+    {
+        public static void RunTests()
+        {
+            Database.SetInitializer(new MigrateDatabaseToLatestVersion&lt;MyContext, Configuration&gt;());
+            StartDb();            
+
+            for (int i = 0; i &lt; 3; i++)
+            {
+                Console.WriteLine("\nRun {0}", i + 1);
+
+                var memUsage = PerformanceHelper.RunActionMeasurePerformance(() =&gt; LoadWithTracking());
+                Console.WriteLine("LoadWithTracking:\n{0}", memUsage);
+
+                memUsage = PerformanceHelper.RunActionMeasurePerformance(() =&gt; LoadWithoutTracking());
+                Console.WriteLine("LoadWithoutTracking:\n{0}", memUsage);
+            }
+        }
+
+        private static void StartDb()
+        {
+            using (var ctx = new MyContext())
+            {
+                var user = ctx.Users.Find(1);
+                if (user != null)
+                {
+                    // keep the object in memory
+                }
+            }
+        }
+
+        private static void LoadWithTracking()
+        {
+            using (var ctx = new MyContext())
+            {
+                var list = ctx.Users.ToList();
+                if (list.Any())
+                {
+                    // keep the list in memory
+                }
+            }
+        }
+
+        private static void LoadWithoutTracking()
+        {
+            using (var ctx = new MyContext())
+            {
+                var list = ctx.Users.AsNoTracking().ToList();
+                if (list.Any())
+                {
+                    // keep the list in memory
+                }
+            }
+        }
+    }
+}</pre>
+
+</div>
+
+<br>
+
+
+
+<b>توضیحات:</b><br>
+
+
+
+مدل برنامه یک کلاس ساده کاربر است به همراه id و نام او.<br>
+
+
+
+سپس این کلاس توسط Context برنامه در معرض دید EF Code first قرار می‌گیرد.<br>
+
+
+
+در کلاس Configuration تعدادی رکورد را در ابتدای کار برنامه در بانک اطلاعاتی ثبت خواهیم کرد. قصد داریم میزان مصرف حافظه بارگذاری این اطلاعات را بررسی کنیم.<br>
+
+
+
+کلاس PerformanceHelper معرفی شده، دو کار اندازه گیری میزان مصرف حافظه برنامه در طی اجرای یک فرمان خاص و همچنین مدت زمان سپری شدن آن‌را اندازه‌گیری می‌کند.<br>
+
+
+
+در کلاس Test فوق چندین متد به شرح زیر وجود دارند:<br>
+
+
+
+متد StartDb سبب می‌شود تا تنظیمات ابتدایی برنامه به بانک اطلاعاتی اعمال شوند. تا زمانیکه کوئری خاصی به بانک اطلاعاتی ارسال نگردد، EF Code first بانک اطلاعاتی را آغاز نخواهد کرد.<br>
+
+
+
+در متد LoadWithTracking اطلاعات تمام رکوردها به صورت متداولی بارگذاری شده است.<br>
+
+
+
+در متد LoadWithoutTracking نحوه استفاده از متد الحاقی AsNoTracking را مشاهده می‌کنید. در این متد سطح اول کش به این ترتیب خاموش می‌شود.<br>
+
+
+
+و متد RunTests، این متدها را در سه بار متوالی اجرا کرده و نتیجه عملیات را نمایش خواهد داد.<br>
+
+
+
+<br>
+
+
+
+برای نمونه این نتیجه در اینجا حاصل شده است:<br>
+
+
+
+<br>
+
+
+
+<p><img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/png;base64,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"></p>
+
+<br>
+
+
+
+همانطور که ملاحظه کنید، بین این دو حالت، تفاوت بسیار قابل ملاحظه است؛ چه از لحاظ مصرف حافظه و چه از لحاظ سرعت.<br>
+
+
+
+<br>
+
+<b>
+
+نتیجه گیری:</b><br>
+
+
+
+اگر قصد ندارید بر روی اطلاعات دریافتی از بانک اطلاعاتی تغییرات خاصی را انجام دهید و فقط قرار است از آن‌ها به صورت فقط خواندنی گزارشگیری شود، بهتر است سطح اول کش را به کمک متد الحاقی AsNoTracking خاموش کنید.<br>
+
+
+
+<br>
+
+
+
+&nbsp;</div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1424.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Func یا Expression Func در EF</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2851.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>به روز رسانی تمام فیلدهای رشته‌ای تمام جداول بانک اطلاعاتی توسط Entity framework 6.x</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1811.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>پردازش‌های Async در Entity framework 6</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-995.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>سازگار سازی EFTracingProvider با EF Code first</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1817.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>روش‌هایی برای بهبود سرعت برنامه‌های مبتنی بر Entity framework</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-926.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>کار با کلیدهای اصلی و خارجی در EF Code first</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/courses/topic/16/2f2ad4e5-da28-40d1-85c5-52d291e0745d'><span class='badge bg-warning rounded-pill me-2'>مطالب دوره‌ها</span>بررسی سرعت و کارآیی AutoMapper</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-966.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>نحوه کاهش مصرف حافظه EF Code first حین گزارشگیری از اطلاعات</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1344.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>چند نکته کاربردی درباره  Entity Framework</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1350.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>نکاتی درباره پرس و جو با استفاده از پردازش موازی</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۹۱/۱۰/۲۳ ۱۷:۸</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام.<div>وقتی از متد Where و ... برای فیلتر کردن استفاده کنیم دیگه قادر به انجام این کار (خاموش کردن سطح اول کش) نیستیم؟</div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۱/۱۰/۲۳ ۱۷:۱۵</span>
+  </div>
+  <div style='text-align: left; font-family:inherit; font-size:inherit;' dir='ltr'><div dir="ltr" align="left">
+<pre language="CSharp" name="code">// Query for all users without tracking them
+var users = context.Users.AsNoTracking();
+
+// Query for some users without tracking them
+var someUsers = context.Users
+                        .Where(u =&gt; u.Name.EndsWith("st"))
+                        .AsNoTracking()
+                        .ToList();
+//Or ...
+var items = context.Users.AsNoTracking().Where(...);</pre>
+</div></div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۹۱/۱۲/۰۹ ۱۹:۴۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>با سلام<br>
+اگر کش سطح اول رو غیر فعال کنیم و توی صفحه عمل Update یا Delete انجام بدیم چه اتفاقی رخ میده؟<br></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۱/۱۲/۰۹ ۲۱:۲۸</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>با استفاده از متد AsNoTracking و یا غیرفعال سازی کلی این فرآیند توسط تنظیم context.Configuration.AutoDetectChangesEnabled = false<span> ،</span> شیء از context جدا شده در نظر گرفته می‌شود. بنابراین context از تغییرات شما بی‌خبر بوده و ... اتفاق خاصی رخ نخواهد داد.<br></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>پدرام جباری</strong>  در  <span dir='ltr'>۱۳۹۱/۱۲/۱۰ ۲۳:۵۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>اگر نیاز دارید مدل رو از یک Context جدا کنید ( کش کردن اون رو غیر فعال کنید ) باید توجه داشته باشید که غبر فعال کردن&nbsp;<span style="color: rgb(78, 68, 60); text-align: right; background-color: rgb(252, 252, 250);">AutoDetectChangesEnabled<span>&nbsp; کافی نیست باید متد&nbsp;</span></span><span style="color: rgb(78, 68, 60); text-align: right; background-color: rgb(252, 252, 250);">AsNoTracking رو هم استفاده کنید ، <span>&nbsp;مخصوصا برای زمانی که لازم داشته باشید در یک شی دیگه از Context اون مدل رو Attach کنید، اگر هر دو رو غیر فعال نکنید Attach کردن مدل ( بسته به پیچیدگی مدل) زمانی تا 5 ثانیه یا حتی بیشتر میبره.</span></span><div><span style="color: rgb(78, 68, 60); text-align: right; background-color: rgb(252, 252, 250);"><br></span></div><div><span style="color: #4e443c;">غیر فعال کردن کلی&nbsp;</span><span style=" color: rgb(78, 68, 60); text-align: right; background-color: rgb(252, 252, 250);">AutoDetectChangesEnabled</span><span style=" color: rgb(78, 68, 60); text-align: right;">&nbsp;بیشتر زمانی که می‌خواهید رکورد به دیتابیس اضافه کنید بسیار مورد نیاز هست، سرعت رو به مقدار قابل توجهی افزایش میده ( البته برای تعداد رکورد بالا تاثیر خودش رو نشون میده)</span></div><div><span style="color: rgb(78, 68, 60); text-align: right; line-height: 1.5em; font-size: 9pt;">برای آپدیت و حذف رکورد ، اگر از وجود رکورد اطمینان دارید ( مخصوصا برای ویرایش مدل) بهتر هست مدل رو به Context ای که دارید Attach کنید که خوب بهتر از Select زدن از دیتابیس هست&nbsp;</span><br></div></div>
+</div></li></ul></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>احمد ولی پور</strong>  در  <span dir='ltr'>۱۳۹۲/۰۲/۱۴ ۲۰:۴۸</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>با سلام<br>
+متد بالا رو برای DataBase First هم میشه استفاده کرد؟<br></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۲/۰۲/۱۴ ۲۱:۵۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>برای حالت استفاده مستقیم از ObjectContext:&nbsp; <br><div dir="ltr" align="left"><pre language="CSharp" name="code">var context = new NorthwindDataContext();
+context.tblCities.MergeOption = MergeOption.NoTracking;</pre></div>
+
+
+
+
+
+
+
+
+واقعیت این است که یک EF بیشتر وجود خارجی ندارد. سورس EF هم <a href="https://entityframework.codeplex.com/SourceControl/changeset/view/e7f6bbcd4cf1447cc5e45382f1b8e62934b43521#src/EntityFramework/Internal/DbHelpers.cs">در دسترس است</a>:<br><div dir="ltr" align="left"><pre language="CSharp" name="code">public virtual IInternalQuery&lt;TElement&gt; AsNoTracking()
+{
+   return (IInternalQuery&lt;TElement&gt;) new InternalQuery&lt;TElement&gt;(this._internalContext, (ObjectQuery)    DbHelpers.CreateNoTrackingQuery((ObjectQuery) this._objectQuery));
+}
+
+public static IQueryable CreateNoTrackingQuery(ObjectQuery query)
+{
+  IQueryable queryable = (IQueryable) query;
+  ObjectQuery objectQuery = (ObjectQuery) queryable.Provider.CreateQuery(queryable.Expression);
+  objectQuery.MergeOption = MergeOption.NoTracking; // اینجا کار خاموش سازی ردیابی انجام شده
+  return (IQueryable) objectQuery;
+}</pre></div>
+
+
+
+
+
+
+همانطور که مشاهده می‌کنید، متد الحاقی AsNoTracking در پشت صحنه همان کار تنظیم MergeOption = MergeOption.NoTracking رو انجام می‌ده.<br></div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۲/۰۹/۱۹ ۱۲:۴۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>اهمیت استفاده از AsNoTracking زمانیکه نیازی به آن نیست:<br> <a href="http://weblogs.asp.net/fbouma/archive/2013/12/09/fetch-performance-of-various-net-orm-data-access-frameworks.aspx"> Fetch performance of various .NET ORM / Data-access frameworks</a>&nbsp;</div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>شاهین کیاست</strong>  در  <span dir='ltr'>۱۳۹۲/۰۹/۲۳ ۹:۵</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>آیا ممکن است&nbsp;<span style="color: rgb(78, 68, 60); background-color: rgb(252, 252, 250);">AsNoTracking برای همه‌ی Query‌ها فعال شود ؟ یعنی کلا Change Tracker , سطح اول Cache خاموش شود.&nbsp;</span> <div>در مثال پست جاری تابع LoadWithoutTracking را با کد زیر جایگزین کردم :&nbsp;</div> <div> <div align="left" dir="ltr"> <pre language="CSharp" name="code">        private static void LoadWithoutTracking()
+        {
+            using (var ctx = new MyContext())
+            {
+                ctx.Configuration.AutoDetectChangesEnabled = false;
+                var list = ctx.Users.ToList();
+                if (list.Any())
+                {
+                    // keep the list in memory
+                }
+            }
+        }</pre> </div>
+
+با توجه نتیجه‌ی حاصل شده به نظر مصرف حافظه بهبود نیافته :&nbsp;</div> <div> <p> <img style="display:block; margin-left: auto; margin-right: auto;" src="data:image/PNG;base64,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"> </p> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۲/۰۹/۲۳ ۱۰:۴۵</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>با توجه به <a href="www.dntips.ir-posts-966.html">سورس EF</a> ، در متد CreateNoTrackingQuery کار MergeOption.NoTracking به ازای یک ObjectSet (و نه حتی DbSet) انجام می‌شود و الزاما معادل نیست با AutoDetectChangesEnabled = false تنها.  <br></div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>رضا گرمارودی</strong>  در  <span dir='ltr'>۱۳۹۲/۱۱/۲۸ ۱۷:۲۸</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><p>سلام؛ من <a href="www.dntips.ir-posts-1344.html">اینجا</a> و <a href="www.dntips.ir-posts-840.html">اینجا</a> و&nbsp;<a href="www.dntips.ir-posts-423.html">اینجا</a>&nbsp; را ... مطالعه کردم. اما متوجه نشدم در زمان گزارش گیری با هر ابزاری (Stmulsoft, FastReport, ..) اطلاعات باید به صورت یک BusinesObject و یا هر عنوان دیگه ای به ابزار مورد نظر در قالب یک IEnumeable ارسال شود. در حالی که اگر ما IQueable&nbsp;را با .ToList() به یک IEnumerable تبدیل شود، ممکن است در برگیرنده کل اطلاعات باشد. در این موارد راهی برای کاهش حافظه و سربار کم وجود دارد؟ متد ToList را نمی‌توان به صورت Lazy&nbsp;پیاده سازی کرد&nbsp;یعنی اگر ابزار گزارش ساز فرضا صفحه&nbsp;1 را نمایش دهد اطلاعات تا صفحه یک از بانک واکشی بشود. اگر گزارش ما 200 صفحه باشد در حالت عادی کل اطلاعات در سرور لود شده و برنامه‌های گزارش ساز صرفا پس از تهیه گزارش اطلاعات را به صورت صفحه بندی نمایش می‌دهند.</p></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۲/۱۱/۲۸ ۱۷:۴۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>مورد مدنظر شما اصطلاحا paging نام دارد و در گزارش گیری‌های خصوصا برنامه‌های تحت وب که گرید نهایی را برنامه نویس با کدنویسی و ارائه منبع داده مناسبی طراحی و پیاده سازی می‌کند، بسیار مرسوم است (یک Take و Skip است در سمت کوئری LINQ نوشته شده). مثلا:<br>
+
+
+
+
+
+
+
+
+«<a href="www.dntips.ir-posts-946.html">واکشی اطلاعات به صورت chunk chunk (تکه تکه) و نمایش در ListView</a>»<br>
+
+
+
+
+
+
+این قابلیت اگر در نرم افزارهای گزارشگیری یاد شده، پیاده سازی شده‌‌است (مانند مثال یاد شده <i> <b>MaximumRows</b> </i> و <i> <b>StartRowIndex</b> </i> را هربار در اختیار برنامه نویس قرار می‌دهند)، آنگاه قابل استفاده و پیاده سازی خواهد بود. در غیراینصورت، کار خاصی را نمی‌توان انجام داد و باید مطابق نیاز تجاری آن‌ها رفتار کرد.</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>رضا گرمارودی</strong>  در  <span dir='ltr'>۱۳۹۲/۱۱/۳۰ ۱۰:۱۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><p>سلام؛ ممنون از پاسختون. من تمام برنامه‌های گزارش سازی&nbsp;را که میشناختم (Telerik, Fastreport, ReportViewer, DevExpress) همه را بررسی کردم . اما هیچ کدام چنین پراپرتی و یا مشابه اون و نداشتند. یعنی هرکسی می‌خواد گزارش بگیرد یک دفعه کل اطلاعات و از بانک می‌خونه! هرچقدر هم با فیلترهای مختلف گزارش و با فیلترهای مختلف مثلا تاریخ یا شماره رکورد محدود کنیم اما در کل کاربر در هر لحظه یک صفحه را که بیشتر نمی‌تواند ببیند. مباحث مذکور به خوبی در انواع گرید و کنترل‌های مختلف پیاده سازی شده و شرکت‌های مختلف راه حل‌های مختلفی همانند مواردی که شما ذکر کردید ارائه کرده اند اما برای گزارش خیر !</p></div>
+</div></li></ul></li></ul></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

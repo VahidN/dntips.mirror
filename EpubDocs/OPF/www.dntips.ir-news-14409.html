@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫بهبود کارآیی IDEهای Jetbrains</title>     <meta name="description" content="&lt;p&gt;سال‌ها است که&amp;nbsp; IDEهای Jetbrains برای اینکه در سکوهای کاری متفاوت قابل اجرا باشند، با جاوا نوشته می‌شوند. برای مثال Rider که یک IDE مخصوص دات نت است نیز با جاوا نوشته شده‌است و مابقی آن‌ها نیز به همین صورت. اگر به مسیر C:\Program Files\JetBrains\JetBrains Rider 2018.3.4\bin\&lt;b&gt;rider64.exe.vmoptions&lt;/b&gt; مراجعه کنید، فایل با پسوند vmoptions در حقیقت تنظیمات Java Virtual Machine یا JVM را به همراه دارد. این فایل طوری تنظیم شده‌است که کمترین منابع را مصرف کند؛ به همین جهت شاید در حین کار کردن با این IDEها احساس کنید که کند هستند. تنظیمات JVM مخصوص جاوای ویندوز و جاوای مک و لینوکس را در &lt;a href=&quot;https://docs.oracle.com/javase/8/docs/technotes/tools/windows/java.html&quot;&gt;اینجا&lt;/a&gt;  و &lt;a href=&quot;https://docs.oracle.com/javase/8/docs/technotes/tools/unix/java.html&quot;&gt;اینجا&lt;/a&gt;  می‌توانید مطالعه کنید.&lt;br&gt;
+
+اگر بر این اساس فایل rider64.exe.vmoptions را بخواهیم تکمیل کنیم، می‌توان به تنظیمات زیر رسید:&lt;br&gt; &lt;/p&gt; &lt;div dir=&quot;ltr&quot; style=&quot;direction:ltr;text-align:left;&quot; align=&quot;left&quot;&gt; &lt;pre language=&quot;CSharp&quot; name=&quot;code&quot;&gt;-Xms1024m
+-Xmx3072m
+-Xss64m
+-XX:ReservedCodeCacheSize=512m
+-XX:+UseCompressedOops
+-XX:NewRatio=2
+-Dfile.encoding=UTF-8
+-XX:+UseConcMarkSweepGC
+-XX:SoftRefLRUPolicyMSPerMB=250
+-XX:NewSize=512m
+-XX:MaxNewSize=512m
+-XX:PermSize=512m
+-XX:MaxPermSize=1024m
+-XX:+UseParNewGC
+-XX:ParallelGCThreads=4
+-XX:MaxTenuringThreshold=1
+-XX:SurvivorRatio=8
+-XX:+UseCodeCacheFlushing
+-XX:+AggressiveOpts
+-XX:+CMSClassUnloadingEnabled
+-XX:+CMSIncrementalMode
+-XX:+CMSIncrementalPacing
+-XX:+CMSParallelRemarkEnabled
+-XX:CMSInitiatingOccupancyFraction=65
+-XX:+CMSScavengeBeforeRemark
+-XX:+UseCMSInitiatingOccupancyOnly
+-XX:-TraceClassUnloading
+-XX:+AlwaysPreTouch
+-XX:+TieredCompilation
+-XX:+DoEscapeAnalysis
+-XX:+UnlockExperimentalVMOptions
+-XX:LargePageSizeInBytes=256m
+-XX:+DisableExplicitGC
+-XX:+ExplicitGCInvokesConcurrent
+-XX:+PrintGCDetails
+-XX:+PrintFlagsFinal
+-XX:+CMSPermGenSweepingEnabled
+-XX:+UseAdaptiveGCBoundary
+-XX:+UseSplitVerifier
+-XX:CompileThreshold=10000
+-XX:+OptimizeStringConcat
+-XX:+UseStringCache
+-XX:+UseFastAccessorMethods
+-XX:+UnlockDiagnosticVMOptions
+-ea
+-Dsun.io.useCanonCaches=false
+-Djava.net.preferIPv4Stack=true
+-Djdk.http.auth.tunneling.disabledSchemes=&quot;&quot;
+-XX:+HeapDumpOnOutOfMemoryError
+-XX:-OmitStackTraceInFastThrow
+-Xverify:none&lt;/pre&gt; &lt;/div&gt;
+
+برای ویرایش فایل rider64.exe.vmoptions، چون در مسیر C:\Program Files قرار دارد، نیاز است برای مثال نوت‌پد یا هر ویرایشگر متنی دیگر را با دسترسی ادمین اجرا کنید تا بتوانید تغییرات انجام شده را ذخیره نمائید. برای مثال اگر از &lt;a href=&quot;https://notepad-plus-plus.org/download/&quot;&gt;notepad++&lt;/a&gt;  استفاده کنید، خودش این مساله را تشخیص داده و درخواست اجرای با دسترسی ادمین را نمایش می‌دهد.&lt;br&gt; &lt;p&gt;
+
+پس از این تغییرات اگر Rider را اجرا کنید، حداقل نسبت به قبل &lt;b&gt; &lt;i&gt;دو برابر&lt;/i&gt; &lt;/b&gt; RAM مصرف خواهد کرد. همچنین بار اولی که برنامه را اجرا می‌کنید، چون تعدادی از این تنظیمات بر روی نحوه‌ی JIT تاثیرگذار هستند، کمی طول می‌کشد تا کار کامپایل جدید آن صورت گیرد و از دفعات آتی اجرای آن، بهبود کارآیی را احساس خواهید کرد.&lt;br&gt; &lt;br&gt;
+
+
+
+علاوه بر موارد فوق، فایل C:\Program Files\JetBrains\JetBrains Rider 2018.3.4\bin\&lt;b&gt;idea.properties&lt;/b&gt; را نیز می‌توانید جهت اعمال تغییرات زیر ویرایش کنید:&lt;br&gt; &lt;/p&gt; &lt;div dir=&quot;ltr&quot; style=&quot;direction:ltr;text-align:left;&quot; align=&quot;left&quot;&gt; &lt;pre language=&quot;JScript&quot; name=&quot;code&quot;&gt;idea.max.intellisense.filesize=3500
+idea.cycle.buffer.size=2048&lt;/pre&gt; &lt;/div&gt;">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="بهبود کارآیی IDEهای Jetbrains">
+    <meta itemprop="description" content="&lt;p&gt;سال‌ها است که&amp;nbsp; IDEهای Jetbrains برای اینکه در سکوهای کاری متفاوت قابل اجرا باشند، با جاوا نوشته می‌شوند. برای مثال Rider که یک IDE مخصوص دات نت است نیز با جاوا نوشته شده‌است و مابقی آن‌ها نیز به همین صورت. اگر به مسیر C:\Program Files\JetBrains\JetBrains Rider 2018.3.4\bin\&lt;b&gt;rider64.exe.vmoptions&lt;/b&gt; مراجعه کنید، فایل با پسوند vmoptions در حقیقت تنظیمات Java Virtual Machine یا JVM را به همراه دارد. این فایل طوری تنظیم شده‌است که کمترین منابع را مصرف کند؛ به همین جهت شاید در حین کار کردن با این IDEها احساس کنید که کند هستند. تنظیمات JVM مخصوص جاوای ویندوز و جاوای مک و لینوکس را در &lt;a href=&quot;https://docs.oracle.com/javase/8/docs/technotes/tools/windows/java.html&quot;&gt;اینجا&lt;/a&gt;  و &lt;a href=&quot;https://docs.oracle.com/javase/8/docs/technotes/tools/unix/java.html&quot;&gt;اینجا&lt;/a&gt;  می‌توانید مطالعه کنید.&lt;br&gt;
+
+اگر بر این اساس فایل rider64.exe.vmoptions را بخواهیم تکمیل کنیم، می‌توان به تنظیمات زیر رسید:&lt;br&gt; &lt;/p&gt; &lt;div dir=&quot;ltr&quot; style=&quot;direction:ltr;text-align:left;&quot; align=&quot;left&quot;&gt; &lt;pre language=&quot;CSharp&quot; name=&quot;code&quot;&gt;-Xms1024m
+-Xmx3072m
+-Xss64m
+-XX:ReservedCodeCacheSize=512m
+-XX:+UseCompressedOops
+-XX:NewRatio=2
+-Dfile.encoding=UTF-8
+-XX:+UseConcMarkSweepGC
+-XX:SoftRefLRUPolicyMSPerMB=250
+-XX:NewSize=512m
+-XX:MaxNewSize=512m
+-XX:PermSize=512m
+-XX:MaxPermSize=1024m
+-XX:+UseParNewGC
+-XX:ParallelGCThreads=4
+-XX:MaxTenuringThreshold=1
+-XX:SurvivorRatio=8
+-XX:+UseCodeCacheFlushing
+-XX:+AggressiveOpts
+-XX:+CMSClassUnloadingEnabled
+-XX:+CMSIncrementalMode
+-XX:+CMSIncrementalPacing
+-XX:+CMSParallelRemarkEnabled
+-XX:CMSInitiatingOccupancyFraction=65
+-XX:+CMSScavengeBeforeRemark
+-XX:+UseCMSInitiatingOccupancyOnly
+-XX:-TraceClassUnloading
+-XX:+AlwaysPreTouch
+-XX:+TieredCompilation
+-XX:+DoEscapeAnalysis
+-XX:+UnlockExperimentalVMOptions
+-XX:LargePageSizeInBytes=256m
+-XX:+DisableExplicitGC
+-XX:+ExplicitGCInvokesConcurrent
+-XX:+PrintGCDetails
+-XX:+PrintFlagsFinal
+-XX:+CMSPermGenSweepingEnabled
+-XX:+UseAdaptiveGCBoundary
+-XX:+UseSplitVerifier
+-XX:CompileThreshold=10000
+-XX:+OptimizeStringConcat
+-XX:+UseStringCache
+-XX:+UseFastAccessorMethods
+-XX:+UnlockDiagnosticVMOptions
+-ea
+-Dsun.io.useCanonCaches=false
+-Djava.net.preferIPv4Stack=true
+-Djdk.http.auth.tunneling.disabledSchemes=&quot;&quot;
+-XX:+HeapDumpOnOutOfMemoryError
+-XX:-OmitStackTraceInFastThrow
+-Xverify:none&lt;/pre&gt; &lt;/div&gt;
+
+برای ویرایش فایل rider64.exe.vmoptions، چون در مسیر C:\Program Files قرار دارد، نیاز است برای مثال نوت‌پد یا هر ویرایشگر متنی دیگر را با دسترسی ادمین اجرا کنید تا بتوانید تغییرات انجام شده را ذخیره نمائید. برای مثال اگر از &lt;a href=&quot;https://notepad-plus-plus.org/download/&quot;&gt;notepad++&lt;/a&gt;  استفاده کنید، خودش این مساله را تشخیص داده و درخواست اجرای با دسترسی ادمین را نمایش می‌دهد.&lt;br&gt; &lt;p&gt;
+
+پس از این تغییرات اگر Rider را اجرا کنید، حداقل نسبت به قبل &lt;b&gt; &lt;i&gt;دو برابر&lt;/i&gt; &lt;/b&gt; RAM مصرف خواهد کرد. همچنین بار اولی که برنامه را اجرا می‌کنید، چون تعدادی از این تنظیمات بر روی نحوه‌ی JIT تاثیرگذار هستند، کمی طول می‌کشد تا کار کامپایل جدید آن صورت گیرد و از دفعات آتی اجرای آن، بهبود کارآیی را احساس خواهید کرد.&lt;br&gt; &lt;br&gt;
+
+
+
+علاوه بر موارد فوق، فایل C:\Program Files\JetBrains\JetBrains Rider 2018.3.4\bin\&lt;b&gt;idea.properties&lt;/b&gt; را نیز می‌توانید جهت اعمال تغییرات زیر ویرایش کنید:&lt;br&gt; &lt;/p&gt; &lt;div dir=&quot;ltr&quot; style=&quot;direction:ltr;text-align:left;&quot; align=&quot;left&quot;&gt; &lt;pre language=&quot;JScript&quot; name=&quot;code&quot;&gt;idea.max.intellisense.filesize=3500
+idea.cycle.buffer.size=2048&lt;/pre&gt; &lt;/div&gt;">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="بهبود کارآیی IDEهای Jetbrains">
+    <meta property="og:description" content="&lt;p&gt;سال‌ها است که&amp;nbsp; IDEهای Jetbrains برای اینکه در سکوهای کاری متفاوت قابل اجرا باشند، با جاوا نوشته می‌شوند. برای مثال Rider که یک IDE مخصوص دات نت است نیز با جاوا نوشته شده‌است و مابقی آن‌ها نیز به همین صورت. اگر به مسیر C:\Program Files\JetBrains\JetBrains Rider 2018.3.4\bin\&lt;b&gt;rider64.exe.vmoptions&lt;/b&gt; مراجعه کنید، فایل با پسوند vmoptions در حقیقت تنظیمات Java Virtual Machine یا JVM را به همراه دارد. این فایل طوری تنظیم شده‌است که کمترین منابع را مصرف کند؛ به همین جهت شاید در حین کار کردن با این IDEها احساس کنید که کند هستند. تنظیمات JVM مخصوص جاوای ویندوز و جاوای مک و لینوکس را در &lt;a href=&quot;https://docs.oracle.com/javase/8/docs/technotes/tools/windows/java.html&quot;&gt;اینجا&lt;/a&gt;  و &lt;a href=&quot;https://docs.oracle.com/javase/8/docs/technotes/tools/unix/java.html&quot;&gt;اینجا&lt;/a&gt;  می‌توانید مطالعه کنید.&lt;br&gt;
+
+اگر بر این اساس فایل rider64.exe.vmoptions را بخواهیم تکمیل کنیم، می‌توان به تنظیمات زیر رسید:&lt;br&gt; &lt;/p&gt; &lt;div dir=&quot;ltr&quot; style=&quot;direction:ltr;text-align:left;&quot; align=&quot;left&quot;&gt; &lt;pre language=&quot;CSharp&quot; name=&quot;code&quot;&gt;-Xms1024m
+-Xmx3072m
+-Xss64m
+-XX:ReservedCodeCacheSize=512m
+-XX:+UseCompressedOops
+-XX:NewRatio=2
+-Dfile.encoding=UTF-8
+-XX:+UseConcMarkSweepGC
+-XX:SoftRefLRUPolicyMSPerMB=250
+-XX:NewSize=512m
+-XX:MaxNewSize=512m
+-XX:PermSize=512m
+-XX:MaxPermSize=1024m
+-XX:+UseParNewGC
+-XX:ParallelGCThreads=4
+-XX:MaxTenuringThreshold=1
+-XX:SurvivorRatio=8
+-XX:+UseCodeCacheFlushing
+-XX:+AggressiveOpts
+-XX:+CMSClassUnloadingEnabled
+-XX:+CMSIncrementalMode
+-XX:+CMSIncrementalPacing
+-XX:+CMSParallelRemarkEnabled
+-XX:CMSInitiatingOccupancyFraction=65
+-XX:+CMSScavengeBeforeRemark
+-XX:+UseCMSInitiatingOccupancyOnly
+-XX:-TraceClassUnloading
+-XX:+AlwaysPreTouch
+-XX:+TieredCompilation
+-XX:+DoEscapeAnalysis
+-XX:+UnlockExperimentalVMOptions
+-XX:LargePageSizeInBytes=256m
+-XX:+DisableExplicitGC
+-XX:+ExplicitGCInvokesConcurrent
+-XX:+PrintGCDetails
+-XX:+PrintFlagsFinal
+-XX:+CMSPermGenSweepingEnabled
+-XX:+UseAdaptiveGCBoundary
+-XX:+UseSplitVerifier
+-XX:CompileThreshold=10000
+-XX:+OptimizeStringConcat
+-XX:+UseStringCache
+-XX:+UseFastAccessorMethods
+-XX:+UnlockDiagnosticVMOptions
+-ea
+-Dsun.io.useCanonCaches=false
+-Djava.net.preferIPv4Stack=true
+-Djdk.http.auth.tunneling.disabledSchemes=&quot;&quot;
+-XX:+HeapDumpOnOutOfMemoryError
+-XX:-OmitStackTraceInFastThrow
+-Xverify:none&lt;/pre&gt; &lt;/div&gt;
+
+برای ویرایش فایل rider64.exe.vmoptions، چون در مسیر C:\Program Files قرار دارد، نیاز است برای مثال نوت‌پد یا هر ویرایشگر متنی دیگر را با دسترسی ادمین اجرا کنید تا بتوانید تغییرات انجام شده را ذخیره نمائید. برای مثال اگر از &lt;a href=&quot;https://notepad-plus-plus.org/download/&quot;&gt;notepad++&lt;/a&gt;  استفاده کنید، خودش این مساله را تشخیص داده و درخواست اجرای با دسترسی ادمین را نمایش می‌دهد.&lt;br&gt; &lt;p&gt;
+
+پس از این تغییرات اگر Rider را اجرا کنید، حداقل نسبت به قبل &lt;b&gt; &lt;i&gt;دو برابر&lt;/i&gt; &lt;/b&gt; RAM مصرف خواهد کرد. همچنین بار اولی که برنامه را اجرا می‌کنید، چون تعدادی از این تنظیمات بر روی نحوه‌ی JIT تاثیرگذار هستند، کمی طول می‌کشد تا کار کامپایل جدید آن صورت گیرد و از دفعات آتی اجرای آن، بهبود کارآیی را احساس خواهید کرد.&lt;br&gt; &lt;br&gt;
+
+
+
+علاوه بر موارد فوق، فایل C:\Program Files\JetBrains\JetBrains Rider 2018.3.4\bin\&lt;b&gt;idea.properties&lt;/b&gt; را نیز می‌توانید جهت اعمال تغییرات زیر ویرایش کنید:&lt;br&gt; &lt;/p&gt; &lt;div dir=&quot;ltr&quot; style=&quot;direction:ltr;text-align:left;&quot; align=&quot;left&quot;&gt; &lt;pre language=&quot;JScript&quot; name=&quot;code&quot;&gt;idea.max.intellisense.filesize=3500
+idea.cycle.buffer.size=2048&lt;/pre&gt; &lt;/div&gt;">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="بهبود کارآیی IDEهای Jetbrains">
+    <meta name="twitter:description" content="&lt;p&gt;سال‌ها است که&amp;nbsp; IDEهای Jetbrains برای اینکه در سکوهای کاری متفاوت قابل اجرا باشند، با جاوا نوشته می‌شوند. برای مثال Rider که یک IDE مخصوص دات نت است نیز با جاوا نوشته شده‌است و مابقی آن‌ها نیز به همین صورت. اگر به مسیر C:\Program Files\JetBrains\JetBrains Rider 2018.3.4\bin\&lt;b&gt;rider64.exe.vmoptions&lt;/b&gt; مراجعه کنید، فایل با پسوند vmoptions در حقیقت تنظیمات Java Virtual Machine یا JVM را به همراه دارد. این فایل طوری تنظیم شده‌است که کمترین منابع را مصرف کند؛ به همین جهت شاید در حین کار کردن با این IDEها احساس کنید که کند هستند. تنظیمات JVM مخصوص جاوای ویندوز و جاوای مک و لینوکس را در &lt;a href=&quot;https://docs.oracle.com/javase/8/docs/technotes/tools/windows/java.html&quot;&gt;اینجا&lt;/a&gt;  و &lt;a href=&quot;https://docs.oracle.com/javase/8/docs/technotes/tools/unix/java.html&quot;&gt;اینجا&lt;/a&gt;  می‌توانید مطالعه کنید.&lt;br&gt;
+
+اگر بر این اساس فایل rider64.exe.vmoptions را بخواهیم تکمیل کنیم، می‌توان به تنظیمات زیر رسید:&lt;br&gt; &lt;/p&gt; &lt;div dir=&quot;ltr&quot; style=&quot;direction:ltr;text-align:left;&quot; align=&quot;left&quot;&gt; &lt;pre language=&quot;CSharp&quot; name=&quot;code&quot;&gt;-Xms1024m
+-Xmx3072m
+-Xss64m
+-XX:ReservedCodeCacheSize=512m
+-XX:+UseCompressedOops
+-XX:NewRatio=2
+-Dfile.encoding=UTF-8
+-XX:+UseConcMarkSweepGC
+-XX:SoftRefLRUPolicyMSPerMB=250
+-XX:NewSize=512m
+-XX:MaxNewSize=512m
+-XX:PermSize=512m
+-XX:MaxPermSize=1024m
+-XX:+UseParNewGC
+-XX:ParallelGCThreads=4
+-XX:MaxTenuringThreshold=1
+-XX:SurvivorRatio=8
+-XX:+UseCodeCacheFlushing
+-XX:+AggressiveOpts
+-XX:+CMSClassUnloadingEnabled
+-XX:+CMSIncrementalMode
+-XX:+CMSIncrementalPacing
+-XX:+CMSParallelRemarkEnabled
+-XX:CMSInitiatingOccupancyFraction=65
+-XX:+CMSScavengeBeforeRemark
+-XX:+UseCMSInitiatingOccupancyOnly
+-XX:-TraceClassUnloading
+-XX:+AlwaysPreTouch
+-XX:+TieredCompilation
+-XX:+DoEscapeAnalysis
+-XX:+UnlockExperimentalVMOptions
+-XX:LargePageSizeInBytes=256m
+-XX:+DisableExplicitGC
+-XX:+ExplicitGCInvokesConcurrent
+-XX:+PrintGCDetails
+-XX:+PrintFlagsFinal
+-XX:+CMSPermGenSweepingEnabled
+-XX:+UseAdaptiveGCBoundary
+-XX:+UseSplitVerifier
+-XX:CompileThreshold=10000
+-XX:+OptimizeStringConcat
+-XX:+UseStringCache
+-XX:+UseFastAccessorMethods
+-XX:+UnlockDiagnosticVMOptions
+-ea
+-Dsun.io.useCanonCaches=false
+-Djava.net.preferIPv4Stack=true
+-Djdk.http.auth.tunneling.disabledSchemes=&quot;&quot;
+-XX:+HeapDumpOnOutOfMemoryError
+-XX:-OmitStackTraceInFastThrow
+-Xverify:none&lt;/pre&gt; &lt;/div&gt;
+
+برای ویرایش فایل rider64.exe.vmoptions، چون در مسیر C:\Program Files قرار دارد، نیاز است برای مثال نوت‌پد یا هر ویرایشگر متنی دیگر را با دسترسی ادمین اجرا کنید تا بتوانید تغییرات انجام شده را ذخیره نمائید. برای مثال اگر از &lt;a href=&quot;https://notepad-plus-plus.org/download/&quot;&gt;notepad++&lt;/a&gt;  استفاده کنید، خودش این مساله را تشخیص داده و درخواست اجرای با دسترسی ادمین را نمایش می‌دهد.&lt;br&gt; &lt;p&gt;
+
+پس از این تغییرات اگر Rider را اجرا کنید، حداقل نسبت به قبل &lt;b&gt; &lt;i&gt;دو برابر&lt;/i&gt; &lt;/b&gt; RAM مصرف خواهد کرد. همچنین بار اولی که برنامه را اجرا می‌کنید، چون تعدادی از این تنظیمات بر روی نحوه‌ی JIT تاثیرگذار هستند، کمی طول می‌کشد تا کار کامپایل جدید آن صورت گیرد و از دفعات آتی اجرای آن، بهبود کارآیی را احساس خواهید کرد.&lt;br&gt; &lt;br&gt;
+
+
+
+علاوه بر موارد فوق، فایل C:\Program Files\JetBrains\JetBrains Rider 2018.3.4\bin\&lt;b&gt;idea.properties&lt;/b&gt; را نیز می‌توانید جهت اعمال تغییرات زیر ویرایش کنید:&lt;br&gt; &lt;/p&gt; &lt;div dir=&quot;ltr&quot; style=&quot;direction:ltr;text-align:left;&quot; align=&quot;left&quot;&gt; &lt;pre language=&quot;JScript&quot; name=&quot;code&quot;&gt;idea.max.intellisense.filesize=3500
+idea.cycle.buffer.size=2048&lt;/pre&gt; &lt;/div&gt;">
+    <meta name="twitter:card" content="&lt;p&gt;سال‌ها است که&amp;nbsp; IDEهای Jetbrains برای اینکه در سکوهای کاری متفاوت قابل اجرا باشند، با جاوا نوشته می‌شوند. برای مثال Rider که یک IDE مخصوص دات نت است نیز با جاوا نوشته شده‌است و مابقی آن‌ها نیز به همین صورت. اگر به مسیر C:\Program Files\JetBrains\JetBrains Rider 2018.3.4\bin\&lt;b&gt;rider64.exe.vmoptions&lt;/b&gt; مراجعه کنید، فایل با پسوند vmoptions در حقیقت تنظیمات Java Virtual Machine یا JVM را به همراه دارد. این فایل طوری تنظیم شده‌است که کمترین منابع را مصرف کند؛ به همین جهت شاید در حین کار کردن با این IDEها احساس کنید که کند هستند. تنظیمات JVM مخصوص جاوای ویندوز و جاوای مک و لینوکس را در &lt;a href=&quot;https://docs.oracle.com/javase/8/docs/technotes/tools/windows/java.html&quot;&gt;اینجا&lt;/a&gt;  و &lt;a href=&quot;https://docs.oracle.com/javase/8/docs/technotes/tools/unix/java.html&quot;&gt;اینجا&lt;/a&gt;  می‌توانید مطالعه کنید.&lt;br&gt;
+
+اگر بر این اساس فایل rider64.exe.vmoptions را بخواهیم تکمیل کنیم، می‌توان به تنظیمات زیر رسید:&lt;br&gt; &lt;/p&gt; &lt;div dir=&quot;ltr&quot; style=&quot;direction:ltr;text-align:left;&quot; align=&quot;left&quot;&gt; &lt;pre language=&quot;CSharp&quot; name=&quot;code&quot;&gt;-Xms1024m
+-Xmx3072m
+-Xss64m
+-XX:ReservedCodeCacheSize=512m
+-XX:+UseCompressedOops
+-XX:NewRatio=2
+-Dfile.encoding=UTF-8
+-XX:+UseConcMarkSweepGC
+-XX:SoftRefLRUPolicyMSPerMB=250
+-XX:NewSize=512m
+-XX:MaxNewSize=512m
+-XX:PermSize=512m
+-XX:MaxPermSize=1024m
+-XX:+UseParNewGC
+-XX:ParallelGCThreads=4
+-XX:MaxTenuringThreshold=1
+-XX:SurvivorRatio=8
+-XX:+UseCodeCacheFlushing
+-XX:+AggressiveOpts
+-XX:+CMSClassUnloadingEnabled
+-XX:+CMSIncrementalMode
+-XX:+CMSIncrementalPacing
+-XX:+CMSParallelRemarkEnabled
+-XX:CMSInitiatingOccupancyFraction=65
+-XX:+CMSScavengeBeforeRemark
+-XX:+UseCMSInitiatingOccupancyOnly
+-XX:-TraceClassUnloading
+-XX:+AlwaysPreTouch
+-XX:+TieredCompilation
+-XX:+DoEscapeAnalysis
+-XX:+UnlockExperimentalVMOptions
+-XX:LargePageSizeInBytes=256m
+-XX:+DisableExplicitGC
+-XX:+ExplicitGCInvokesConcurrent
+-XX:+PrintGCDetails
+-XX:+PrintFlagsFinal
+-XX:+CMSPermGenSweepingEnabled
+-XX:+UseAdaptiveGCBoundary
+-XX:+UseSplitVerifier
+-XX:CompileThreshold=10000
+-XX:+OptimizeStringConcat
+-XX:+UseStringCache
+-XX:+UseFastAccessorMethods
+-XX:+UnlockDiagnosticVMOptions
+-ea
+-Dsun.io.useCanonCaches=false
+-Djava.net.preferIPv4Stack=true
+-Djdk.http.auth.tunneling.disabledSchemes=&quot;&quot;
+-XX:+HeapDumpOnOutOfMemoryError
+-XX:-OmitStackTraceInFastThrow
+-Xverify:none&lt;/pre&gt; &lt;/div&gt;
+
+برای ویرایش فایل rider64.exe.vmoptions، چون در مسیر C:\Program Files قرار دارد، نیاز است برای مثال نوت‌پد یا هر ویرایشگر متنی دیگر را با دسترسی ادمین اجرا کنید تا بتوانید تغییرات انجام شده را ذخیره نمائید. برای مثال اگر از &lt;a href=&quot;https://notepad-plus-plus.org/download/&quot;&gt;notepad++&lt;/a&gt;  استفاده کنید، خودش این مساله را تشخیص داده و درخواست اجرای با دسترسی ادمین را نمایش می‌دهد.&lt;br&gt; &lt;p&gt;
+
+پس از این تغییرات اگر Rider را اجرا کنید، حداقل نسبت به قبل &lt;b&gt; &lt;i&gt;دو برابر&lt;/i&gt; &lt;/b&gt; RAM مصرف خواهد کرد. همچنین بار اولی که برنامه را اجرا می‌کنید، چون تعدادی از این تنظیمات بر روی نحوه‌ی JIT تاثیرگذار هستند، کمی طول می‌کشد تا کار کامپایل جدید آن صورت گیرد و از دفعات آتی اجرای آن، بهبود کارآیی را احساس خواهید کرد.&lt;br&gt; &lt;br&gt;
+
+
+
+علاوه بر موارد فوق، فایل C:\Program Files\JetBrains\JetBrains Rider 2018.3.4\bin\&lt;b&gt;idea.properties&lt;/b&gt; را نیز می‌توانید جهت اعمال تغییرات زیر ویرایش کنید:&lt;br&gt; &lt;/p&gt; &lt;div dir=&quot;ltr&quot; style=&quot;direction:ltr;text-align:left;&quot; align=&quot;left&quot;&gt; &lt;pre language=&quot;JScript&quot; name=&quot;code&quot;&gt;idea.max.intellisense.filesize=3500
+idea.cycle.buffer.size=2048&lt;/pre&gt; &lt;/div&gt;">
+    <meta property="article:published_time" content="Thu, 21 Mar 2019 18:27:02 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫بهبود کارآیی IDEهای Jetbrains";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-news-14410.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫کتاب های برنامه نویسی که آرزو میکردید قبلا خوانده بودید!</span>
+   </h6>
+</a><a href='www.dntips.ir-news-14408.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫ابزاری برای بررسی هدرهای امنیتی برنامه‌های وب</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫بهبود کارآیی IDEهای Jetbrains</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۸/۰۱/۰۱ ۱۸:۲۷</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-news-14409.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><p>سال‌ها است که&nbsp; IDEهای Jetbrains برای اینکه در سکوهای کاری متفاوت قابل اجرا باشند، با جاوا نوشته می‌شوند. برای مثال Rider که یک IDE مخصوص دات نت است نیز با جاوا نوشته شده‌است و مابقی آن‌ها نیز به همین صورت. اگر به مسیر C:\Program Files\JetBrains\JetBrains Rider 2018.3.4\bin\<b>rider64.exe.vmoptions</b> مراجعه کنید، فایل با پسوند vmoptions در حقیقت تنظیمات Java Virtual Machine یا JVM را به همراه دارد. این فایل طوری تنظیم شده‌است که کمترین منابع را مصرف کند؛ به همین جهت شاید در حین کار کردن با این IDEها احساس کنید که کند هستند. تنظیمات JVM مخصوص جاوای ویندوز و جاوای مک و لینوکس را در <a href="https://docs.oracle.com/javase/8/docs/technotes/tools/windows/java.html">اینجا</a>  و <a href="https://docs.oracle.com/javase/8/docs/technotes/tools/unix/java.html">اینجا</a>  می‌توانید مطالعه کنید.<br>
+
+اگر بر این اساس فایل rider64.exe.vmoptions را بخواهیم تکمیل کنیم، می‌توان به تنظیمات زیر رسید:<br> </p> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">-Xms1024m
+-Xmx3072m
+-Xss64m
+-XX:ReservedCodeCacheSize=512m
+-XX:+UseCompressedOops
+-XX:NewRatio=2
+-Dfile.encoding=UTF-8
+-XX:+UseConcMarkSweepGC
+-XX:SoftRefLRUPolicyMSPerMB=250
+-XX:NewSize=512m
+-XX:MaxNewSize=512m
+-XX:PermSize=512m
+-XX:MaxPermSize=1024m
+-XX:+UseParNewGC
+-XX:ParallelGCThreads=4
+-XX:MaxTenuringThreshold=1
+-XX:SurvivorRatio=8
+-XX:+UseCodeCacheFlushing
+-XX:+AggressiveOpts
+-XX:+CMSClassUnloadingEnabled
+-XX:+CMSIncrementalMode
+-XX:+CMSIncrementalPacing
+-XX:+CMSParallelRemarkEnabled
+-XX:CMSInitiatingOccupancyFraction=65
+-XX:+CMSScavengeBeforeRemark
+-XX:+UseCMSInitiatingOccupancyOnly
+-XX:-TraceClassUnloading
+-XX:+AlwaysPreTouch
+-XX:+TieredCompilation
+-XX:+DoEscapeAnalysis
+-XX:+UnlockExperimentalVMOptions
+-XX:LargePageSizeInBytes=256m
+-XX:+DisableExplicitGC
+-XX:+ExplicitGCInvokesConcurrent
+-XX:+PrintGCDetails
+-XX:+PrintFlagsFinal
+-XX:+CMSPermGenSweepingEnabled
+-XX:+UseAdaptiveGCBoundary
+-XX:+UseSplitVerifier
+-XX:CompileThreshold=10000
+-XX:+OptimizeStringConcat
+-XX:+UseStringCache
+-XX:+UseFastAccessorMethods
+-XX:+UnlockDiagnosticVMOptions
+-ea
+-Dsun.io.useCanonCaches=false
+-Djava.net.preferIPv4Stack=true
+-Djdk.http.auth.tunneling.disabledSchemes=""
+-XX:+HeapDumpOnOutOfMemoryError
+-XX:-OmitStackTraceInFastThrow
+-Xverify:none</pre> </div>
+
+برای ویرایش فایل rider64.exe.vmoptions، چون در مسیر C:\Program Files قرار دارد، نیاز است برای مثال نوت‌پد یا هر ویرایشگر متنی دیگر را با دسترسی ادمین اجرا کنید تا بتوانید تغییرات انجام شده را ذخیره نمائید. برای مثال اگر از <a href="https://notepad-plus-plus.org/download/">notepad++</a>  استفاده کنید، خودش این مساله را تشخیص داده و درخواست اجرای با دسترسی ادمین را نمایش می‌دهد.<br> <p>
+
+پس از این تغییرات اگر Rider را اجرا کنید، حداقل نسبت به قبل <b> <i>دو برابر</i> </b> RAM مصرف خواهد کرد. همچنین بار اولی که برنامه را اجرا می‌کنید، چون تعدادی از این تنظیمات بر روی نحوه‌ی JIT تاثیرگذار هستند، کمی طول می‌کشد تا کار کامپایل جدید آن صورت گیرد و از دفعات آتی اجرای آن، بهبود کارآیی را احساس خواهید کرد.<br> <br>
+
+
+
+علاوه بر موارد فوق، فایل C:\Program Files\JetBrains\JetBrains Rider 2018.3.4\bin\<b>idea.properties</b> را نیز می‌توانید جهت اعمال تغییرات زیر ویرایش کنید:<br> </p> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="JScript" name="code">idea.max.intellisense.filesize=3500
+idea.cycle.buffer.size=2048</pre> </div></div><br><br><a href='https://intellij-support.jetbrains.com/hc/en-us/articles/206544869-Configuring-JVM-options-and-platform-properties'>مشاهده مطلب اصلی</a></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-19013.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>کار با Git‌ از طریق Rider</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-14319.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>ReSharper Ultimate و Rider نگارش 2018.3.4 منتشر شدند</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-13840.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>JetBrains Rider چگونه طراحی شده‌است؟</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/questions/details/13#comment-35'><span class='badge bg-primary rounded-pill me-2'>پاسخ به پرسش‌ها</span>جستجو Contains روی کلید های ترکیبی</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-125.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بررسی وجود نام کاربر با استفاده از jQuery Ajax در ASP.Net</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1315.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>پلاگین DataTables کتابخانه jQuery - قسمت سوم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3094.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>روش اجرای پروژه‌های ASP.NET Core توسط Rider و IIS Express</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-3508.html'><span class='badge bg-warning-subtle text-warning-emphasis bg-gradient rounded-pill me-2'>نظرات اشتراک‌ها</span>بررسی هزینه انجام select count(*) from tbl</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1042.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>وادار کردن EF Code first به ساخت بانک اطلاعاتی پیش از شروع به کار برنامه</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3401.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>بررسی Source Generators در #C - قسمت سوم - بهبود کارآیی برنامه با تبدیل عملیات Reflection به تولید کد خودکار</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>سعید ق</strong>  در  <span dir='ltr'>۱۳۹۸/۰۱/۰۴ ۱۲:۱۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>نسخه ای که من دارم، همینطوریشم ۲ گیگ رم مصرف میکنه، اگه مصرف رمش دو برابر بشه که کل سیستمو اشغال میکنه.</div>
+</div></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

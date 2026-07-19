@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫پیاده سازی Full-Text Search با SQLite و EF Core - قسمت اول - ایجاد و به روز رسانی جدول مجازی FTS</title>     <meta name="description" content="SQLite به صورت توکار از full-text search پشتیبانی می‌کند؛ اما اهمیت آن چیست؟ هدف از full-text search، انجام جستجوهای بسیار سریع، در ستون‌های متنی یک جدول بانک اطلاعاتی است. بدون وجود یک چنین قابلیتی، عموما برای انجام اینکار از دستور LIKE استفاده می‌شود:     SELECT Title FROM Book WHERE Desc LIKE &#39;%cat%&#39;;   
+ کار این کوئری، یافتن ردیف‌هایی است که در آن واژه‌ی cat وجود دارند. مشکل این روش، عدم استفاده‌ی از ایندکس‌ها و اصطلاحا انجام یک full  ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="پیاده سازی Full-Text Search با SQLite و EF Core - قسمت اول - ایجاد و به روز رسانی جدول مجازی FTS">
+    <meta itemprop="description" content="SQLite به صورت توکار از full-text search پشتیبانی می‌کند؛ اما اهمیت آن چیست؟ هدف از full-text search، انجام جستجوهای بسیار سریع، در ستون‌های متنی یک جدول بانک اطلاعاتی است. بدون وجود یک چنین قابلیتی، عموما برای انجام اینکار از دستور LIKE استفاده می‌شود:     SELECT Title FROM Book WHERE Desc LIKE &#39;%cat%&#39;;   
+ کار این کوئری، یافتن ردیف‌هایی است که در آن واژه‌ی cat وجود دارند. مشکل این روش، عدم استفاده‌ی از ایندکس‌ها و اصطلاحا انجام یک full  ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="پیاده سازی Full-Text Search با SQLite و EF Core - قسمت اول - ایجاد و به روز رسانی جدول مجازی FTS">
+    <meta property="og:description" content="SQLite به صورت توکار از full-text search پشتیبانی می‌کند؛ اما اهمیت آن چیست؟ هدف از full-text search، انجام جستجوهای بسیار سریع، در ستون‌های متنی یک جدول بانک اطلاعاتی است. بدون وجود یک چنین قابلیتی، عموما برای انجام اینکار از دستور LIKE استفاده می‌شود:     SELECT Title FROM Book WHERE Desc LIKE &#39;%cat%&#39;;   
+ کار این کوئری، یافتن ردیف‌هایی است که در آن واژه‌ی cat وجود دارند. مشکل این روش، عدم استفاده‌ی از ایندکس‌ها و اصطلاحا انجام یک full  ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="پیاده سازی Full-Text Search با SQLite و EF Core - قسمت اول - ایجاد و به روز رسانی جدول مجازی FTS">
+    <meta name="twitter:description" content="SQLite به صورت توکار از full-text search پشتیبانی می‌کند؛ اما اهمیت آن چیست؟ هدف از full-text search، انجام جستجوهای بسیار سریع، در ستون‌های متنی یک جدول بانک اطلاعاتی است. بدون وجود یک چنین قابلیتی، عموما برای انجام اینکار از دستور LIKE استفاده می‌شود:     SELECT Title FROM Book WHERE Desc LIKE &#39;%cat%&#39;;   
+ کار این کوئری، یافتن ردیف‌هایی است که در آن واژه‌ی cat وجود دارند. مشکل این روش، عدم استفاده‌ی از ایندکس‌ها و اصطلاحا انجام یک full  ...">
+    <meta name="twitter:card" content="SQLite به صورت توکار از full-text search پشتیبانی می‌کند؛ اما اهمیت آن چیست؟ هدف از full-text search، انجام جستجوهای بسیار سریع، در ستون‌های متنی یک جدول بانک اطلاعاتی است. بدون وجود یک چنین قابلیتی، عموما برای انجام اینکار از دستور LIKE استفاده می‌شود:     SELECT Title FROM Book WHERE Desc LIKE &#39;%cat%&#39;;   
+ کار این کوئری، یافتن ردیف‌هایی است که در آن واژه‌ی cat وجود دارند. مشکل این روش، عدم استفاده‌ی از ایندکس‌ها و اصطلاحا انجام یک full  ...">
+    <meta property="article:published_time" content="Sat, 09 May 2020 11:10:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫پیاده سازی Full-Text Search با SQLite و EF Core - قسمت اول - ایجاد و به روز رسانی جدول مجازی FTS";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-3192.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫راهکار لاگ متناسب با Cloud و On-Premise</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-3190.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫شرط گذاری روی Include ها در EF Core 5x</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫پیاده سازی Full-Text Search با SQLite و EF Core - قسمت اول - ایجاد و به روز رسانی جدول مجازی FTS</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۹/۰۲/۲۰ ۱۱:۱۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-3191.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'>SQLite به صورت توکار از full-text search پشتیبانی می‌کند؛ اما اهمیت آن چیست؟ هدف از full-text search، انجام جستجوهای بسیار سریع، در ستون‌های متنی یک جدول بانک اطلاعاتی است. بدون وجود یک چنین قابلیتی، عموما برای انجام اینکار از دستور LIKE استفاده می‌شود:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="Sql" name="code">SELECT Title FROM Book WHERE Desc LIKE '%cat%';</pre> </div>
+کار این کوئری، یافتن ردیف‌هایی است که در آن واژه‌ی cat وجود دارند. مشکل این روش، عدم استفاده‌ی از ایندکس‌ها و اصطلاحا انجام یک full table scan است. با استفاده از دستور LIKE، باید تک تک ردیف‌های بانک اطلاعاتی برای یافتن واژه‌ی مدنظر، اسکن و بررسی شوند و انجام اینکار با بالا رفتن تعداد رکوردهای بانک اطلاعاتی، کندتر و کندتر خواهد شد. برای رفع این مشکل، راه حلی به نام full-text search ارائه شده‌است که کار آن ایندکس کردن تمام ستون‌های متنی مدنظر و سپس جستجوی بر روی این ایندکس از پیش آماده شده‌است.<br>
+
+
+معادل دستور LIKE در کوئری فوق، متد Contains در EF Core است:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">var cats = context.Chapters.Where(item =&gt; item.Text.Contains("cat")).ToList();</pre> </div>
+بنابراین هدف از این سری، جایگزین کردن متدهای الحاقی Contains ، StartsWith و EndsWith، با روشی بسیار سریعتر است.<br> <br> <b>یک نکته:</b> کوئری فوق توسط EF Core و به همراه پروایدر SQLite آن، به صورت زیر ترجمه می‌شود (که آن نیز یک full table scan است):<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="Sql" name="code">SELECT  "c"."Text" FROM "Chapters" AS "c" WHERE ('cat' = '') OR (instr("c"."Text", 'cat') &gt; 0)</pre> </div>
+اما دقیقا دستور Like را به همراه متدهای الحاقی StartsWith و یا EndsWith می‌توان مشاهده کرد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">var cats = context.Chapters.Where(item =&gt; item.Text.StartsWith("cat")).ToList();
+// SELECT "c"."Text", FROM "Chapters" AS "c" WHERE "c"."Text" IS NOT NULL AND ("c"."Text" LIKE 'cat%')</pre> </div> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">var cats = context.Chapters.Where(item =&gt; item.Text.EndsWith("cat")).ToList();
+// SELECT "c"."Title" FROM "Chapters" AS "c" WHERE "c"."Text" IS NOT NULL AND ("c"."Text" LIKE '%cat')</pre> </div> <br> <br> <b>معرفی موجودیت‌های مثال این سری</b> <br> <br>
+
+
+هدف اصلی ما، ایندکس کردن full-text ستون‌های متنی عنوان و متن جدول بانک اطلاعاتی متناظر با Chapter است:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">using System.Collections.Generic;
+
+namespace EFCoreSQLiteFTS.Entities
+{
+    public class User
+    {
+        public int Id { get; set; }
+
+        public string Name { get; set; }
+
+        public ICollection&lt;Chapter&gt; Chapters { get; set; }
+    }
+
+    public class Chapter
+    {
+        public int Id { get; set; }
+
+        public string Title { get; set; }
+
+        public string Text { get; set; }
+
+        public User User { get; set; }
+        public int UserId { get; set; }
+    }
+}</pre> </div> <div> <br> </div> <div> <br> </div> <b>ایجاد جدول مجازی Full-text search</b> <br> <br>
+
+
+زمانیکه عملیات Migration را در EF Core فعال و اجرا می‌کنیم، دو جدول متناظر با Chapter و User ایجاد می‌شوند. اما برای کار با full-text search، نیاز به ایجاد جداول دیگری است، تا کار نگهداری ایندکس‌های تشکیل شده‌ی از ستون‌های متنی مدنظر ما را انجام دهند. به این نوع جداول در SQLite، جدول مجازی و یا virtual table گفته می‌شود. یک virtual table در اصل تفاوتی با یک جدول معمولی ندارد. تفاوت در اینجا است که منطق دسترسی به این جدول مجازی از موتور FTS5 مربوط به SQLite باید عبور کند. تاکنون نگارش‌های مختلفی از موتور full-text search آن منتشر شده‌اند؛ مانند FTS3 ، FTS4 و غیره که آخرین نگارش آن، FTS5 می‌باشد و به همراه توزیعی که مایکروسافت ارائه می‌دهد، وجود دارد و نیازی به تنظیمات خاصی ندارد.<br>
+
+
+در اینجا روش ایجاد یک جدول مجازی جدید Chapters_FTS را مشاهده می‌کنید:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="Sql" name="code">CREATE VIRTUAL TABLE "Chapters_FTS"
+USING fts5("Text", "Title", content="Chapters", content_rowid="Id")</pre> </div>
+جدول مجازی، با اجرای دستور CREATE VIRTUAL TABLE&nbsp; ایجاد می‌شود و USING fts5 آن به معنای استفاده‌ی از موتور full-text search نگارش پنجم آن است. سپس لیست ستون‌هایی را که می‌خواهیم ایندکس کنیم، ذکر می‌شوند؛ مانند Text و Title در اینجا. همانطور که مشاهده می‌کنید، فقط نام این ستون‌ها قابل تعریف هستند و هیچ نوع اطلاعات اضافه‌تری را نمی‌توان ذکر کرد.<br>
+
+
+ذکر پارامتر "content="Chapters اختیاری بوده و به این معنا است که نیازی نیست تا اصل داده‌های مرتبط با ستون‌های ذکر شده نیز ذخیره شوند و آن‌ها را می‌توان از جدول Chapters، بازیابی کرد. در این حالت برای برقراری ارتباط بین این جدول مجازی و جدول chapters، پارامتر "content_rowid="Id مقدار دهی شده‌است. content_rowid به primary key جدول content اشاره می‌کند. ذکر هر دوی این پارامترها اختیاری بوده و در صورت تنظیم، حجم نهایی بانک اطلاعاتی را کاهش می‌دهند. چون در این حالت دیگری نیازی به ذخیره سازی جداگانه‌ی اصل اطلاعات متناظر با ایندکس‌های FTS نیست.<br> <br>
+
+
+اکنون که با دستور ایجاد جدول مجازی FTS آشنا شدیم، روش ایجاد آن در برنامه‌های مبتنی بر EF Core نیز دقیقا به همین صورت است:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">private static void createFtsTables(ApplicationDbContext context)
+{
+    // For SQLite FTS
+    // Note: This can be added to the `protected override void Up(MigrationBuilder migrationBuilder)` method too.
+    context.Database.ExecuteSqlRaw(@"CREATE VIRTUAL TABLE IF NOT EXISTS ""Chapters_FTS""
+    USING fts5(""Text"", ""Title"", content=""Chapters"", content_rowid=""Id"");");
+}</pre> </div>
+فقط کافی است در ابتدای اجرای برنامه با استفاده از متد ExecuteSqlRaw، عبارت SQL متناظر با ایجاد جدول مجازی را اجرا کنیم. این یک روش ایجاد این نوع جداول است؛ روش دیگر آن، قرار دادن همین قطعه کد در متد "protected override void Up(MigrationBuilder migrationBuilder)" مربوط به کلاس‌های ایجاد شده‌ی توسط عملیات Migration است.<br> <br> <br> <b>به روز رسانی اطلاعات جدول مجازی FTS، توسط تریگرها</b> <br> <br>
+
+
+پس از اجرای دستورCREATE VIRTUAL TABLE&nbsp; فوق، SQLite پنج جدول را به صورت خودکار ایجاد می‌کند که در تصویر زیر قابل مشاهده هستند:<br> <br> <p style="display:block; margin-left: auto; margin-right: auto;"> <img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/png;base64,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"> </p> <br>
+
+
+البته ما مستقیما با این جداول کار نخواهیم کرد و این جداول برای نگهداری اطلاعات ایندکس‌های full-text موتور FTS5، توسط خود SQLite نگهداری و مدیریت می‌شوند.<br> <br>
+
+
+اما ... نکته‌ی مهم اینجا است که جدول مجازی Chapters_FTS، هرچند به جدول اصلی Chapters توسط پارامتر content آن متصل شده‌است، اما تغییرات آن‌را ردیابی نمی‌کند. یعنی هر نوع insert/update/delete ای که در جدول اصلی Chapters رخ می‌دهد، سبب ایندکس شدن اطلاعات جدید آن در جدول مجازی Chapters_FTS نمی‌شود و برای اینکار باید اطلاعات را مستقیما در جدول Chapters_FTS درج کرد.<br>
+
+
+روش پیشنهاد شده‌ی در <a href="https://sqlite.org/fts5.html">مستندات رسمی آن</a>، استفاده از تریگرهای پس از درج اطلاعات، پس از حذف اطلاعات و پس از به روز رسانی اطلاعات به صورت زیر است:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="Sql" name="code">-- Create a table. And an external content fts5 table to index it.
+CREATE TABLE tbl(a INTEGER PRIMARY KEY, b, c);
+CREATE VIRTUAL TABLE fts_idx USING fts5(b, c, content='tbl', content_rowid='a');
+
+-- Triggers to keep the FTS index up to date.
+CREATE TRIGGER tbl_ai AFTER INSERT ON tbl BEGIN
+  INSERT INTO fts_idx(rowid, b, c) VALUES (new.a, new.b, new.c);
+END;
+CREATE TRIGGER tbl_ad AFTER DELETE ON tbl BEGIN
+  INSERT INTO fts_idx(fts_idx, rowid, b, c) VALUES('delete', old.a, old.b, old.c);
+END;
+CREATE TRIGGER tbl_au AFTER UPDATE ON tbl BEGIN
+  INSERT INTO fts_idx(fts_idx, rowid, b, c) VALUES('delete', old.a, old.b, old.c);
+  INSERT INTO fts_idx(rowid, b, c) VALUES (new.a, new.b, new.c);
+END;</pre> </div>
+در اینجا ابتدا روش ایجاد یک جدول جدید و سپس ایجاد یک جدول مجازی FTS را از روی آن مشاهده می‌کنید. <br>
+در ادامه سه تریگر بر روی جدول اصلی که ما به صورت متداولی با آن در برنامه‌های خود کار می‌کنیم، تعریف شده‌اند. این تریگرها کار insert اطلاعات را در جدول مجازی ایجاد شده، به صورت خودکار انجام می‌دهند. <br>
+
+
+همانطور که مشاهده می‌کنید، یک rowid نیز در اینجا قابل تعریف است؛ rowid، ستون مخفی یک جدول مجازی FTS است و هرچند در حین ایجاد، آن‌را ذکر نمی‌کنیم، اما جزئی از ساختار آن بوده و قابل کوئری گرفتن است.<br> <br> <b>نکته‌ی مهم:</b> به فرمت دستورات به روز رسانی جدول مجازی FTS دقت کنید. حتی در حالت تریگرهای update و یا delete نیز در اینجا دستور insert، مشاهده می‌شوند. این فرمت دقیقا باید به همین نحو رعایت شود؛ در غیراینصورت اگر از دستورات delete و یا update معمولی بر روی این جدول مجازی استفاده کنید، دفعه‌ی بعدی که برنامه را اجرا می‌کنید، خطای «این بانک اطلاعاتی تخریب شده‌است» را مشاهده کرده (database disk image is malformed) و دیگر نمی‌توانید با فایل بانک اطلاعاتی خود کار کنید.<br> <br> <br> <b>
+
+به روز رسانی اطلاعات جدول مجازی FTS توسط EF Core</b> <br> <br> <div>
+
+روش تعریف تریگرهای یاد شده، مستقل از EF Core بوده و راسا توسط خود بانک اطلاعاتی مدیریت می‌شود. بنابراین فقط کافی است دستور CREATE TRIGGER را به همان نحوی که عنوان شد، توسط متد ExecuteSqlRaw اجرا کنیم تا جزئی از ساختار بانک اطلاعاتی شوند؛ اما ... این روش برای برنامه‌هایی با متن‌های پیچیده کارآیی ندارد. برای مثال فرض کنید اطلاعات اصلی شما با فرمت HTML است. ایندکس ایجاد شده، تگ‌های HTML را حذف نمی‌کند و آن‌ها را نیز ایندکس می‌کند که نه تنها سبب بالا رفتن حجم بانک اطلاعاتی می‌شود، بلکه زمانیکه ما قصد جستجویی را بر روی اطلاعات HTML ای داریم، اساسا کاری به تگ‌های آن نداشته و هدف اصلی ما، متن‌های درج شده‌ی در آن است. نمونه‌ی دیگر آن داشتن اطلاعاتی با «اعراب» است و یا شاید نیاز به یک‌دست سازی ی و ک فارسی وجود داشته باشد. به این نوع عملیات، «نرمال سازی متن» گفته می‌شود و با روش تریگرهای فوق قابل تعریف و مدیریت نیست. به همین جهت می‌توان از روش پیشنهادی زیر استفاده کرد:</div> <div> <br> </div> <b>
+
+الف) یافتن لیست اطلاعات تغییر یافته‌ی حاصل از اعمال insert/update/delete</b> <br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+
+namespace EFCoreSQLiteFTS.DataLayer
+{
+    public static class EFChangeTrackerExtensions
+    {
+        public static List&lt;(EntityState State, TEntity NewEntity, TEntity OldEntity)&gt;
+                    GetChangedEntities&lt;TEntity&gt;(this DbContext dbContext) where TEntity : class, new()
+        {
+            if (!dbContext.ChangeTracker.AutoDetectChangesEnabled)
+            {
+                // ChangeTracker.Entries() only calls `Try`DetectChanges() behind the scene.
+                dbContext.ChangeTracker.DetectChanges();
+            }
+
+            return dbContext.ChangeTracker.Entries&lt;TEntity&gt;()
+                    .Where(IsEntityChanged)
+                    .Select(entityEntry =&gt; (entityEntry.State,
+                                            entityEntry.Entity,
+                                            createWithValues&lt;TEntity&gt;(entityEntry.OriginalValues)))
+                    .ToList();
+        }
+
+        private static bool IsEntityChanged(EntityEntry entry)
+        {
+            return entry.State == EntityState.Added
+                    || entry.State == EntityState.Modified
+                    || entry.State == EntityState.Deleted
+                    || entry.References.Any(r =&gt; r.TargetEntry?.Metadata.IsOwned() == true &amp;&amp; IsEntityChanged(r.TargetEntry));
+        }
+
+        private static T createWithValues&lt;T&gt;(PropertyValues values) where T : new()
+        {
+            var entity = new T();
+            foreach (var prop in values.Properties)
+            {
+                var value = values[prop.Name];
+                if (value is PropertyValues)
+                {
+                    throw new NotSupportedException("nested complex object");
+                }
+                else
+                {
+                    prop.PropertyInfo.SetValue(entity, value);
+                }
+            }
+            return entity;
+        }
+    }
+}</pre> </div>
+هدف از متد GetChangedEntities فوق این است که با استفاده از سیستم tracking، نوع عملیات انجام شده و همچنین اصل موجودیت‌ها را پیش و پس از تغییر، بتوان لیست کرد و سپس بر اساس آن‌ها، جدول مجازی FTS را به روز رسانی نمود.<br>
+
+
+علت نیاز به نمونه‌ی اصل و سپس تغییر کرده‌ی موجودیت‌ها، به نحوه‌ی تعریف تریگرهای مخصوص به به روز رسانی FTS بر می‌گردد. اگر دقت کرده باشید در این تریگرها، new.a و همچنین old.a را داریم که برای شبیه سازی آن‌ها دقیقا باید به اطلاعات یک رکورد، در پیش و پس از به روز رسانی آن، دسترسی یافت.<br> <br> <b>ب) تعریف تریگرهای SQL توسط سیستم tracking؛ به همراه عملیات نرمال سازی اطلاعات</b> <br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">using System.Collections.Generic;
+using System.Data;
+using System.Text.RegularExpressions;
+using EFCoreSQLiteFTS.Entities;
+using Microsoft.EntityFrameworkCore;
+
+namespace EFCoreSQLiteFTS.DataLayer
+{
+    public static class FtsNormalizer
+    {
+        private static readonly Regex _htmlRegex = new Regex("&lt;[^&gt;]*&gt;", RegexOptions.Compiled);
+
+        public static string NormalizeText(this string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return string.Empty;
+            }
+
+            // Remove html tags
+            text = _htmlRegex.Replace(text, string.Empty);
+
+            // TODO: add other normalizers here, such as `remove diacritics`, `fix Persian Ye-Ke` and so on ...
+
+            return text;
+        }
+    }
+
+    public static class UpdateFtsTriggers
+    {
+        public static void UpdateChapterFTS(
+            this DbContext context,
+            List&lt;(EntityState State, Chapter NewEntity, Chapter OldEntity)&gt; changedChapters)
+        {
+            var database = context.Database;
+
+            try
+            {
+                database.BeginTransaction(IsolationLevel.ReadCommitted);
+
+                foreach (var (State, NewEntity, OldEntity) in changedChapters)
+                {
+                    var chapterNew = NewEntity;
+                    var chapterOld = OldEntity;
+
+                    var normalizedNewText = chapterNew.Text.NormalizeText();
+                    var normalizedOldText = chapterOld.Text.NormalizeText();
+                    var normalizedNewTitle = chapterNew.Title.NormalizeText();
+                    var normalizedOldTitle = chapterOld.Title.NormalizeText();
+                    switch (State)
+                    {
+                        case EntityState.Added:
+                            if (shouldSkipAddedChapter(chapterNew))
+                            {
+                                continue;
+                            }
+                            database.ExecuteSqlRaw("INSERT INTO Chapters_FTS(rowid, Text, Title) values({0}, {1}, {2});",
+                                    chapterNew.Id, normalizedNewText, normalizedNewTitle);
+                            break;
+                        case EntityState.Modified:
+                            if (shouldSkipModifiedChapter(chapterNew, chapterOld))
+                            {
+                                continue;
+                            }
+                            // This format is important! Otherwise we will get `SQLite Error 11: 'database disk image is malformed'.` error!
+                            database.ExecuteSqlRaw(@"INSERT INTO Chapters_FTS(Chapters_FTS, rowid, Text, Title)
+                                                        VALUES('delete', {0}, {1}, {2}); ",
+                                                        chapterOld.Id, normalizedOldText, normalizedOldTitle);
+                            database.ExecuteSqlRaw("INSERT INTO Chapters_FTS(rowid, Text, Title) values({0}, {1}, {2});",
+                                    chapterNew.Id, normalizedNewText, normalizedNewTitle);
+                            break;
+                        case EntityState.Deleted:
+                            // This format is important! Otherwise we will get `SQLite Error 11: 'database disk image is malformed'.` error!
+                            database.ExecuteSqlRaw(@"INSERT INTO Chapters_FTS(Chapters_FTS, rowid, Text, Title)
+                                                        VALUES('delete', {0}, {1}, {2}); ",
+                                    chapterOld.Id, normalizedOldText, normalizedOldTitle);
+                            break;
+                    }
+                }
+            }
+            finally
+            {
+                database.CommitTransaction();
+            }
+        }
+
+        private static bool shouldSkipAddedChapter(Chapter chapterNew)
+        {
+            // TODO: add your logic to avoid indexing this item
+            return false;
+        }
+
+        private static bool shouldSkipModifiedChapter(Chapter chapterNew, Chapter chapterOld)
+        {
+            // TODO: add your logic to avoid indexing this item
+            return chapterNew.Text == chapterOld.Text &amp;&amp; chapterNew.Title == chapterOld.Title;
+        }
+    }
+}</pre> </div>
+در اینجا نحوه‌ی تعریف متد UpdateChapterFTS را مشاهده می‌کند که اطلاعات خودش را از متد GetChangedEntities دریافت کرده و سپس یکی یکی آن‌ها را در جدول مجازی FTS، با فرمت مخصوصی که عنوان شد (دقیقا متناظر با فرمت تریگرهای مستندات رسمی FTS)، درج می‌کند. <br>
+
+
+همچنین در اینجا متد NormalizeText را نیز مشاهده می‌کند که بر روی ستون‌های متنی اعمال شده‌است. کار آن پاکسازی تگ‌های یک متن HTML ای است و نگهداری اطلاعات صرفا متنی آن. در اینجا اگر نیاز بود می‌توان منطق‌های پاکسازی اطلاعات دیگری را نیز اعمال کرد.<br>
+
+
+اکنون که این اطلاعات به صورت پاکسازی شده در جدول مجازی درج می‌شوند، زمانیکه بر روی آن‌ها جستجویی صورت می‌گیرد، دیگر شامل جستجوی بر روی تگ‌های HTML ای نیست و دقت بسیار بیشتری دارد.<br> <br> <b>ج) اتصال به سیستم</b> <br>
+
+
+پس از تعریف متدهای الحاقی GetChangedEntities و UpdateChapterFTS، اکنون روش اتصال آن‌ها به DbContext برنامه، با بازنویسی متد SaveChanges آن است:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">namespace EFCoreSQLiteFTS.DataLayer
+{
+    public class ApplicationDbContext : DbContext
+    {
+        public ApplicationDbContext(DbContextOptions options)
+            : base(options)
+        {
+        }
+
+        public DbSet&lt;Chapter&gt; Chapters { get; set; }
+        public DbSet&lt;User&gt; Users { get; set; }
+
+        public override int SaveChanges()
+        {
+            var changedChapters = this.GetChangedEntities&lt;Chapter&gt;();
+
+            this.ChangeTracker.AutoDetectChangesEnabled = false; // for performance reasons, to avoid calling DetectChanges() again.
+            var result = base.SaveChanges();
+            this.ChangeTracker.AutoDetectChangesEnabled = true;
+
+            this.UpdateChapterFTS(changedChapters);
+            return result;
+        }
+    }
+}</pre> </div>
+از این پس تمام عملیات insert/update/delete برنامه تحت کنترل قرار گرفته و به صورت خودکار سبب به روز رسانی جدول مجازی FTS نیز می‌شوند. <br> <br> <br>
+
+
+در قسمت بعدی، روش کوئری گرفتن از این جدول مجازی FTS را بررسی می‌کنیم.<span> </span></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/courses/topic/13/436a0f7b-c629-49ea-87d5-fa5bfe6f8211#comment-550'><span class='badge bg-light text-dark bg-gradient rounded-pill me-2'>بازخوردهای دوره</span>نگاهی به محتوا و نحوه‌ی تشکیل ایندکس‌های FTS</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/courses/topic/13/2921e85d-e10b-4f04-a556-0fa3cd382077#comment-415'><span class='badge bg-light text-dark bg-gradient rounded-pill me-2'>بازخوردهای دوره</span>بررسی Semantic Search و FTS Table-valued functions</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/courses/topic/13/2921e85d-e10b-4f04-a556-0fa3cd382077#comment-417'><span class='badge bg-light text-dark bg-gradient rounded-pill me-2'>بازخوردهای دوره</span>بررسی Semantic Search و FTS Table-valued functions</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/courses/topic/13/2921e85d-e10b-4f04-a556-0fa3cd382077#comment-523'><span class='badge bg-light text-dark bg-gradient rounded-pill me-2'>بازخوردهای دوره</span>بررسی Semantic Search و FTS Table-valued functions</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/courses/topic/13/2921e85d-e10b-4f04-a556-0fa3cd382077#comment-442'><span class='badge bg-light text-dark bg-gradient rounded-pill me-2'>بازخوردهای دوره</span>بررسی Semantic Search و FTS Table-valued functions</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3193.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>پیاده سازی Full-Text Search با SQLite و EF Core - قسمت دوم - کوئری گرفتن از جدول مجازی FTS</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3195.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>پیاده سازی Full-Text Search با SQLite و EF Core - قسمت سوم - بهبود کیفیت جستجوهای FTS توسط یک غلط یاب املایی</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/courses/topic/13/2921e85d-e10b-4f04-a556-0fa3cd382077'><span class='badge bg-warning rounded-pill me-2'>مطالب دوره‌ها</span>بررسی Semantic Search و FTS Table-valued functions</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/courses/topic/13/436a0f7b-c629-49ea-87d5-fa5bfe6f8211'><span class='badge bg-warning rounded-pill me-2'>مطالب دوره‌ها</span>نگاهی به محتوا و نحوه‌ی تشکیل ایندکس‌های FTS</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/courses/topic/12/09fd3eac-2e0c-458d-bb7e-68ed21445ef3'><span class='badge bg-warning rounded-pill me-2'>مطالب دوره‌ها</span>استفاده از Full Text Search بر روی اسناد XML</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>الیاس اثنا</strong>  در  <span dir='ltr'>۱۳۹۹/۰۲/۲۱ ۱۶:۲۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام و سپاس؛ امکان پیاده سازی همچین فرایندی بر روی خود sqlserver وجود نداره؟ اگر بحث ایندکس گذاری رو بر روی جداول Sql اعمال کنیم تفاوت پرفورمنس بازم هم زیاده نسبت به SqLite؟</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۹/۰۲/۲۱ ۲۰:۴۷</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>بله و وجود دارد: «<a href="https://www.dntips.ir/courses/details/13">پشتیبانی از Full Text Search در SQL Server</a>»</div>
+</div></li></ul></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫احراز هویت و اعتبارسنجی کاربران در برنامه‌های Angular - قسمت اول - معرفی و ایجاد ساختار برنامه</title>     <meta name="description" content="قصد داریم در طی یک سری مطلب، یک کلاینت Angular 5.x را برای مطلب « اعتبارسنجی مبتنی بر JWT در ASP.NET Core 2.0 بدون استفاده از سیستم Identity » تهیه کنیم. البته این سری، مستقل از قسمت سمت سرور آن تهیه خواهد شد و صرفا در حد دریافت توکن از سرور و یا ارسال مشخصات کاربر جهت لاگین، نیاز بیشتری به قسمت سمت سرور آن ندارد و تاکید آن بر روی مباحث سمت کلاینت Angular است. بنابراین اینکه چگونه این توکن را تولید می‌کنید، در اینجا اهمیتی ندارد و کلیات آن ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="احراز هویت و اعتبارسنجی کاربران در برنامه‌های Angular - قسمت اول - معرفی و ایجاد ساختار برنامه">
+    <meta itemprop="description" content="قصد داریم در طی یک سری مطلب، یک کلاینت Angular 5.x را برای مطلب « اعتبارسنجی مبتنی بر JWT در ASP.NET Core 2.0 بدون استفاده از سیستم Identity » تهیه کنیم. البته این سری، مستقل از قسمت سمت سرور آن تهیه خواهد شد و صرفا در حد دریافت توکن از سرور و یا ارسال مشخصات کاربر جهت لاگین، نیاز بیشتری به قسمت سمت سرور آن ندارد و تاکید آن بر روی مباحث سمت کلاینت Angular است. بنابراین اینکه چگونه این توکن را تولید می‌کنید، در اینجا اهمیتی ندارد و کلیات آن ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="احراز هویت و اعتبارسنجی کاربران در برنامه‌های Angular - قسمت اول - معرفی و ایجاد ساختار برنامه">
+    <meta property="og:description" content="قصد داریم در طی یک سری مطلب، یک کلاینت Angular 5.x را برای مطلب « اعتبارسنجی مبتنی بر JWT در ASP.NET Core 2.0 بدون استفاده از سیستم Identity » تهیه کنیم. البته این سری، مستقل از قسمت سمت سرور آن تهیه خواهد شد و صرفا در حد دریافت توکن از سرور و یا ارسال مشخصات کاربر جهت لاگین، نیاز بیشتری به قسمت سمت سرور آن ندارد و تاکید آن بر روی مباحث سمت کلاینت Angular است. بنابراین اینکه چگونه این توکن را تولید می‌کنید، در اینجا اهمیتی ندارد و کلیات آن ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="احراز هویت و اعتبارسنجی کاربران در برنامه‌های Angular - قسمت اول - معرفی و ایجاد ساختار برنامه">
+    <meta name="twitter:description" content="قصد داریم در طی یک سری مطلب، یک کلاینت Angular 5.x را برای مطلب « اعتبارسنجی مبتنی بر JWT در ASP.NET Core 2.0 بدون استفاده از سیستم Identity » تهیه کنیم. البته این سری، مستقل از قسمت سمت سرور آن تهیه خواهد شد و صرفا در حد دریافت توکن از سرور و یا ارسال مشخصات کاربر جهت لاگین، نیاز بیشتری به قسمت سمت سرور آن ندارد و تاکید آن بر روی مباحث سمت کلاینت Angular است. بنابراین اینکه چگونه این توکن را تولید می‌کنید، در اینجا اهمیتی ندارد و کلیات آن ...">
+    <meta name="twitter:card" content="قصد داریم در طی یک سری مطلب، یک کلاینت Angular 5.x را برای مطلب « اعتبارسنجی مبتنی بر JWT در ASP.NET Core 2.0 بدون استفاده از سیستم Identity » تهیه کنیم. البته این سری، مستقل از قسمت سمت سرور آن تهیه خواهد شد و صرفا در حد دریافت توکن از سرور و یا ارسال مشخصات کاربر جهت لاگین، نیاز بیشتری به قسمت سمت سرور آن ندارد و تاکید آن بر روی مباحث سمت کلاینت Angular است. بنابراین اینکه چگونه این توکن را تولید می‌کنید، در اینجا اهمیتی ندارد و کلیات آن ...">
+    <meta property="article:published_time" content="Sat, 16 Dec 2017 14:15:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫احراز هویت و اعتبارسنجی کاربران در برنامه‌های Angular - قسمت اول - معرفی و ایجاد ساختار برنامه";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-2790.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫احراز هویت و اعتبارسنجی کاربران در برنامه‌های Angular - قسمت دوم - سرویس اعتبارسنجی</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-2788.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫ایجاد تایمرها در برنامه‌های Angular</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫احراز هویت و اعتبارسنجی کاربران در برنامه‌های Angular - قسمت اول - معرفی و ایجاد ساختار برنامه</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۶/۰۹/۲۵ ۱۴:۱۵</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-2789.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'>قصد داریم در طی یک سری مطلب، یک کلاینت Angular 5.x را برای مطلب «<a href="www.dntips.ir-posts-2736.html">اعتبارسنجی مبتنی بر JWT در ASP.NET Core 2.0 بدون استفاده از سیستم Identity</a>» تهیه کنیم. البته این سری، مستقل از قسمت سمت سرور آن تهیه خواهد شد و صرفا در حد دریافت توکن از سرور و یا ارسال مشخصات کاربر جهت لاگین، نیاز بیشتری به قسمت سمت سرور آن ندارد و تاکید آن بر روی مباحث سمت کلاینت Angular است. بنابراین اینکه چگونه این توکن را تولید می‌کنید، در اینجا اهمیتی ندارد و کلیات آن با تمام روش‌های پیاده سازی سمت سرور (حتی مطلب «<a href="www.dntips.ir-posts-2439.html">پیاده سازی JSON Web Token با ASP.NET Web API 2.x</a>») سازگار است.<br>
+
+
+این سری شامل بررسی موارد ذیل خواهد بود:<br> <ol> <li>
+
+قسمت اول - معرفی و ایجاد ساختار برنامه</li> <li>
+
+قسمت دوم - سرویس اعتبارسنجی</li> <li>
+
+قسمت سوم - ورود به سیستم</li> <li>
+
+قسمت چهارم - به روز رسانی خودکار توکن‌ها</li> <li>
+
+قسمت پنجم - محافظت از مسیرها</li> <li>
+
+قسمت ششم - کار با منابع محافظت شده‌ی سمت سرور<span>&nbsp;</span> </li> </ol> <br> <br> <b>
+
+
+
+پیشنیازها </b> <br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+- <a href="https://www.dntips.ir/learningpaths/details/57">آشنایی با Angular CLI </a> <br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+- <a href="https://www.dntips.ir/learningpaths/details/58">آشنایی با مسیریابی‌ها در Angular </a> <br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+- <a href="https://www.dntips.ir/learningpaths/details/44">آشنایی با فرم‌های مبتنی بر قالب‌ها</a> <br> <br> <br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+همچنین اگر پیشتر Angular CLI را نصب کرده‌اید، قسمت «به روز رسانی Angular CLI» ذکر شده‌ی در مطلب «<a href="www.dntips.ir-posts-2628.html">Angular CLI - قسمت اول - نصب و راه اندازی</a>» را نیز اعمال کنید. در این سری از angular/cli: 1.6.0@ استفاده شده‌است.<br> <br> <br> <b>
+
+
+
+ایجاد ساختار اولیه و مسیریابی‌های آغازین مثال این سری </b> <br> <br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+در ادامه، یک پروژه‌ی جدید مبتنی بر Angular CLI را به نام ASPNETCore2JwtAuthentication.AngularClient به همراه تنظیمات ابتدایی مسیریابی آن ایجاد می‌کنیم:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">&gt; ng new ASPNETCore2JwtAuthentication.AngularClient --routing</pre> </div> <br>
+
+
+به علاوه، قصد استفاده‌ی از بوت استرپ را نیز داریم. به همین جهت ابتدا به ریشه‌ی پروژه وارد شده و سپس دستور ذیل را صادر کنید، تا بوت استرپ نصب شود و پرچم save آن سبب به روز رسانی فایل package.json نیز گردد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">&gt; npm install bootstrap --save</pre> </div>
+
+
+
+
+
+
+
+
+
+
+پس از آن نیاز است به فایل angular-cli.json. مراجعه کرده و شیوه‌نامه‌ی بوت استرپ را تعریف کنیم:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="JScript" name="code">  "apps": [
+    {
+      "styles": [
+    "../node_modules/bootstrap/dist/css/bootstrap.min.css",
+        "styles.css"
+      ],</pre> </div>
+
+
+
+
+
+
+
+
+
+
+به این ترتیب، به صورت خودکار این شیوه نامه به همراه توزیع برنامه حضور خواهد داشت و نیازی به تعریف مستقیم آن در فایل index.html نیست.<br> <br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+در ادامه برای تکمیل مثال جاری، دو کامپوننت جدید خوش‌آمدگویی و همچنین یافتن نشدن مسیرها را به برنامه اضافه می‌کنیم:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">&gt;ng g c welcome
+&gt;ng g c PageNotFound</pre> </div>
+
+
+
+
+
+
+
+
+
+
+که سبب ایجاد کامپوننت‌های src\app\welcome\welcome.component.ts و src\app\page-not-found\page-not-found.component.ts خواهند شد؛ به همراه به روز رسانی خودکار فایل src\app\app.module.ts جهت تکمیل قسمت declarations آن:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="TypeScript" name="code">@NgModule({
+  declarations: [
+    AppComponent,
+    WelcomeComponent,
+    PageNotFoundComponent
+  ],</pre> </div>
+
+
+
+
+
+
+
+
+
+
+سپس فایل src\app\app-routing.module.ts را به نحو ذیل تکمیل نمائید:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="TypeScript" name="code">import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
+import { WelcomeComponent } from './welcome/welcome.component';
+import { NgModule } from '@angular/core';
+import { Routes, RouterModule } from '@angular/router';
+const routes: Routes = [
+  { path: 'welcome', component: WelcomeComponent },
+  { path: '', redirectTo: 'welcome', pathMatch: 'full' },
+  { path: '**', component: PageNotFoundComponent }
+];
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule]
+})
+export class AppRoutingModule { }</pre> </div>
+
+
+
+
+
+
+
+
+
+
+در اینجا زمانیکه کاربر ریشه‌ی سایت را درخواست می‌کند، به کامپوننت welcome هدایت خواهد شد.<br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+همچنین مدیریت مسیریابی آدرس‌های ناموجود در سایت نیز با تعریف ** صورت گرفته‌است.<br> <br> <br> <b>ایجاد ماژول Authentication و تعریف کامپوننت لاگین</b> <br> <br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+کامپوننت‌های احراز هویت و اعتبارسنجی کاربران را در ماژولی به نام Authentication قرار خواهیم داد. بنابراین ماژول جدید آن‌را به همراه تنظیمات ابتدایی مسیریابی آن ایجاد می‌کنیم:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">&gt;ng g m Authentication -m app.module --routing</pre> </div>
+
+
+
+
+
+
+
+
+
+
+با این خروجی<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">  create src/app/authentication/authentication-routing.module.ts (257 bytes)
+  create src/app/authentication/authentication.module.ts (311 bytes)
+  update src/app/app.module.ts (696 bytes)</pre> </div>
+
+
+
+
+
+
+
+
+
+
+اگر به سطر آخر آن دقت کنید، فایل app.module.ts را نیز به صورت خودکار به روز رسانی کرده‌است:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="TypeScript" name="code">import { EmployeeRoutingModule } from './employee/employee-routing.module';
+@NgModule({
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    AuthenticationModule
+  ]</pre> </div>
+
+
+
+
+
+
+
+
+
+
+در اینجا AuthenticationModule را به انتهای لیست imports افزوده‌است که نیاز به اندکی تغییر دارد و باید آن‌را پیش از AppRoutingModule تعریف کرد. علت این است که AppRoutingModule، دارای تعریف مسیریابی ** یا catch all است که آن‌را جهت مدیریت مسیرهای یافت نشده به برنامه افزوده‌ایم. بنابراین اگر ابتدا AppRoutingModule تعریف شود و سپس AuthenticationModule، هیچگاه فرصت به پردازش مسیریابی‌های ماژول اعتبارسنجی نمی‌رسد؛ چون مسیر ** پیشتر برنده شده‌است.<br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+بنابراین فایل app.module.ts چنین تعاریفی را پیدا می‌کند:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="TypeScript" name="code">import { EmployeeModule } from './employee/employee.module';
+@NgModule({
+  imports: [
+    BrowserModule,
+    AuthenticationModule,
+    AppRoutingModule 
+  ]</pre> </div> <br>
+
+
+
+
+
+
+
+
+
+
+در ادامه کامپوننت جدید لاگین را به این ماژول اضافه می‌کنیم:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">&gt;ng g c Authentication/Login</pre> </div>
+
+
+
+
+
+
+
+
+
+
+با این خروجی<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">  create src/app/Authentication/login/login.component.html (24 bytes)
+  create src/app/Authentication/login/login.component.ts (265 bytes)
+  create src/app/Authentication/login/login.component.css (0 bytes)
+  update src/app/Authentication/authentication.module.ts (383 bytes)</pre> </div>
+
+
+
+
+
+
+
+
+
+
+اگر به سطر آخر آن دقت کنید، کار به روز رسانی فایل ماژول authentication، جهت درج این کامپوننت جدید، در قسمت declarations فایل authentication.module.ts نیز به صورت خودکار انجام شده‌است:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="TypeScript" name="code">import { LoginComponent } from "./login/login.component";
+
+@NgModule({
+  declarations: [LoginComponent]
+})</pre> </div> <br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+در ادامه می‌خواهیم قالب این کامپوننت را در منوی اصلی سایت قابل دسترسی کنیم. به همین جهت به فایل src/app/authentication/authentication-routing.module.ts مراجعه کرده و مسیریابی این کامپوننت را تعریف می‌کنیم:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="TypeScript" name="code">import { LoginComponent } from "./login/login.component";
+
+const routes: Routes = [
+  { path: "login", component: LoginComponent }
+];</pre> </div>
+
+
+
+
+
+
+
+
+
+
+ابتدا کامپوننت لاگین import شده و سپس آرایه‌ی Routes، مسیری را به این کامپوننت تعریف کرده‌است.<br> <br> <br> <b>ایجاد ماژول‌های Core و Shared</b> <br> <br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+در مطلب «<a href="www.dntips.ir-posts-2765.html">سازماندهی برنامه‌های Angular توسط ماژول‌ها</a>» در مورد اهمیت ایجاد ماژول‌های Core و Shared بحث شد. در اینجا نیز این دو ماژول را ایجاد خواهیم کرد.<br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+فایل src\app\core\core.module.ts، جهت به اشتراک گذاری سرویس‌های singleton سراسری برنامه، یک چنین ساختاری را پیدا می‌کند:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="TypeScript" name="code">import { NgModule, SkipSelf, Optional, } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { RouterModule } from "@angular/router";
+
+// import RxJs needed operators only once
+import "./services/rxjs-operators";
+
+import { BrowserStorageService } from "./browser-storage.service";
+
+@NgModule({
+  imports: [CommonModule, RouterModule],
+  exports: [
+    // components that are used in app.component.ts will be listed here.
+  ],
+  declarations: [
+    // components that are used in app.component.ts will be listed here.
+  ],
+  providers: [
+    // global singleton services of the whole app will be listed here.
+    BrowserStorageService
+  ]
+})
+export class CoreModule {
+  constructor( @Optional() @SkipSelf() core: CoreModule) {
+    if (core) {
+      throw new Error("CoreModule should be imported ONLY in AppModule.");
+    }
+  }
+}</pre> </div>
+
+
+
+
+
+
+
+
+در اینجا از BrowserStorageService مطلب «<a href="www.dntips.ir-posts-2767.html">ذخیره سازی اطلاعات در مرورگر توسط برنامه‌های Angular</a>» استفاده شده‌است تا در سراسر برنامه در دسترس باشد. از آن در جهت ذخیره سازی توکن دریافتی از سرور در مرورگر کاربر، استفاده خواهیم کرد.<br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+همچنین سطر "import "./services/rxjs-operators نیز از مطلب «<a href="www.dntips.ir-posts-2726.html">روش‌هایی برای مدیریت بهتر عملگرهای RxJS در برنامه‌های Angular</a>» کمک می‌گیرد تا مدام نیاز به import عملگرهای rxjs نباشد.<br> <br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+و ساختار فایل src\app\shared\shared.module.ts جهت به اشتراک گذاری کامپوننت‌های مشترک بین تمام ماژول‌ها، به صورت ذیل است:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="TypeScript" name="code">import { NgModule, ModuleWithProviders } from "@angular/core";
+import { CommonModule } from "@angular/common";
+
+@NgModule({
+  imports: [
+    CommonModule
+  ],
+  entryComponents: [
+    // All components about to be loaded "dynamically" need to be declared in the entryComponents section.
+  ],
+  declarations: [
+    // common and shared components/directives/pipes between more than one module and components will be listed here.
+  ],
+  exports: [
+    // common and shared components/directives/pipes between more than one module and components will be listed here.
+    CommonModule
+  ]
+  /* No providers here! Since they’ll be already provided in AppModule. */
+})
+export class SharedModule {
+  static forRoot(): ModuleWithProviders {
+    // Forcing the whole app to use the returned providers from the AppModule only.
+    return {
+      ngModule: SharedModule,
+      providers: [ /* All of your services here. It will hold the services needed by&nbsp;`itself`. */]
+    };
+  }
+}</pre> </div> <br>
+
+
+و در آخر تعاریف این دو ماژول جدید به فایل src\app\app.module.ts اضافه خواهند شد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="TypeScript" name="code">import { FormsModule } from "@angular/forms";
+import { HttpClientModule } from "@angular/common/http";
+
+import { CoreModule } from "./core/core.module";
+import { SharedModule } from "./shared/shared.module";
+
+@NgModule({
+  imports: [
+    BrowserModule,
+    FormsModule,
+    HttpClientModule,
+    CoreModule,
+    SharedModule.forRoot(),
+    AuthenticationModule,
+    AppRoutingModule
+  ]
+})
+export class AppModule { }</pre> </div>
+
+
+
+
+در اینجا «FormsModule» و «<a href="www.dntips.ir-posts-2728.html">HttpClientModule جدید</a>» اضافه شده از Angular 4.3 را نیز import کرده‌ایم.<br> <br> <br> <b>
+
+
+
+
+
+
+
+
+
+افزودن کامپوننت Header</b> <br> <br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+در ادامه می‌خواهیم لینکی را به این مسیریابی جدید در نوار راهبری بالای سایت اضافه کنیم. همچنین قصد نداریم فایل app.component.html را با تعاریف آن شلوغ کنیم. به همین جهت یک کامپوننت هدر جدید را برای این منظور اضافه می‌کنیم:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">&gt; ng g c Header</pre> </div>
+
+
+
+
+با این خروجی:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">  create src/app/header/header.component.html (25 bytes)
+  create src/app/header/header.component.ts (269 bytes)
+  create src/app/header/header.component.css (0 bytes)
+  update src/app/app.module.ts (1069 bytes)</pre> </div>
+
+
+
+
+سپس به فایل src\app\header\header.component.html مراجعه کرده و آن‌را به صورت ذیل تغییر می‌دهیم:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="XML" name="code">&lt;nav&gt;
+  &lt;div&gt;
+    &lt;div&gt;
+      &lt;a [routerLink]="['/']"&gt;{{title}}&lt;/a&gt;
+    &lt;/div&gt;
+    &lt;ul&gt;
+      &lt;li role="menuitem" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"&gt;
+        &lt;a [routerLink]="['/welcome']"&gt;Home&lt;/a&gt;
+      &lt;/li&gt;
+      &lt;li role="menuitem" routerLinkActive="active"&gt;
+        &lt;a queryParamsHandling="merge" [routerLink]="['/login']"&gt;Login&lt;/a&gt;
+      &lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/div&gt;
+&lt;/nav&gt;</pre> </div>
+
+
+
+
+که title آن نیز به صورت ذیل تامین می‌شود:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="TypeScript" name="code">export class HeaderComponent implements OnInit {
+    title = "Angular.Jwt.Core";</pre> </div> <br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+در آخر به فایل app.component.html مراجعه کرده و selector این کامپوننت را در آن درج می‌کنیم:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="XML" name="code">&lt;app-header&gt;&lt;/app-header&gt;
+&lt;div&gt;
+  &lt;router-outlet&gt;&lt;/router-outlet&gt;
+&lt;/div&gt;</pre> </div>
+
+
+
+
+زمانیکه یک کامپوننت فعالسازی می‌شود، قالب آن در router-outlet نمایش داده خواهد شد. app-header نیز کار نمایش nav-bar را انجام می‌دهد.<br> <br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+تا اینجا اگر دستور ng serve -o را صادر کنیم (کار build درون حافظه‌ای، جهت محیط توسعه و نمایش خودکار برنامه در مرورگر)، چنین خروجی در مرورگر نمایان خواهد شد (البته می‌توان پنجره‌ی کنسول ng serve را باز نگه داشت تا کار watch را به صورت خودکار انجام دهد؛ این روش سریعتر و به همراه build تدریجی است):<br> <br> <p style="display:block; margin-left: auto; margin-right: auto;"> <img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/png;base64,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"> </p> <br> <br> <b>انتقال کامپوننت‌هایی که در app.component.ts استفاده می‌شوند به CoreModule</b> <br> <br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&nbsp;با توجه به مطلب «<a href="www.dntips.ir-posts-2765.html">سازماندهی برنامه‌های Angular توسط ماژول‌ها</a>»، کامپوننت‌هایی که در app.component.ts مورد استفاده قرار می‌گیرند، باید به Core Module منتقل شوند و قسمت declarations فایل app.module.ts از آن‌ها خالی گردد. به همین جهت پوشه‌ی جدید src\app\core\component را ایجاد کرده و سپس پوشه‌ی src\app\header را به آنجا منتقل می‌کنیم (با تمام فایل‌های درون آن).<br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+پس از آن، تعریف HeaderComponent را از قسمت declarations مربوط به AppModule حذف کرده و آن‌را به دو قسمت exports و declarations مربوط به CoreModule منتقل می‌کنیم:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="TypeScript" name="code">import { HeaderComponent } from "./component/header/header.component";
+
+@NgModule({
+  exports: [
+    // components that are used in app.component.ts will be listed here.
+    HeaderComponent
+  ],
+  declarations: [
+    // components that are used in app.component.ts will be listed here.
+    HeaderComponent
+  ]
+})
+export class CoreModule {</pre> </div> <br> <br> <b>
+
+
+
+
+
+
+
+
+
+کدهای کامل این سری را <a href="https://github.com/VahidN/ASPNETCore2JwtAuthentication/tree/master/src/ASPNETCore2JwtAuthentication.AngularClient">از اینجا</a>  می‌توانید دریافت کنید. </b> <br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+برای اجرای آن فرض بر این است که پیشتر Angular CLI را نصب کرده‌اید. سپس از طریق خط فرمان به ریشه‌ی پروژه‌ی ASPNETCore2JwtAuthentication.AngularClient وارد شده و دستور npm install را صادر کنید تا وابستگی‌های آن دریافت و نصب شوند. در آخر با اجرای دستور ng serve -o برنامه ساخته شده و در مرورگر پیش فرض سیستم نمایش داده خواهد شد (و یا همان اجرای فایل ng-serve.bat). همچنین باید به پوشه‌ی ASPNETCore2JwtAuthentication.WebApp نیز مراجعه کرده و فایل dotnet_run.bat را اجرا کنید، تا توکن سرور برنامه نیز فعال شود.<span> </span></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2877.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Angular Material 6x - قسمت اول - افزودن آن به برنامه</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3020.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>چگونه پروژه‌های Angular ی سبکی داشته باشیم - قسمت دوم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2684.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>فرم‌های مبتنی بر قالب‌ها در Angular - قسمت اول - معرفی و ایجاد ساختار برنامه</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2765.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>سازماندهی برنامه‌های Angular توسط ماژول‌ها</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2633.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Angular CLI - قسمت چهارم - تنظیمات مسیریابی</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2811.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>نمایش Breadcrumbs در برنامه‌های Angular</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2784.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>کار با modal dialogs مجموعه Bootstrap در برنامه‌های Angular</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2648.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مسیریابی در Angular - قسمت دوم - مسیریابی ماژول‌ها</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2790.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>احراز هویت و اعتبارسنجی کاربران در برنامه‌های Angular - قسمت دوم - سرویس اعتبارسنجی</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2765.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>سازماندهی برنامه‌های Angular توسط ماژول‌ها</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>محمد دلیری</strong>  در  <span dir='ltr'>۱۳۹۶/۱۲/۰۶ ۱۲:۱۷</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>بنده یک function در&nbsp;<span style="background-color: rgb(245, 245, 245);">HeaderComponent&nbsp;</span>دارم چگونه می‌توانم این function را در component‌های دیگر که خارج از&nbsp;<span style="background-color: rgb(245, 245, 245);">CoreModule&nbsp;</span>هستند، صدا بزنم ؟</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۶/۱۲/۰۶ ۱۲:۳۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>«<a href="www.dntips.ir-posts-2782.html">صدور رخدادها از سرویس‌ها به کامپوننت‌ها در برنامه‌های Angular</a>»
+
+                <span>&nbsp;</span></div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۷/۰۲/۱۷ ۹:۲۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><b>به روز رسانی</b> <br>
+کدهای مخزن کد این پروژه به Angular 6 <a href="https://github.com/VahidN/ASPNETCore2JwtAuthentication/commit/4375a2fd58c7f8932de77c39ad808417b75928f6">به روز رسانی شد</a>.</div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>ابوالفضل روشن ضمیر</strong>  در  <span dir='ltr'>۱۳۹۷/۰۲/۲۷ ۲۰:۳۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>در زمان لاگین کردن، در صورتیکه برگه‌ی Network را باز کنیم متوجه خواهیم شد که دو Request&nbsp; به سمت سرور ارسال می‌شود! این مشکل نه تنها در این فرم login وجود دارد، بلکه در هر جایی که یک درخواست Http صادر می‌شود وجود دارد. دلیل چیست؟&nbsp;</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۷/۰۲/۲۷ ۲۰:۵۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>این مشکل نیست. درخواست اول برای <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS">بررسی CORS</a>  است و درخواست دوم اصل کار. اگر کلاینت و سرور را بر روی یک آدرس و پورت اجرا کنید، <a href="https://github.com/VahidN/ASPNETCore2JwtAuthentication/blob/master/src/ASPNETCore2JwtAuthentication.WebApp/Startup.cs#L119">چنین مساله‌ای</a>  رخ نخواهد داد.</div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۸/۰۴/۰۱ ۱۲:۱۵</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div> <b>یک نکته‌ی تکمیلی</b> </div> <div>اگر NET Core 3 SDK. را نصب کنید، امکان ایجاد یک برنامه‌ی Angular مبتنی بر Microsoft.AspNetCore.ApiAuthorization.<b>IdentityServer</b> <span> </span>به قالب‌های پیش‌فرض آن اضافه شده‌است. روش ایجاد آن توسط دستورات CLI به صورت زیر است:</div> <div> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">dotnet new angular --auth Individual</pre> </div> <p style="display:block; margin-left: auto; margin-right: auto;"> <img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/png;base64,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"> </p> </div> <div>همین مورد برای برنامه‌های React نیز پیش بینی شده‌است:</div> <div> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">dotnet new react --auth Individual
+//or
+dotnet new reactredux --auth Individual</pre> </div> </div></div>
+</div></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

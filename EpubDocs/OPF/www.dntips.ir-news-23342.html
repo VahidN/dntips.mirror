@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫دفاع از دستور MERGE در SQL Server: کشف مزایای غیرمنتظره</title>     <meta name="description" content="در این مقاله، اریک دارلینگ از دستور MERGE در SQL Server دفاع می‌کند و نشان می‌دهد که چگونه می‌تواند به شناسایی به‌روزرسانی‌های نامشخص کمک کند، چیزی که یک دستور UPDATE استاندارد قادر به انجام آن نیست. این مقاله به بررسی مزایای این دستور و ارائه راهکارهایی برای اطمینان از determinism به‌روزرسانی‌ها با استفاده از توابع پنجره‌ای مانند ROW_NUMBER() می‌پردازد.
+
+تمرکز اصلی این مقاله بر روی این است که چگونه دستور MERGE می‌تواند هشداری را در هنگام تلاش برای انجام به‌روزرسانی‌های نامشخص صادر کند. این ویژگی به توسعه‌دهندگان کمک می‌کند تا از یکپارچگی و سازگاری داده‌ها در پایگاه داده خود اطمینان حاصل کنند. اریک دارلینگ با ارائه این دیدگاه، قصد دارد ارزش دستور MERGE را در ابزارهای توسعه پایگاه داده افزایش دهد.
+
+این مقاله همچنین به بررسی راهکارهای عملی برای ایجاد به‌روزرسانی‌های determinist با استفاده از توابع پنجره‌ای می‌پردازد. با استفاده از این تکنیک‌ها، توسعه‌دهندگان می‌توانند از بروز مشکلات ناشی از به‌روزرسانی‌های نامشخص جلوگیری کرده و اطمینان حاصل کنند که داده‌ها به طور قابل پیش‌بینی و سازگار تغییر می‌کنند. این امر به ویژه در محیط‌های پیچیده با حجم بالای داده بسیار مهم است.
+
+در نهایت، این مقاله برای هر کسی که با عملیات پیچیده داده در SQL Server سروکار دارد، مفید خواهد بود. چه به دنبال بهبود قابلیت اطمینان پرس و جوها باشید و چه فقط بخواهید یک ویژگی کمتر استفاده شده را بهتر درک کنید، این مقاله اطلاعات ارزشمندی را ارائه می‌دهد. اریک دارلینگ همچنین به منابع اضافی مانند کلاس‌های ضبط شده، اسکریپت‌ها و اطلاعات تماس اشاره می‌کند.">
+    <meta name="author" content="راویAI">
+    <meta itemprop="name" content="دفاع از دستور MERGE در SQL Server: کشف مزایای غیرمنتظره">
+    <meta itemprop="description" content="در این مقاله، اریک دارلینگ از دستور MERGE در SQL Server دفاع می‌کند و نشان می‌دهد که چگونه می‌تواند به شناسایی به‌روزرسانی‌های نامشخص کمک کند، چیزی که یک دستور UPDATE استاندارد قادر به انجام آن نیست. این مقاله به بررسی مزایای این دستور و ارائه راهکارهایی برای اطمینان از determinism به‌روزرسانی‌ها با استفاده از توابع پنجره‌ای مانند ROW_NUMBER() می‌پردازد.
+
+تمرکز اصلی این مقاله بر روی این است که چگونه دستور MERGE می‌تواند هشداری را در هنگام تلاش برای انجام به‌روزرسانی‌های نامشخص صادر کند. این ویژگی به توسعه‌دهندگان کمک می‌کند تا از یکپارچگی و سازگاری داده‌ها در پایگاه داده خود اطمینان حاصل کنند. اریک دارلینگ با ارائه این دیدگاه، قصد دارد ارزش دستور MERGE را در ابزارهای توسعه پایگاه داده افزایش دهد.
+
+این مقاله همچنین به بررسی راهکارهای عملی برای ایجاد به‌روزرسانی‌های determinist با استفاده از توابع پنجره‌ای می‌پردازد. با استفاده از این تکنیک‌ها، توسعه‌دهندگان می‌توانند از بروز مشکلات ناشی از به‌روزرسانی‌های نامشخص جلوگیری کرده و اطمینان حاصل کنند که داده‌ها به طور قابل پیش‌بینی و سازگار تغییر می‌کنند. این امر به ویژه در محیط‌های پیچیده با حجم بالای داده بسیار مهم است.
+
+در نهایت، این مقاله برای هر کسی که با عملیات پیچیده داده در SQL Server سروکار دارد، مفید خواهد بود. چه به دنبال بهبود قابلیت اطمینان پرس و جوها باشید و چه فقط بخواهید یک ویژگی کمتر استفاده شده را بهتر درک کنید، این مقاله اطلاعات ارزشمندی را ارائه می‌دهد. اریک دارلینگ همچنین به منابع اضافی مانند کلاس‌های ضبط شده، اسکریپت‌ها و اطلاعات تماس اشاره می‌کند.">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="دفاع از دستور MERGE در SQL Server: کشف مزایای غیرمنتظره">
+    <meta property="og:description" content="در این مقاله، اریک دارلینگ از دستور MERGE در SQL Server دفاع می‌کند و نشان می‌دهد که چگونه می‌تواند به شناسایی به‌روزرسانی‌های نامشخص کمک کند، چیزی که یک دستور UPDATE استاندارد قادر به انجام آن نیست. این مقاله به بررسی مزایای این دستور و ارائه راهکارهایی برای اطمینان از determinism به‌روزرسانی‌ها با استفاده از توابع پنجره‌ای مانند ROW_NUMBER() می‌پردازد.
+
+تمرکز اصلی این مقاله بر روی این است که چگونه دستور MERGE می‌تواند هشداری را در هنگام تلاش برای انجام به‌روزرسانی‌های نامشخص صادر کند. این ویژگی به توسعه‌دهندگان کمک می‌کند تا از یکپارچگی و سازگاری داده‌ها در پایگاه داده خود اطمینان حاصل کنند. اریک دارلینگ با ارائه این دیدگاه، قصد دارد ارزش دستور MERGE را در ابزارهای توسعه پایگاه داده افزایش دهد.
+
+این مقاله همچنین به بررسی راهکارهای عملی برای ایجاد به‌روزرسانی‌های determinist با استفاده از توابع پنجره‌ای می‌پردازد. با استفاده از این تکنیک‌ها، توسعه‌دهندگان می‌توانند از بروز مشکلات ناشی از به‌روزرسانی‌های نامشخص جلوگیری کرده و اطمینان حاصل کنند که داده‌ها به طور قابل پیش‌بینی و سازگار تغییر می‌کنند. این امر به ویژه در محیط‌های پیچیده با حجم بالای داده بسیار مهم است.
+
+در نهایت، این مقاله برای هر کسی که با عملیات پیچیده داده در SQL Server سروکار دارد، مفید خواهد بود. چه به دنبال بهبود قابلیت اطمینان پرس و جوها باشید و چه فقط بخواهید یک ویژگی کمتر استفاده شده را بهتر درک کنید، این مقاله اطلاعات ارزشمندی را ارائه می‌دهد. اریک دارلینگ همچنین به منابع اضافی مانند کلاس‌های ضبط شده، اسکریپت‌ها و اطلاعات تماس اشاره می‌کند.">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="دفاع از دستور MERGE در SQL Server: کشف مزایای غیرمنتظره">
+    <meta name="twitter:description" content="در این مقاله، اریک دارلینگ از دستور MERGE در SQL Server دفاع می‌کند و نشان می‌دهد که چگونه می‌تواند به شناسایی به‌روزرسانی‌های نامشخص کمک کند، چیزی که یک دستور UPDATE استاندارد قادر به انجام آن نیست. این مقاله به بررسی مزایای این دستور و ارائه راهکارهایی برای اطمینان از determinism به‌روزرسانی‌ها با استفاده از توابع پنجره‌ای مانند ROW_NUMBER() می‌پردازد.
+
+تمرکز اصلی این مقاله بر روی این است که چگونه دستور MERGE می‌تواند هشداری را در هنگام تلاش برای انجام به‌روزرسانی‌های نامشخص صادر کند. این ویژگی به توسعه‌دهندگان کمک می‌کند تا از یکپارچگی و سازگاری داده‌ها در پایگاه داده خود اطمینان حاصل کنند. اریک دارلینگ با ارائه این دیدگاه، قصد دارد ارزش دستور MERGE را در ابزارهای توسعه پایگاه داده افزایش دهد.
+
+این مقاله همچنین به بررسی راهکارهای عملی برای ایجاد به‌روزرسانی‌های determinist با استفاده از توابع پنجره‌ای می‌پردازد. با استفاده از این تکنیک‌ها، توسعه‌دهندگان می‌توانند از بروز مشکلات ناشی از به‌روزرسانی‌های نامشخص جلوگیری کرده و اطمینان حاصل کنند که داده‌ها به طور قابل پیش‌بینی و سازگار تغییر می‌کنند. این امر به ویژه در محیط‌های پیچیده با حجم بالای داده بسیار مهم است.
+
+در نهایت، این مقاله برای هر کسی که با عملیات پیچیده داده در SQL Server سروکار دارد، مفید خواهد بود. چه به دنبال بهبود قابلیت اطمینان پرس و جوها باشید و چه فقط بخواهید یک ویژگی کمتر استفاده شده را بهتر درک کنید، این مقاله اطلاعات ارزشمندی را ارائه می‌دهد. اریک دارلینگ همچنین به منابع اضافی مانند کلاس‌های ضبط شده، اسکریپت‌ها و اطلاعات تماس اشاره می‌کند.">
+    <meta name="twitter:card" content="در این مقاله، اریک دارلینگ از دستور MERGE در SQL Server دفاع می‌کند و نشان می‌دهد که چگونه می‌تواند به شناسایی به‌روزرسانی‌های نامشخص کمک کند، چیزی که یک دستور UPDATE استاندارد قادر به انجام آن نیست. این مقاله به بررسی مزایای این دستور و ارائه راهکارهایی برای اطمینان از determinism به‌روزرسانی‌ها با استفاده از توابع پنجره‌ای مانند ROW_NUMBER() می‌پردازد.
+
+تمرکز اصلی این مقاله بر روی این است که چگونه دستور MERGE می‌تواند هشداری را در هنگام تلاش برای انجام به‌روزرسانی‌های نامشخص صادر کند. این ویژگی به توسعه‌دهندگان کمک می‌کند تا از یکپارچگی و سازگاری داده‌ها در پایگاه داده خود اطمینان حاصل کنند. اریک دارلینگ با ارائه این دیدگاه، قصد دارد ارزش دستور MERGE را در ابزارهای توسعه پایگاه داده افزایش دهد.
+
+این مقاله همچنین به بررسی راهکارهای عملی برای ایجاد به‌روزرسانی‌های determinist با استفاده از توابع پنجره‌ای می‌پردازد. با استفاده از این تکنیک‌ها، توسعه‌دهندگان می‌توانند از بروز مشکلات ناشی از به‌روزرسانی‌های نامشخص جلوگیری کرده و اطمینان حاصل کنند که داده‌ها به طور قابل پیش‌بینی و سازگار تغییر می‌کنند. این امر به ویژه در محیط‌های پیچیده با حجم بالای داده بسیار مهم است.
+
+در نهایت، این مقاله برای هر کسی که با عملیات پیچیده داده در SQL Server سروکار دارد، مفید خواهد بود. چه به دنبال بهبود قابلیت اطمینان پرس و جوها باشید و چه فقط بخواهید یک ویژگی کمتر استفاده شده را بهتر درک کنید، این مقاله اطلاعات ارزشمندی را ارائه می‌دهد. اریک دارلینگ همچنین به منابع اضافی مانند کلاس‌های ضبط شده، اسکریپت‌ها و اطلاعات تماس اشاره می‌کند.">
+    <meta property="article:published_time" content="Fri, 30 Jan 2026 19:25:52 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫دفاع از دستور MERGE در SQL Server: کشف مزایای غیرمنتظره";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-news-23344.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫ابزار Time Boxed جدید: ConsoleImage برای رندر ترمینال با استفاده از ASCII Art</span>
+   </h6>
+</a><a href='www.dntips.ir-news-23340.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫اعلام کنفرانس Microsoft 365 Community Conference 2026</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫دفاع از دستور MERGE در SQL Server: کشف مزایای غیرمنتظره</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>راویAI<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۴/۱۱/۱۰ ۲۲:۵۵</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-news-23342.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>در این مقاله، اریک دارلینگ از دستور MERGE در SQL Server دفاع می‌کند و نشان می‌دهد که چگونه می‌تواند به شناسایی به‌روزرسانی‌های نامشخص کمک کند، چیزی که یک دستور UPDATE استاندارد قادر به انجام آن نیست. این مقاله به بررسی مزایای این دستور و ارائه راهکارهایی برای اطمینان از determinism به‌روزرسانی‌ها با استفاده از توابع پنجره‌ای مانند ROW_NUMBER() می‌پردازد.
+
+تمرکز اصلی این مقاله بر روی این است که چگونه دستور MERGE می‌تواند هشداری را در هنگام تلاش برای انجام به‌روزرسانی‌های نامشخص صادر کند. این ویژگی به توسعه‌دهندگان کمک می‌کند تا از یکپارچگی و سازگاری داده‌ها در پایگاه داده خود اطمینان حاصل کنند. اریک دارلینگ با ارائه این دیدگاه، قصد دارد ارزش دستور MERGE را در ابزارهای توسعه پایگاه داده افزایش دهد.
+
+این مقاله همچنین به بررسی راهکارهای عملی برای ایجاد به‌روزرسانی‌های determinist با استفاده از توابع پنجره‌ای می‌پردازد. با استفاده از این تکنیک‌ها، توسعه‌دهندگان می‌توانند از بروز مشکلات ناشی از به‌روزرسانی‌های نامشخص جلوگیری کرده و اطمینان حاصل کنند که داده‌ها به طور قابل پیش‌بینی و سازگار تغییر می‌کنند. این امر به ویژه در محیط‌های پیچیده با حجم بالای داده بسیار مهم است.
+
+در نهایت، این مقاله برای هر کسی که با عملیات پیچیده داده در SQL Server سروکار دارد، مفید خواهد بود. چه به دنبال بهبود قابلیت اطمینان پرس و جوها باشید و چه فقط بخواهید یک ویژگی کمتر استفاده شده را بهتر درک کنید، این مقاله اطلاعات ارزشمندی را ارائه می‌دهد. اریک دارلینگ همچنین به منابع اضافی مانند کلاس‌های ضبط شده، اسکریپت‌ها و اطلاعات تماس اشاره می‌کند.</div><br><br><a href='https://erikdarling.com/in-defense-of-merge-non-deterministic-updates'>مشاهده مطلب اصلی</a></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-23244.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>بررسی انواع داده‌های تاریخ و زمان در SQL Server</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-24003.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>معرفی پایگاه داده Stack Overflow 2010 برای آموزش هوش مصنوعی در .NET</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-23932.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>آشنایی با نوع داده‌ی برداری و تابع فاصله‌ی برداری در SQL Server 2025</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20980.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>قواعد بهینه‌ساز SQL Server که مایلم داشت: بررسی و راهکارها</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-24170.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>آماده‌سازی برای هوش مصنوعی با اریک: کمی در مورد یافتن محتوای مرتبط</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-24149.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>آشنایی با مفهوم فاصله برداری در هوش مصنوعی با اریک دارلینگ</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-22960.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>معماری ویرایشگر در SwiftUI: مقیاس‌پذیری متن، رسانه و فرم‌ها</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20397.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>رویکرد صحیح در توسعه نرم‌افزار: تعادلی هوشمندانه بین شاخه‌ها و یکپارچه‌سازی مداوم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20403.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>استفاده از قفل‌های توزیع‌شده برای جلوگیری از اجرای مجدد وظایف پشت‌صحنه</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20270.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>بهینه‌سازی عملکرد کوئری‌ها در EF Core و SQL با فیلتر به‌هنگام اطلاعات</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

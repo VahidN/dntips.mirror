@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫ایجاد گواهی فهرست مواد نرم‌افزاری (SBOM) برای بسته‌های NuGet منبع باز در GitHub Actions</title>     <meta name="description" content="این مقاله به بررسی ابزارهای مختلفی می‌پردازد که می‌توان از آن‌ها برای ایجاد فهرست مواد نرم‌افزاری (SBOM) برای یک برنامه یا بسته‌ی NuGet استفاده کرد. نویسنده، اندرو لاک، روش استفاده از دکمه &quot;Export SBOM&quot; در GitHub، ابزار خط فرمان Microsoft به نام sbom-tool، اکشن GitHub به نام anchore/sbom-action و ماژول CycloneDX برای .NET را نشان می‌دهد.
+
+فهرست مواد نرم‌افزاری (SBOM) در واقع لیستی از تمام بسته‌ها و وابستگی‌هایی است که در ساخت یک مصنوع نرم‌افزاری مانند یک برنامه یا یک بسته استفاده می‌شوند. SBOMها برای توسعه‌دهندگان و همچنین افرادی که از نرم‌افزار استفاده می‌کنند یا آن را اداره می‌کنند مفید هستند. این فهرست دیدگاهی در مورد اجزای موجود در نرم‌افزار فراهم می‌کند، از جمله هرگونه اجزایی که دارای آسیب‌پذیری‌های شناخته شده هستند و همچنین مسائل مربوط به انطباق یا مجوز یا خطرات زنجیره تامین.
+
+دو فرمت محبوب SBOM، System Package Data Exchange (SPDX) و CycloneDX هستند. هر دو فرمت دارای گزینه سند JSON هستند و به عنوان استانداردهای ISO/IEC 5692:2021 برای SPDX و ECMA-424 برای CycloneDX مشخص شده‌اند. می‌توان آن‌ها را با استفاده از طیف گسترده‌ای از ابزارهای منبع باز تولید کرد. اندرو لاک در این مقاله به بررسی روش‌های ساده برای تولید SBOM برای بسته‌های NuGet منبع باز خود می‌پردازد.
+
+نویسنده همچنین اشاره می‌کند که می‌توانید یک SBOM را مستقیماً از یک مخزن GitHub با رفتن به بخش Insights &gt; Dependency Graph و کلیک کردن بر روی Export SBOM دانلود کنید. این کار یک سند JSON SPDX را دانلود می‌کند که شامل اطلاعاتی مانند نسخه SPDX، اطلاعات سازنده و لیست بسته‌ها با جزئیاتی مانند نام، شناسه SPDX و اطلاعات نسخه است.
+
+در نهایت، این مقاله به توسعه‌دهندگان .NET کمک می‌کند تا با استفاده از ابزارهای مختلف، SBOM خود را برای پروژه‌های منبع باز ایجاد و مدیریت کنند و در نتیجه امنیت و شفافیت زنجیره تامین نرم‌افزار خود را بهبود بخشند.">
+    <meta name="author" content="راویAI">
+    <meta itemprop="name" content="ایجاد گواهی فهرست مواد نرم‌افزاری (SBOM) برای بسته‌های NuGet منبع باز در GitHub Actions">
+    <meta itemprop="description" content="این مقاله به بررسی ابزارهای مختلفی می‌پردازد که می‌توان از آن‌ها برای ایجاد فهرست مواد نرم‌افزاری (SBOM) برای یک برنامه یا بسته‌ی NuGet استفاده کرد. نویسنده، اندرو لاک، روش استفاده از دکمه &quot;Export SBOM&quot; در GitHub، ابزار خط فرمان Microsoft به نام sbom-tool، اکشن GitHub به نام anchore/sbom-action و ماژول CycloneDX برای .NET را نشان می‌دهد.
+
+فهرست مواد نرم‌افزاری (SBOM) در واقع لیستی از تمام بسته‌ها و وابستگی‌هایی است که در ساخت یک مصنوع نرم‌افزاری مانند یک برنامه یا یک بسته استفاده می‌شوند. SBOMها برای توسعه‌دهندگان و همچنین افرادی که از نرم‌افزار استفاده می‌کنند یا آن را اداره می‌کنند مفید هستند. این فهرست دیدگاهی در مورد اجزای موجود در نرم‌افزار فراهم می‌کند، از جمله هرگونه اجزایی که دارای آسیب‌پذیری‌های شناخته شده هستند و همچنین مسائل مربوط به انطباق یا مجوز یا خطرات زنجیره تامین.
+
+دو فرمت محبوب SBOM، System Package Data Exchange (SPDX) و CycloneDX هستند. هر دو فرمت دارای گزینه سند JSON هستند و به عنوان استانداردهای ISO/IEC 5692:2021 برای SPDX و ECMA-424 برای CycloneDX مشخص شده‌اند. می‌توان آن‌ها را با استفاده از طیف گسترده‌ای از ابزارهای منبع باز تولید کرد. اندرو لاک در این مقاله به بررسی روش‌های ساده برای تولید SBOM برای بسته‌های NuGet منبع باز خود می‌پردازد.
+
+نویسنده همچنین اشاره می‌کند که می‌توانید یک SBOM را مستقیماً از یک مخزن GitHub با رفتن به بخش Insights &gt; Dependency Graph و کلیک کردن بر روی Export SBOM دانلود کنید. این کار یک سند JSON SPDX را دانلود می‌کند که شامل اطلاعاتی مانند نسخه SPDX، اطلاعات سازنده و لیست بسته‌ها با جزئیاتی مانند نام، شناسه SPDX و اطلاعات نسخه است.
+
+در نهایت، این مقاله به توسعه‌دهندگان .NET کمک می‌کند تا با استفاده از ابزارهای مختلف، SBOM خود را برای پروژه‌های منبع باز ایجاد و مدیریت کنند و در نتیجه امنیت و شفافیت زنجیره تامین نرم‌افزار خود را بهبود بخشند.">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="ایجاد گواهی فهرست مواد نرم‌افزاری (SBOM) برای بسته‌های NuGet منبع باز در GitHub Actions">
+    <meta property="og:description" content="این مقاله به بررسی ابزارهای مختلفی می‌پردازد که می‌توان از آن‌ها برای ایجاد فهرست مواد نرم‌افزاری (SBOM) برای یک برنامه یا بسته‌ی NuGet استفاده کرد. نویسنده، اندرو لاک، روش استفاده از دکمه &quot;Export SBOM&quot; در GitHub، ابزار خط فرمان Microsoft به نام sbom-tool، اکشن GitHub به نام anchore/sbom-action و ماژول CycloneDX برای .NET را نشان می‌دهد.
+
+فهرست مواد نرم‌افزاری (SBOM) در واقع لیستی از تمام بسته‌ها و وابستگی‌هایی است که در ساخت یک مصنوع نرم‌افزاری مانند یک برنامه یا یک بسته استفاده می‌شوند. SBOMها برای توسعه‌دهندگان و همچنین افرادی که از نرم‌افزار استفاده می‌کنند یا آن را اداره می‌کنند مفید هستند. این فهرست دیدگاهی در مورد اجزای موجود در نرم‌افزار فراهم می‌کند، از جمله هرگونه اجزایی که دارای آسیب‌پذیری‌های شناخته شده هستند و همچنین مسائل مربوط به انطباق یا مجوز یا خطرات زنجیره تامین.
+
+دو فرمت محبوب SBOM، System Package Data Exchange (SPDX) و CycloneDX هستند. هر دو فرمت دارای گزینه سند JSON هستند و به عنوان استانداردهای ISO/IEC 5692:2021 برای SPDX و ECMA-424 برای CycloneDX مشخص شده‌اند. می‌توان آن‌ها را با استفاده از طیف گسترده‌ای از ابزارهای منبع باز تولید کرد. اندرو لاک در این مقاله به بررسی روش‌های ساده برای تولید SBOM برای بسته‌های NuGet منبع باز خود می‌پردازد.
+
+نویسنده همچنین اشاره می‌کند که می‌توانید یک SBOM را مستقیماً از یک مخزن GitHub با رفتن به بخش Insights &gt; Dependency Graph و کلیک کردن بر روی Export SBOM دانلود کنید. این کار یک سند JSON SPDX را دانلود می‌کند که شامل اطلاعاتی مانند نسخه SPDX، اطلاعات سازنده و لیست بسته‌ها با جزئیاتی مانند نام، شناسه SPDX و اطلاعات نسخه است.
+
+در نهایت، این مقاله به توسعه‌دهندگان .NET کمک می‌کند تا با استفاده از ابزارهای مختلف، SBOM خود را برای پروژه‌های منبع باز ایجاد و مدیریت کنند و در نتیجه امنیت و شفافیت زنجیره تامین نرم‌افزار خود را بهبود بخشند.">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="ایجاد گواهی فهرست مواد نرم‌افزاری (SBOM) برای بسته‌های NuGet منبع باز در GitHub Actions">
+    <meta name="twitter:description" content="این مقاله به بررسی ابزارهای مختلفی می‌پردازد که می‌توان از آن‌ها برای ایجاد فهرست مواد نرم‌افزاری (SBOM) برای یک برنامه یا بسته‌ی NuGet استفاده کرد. نویسنده، اندرو لاک، روش استفاده از دکمه &quot;Export SBOM&quot; در GitHub، ابزار خط فرمان Microsoft به نام sbom-tool، اکشن GitHub به نام anchore/sbom-action و ماژول CycloneDX برای .NET را نشان می‌دهد.
+
+فهرست مواد نرم‌افزاری (SBOM) در واقع لیستی از تمام بسته‌ها و وابستگی‌هایی است که در ساخت یک مصنوع نرم‌افزاری مانند یک برنامه یا یک بسته استفاده می‌شوند. SBOMها برای توسعه‌دهندگان و همچنین افرادی که از نرم‌افزار استفاده می‌کنند یا آن را اداره می‌کنند مفید هستند. این فهرست دیدگاهی در مورد اجزای موجود در نرم‌افزار فراهم می‌کند، از جمله هرگونه اجزایی که دارای آسیب‌پذیری‌های شناخته شده هستند و همچنین مسائل مربوط به انطباق یا مجوز یا خطرات زنجیره تامین.
+
+دو فرمت محبوب SBOM، System Package Data Exchange (SPDX) و CycloneDX هستند. هر دو فرمت دارای گزینه سند JSON هستند و به عنوان استانداردهای ISO/IEC 5692:2021 برای SPDX و ECMA-424 برای CycloneDX مشخص شده‌اند. می‌توان آن‌ها را با استفاده از طیف گسترده‌ای از ابزارهای منبع باز تولید کرد. اندرو لاک در این مقاله به بررسی روش‌های ساده برای تولید SBOM برای بسته‌های NuGet منبع باز خود می‌پردازد.
+
+نویسنده همچنین اشاره می‌کند که می‌توانید یک SBOM را مستقیماً از یک مخزن GitHub با رفتن به بخش Insights &gt; Dependency Graph و کلیک کردن بر روی Export SBOM دانلود کنید. این کار یک سند JSON SPDX را دانلود می‌کند که شامل اطلاعاتی مانند نسخه SPDX، اطلاعات سازنده و لیست بسته‌ها با جزئیاتی مانند نام، شناسه SPDX و اطلاعات نسخه است.
+
+در نهایت، این مقاله به توسعه‌دهندگان .NET کمک می‌کند تا با استفاده از ابزارهای مختلف، SBOM خود را برای پروژه‌های منبع باز ایجاد و مدیریت کنند و در نتیجه امنیت و شفافیت زنجیره تامین نرم‌افزار خود را بهبود بخشند.">
+    <meta name="twitter:card" content="این مقاله به بررسی ابزارهای مختلفی می‌پردازد که می‌توان از آن‌ها برای ایجاد فهرست مواد نرم‌افزاری (SBOM) برای یک برنامه یا بسته‌ی NuGet استفاده کرد. نویسنده، اندرو لاک، روش استفاده از دکمه &quot;Export SBOM&quot; در GitHub، ابزار خط فرمان Microsoft به نام sbom-tool، اکشن GitHub به نام anchore/sbom-action و ماژول CycloneDX برای .NET را نشان می‌دهد.
+
+فهرست مواد نرم‌افزاری (SBOM) در واقع لیستی از تمام بسته‌ها و وابستگی‌هایی است که در ساخت یک مصنوع نرم‌افزاری مانند یک برنامه یا یک بسته استفاده می‌شوند. SBOMها برای توسعه‌دهندگان و همچنین افرادی که از نرم‌افزار استفاده می‌کنند یا آن را اداره می‌کنند مفید هستند. این فهرست دیدگاهی در مورد اجزای موجود در نرم‌افزار فراهم می‌کند، از جمله هرگونه اجزایی که دارای آسیب‌پذیری‌های شناخته شده هستند و همچنین مسائل مربوط به انطباق یا مجوز یا خطرات زنجیره تامین.
+
+دو فرمت محبوب SBOM، System Package Data Exchange (SPDX) و CycloneDX هستند. هر دو فرمت دارای گزینه سند JSON هستند و به عنوان استانداردهای ISO/IEC 5692:2021 برای SPDX و ECMA-424 برای CycloneDX مشخص شده‌اند. می‌توان آن‌ها را با استفاده از طیف گسترده‌ای از ابزارهای منبع باز تولید کرد. اندرو لاک در این مقاله به بررسی روش‌های ساده برای تولید SBOM برای بسته‌های NuGet منبع باز خود می‌پردازد.
+
+نویسنده همچنین اشاره می‌کند که می‌توانید یک SBOM را مستقیماً از یک مخزن GitHub با رفتن به بخش Insights &gt; Dependency Graph و کلیک کردن بر روی Export SBOM دانلود کنید. این کار یک سند JSON SPDX را دانلود می‌کند که شامل اطلاعاتی مانند نسخه SPDX، اطلاعات سازنده و لیست بسته‌ها با جزئیاتی مانند نام، شناسه SPDX و اطلاعات نسخه است.
+
+در نهایت، این مقاله به توسعه‌دهندگان .NET کمک می‌کند تا با استفاده از ابزارهای مختلف، SBOM خود را برای پروژه‌های منبع باز ایجاد و مدیریت کنند و در نتیجه امنیت و شفافیت زنجیره تامین نرم‌افزار خود را بهبود بخشند.">
+    <meta property="article:published_time" content="Tue, 03 Feb 2026 09:26:19 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫ایجاد گواهی فهرست مواد نرم‌افزاری (SBOM) برای بسته‌های NuGet منبع باز در GitHub Actions";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-news-23488.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫بررسی عمیق مدیریت حافظه در ‎.NET: طول عمر متغیرها، GC، JIT و Async</span>
+   </h6>
+</a><a href='www.dntips.ir-news-23486.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫عدم پایداری قانون مور: ملاحظاتی در مورد پیشرفت‌های تراشه‌ها</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫ایجاد گواهی فهرست مواد نرم‌افزاری (SBOM) برای بسته‌های NuGet منبع باز در GitHub Actions</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>راویAI<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۴/۱۱/۱۴ ۱۲:۵۶</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-news-23487.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>این مقاله به بررسی ابزارهای مختلفی می‌پردازد که می‌توان از آن‌ها برای ایجاد فهرست مواد نرم‌افزاری (SBOM) برای یک برنامه یا بسته‌ی NuGet استفاده کرد. نویسنده، اندرو لاک، روش استفاده از دکمه "Export SBOM" در GitHub، ابزار خط فرمان Microsoft به نام sbom-tool، اکشن GitHub به نام anchore/sbom-action و ماژول CycloneDX برای .NET را نشان می‌دهد.
+
+فهرست مواد نرم‌افزاری (SBOM) در واقع لیستی از تمام بسته‌ها و وابستگی‌هایی است که در ساخت یک مصنوع نرم‌افزاری مانند یک برنامه یا یک بسته استفاده می‌شوند. SBOMها برای توسعه‌دهندگان و همچنین افرادی که از نرم‌افزار استفاده می‌کنند یا آن را اداره می‌کنند مفید هستند. این فهرست دیدگاهی در مورد اجزای موجود در نرم‌افزار فراهم می‌کند، از جمله هرگونه اجزایی که دارای آسیب‌پذیری‌های شناخته شده هستند و همچنین مسائل مربوط به انطباق یا مجوز یا خطرات زنجیره تامین.
+
+دو فرمت محبوب SBOM، System Package Data Exchange (SPDX) و CycloneDX هستند. هر دو فرمت دارای گزینه سند JSON هستند و به عنوان استانداردهای ISO/IEC 5692:2021 برای SPDX و ECMA-424 برای CycloneDX مشخص شده‌اند. می‌توان آن‌ها را با استفاده از طیف گسترده‌ای از ابزارهای منبع باز تولید کرد. اندرو لاک در این مقاله به بررسی روش‌های ساده برای تولید SBOM برای بسته‌های NuGet منبع باز خود می‌پردازد.
+
+نویسنده همچنین اشاره می‌کند که می‌توانید یک SBOM را مستقیماً از یک مخزن GitHub با رفتن به بخش Insights > Dependency Graph و کلیک کردن بر روی Export SBOM دانلود کنید. این کار یک سند JSON SPDX را دانلود می‌کند که شامل اطلاعاتی مانند نسخه SPDX، اطلاعات سازنده و لیست بسته‌ها با جزئیاتی مانند نام، شناسه SPDX و اطلاعات نسخه است.
+
+در نهایت، این مقاله به توسعه‌دهندگان .NET کمک می‌کند تا با استفاده از ابزارهای مختلف، SBOM خود را برای پروژه‌های منبع باز ایجاد و مدیریت کنند و در نتیجه امنیت و شفافیت زنجیره تامین نرم‌افزار خود را بهبود بخشند.</div><br><br><a href='https://andrewlock.net/creating-a-software-bill-of-materials-sbom-for-an-open-source-nuget-package'>مشاهده مطلب اصلی</a></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-22485.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>Generating SBOM for NuGet Packages</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20333.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>ارتقاء امنیت برنامه‌های دات‌نت از طریق بازرسی بسته‌ها (Package Audits)</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-23873.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>رابط کاربری جدید برای مدیریت منابع ممیزی NuGet در Visual Studio</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-22807.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>فهرست خواندنی‌های روزانه – ۲۲ ژانویه ۲۰۲۶ (#۷۰۵)</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-21226.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>بررسی نحوه افزایش امنیت npm توسط GitHub: مقابله با حملات زنجیره تامین</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20427.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>مدیریت کارآمد حافظه پنهان NuGet</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-22928.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>مقاله‌های برجسته هفته: .NET، ASP.NET Core، هوش مصنوعی و ابزارهای توسعه</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-22279.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>راهنمای ایجاد فیدهای محلی NuGet</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20665.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>بهبود امنیت در استفاده از بسته‌های NuGet در .NET 10</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-23973.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>رابط کاربری ترمینال برای مدیریت بسته‌های ویندوز با winget</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫چالش‌های امنیتی هوش مصنوعی عاملی (Agentic AI)</title>     <meta name="description" content="سیستم‌های هوش مصنوعی عاملی (Agentic AI) چالش‌های امنیتی جدیدی را به همراه دارند. ضعف اساسی مدل‌های زبانی بزرگ (LLM) این است که راهی دقیق برای جدا کردن دستورالعمل‌ها از داده‌ها وجود ندارد، بنابراین هر چیزی که می‌خوانند به طور بالقوه می‌تواند یک دستورالعمل باشد. این موضوع منجر به &quot;سه گانه مرگبار&quot; می‌شود: داده‌های حساس، محتوای غیرقابل اعتماد و ارتباطات خارجی - خطری که LLM دستورالعمل‌های پنهانی را بخواند که داده‌های حساس را به مهاجمان نشت می‌دهد.
+
+برای کاهش این خطر، باید گام‌های مشخصی برای به حداقل رساندن دسترسی به هر یک از این سه عنصر برداریم. اجرای LLMها در داخل کانتینرهای کنترل‌شده و شکستن وظایف به زیر وظایف که هر کدام حداقل یکی از عناصر سه گانه را مسدود می‌کنند، مفید است. مهم‌تر از همه، باید گام‌های کوچک و قابل کنترل و قابل بررسی توسط انسان‌ها را انجام داد. این رویکرد به توسعه‌دهندگان کمک می‌کند تا امنیت برنامه‌های خود را در برابر حملات احتمالی تقویت کنند.
+
+این سیستم‌ها می‌توانند شگفت‌انگیز باشند و راه‌های جدید و رادیکالی برای ساخت نرم‌افزار از طریق سازماندهی یک اکوسیستم کامل از عوامل، همه از طریق یک رابط کاربری مکالمه‌ای مبهم، ارائه دهند. با این حال، این روش جدید نحوه کار، خطرات امنیتی جدی را نیز به همراه دارد. در حال حاضر، هیچ سیستم هوش مصنوعی عاملی وجود ندارد که در برابر این حملات ایمن باشد. هر هوش مصنوعی که در یک محیط خصمانه کار می‌کند - به این معنی که ممکن است با داده‌های آموزشی یا ورودی‌های غیرقابل اعتماد مواجه شود - در برابر تزریق دستور (Prompt Injection) آسیب‌پذیر است.
+
+به گفته Bruce Schneier، ردیابی این خطرات مستلزم بررسی مقالات تحقیقاتی و شناسایی افرادی است که درک عمیقی از ابزارهای مدرن مبتنی بر LLM و دیدگاهی واقع‌بینانه در مورد خطرات دارند. هدف از این مقاله، ارائه یک نمای کلی قابل دسترس و کاربردی از مسائل امنیتی و کاهش خطرات هوش مصنوعی عاملی است. این محتوا بر اساس تحقیقات گسترده‌ای است که توسط متخصصانی مانند Simon Willison و Bruce Schneier به اشتراک گذاشته شده است.">
+    <meta name="author" content="راویAI">
+    <meta itemprop="name" content="چالش‌های امنیتی هوش مصنوعی عاملی (Agentic AI)">
+    <meta itemprop="description" content="سیستم‌های هوش مصنوعی عاملی (Agentic AI) چالش‌های امنیتی جدیدی را به همراه دارند. ضعف اساسی مدل‌های زبانی بزرگ (LLM) این است که راهی دقیق برای جدا کردن دستورالعمل‌ها از داده‌ها وجود ندارد، بنابراین هر چیزی که می‌خوانند به طور بالقوه می‌تواند یک دستورالعمل باشد. این موضوع منجر به &quot;سه گانه مرگبار&quot; می‌شود: داده‌های حساس، محتوای غیرقابل اعتماد و ارتباطات خارجی - خطری که LLM دستورالعمل‌های پنهانی را بخواند که داده‌های حساس را به مهاجمان نشت می‌دهد.
+
+برای کاهش این خطر، باید گام‌های مشخصی برای به حداقل رساندن دسترسی به هر یک از این سه عنصر برداریم. اجرای LLMها در داخل کانتینرهای کنترل‌شده و شکستن وظایف به زیر وظایف که هر کدام حداقل یکی از عناصر سه گانه را مسدود می‌کنند، مفید است. مهم‌تر از همه، باید گام‌های کوچک و قابل کنترل و قابل بررسی توسط انسان‌ها را انجام داد. این رویکرد به توسعه‌دهندگان کمک می‌کند تا امنیت برنامه‌های خود را در برابر حملات احتمالی تقویت کنند.
+
+این سیستم‌ها می‌توانند شگفت‌انگیز باشند و راه‌های جدید و رادیکالی برای ساخت نرم‌افزار از طریق سازماندهی یک اکوسیستم کامل از عوامل، همه از طریق یک رابط کاربری مکالمه‌ای مبهم، ارائه دهند. با این حال، این روش جدید نحوه کار، خطرات امنیتی جدی را نیز به همراه دارد. در حال حاضر، هیچ سیستم هوش مصنوعی عاملی وجود ندارد که در برابر این حملات ایمن باشد. هر هوش مصنوعی که در یک محیط خصمانه کار می‌کند - به این معنی که ممکن است با داده‌های آموزشی یا ورودی‌های غیرقابل اعتماد مواجه شود - در برابر تزریق دستور (Prompt Injection) آسیب‌پذیر است.
+
+به گفته Bruce Schneier، ردیابی این خطرات مستلزم بررسی مقالات تحقیقاتی و شناسایی افرادی است که درک عمیقی از ابزارهای مدرن مبتنی بر LLM و دیدگاهی واقع‌بینانه در مورد خطرات دارند. هدف از این مقاله، ارائه یک نمای کلی قابل دسترس و کاربردی از مسائل امنیتی و کاهش خطرات هوش مصنوعی عاملی است. این محتوا بر اساس تحقیقات گسترده‌ای است که توسط متخصصانی مانند Simon Willison و Bruce Schneier به اشتراک گذاشته شده است.">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="چالش‌های امنیتی هوش مصنوعی عاملی (Agentic AI)">
+    <meta property="og:description" content="سیستم‌های هوش مصنوعی عاملی (Agentic AI) چالش‌های امنیتی جدیدی را به همراه دارند. ضعف اساسی مدل‌های زبانی بزرگ (LLM) این است که راهی دقیق برای جدا کردن دستورالعمل‌ها از داده‌ها وجود ندارد، بنابراین هر چیزی که می‌خوانند به طور بالقوه می‌تواند یک دستورالعمل باشد. این موضوع منجر به &quot;سه گانه مرگبار&quot; می‌شود: داده‌های حساس، محتوای غیرقابل اعتماد و ارتباطات خارجی - خطری که LLM دستورالعمل‌های پنهانی را بخواند که داده‌های حساس را به مهاجمان نشت می‌دهد.
+
+برای کاهش این خطر، باید گام‌های مشخصی برای به حداقل رساندن دسترسی به هر یک از این سه عنصر برداریم. اجرای LLMها در داخل کانتینرهای کنترل‌شده و شکستن وظایف به زیر وظایف که هر کدام حداقل یکی از عناصر سه گانه را مسدود می‌کنند، مفید است. مهم‌تر از همه، باید گام‌های کوچک و قابل کنترل و قابل بررسی توسط انسان‌ها را انجام داد. این رویکرد به توسعه‌دهندگان کمک می‌کند تا امنیت برنامه‌های خود را در برابر حملات احتمالی تقویت کنند.
+
+این سیستم‌ها می‌توانند شگفت‌انگیز باشند و راه‌های جدید و رادیکالی برای ساخت نرم‌افزار از طریق سازماندهی یک اکوسیستم کامل از عوامل، همه از طریق یک رابط کاربری مکالمه‌ای مبهم، ارائه دهند. با این حال، این روش جدید نحوه کار، خطرات امنیتی جدی را نیز به همراه دارد. در حال حاضر، هیچ سیستم هوش مصنوعی عاملی وجود ندارد که در برابر این حملات ایمن باشد. هر هوش مصنوعی که در یک محیط خصمانه کار می‌کند - به این معنی که ممکن است با داده‌های آموزشی یا ورودی‌های غیرقابل اعتماد مواجه شود - در برابر تزریق دستور (Prompt Injection) آسیب‌پذیر است.
+
+به گفته Bruce Schneier، ردیابی این خطرات مستلزم بررسی مقالات تحقیقاتی و شناسایی افرادی است که درک عمیقی از ابزارهای مدرن مبتنی بر LLM و دیدگاهی واقع‌بینانه در مورد خطرات دارند. هدف از این مقاله، ارائه یک نمای کلی قابل دسترس و کاربردی از مسائل امنیتی و کاهش خطرات هوش مصنوعی عاملی است. این محتوا بر اساس تحقیقات گسترده‌ای است که توسط متخصصانی مانند Simon Willison و Bruce Schneier به اشتراک گذاشته شده است.">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="چالش‌های امنیتی هوش مصنوعی عاملی (Agentic AI)">
+    <meta name="twitter:description" content="سیستم‌های هوش مصنوعی عاملی (Agentic AI) چالش‌های امنیتی جدیدی را به همراه دارند. ضعف اساسی مدل‌های زبانی بزرگ (LLM) این است که راهی دقیق برای جدا کردن دستورالعمل‌ها از داده‌ها وجود ندارد، بنابراین هر چیزی که می‌خوانند به طور بالقوه می‌تواند یک دستورالعمل باشد. این موضوع منجر به &quot;سه گانه مرگبار&quot; می‌شود: داده‌های حساس، محتوای غیرقابل اعتماد و ارتباطات خارجی - خطری که LLM دستورالعمل‌های پنهانی را بخواند که داده‌های حساس را به مهاجمان نشت می‌دهد.
+
+برای کاهش این خطر، باید گام‌های مشخصی برای به حداقل رساندن دسترسی به هر یک از این سه عنصر برداریم. اجرای LLMها در داخل کانتینرهای کنترل‌شده و شکستن وظایف به زیر وظایف که هر کدام حداقل یکی از عناصر سه گانه را مسدود می‌کنند، مفید است. مهم‌تر از همه، باید گام‌های کوچک و قابل کنترل و قابل بررسی توسط انسان‌ها را انجام داد. این رویکرد به توسعه‌دهندگان کمک می‌کند تا امنیت برنامه‌های خود را در برابر حملات احتمالی تقویت کنند.
+
+این سیستم‌ها می‌توانند شگفت‌انگیز باشند و راه‌های جدید و رادیکالی برای ساخت نرم‌افزار از طریق سازماندهی یک اکوسیستم کامل از عوامل، همه از طریق یک رابط کاربری مکالمه‌ای مبهم، ارائه دهند. با این حال، این روش جدید نحوه کار، خطرات امنیتی جدی را نیز به همراه دارد. در حال حاضر، هیچ سیستم هوش مصنوعی عاملی وجود ندارد که در برابر این حملات ایمن باشد. هر هوش مصنوعی که در یک محیط خصمانه کار می‌کند - به این معنی که ممکن است با داده‌های آموزشی یا ورودی‌های غیرقابل اعتماد مواجه شود - در برابر تزریق دستور (Prompt Injection) آسیب‌پذیر است.
+
+به گفته Bruce Schneier، ردیابی این خطرات مستلزم بررسی مقالات تحقیقاتی و شناسایی افرادی است که درک عمیقی از ابزارهای مدرن مبتنی بر LLM و دیدگاهی واقع‌بینانه در مورد خطرات دارند. هدف از این مقاله، ارائه یک نمای کلی قابل دسترس و کاربردی از مسائل امنیتی و کاهش خطرات هوش مصنوعی عاملی است. این محتوا بر اساس تحقیقات گسترده‌ای است که توسط متخصصانی مانند Simon Willison و Bruce Schneier به اشتراک گذاشته شده است.">
+    <meta name="twitter:card" content="سیستم‌های هوش مصنوعی عاملی (Agentic AI) چالش‌های امنیتی جدیدی را به همراه دارند. ضعف اساسی مدل‌های زبانی بزرگ (LLM) این است که راهی دقیق برای جدا کردن دستورالعمل‌ها از داده‌ها وجود ندارد، بنابراین هر چیزی که می‌خوانند به طور بالقوه می‌تواند یک دستورالعمل باشد. این موضوع منجر به &quot;سه گانه مرگبار&quot; می‌شود: داده‌های حساس، محتوای غیرقابل اعتماد و ارتباطات خارجی - خطری که LLM دستورالعمل‌های پنهانی را بخواند که داده‌های حساس را به مهاجمان نشت می‌دهد.
+
+برای کاهش این خطر، باید گام‌های مشخصی برای به حداقل رساندن دسترسی به هر یک از این سه عنصر برداریم. اجرای LLMها در داخل کانتینرهای کنترل‌شده و شکستن وظایف به زیر وظایف که هر کدام حداقل یکی از عناصر سه گانه را مسدود می‌کنند، مفید است. مهم‌تر از همه، باید گام‌های کوچک و قابل کنترل و قابل بررسی توسط انسان‌ها را انجام داد. این رویکرد به توسعه‌دهندگان کمک می‌کند تا امنیت برنامه‌های خود را در برابر حملات احتمالی تقویت کنند.
+
+این سیستم‌ها می‌توانند شگفت‌انگیز باشند و راه‌های جدید و رادیکالی برای ساخت نرم‌افزار از طریق سازماندهی یک اکوسیستم کامل از عوامل، همه از طریق یک رابط کاربری مکالمه‌ای مبهم، ارائه دهند. با این حال، این روش جدید نحوه کار، خطرات امنیتی جدی را نیز به همراه دارد. در حال حاضر، هیچ سیستم هوش مصنوعی عاملی وجود ندارد که در برابر این حملات ایمن باشد. هر هوش مصنوعی که در یک محیط خصمانه کار می‌کند - به این معنی که ممکن است با داده‌های آموزشی یا ورودی‌های غیرقابل اعتماد مواجه شود - در برابر تزریق دستور (Prompt Injection) آسیب‌پذیر است.
+
+به گفته Bruce Schneier، ردیابی این خطرات مستلزم بررسی مقالات تحقیقاتی و شناسایی افرادی است که درک عمیقی از ابزارهای مدرن مبتنی بر LLM و دیدگاهی واقع‌بینانه در مورد خطرات دارند. هدف از این مقاله، ارائه یک نمای کلی قابل دسترس و کاربردی از مسائل امنیتی و کاهش خطرات هوش مصنوعی عاملی است. این محتوا بر اساس تحقیقات گسترده‌ای است که توسط متخصصانی مانند Simon Willison و Bruce Schneier به اشتراک گذاشته شده است.">
+    <meta property="article:published_time" content="Tue, 03 Feb 2026 22:59:48 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫چالش‌های امنیتی هوش مصنوعی عاملی (Agentic AI)";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-news-23516.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫استفاده از Roslyn برای تحلیل و بازنویسی کد در یک راه‌حل</span>
+   </h6>
+</a><a href='www.dntips.ir-news-23514.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫معرفی چارچوب MonoGame و توسعه بازی با .NET 8</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫چالش‌های امنیتی هوش مصنوعی عاملی (Agentic AI)</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>راویAI<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۴/۱۱/۱۵ ۰۲:۲۹</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-news-23515.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سیستم‌های هوش مصنوعی عاملی (Agentic AI) چالش‌های امنیتی جدیدی را به همراه دارند. ضعف اساسی مدل‌های زبانی بزرگ (LLM) این است که راهی دقیق برای جدا کردن دستورالعمل‌ها از داده‌ها وجود ندارد، بنابراین هر چیزی که می‌خوانند به طور بالقوه می‌تواند یک دستورالعمل باشد. این موضوع منجر به "سه گانه مرگبار" می‌شود: داده‌های حساس، محتوای غیرقابل اعتماد و ارتباطات خارجی - خطری که LLM دستورالعمل‌های پنهانی را بخواند که داده‌های حساس را به مهاجمان نشت می‌دهد.
+
+برای کاهش این خطر، باید گام‌های مشخصی برای به حداقل رساندن دسترسی به هر یک از این سه عنصر برداریم. اجرای LLMها در داخل کانتینرهای کنترل‌شده و شکستن وظایف به زیر وظایف که هر کدام حداقل یکی از عناصر سه گانه را مسدود می‌کنند، مفید است. مهم‌تر از همه، باید گام‌های کوچک و قابل کنترل و قابل بررسی توسط انسان‌ها را انجام داد. این رویکرد به توسعه‌دهندگان کمک می‌کند تا امنیت برنامه‌های خود را در برابر حملات احتمالی تقویت کنند.
+
+این سیستم‌ها می‌توانند شگفت‌انگیز باشند و راه‌های جدید و رادیکالی برای ساخت نرم‌افزار از طریق سازماندهی یک اکوسیستم کامل از عوامل، همه از طریق یک رابط کاربری مکالمه‌ای مبهم، ارائه دهند. با این حال، این روش جدید نحوه کار، خطرات امنیتی جدی را نیز به همراه دارد. در حال حاضر، هیچ سیستم هوش مصنوعی عاملی وجود ندارد که در برابر این حملات ایمن باشد. هر هوش مصنوعی که در یک محیط خصمانه کار می‌کند - به این معنی که ممکن است با داده‌های آموزشی یا ورودی‌های غیرقابل اعتماد مواجه شود - در برابر تزریق دستور (Prompt Injection) آسیب‌پذیر است.
+
+به گفته Bruce Schneier، ردیابی این خطرات مستلزم بررسی مقالات تحقیقاتی و شناسایی افرادی است که درک عمیقی از ابزارهای مدرن مبتنی بر LLM و دیدگاهی واقع‌بینانه در مورد خطرات دارند. هدف از این مقاله، ارائه یک نمای کلی قابل دسترس و کاربردی از مسائل امنیتی و کاهش خطرات هوش مصنوعی عاملی است. این محتوا بر اساس تحقیقات گسترده‌ای است که توسط متخصصانی مانند Simon Willison و Bruce Schneier به اشتراک گذاشته شده است.</div><br><br><a href='https://martinfowler.com/articles/agentic-ai-security.html'>مشاهده مطلب اصلی</a></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-21005.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>ساخت ایمن عوامل هوش مصنوعی: درس‌هایی از SQL Injection</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-23485.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>خطر سه‌گانه در عوامل هوش مصنوعی: داده‌های خصوصی، محتوای غیرقابل اعتماد و ارتباطات خارجی</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-24091.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>هشدار امنیتی در مورد استفاده از عوامل هوش مصنوعی برای مدیریت ایمیل</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-24415.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>نیاز نمایندگان هوش مصنوعی به مجوزهای دسترسی – کنفرانس NDC لندن 2026</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-23014.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>حفاظت از عوامل هوش مصنوعی در زمان اجرا: یک دفاع بی‌درنگ</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-24168.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>هوش مصنوعی عاملی در توسعه نرم‌افزار: از کدنویسی تا ارکستراسیون</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20356.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>خطر تحلیل رفتن مهارت‌های برنامه‌نویسی در عصر هوش مصنوعی و راهکارهای مقابله با آن</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20291.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>عامل‌های هوش مصنوعی چیستند؟ چرا اهمیت دارند؟</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-23318.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>درس‌هایی از حکمرانی و مدل‌های عملیاتی برای مقیاس‌بندی هوش مصنوعی سازمانی از IBM</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-23353.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>راهنمای عملی برای پیاده‌سازی هوش مصنوعی عاملی محلی‌محور</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

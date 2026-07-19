@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫نحوه‌ی نگاشت فیلدهای فرمول در Fluent NHibernate</title>     <meta name="description" content="اگر با SQL Server کار کرده باشید حتما با مفهوم و امکان Computed columns (فیلدهای محاسبه شده) آن آشنایی دارید. چقدر خوب می‌شد اگر این امکان برای سایر بانک‌های اطلاعاتی که از تعریف فیلدهای محاسبه شده پشتیبانی نمی‌کنند، نیز مهیا می‌شد. زیرا یکی از اهداف مهم استفاده‌ی صحیح از ORMs ، مستقل شدن برنامه از نوع بانک اطلاعاتی است. برای مثال امروز می‌خواهیم با MySQL‌ کار کنیم، ماه بعد شاید بخواهیم یک نسخه‌ی سبک‌تر مخصوص کار با SQLite را ارائه دهیم. آ ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="نحوه‌ی نگاشت فیلدهای فرمول در Fluent NHibernate">
+    <meta itemprop="description" content="اگر با SQL Server کار کرده باشید حتما با مفهوم و امکان Computed columns (فیلدهای محاسبه شده) آن آشنایی دارید. چقدر خوب می‌شد اگر این امکان برای سایر بانک‌های اطلاعاتی که از تعریف فیلدهای محاسبه شده پشتیبانی نمی‌کنند، نیز مهیا می‌شد. زیرا یکی از اهداف مهم استفاده‌ی صحیح از ORMs ، مستقل شدن برنامه از نوع بانک اطلاعاتی است. برای مثال امروز می‌خواهیم با MySQL‌ کار کنیم، ماه بعد شاید بخواهیم یک نسخه‌ی سبک‌تر مخصوص کار با SQLite را ارائه دهیم. آ ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="نحوه‌ی نگاشت فیلدهای فرمول در Fluent NHibernate">
+    <meta property="og:description" content="اگر با SQL Server کار کرده باشید حتما با مفهوم و امکان Computed columns (فیلدهای محاسبه شده) آن آشنایی دارید. چقدر خوب می‌شد اگر این امکان برای سایر بانک‌های اطلاعاتی که از تعریف فیلدهای محاسبه شده پشتیبانی نمی‌کنند، نیز مهیا می‌شد. زیرا یکی از اهداف مهم استفاده‌ی صحیح از ORMs ، مستقل شدن برنامه از نوع بانک اطلاعاتی است. برای مثال امروز می‌خواهیم با MySQL‌ کار کنیم، ماه بعد شاید بخواهیم یک نسخه‌ی سبک‌تر مخصوص کار با SQLite را ارائه دهیم. آ ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="نحوه‌ی نگاشت فیلدهای فرمول در Fluent NHibernate">
+    <meta name="twitter:description" content="اگر با SQL Server کار کرده باشید حتما با مفهوم و امکان Computed columns (فیلدهای محاسبه شده) آن آشنایی دارید. چقدر خوب می‌شد اگر این امکان برای سایر بانک‌های اطلاعاتی که از تعریف فیلدهای محاسبه شده پشتیبانی نمی‌کنند، نیز مهیا می‌شد. زیرا یکی از اهداف مهم استفاده‌ی صحیح از ORMs ، مستقل شدن برنامه از نوع بانک اطلاعاتی است. برای مثال امروز می‌خواهیم با MySQL‌ کار کنیم، ماه بعد شاید بخواهیم یک نسخه‌ی سبک‌تر مخصوص کار با SQLite را ارائه دهیم. آ ...">
+    <meta name="twitter:card" content="اگر با SQL Server کار کرده باشید حتما با مفهوم و امکان Computed columns (فیلدهای محاسبه شده) آن آشنایی دارید. چقدر خوب می‌شد اگر این امکان برای سایر بانک‌های اطلاعاتی که از تعریف فیلدهای محاسبه شده پشتیبانی نمی‌کنند، نیز مهیا می‌شد. زیرا یکی از اهداف مهم استفاده‌ی صحیح از ORMs ، مستقل شدن برنامه از نوع بانک اطلاعاتی است. برای مثال امروز می‌خواهیم با MySQL‌ کار کنیم، ماه بعد شاید بخواهیم یک نسخه‌ی سبک‌تر مخصوص کار با SQLite را ارائه دهیم. آ ...">
+    <meta property="article:published_time" content="Thu, 10 Feb 2011 13:30:00 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫نحوه‌ی نگاشت فیلدهای فرمول در Fluent NHibernate";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-520.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫استفاده از افزونه‌ی jQuery Autocomplete در ASP.NET</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-518.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫اعمال تغییرات سفارشی به ویژگی AutoMapping در Fluent NHibernate</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫نحوه‌ی نگاشت فیلدهای فرمول در Fluent NHibernate</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۸۹/۱۱/۲۱ ۱۳:۳۰:۰۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-519.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><div dir="rtl" style="text-align: right;"><br>اگر با SQL Server کار کرده باشید حتما با مفهوم و امکان <a href="http://msdn.microsoft.com/en-us/library/ms191250.aspx">Computed columns</a> (فیلدهای محاسبه شده) آن آشنایی دارید. چقدر خوب می‌شد اگر این امکان برای سایر بانک‌های اطلاعاتی که از تعریف فیلدهای محاسبه شده پشتیبانی نمی‌کنند، نیز مهیا می‌شد. زیرا یکی از اهداف مهم استفاده‌ی صحیح از ORMs ، مستقل شدن برنامه از نوع بانک اطلاعاتی است. برای مثال امروز می‌خواهیم با MySQL‌ کار کنیم، ماه بعد شاید بخواهیم یک نسخه‌ی سبک‌تر مخصوص کار با SQLite را ارائه دهیم. آیا باید قسمت دسترسی به داده برنامه را از نو بازنویسی کرد؟ اینکار در NHibernate فقط با تغییر نحوه‌ی اتصال به بانک اطلاعاتی میسر است و نه بازنویسی کل برنامه (و صد البته شرط مهم و اصلی آن هم این است که از امکانات ذاتی خود NHibernate استفاده کرده باشید. برای مثال وسوسه‌ی استفاده از رویه‌های ذخیره شده را فراموش کرده و به عبارتی ORM مورد استفاده را به امکانات ویژه‌ی یک بانک اطلاعاتی گره نزده باشید).<br>خوشبختانه در NHibernate امکان تعریف فیلدهای محاسباتی با کمک تعریف نگاشت خواص به صورت فرمول مهیا است. برای توضیحات بیشتر لطفا به مثال ذیل دقت بفرمائید:<br>در ابتدا کلاس کاربر تعریف می‌شود:<br><div dir="ltr" align="left"><pre name="code" language="CSharp"><br>using System;<br>using NHibernate.Validator.Constraints;<br><br>namespace FormulaTests.Domain<br>{<br>   public class User<br>   {<br>       public virtual int Id { get; set; }<br><br>       [NotNull]<br>       public virtual DateTime JoinDate { set; get; }<br><br>       [NotNullNotEmpty]<br>       [Length(450)]<br>       public virtual string FirstName { get; set; }<br><br>       [NotNullNotEmpty]<br>       [Length(450)]<br>       public virtual string LastName { get; set; }<br><br>       [Length(900)]<br>       public virtual string FullName { get; private set; } //از طریق تعریف فرمول مقدار دهی می‌گردد<br><br>       public virtual int DayOfWeek { get; private set; }//از طریق تعریف فرمول مقدار دهی می‌گردد<br>   }<br>}<br></pre></div>در این کلاس دو خاصیت FullName و DayOfWeek به صورت فقط خواندنی به کمک private set ذکر شده، تعریف گردیده‌اند. قصد داریم روی این دو خاصیت فرمول تعریف کنیم: <div dir="ltr" align="left"><pre name="code" language="CSharp"><br>using FluentNHibernate.Automapping;<br>using FluentNHibernate.Automapping.Alterations;<br><br>namespace FormulaTests.Domain<br>{<br>   public class UserCustomMappings : IAutoMappingOverride&lt;User&gt;<br>   {<br>       public void Override(AutoMapping&lt;User&gt; mapping)<br>       {<br>           mapping.Id(u =&gt; u.Id).GeneratedBy.Identity(); //ضروری است <br>           mapping.Map(x =&gt; x.DayOfWeek).Formula("DATEPART(dw, JoinDate) - 1");<br>           mapping.Map(x =&gt; x.FullName).Formula("FirstName + ' ' + LastName");<br>       }<br>   }<br>}<br></pre></div>نحوه‌ی انتساب فرمول‌های مبتنی بر SQL را در نگاشت فوق ملاحظه می‌نمائید. برای مثال FullName از جمع دو فیلد نام و نام خانوادگی حاصل خواهد شد و DayOfWeek از طریق فرمول SQL دیگری که ملاحظه می‌نمائید (یا هر فرمول SQL دلخواه دیگری که صلاح می‌دانید).<br>اکنون اگر Fluent NHibernate را وادار به تولید اسکریپت متناظر با این دو کلاس کنیم حاصل به صورت زیر خواهد بود:<br><div dir="ltr" align="left"><pre name="code" language="Sql">    create table Users (<br>       UserId INT IDENTITY NOT NULL,<br>      JoinDate DATETIME not null,<br>      FirstName NVARCHAR(450) not null,<br>      LastName NVARCHAR(450) not null,<br>      primary key (UserId)<br>   )<br></pre></div>همانطور که ملاحظه می‌کنید در اینجا خبری از دو فیلد محاسباتی تعریف شده نیست. این فیلدها در تعاریف نگاشت‌ها به صورت خودکار ظاهر می‌شوند:<br><div dir="ltr" align="left"><pre name="code" language="XML">&lt;hibernate-mapping xmlns="urn:nhibernate-mapping-2.2"<br> default-access="property" auto-import="true" default-cascade="none" default-lazy="true"&gt;<br> &lt;class xmlns="urn:nhibernate-mapping-2.2" mutable="true"<br> name="FormulaTests.Domain.User, FormulaTests, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" table="Users"&gt;<br>   &lt;id name="Id" type="System.Int32" unsaved-value="0"&gt;<br>     &lt;column name="UserId" /&gt;<br>     &lt;generator class="identity" /&gt;<br>   &lt;/id&gt;<br>   &lt;property name="DayOfWeek" formula="DATEPART(dw, JoinDate) - 1" type="System.Int32" /&gt;<br>   &lt;property name="FullName" formula="FirstName + ' ' + LastName" type="System.String" /&gt;<br>   &lt;property name="JoinDate" type="System.DateTime"&gt;<br>     &lt;column name="JoinDate" /&gt;<br>   &lt;/property&gt;<br>   &lt;property name="FirstName" type="System.String"&gt;<br>     &lt;column name="FirstName" /&gt;<br>   &lt;/property&gt;<br>   &lt;property name="LastName" type="System.String"&gt;<br>     &lt;column name="LastName" /&gt;<br>   &lt;/property&gt;<br> &lt;/class&gt;<br>&lt;/hibernate-mapping&gt;<br></pre></div>اکنون اگر کوئری زیر را در برنامه اجرا نمائیم:<br><div dir="ltr" align="left"><pre name="code" language="CSharp">var list = session.Query&lt;User&gt;.ToList();<br>foreach (var item in list)<br>{<br>   Console.WriteLine("{0}:{1}", item.FullName, item.DayOfWeek);<br>}<br></pre></div>به صورت خودکار به SQL ذیل ترجمه خواهد شد و اکنون نحوه‌ی بکارگیری فیلدهای فرمول، بهتر مشخص می‌گردد:<br><div dir="ltr" align="left"><pre name="code" language="Sql">select<br>       user0_.UserId as UserId0_,<br>       user0_.JoinDate as JoinDate0_,<br>       user0_.FirstName as FirstName0_,<br>       user0_.LastName as LastName0_,<br>       DATEPART(user0_.dw, user0_.JoinDate) - 1 as formula0_, --- همان فرمول تعریف شده است<br>       user0_.FirstName + ' ' + user0_.LastName as formula1_ ---از طریق فرمول تعریف شده حاصل گردیده است<br>   from<br>       Users user0_<br></pre></div><br></div><div class="blogger-post-footer"><img width='1' height='1' src='data:image/jpg;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==' alt=''></div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2494.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>شروع به کار با EF Core 1.0 - قسمت 6 - تعیین نوع‌های داده و ویژگی‌های آن‌ها</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-833.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>EF Code First #3</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1883.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>سطح دوم کش در Nhibernate 4</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-978.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>چگونگی تعریف خاصیتی از نوع Enum در EF Code First</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2616.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>ویژگی های کمتر استفاده شده در NET. - بخش اول</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-838.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>EF Code First #8</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3434.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>پشتیبانی از حذف و به‌روز رسانی دسته‌ای رکوردها در EF 7.0</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-840.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>EF Code First #10</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/courses/topic/16/fd85ffa8-aa76-4872-b72c-41c70571399a'><span class='badge bg-warning rounded-pill me-2'>مطالب دوره‌ها</span>نگاشت خواص محاسبه شده به کمک AutoMapper و DelegateDecompiler</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2495.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>شروع به کار با EF Core 1.0 - قسمت 7 - بررسی رابطه‌ی One-to-Many</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۸۹/۱۲/۰۵ ۲۰:۲۵:۵۹</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام آقای نصیری.<br>فرض کنید کلاسی مانند زیر وجود دارد:<br>public class Project<br>    {<br>        public virtual int Id { get; set; }<br>        public virtual long ProjectCode { get; set; } <br>        public virtual string ProjectName { get; set; }       <br>        public virtual int CreateDate { get; set; }<br>    }<br><br>در فیلد CreateDate مقادیر زیر وجود دارد:<br>CreateDate<br>890102<br>891210<br>و ...<br>که تاریخ شروع پروژه ها می باشد. سوال من اینجاست که در NH کجا باید این تاریخ ها رو به 89/01/02  و 89/12/10 تبدیل کنم و در UI به کاربر نشون بدم.<br>با تشکر فراوان.</div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۸۹/۱۲/۰۵ ۲۰:۳۵:۰۰</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام<br>دقیقا مانند مثال فوق عمل کنید. یک خاصیت  private set دار را همانند مثال فوق اضافه کنید، مثلا PersianDate از نوع string . سپس فرمولی را باید به آن در قسمت CustomMappings ذکر شده انتساب داد. برای اینکار از همان روش‌های مرسوم cast استفاده کنید به همراه substring تا بشود ابتدا مقدار عددی را به رشته تبدیل کرد و سپس با substring قسمت‌های مختلف را جدا کرد و نهایتا به هم چسباند. فقط باید دقت داشت که این فرمول باید یک فرمول معتبر SQL ایی باشد.</div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۸۹/۱۲/۰۵ ۲۳:۳۶:۱۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>ممنون کاملا متوجه شدم.<br>حالا اگر بخواهیم از توابع غیر SQL استفاده کنیم باید چکار کنیم؟ برای مثال بخواهیم همین مثال بالا رو با توابع نوشته شده توسط خودمون انجام بدیم.</div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۸۹/۱۲/۰۶ ۰۱:۵۱:۲۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>ببینید، توابع ویژه نمایشی سی شارپ شما، یعنی سمت کلاینت. موضوع بحث فوق سمت سرور بانک اطلاعاتی است. مقادیر در سمت سرور مطابق فرمول شما تشکیل می‌شوند. به آخرین کوئری ذکر شده در مطلب فوق دقت کنید. در حال حاضر فقط SQL Server است که امکان استفاده از توابع دات نتی را هم سمت سرور میسر کرده (از نگارش 2005 به بعد). بنابراین اگر می‌خواهید توابع ویژه‌ای را در همان سمت سرور اعمال کنید که منطق آن مثلا با سی شارپ پیاده سازی شده، باید یک CLR function مخصوص اس کیوال سرور درست کنید. بعد فرمول نگاشت فوق را بر اساس این CLR function تعیین کنید و کار می‌کند. چیزی شبیه به همان آخرین کوئری تشکیل شده را خواهید داشت. خلاصه اینکه به نحوی باید این پیاده سازی دات نتی خودتون رو به سمت سرور ببرید.<br>اما سمت کلاینت شما هر کاری را می‌‌توانید انجام دهید. برای مثال زمان نمایش اطلاعات در WPF یا سیلورلایت از یک Converter استاندارد آن (با پیاده سازی اینترفیس IValueConverter) در حین Binding استفاده کنید. اگر با ASP.NET Webforms کار می‌کنید حین نمایش اطلاعاتی که هم اکنون در سمت کلاینت مهیا است ، مثلا جهت نمایش در یک GridView یا موارد مشابه شما خواهید داشت myFunc(Eval(&quot;field&quot;)) و شبیه به این که myFunc باید در کدبیهایند شما پیاده سازی شود. در سایر فناوری‌ها که می‌تواند شامل موارد قبل هم باشند، نهایتا شما یک لیست دریافتی از سرور را دارید، یک حلقه با LINQ یا حالت معمولی تشکیل شده و مقادیر مدل مورد نظر ویرایش می‌شوند تا جهت نمایش مناسب شوند.<br>تمام این‌ها در حالتی است که قصد شما فقط و فقط تغییر نحوه‌ی نمایش است. به عبارتی الان کل دیتای فیلتر شده سمت کاربر مهیا است. شما می‌خواهید به آن شکل دهید.<br><br>حالت دیگر (حالت غیر نمایشی و استفاده در کوئری‌ها):<br>اگر با LINQ کمی بیشتر از اطلاعات موجود در وب کار کرده باشید احتمالا به این سوال رسیده‌اید که آیا می‌شود متد سفارشی خودمان را هم حین تهیه کوئری‌هایی از این دست استفاده کنیم؟ چون فقط یک سری extension method مشخص بیشتر وجود ندارند. اگر من extension method سفارشی خودم را تهیه کردم چطور؟ <br>این سوال دو پاسخ دارد:<br>- متدهای سفارشی شما حتما روی کل اطلاعات دریافتی از سرور کار می‌کنند؛ اما بهینه نیستند. چون برای مثال myFunc سی شارپ من معادل SQL ایی ندارد که بتوانم مستقیما آن‌را سمت سرور اجرا کنم. چون نهایتا LINQ to NHibernate باید به SQL یا T-SQL ترجمه شود. به همین جهت مجبورم کل اطلاعات را دریافت کنم، مثلا 100 هزار رکورد، حالا که اشیاء دات نتی من تشکیل و کامل شده، متد سفارشی LINQ خودم را بر روی این‌ها اجرا می‌کنم. این روش کار می‌کنه ولی از لحاظ کارآیی فاجعه است.<br>- روش دیگر: در NH 3.0 این امکان وجود دارد ... بسط پروایدر LINQ آن با صور مختلف. که اگر وقت شد یک مطلب کامل در مورد آن خواهم نوشت.</div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۸۹/۱۲/۰۶ ۱۵:۱۵:۲۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>از پاسخگویی شما بسیار ممنونم. من هر روز از شما مطلب جدیدی یاد میگیرم.<br>من قصد کشدار کردن بحث رو ندارم و اینم آخرین ارسال من در مورد این بحث است.فکر می کنم نتونستم منظورم رو واضح برسونم. فرض کنیم کلاس زیر وجود داره:<br>public class Project<br>    {<br>        public virtual int Id { get; set; }<br>        public virtual long ProjectCode { get; set; } <br>        public virtual string Name { get; set; }       <br>        public virtual int CreateDate { get; set; }<br><br>        public virtual string SepratedDate<br>        {<br>            get { return myFunc(CreateDate); }<br>           private set { ; }<br>        }<br>    }<br><br>من میخواهم در متد زیر لیستی از کلاس بالا رو به DataSet  تبدیل کنم:<br><br>public DataSet dsGetAll(bool includeArchived)<br>        {<br>                using (var repository = new Repository())<br>                {<br>                    var projects = repository.Find(x =&gt; x.IsArchive == includeArchived<br>);<br><br>                    var ds = new CollectionToDataSet&gt;(projects.ToList());<br><br>                    return ds.CreateDataSet();<br>                }<br>        }<br><br>ولی خطا می ده که SepratedDate در جدول وجود نداره!!!<br>{&quot;Invalid column name &#39;SepratedDate&#39;.&quot;}<br>could not execute query<br>[ select project0_.Id as Id15_, project0_.ProjectCode as ProjectC2_15_, project0_.Name as Name15_, project0_.IsArchive as IsArchive15_, project0_.CreateDate as CreateDate15_, project0_.SepratedDate as Seprated6_15_ from tblProject project0_ where case when project0_.IsArchive=1 then &#39;true&#39; else &#39;false&#39; end=case when @p0=&#39;true&#39; then &#39;true&#39; else &#39;false&#39; end</div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۸۹/۱۲/۰۶ ۱۷:۲۱:۱۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>- راه یک: مطالب مقاله فوق. یک قسمت آن custom mapping است که میگه لطفا این فیلد رو در کوئری با فرمول تشکیل بده نه با همین فیلدی که من اینجا اضافه کردم. این رو ندید بگیر، بجاش در SQL نهایی یک فرمول بذار، نه صاف همین فیلد رو تا من به خطا برنخورم. <br>- راه دو: مطالب کامنت قبل. (یعنی از زمان داشتن ToList که همه چیز سمت کلاینت است به بعد ... هر کاری دوست داشتید با این اطلاعات انجام دهید)<br>- راه سه: در همان قسمت custom mappings می‌شود نوشت map.IgnoreProperty الی آخر. به این صورت خاصیت تعریف شده شما در کوئری SQL ظاهر نمی‌شود تا مشکل درست کند. اطلاعات بیشتر: <a href="http://wiki.fluentnhibernate.org/Auto_mapping#Overrides" rel="nofollow">(+)</a></div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۸۹/۱۲/۰۶ ۱۹:۰۵:۰۷</span>
+  </div>
+  <div style='text-align: left; font-family:inherit; font-size:inherit;' dir='ltr'>Thanks. Excellent!!!</div>
+</div></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

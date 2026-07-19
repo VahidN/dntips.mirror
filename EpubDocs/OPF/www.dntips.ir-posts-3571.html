@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫چالش‌های متداول توسعه‌دهندگان ASP.NET Core هنگام استفاده از Nginx - قسمت چهارم - امنیت و SSL/TLS</title>     <meta name="description" content=" تا اینجا، ما یک برنامه پایدار داریم که پشت یک Reverse Proxy بهینه کار می‌کند. اما یک مشکل بزرگ و غیرقابل چشم‌پوشی وجود دارد: تمام ترافیک بین کاربران و سرور ما به صورت متن ساده (Plain Text) و روی پروتکل HTTP رد و بدل می‌شود. این به معنای آن است که هر کسی در میانه راه می‌تواند اطلاعات را شنود کند، آن‌ها را تغییر دهد و هویت سرور ما را جعل کند. در این قسمت، این حفره امنیتی بزرگ را با پیاده‌سازی  HTTPS  می‌بندیم. ما با استفاده از  Let&amp;#39;s En ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="چالش‌های متداول توسعه‌دهندگان ASP.NET Core هنگام استفاده از Nginx - قسمت چهارم - امنیت و SSL/TLS">
+    <meta itemprop="description" content=" تا اینجا، ما یک برنامه پایدار داریم که پشت یک Reverse Proxy بهینه کار می‌کند. اما یک مشکل بزرگ و غیرقابل چشم‌پوشی وجود دارد: تمام ترافیک بین کاربران و سرور ما به صورت متن ساده (Plain Text) و روی پروتکل HTTP رد و بدل می‌شود. این به معنای آن است که هر کسی در میانه راه می‌تواند اطلاعات را شنود کند، آن‌ها را تغییر دهد و هویت سرور ما را جعل کند. در این قسمت، این حفره امنیتی بزرگ را با پیاده‌سازی  HTTPS  می‌بندیم. ما با استفاده از  Let&amp;#39;s En ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="چالش‌های متداول توسعه‌دهندگان ASP.NET Core هنگام استفاده از Nginx - قسمت چهارم - امنیت و SSL/TLS">
+    <meta property="og:description" content=" تا اینجا، ما یک برنامه پایدار داریم که پشت یک Reverse Proxy بهینه کار می‌کند. اما یک مشکل بزرگ و غیرقابل چشم‌پوشی وجود دارد: تمام ترافیک بین کاربران و سرور ما به صورت متن ساده (Plain Text) و روی پروتکل HTTP رد و بدل می‌شود. این به معنای آن است که هر کسی در میانه راه می‌تواند اطلاعات را شنود کند، آن‌ها را تغییر دهد و هویت سرور ما را جعل کند. در این قسمت، این حفره امنیتی بزرگ را با پیاده‌سازی  HTTPS  می‌بندیم. ما با استفاده از  Let&amp;#39;s En ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="چالش‌های متداول توسعه‌دهندگان ASP.NET Core هنگام استفاده از Nginx - قسمت چهارم - امنیت و SSL/TLS">
+    <meta name="twitter:description" content=" تا اینجا، ما یک برنامه پایدار داریم که پشت یک Reverse Proxy بهینه کار می‌کند. اما یک مشکل بزرگ و غیرقابل چشم‌پوشی وجود دارد: تمام ترافیک بین کاربران و سرور ما به صورت متن ساده (Plain Text) و روی پروتکل HTTP رد و بدل می‌شود. این به معنای آن است که هر کسی در میانه راه می‌تواند اطلاعات را شنود کند، آن‌ها را تغییر دهد و هویت سرور ما را جعل کند. در این قسمت، این حفره امنیتی بزرگ را با پیاده‌سازی  HTTPS  می‌بندیم. ما با استفاده از  Let&amp;#39;s En ...">
+    <meta name="twitter:card" content=" تا اینجا، ما یک برنامه پایدار داریم که پشت یک Reverse Proxy بهینه کار می‌کند. اما یک مشکل بزرگ و غیرقابل چشم‌پوشی وجود دارد: تمام ترافیک بین کاربران و سرور ما به صورت متن ساده (Plain Text) و روی پروتکل HTTP رد و بدل می‌شود. این به معنای آن است که هر کسی در میانه راه می‌تواند اطلاعات را شنود کند، آن‌ها را تغییر دهد و هویت سرور ما را جعل کند. در این قسمت، این حفره امنیتی بزرگ را با پیاده‌سازی  HTTPS  می‌بندیم. ما با استفاده از  Let&amp;#39;s En ...">
+    <meta property="article:published_time" content="Tue, 01 Jul 2025 04:40:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫چالش‌های متداول توسعه‌دهندگان ASP.NET Core هنگام استفاده از Nginx - قسمت چهارم - امنیت و SSL/TLS";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-3572.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫چالش‌های متداول توسعه‌دهندگان ASP.NET Core هنگام استفاده از Nginx - قسمت پنجم - لاگ‌برداری و عیب‌یابی</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-3570.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫چالش‌های متداول توسعه‌دهندگان ASP.NET Core هنگام استفاده از Nginx - قسمت سوم - پیکربندی Nginx به عنوان Reverse Proxy</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫چالش‌های متداول توسعه‌دهندگان ASP.NET Core هنگام استفاده از Nginx - قسمت چهارم - امنیت و SSL/TLS</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۴/۰۴/۱۰ ۰۸:۱۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-3571.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">تا اینجا، ما یک برنامه پایدار داریم که پشت یک Reverse Proxy بهینه کار می‌کند. اما یک مشکل بزرگ و غیرقابل چشم‌پوشی وجود دارد: تمام ترافیک بین کاربران و سرور ما به صورت متن ساده (Plain Text) و روی پروتکل HTTP رد و بدل می‌شود. این به معنای آن است که هر کسی در میانه راه می‌تواند اطلاعات را شنود کند، آن‌ها را تغییر دهد و هویت سرور ما را جعل کند. در این قسمت، این حفره امنیتی بزرگ را با پیاده‌سازی <strong>HTTPS</strong> می‌بندیم. ما با استفاده از <strong>Let&#39;s Encrypt</strong> یک گواهی SSL/TLS رایگان و معتبر دریافت می‌کنیم و با ابزار <strong>Certbot</strong>، فرآیند نصب و تمدید آن را کاملاً خودکار می‌کنیم. در پایان این فصل، سایت شما دارای قفل سبز رنگ اعتماد در مرورگرها خواهد بود.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>بخش ۱: پیاده‌سازی HTTPS با Let&#39;s Encrypt و Certbot</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">Let&#39;s Encrypt یک مرجع صدور گواهی (CA) رایگان، خودکار و باز است. Certbot ابزاری است که فرآیند دریافت، نصب و تمدید گواهی از Let&#39;s Encrypt را بسیار ساده می‌کند.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>پیش‌نیازهای ضروری:</strong></div><ul><li><strong>یک دامنه ثبت شده:</strong> شما باید مالک یک دامنه باشید (مثلاً <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">your-domain.com</code>).</li><li><strong>تنظیمات DNS:</strong> رکورد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">A</code> دامنه شما (و ساب‌دامین <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">www</code>) باید به آدرس IP عمومی سرور شما اشاره کند. Certbot برای تایید مالکیت شما، از طریق این دامنه به سرور شما متصل می‌شود.</li><li><strong>پیکربندی Nginx:</strong> کانفیگ Nginx که در فصل قبل ساختیم، باید برای دامنه شما روی پورت 80 به درستی کار کند.</li></ul><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>قدم ۱: نصب Certbot</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">Certbot و پلاگین مخصوص Nginx آن را روی سرور اوبونتو نصب می‌کنیم.</div><pre data-language="bash" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">sudo apt update
+sudo apt install certbot python3-certbot-nginx</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>قدم ۲: دریافت و نصب گواهی SSL</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">اکنون، با یک دستور ویژه، Certbot تمام کارها را برای ما انجام می‌دهد. دامنه خود را جایگزین your-domain.com کنید.</div><pre data-language="bash" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;"># -d برای مشخص کردن دامنه‌هاست. می‌توانید چند دامنه را مشخص کنید.
+sudo certbot --nginx -d your-domain.com -d www.your-domain.com</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>مراحل تعاملی Certbot:</strong></div><ul><li><strong>ایمیل:</strong> از شما یک آدرس ایمیل برای اطلاع‌رسانی‌های ضروری (مانند نزدیک شدن به تاریخ انقضای گواهی) می‌خواهد.</li><li><strong>شرایط سرویس:</strong> باید با شرایط سرویس Let&#39;s Encrypt موافقت کنید.</li><li><strong>خبرنامه:</strong> از شما می‌پرسد که آیا مایل به اشتراک در خبرنامه هستید یا خیر (اختیاری).</li></ul><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>مهم‌ترین سوال Certbot:</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">سپس Certbot از شما می‌پرسد که آیا می‌خواهید تمام ترافیک HTTP به صورت خودکار به HTTPS ریدایرکت شود.</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Please choose whether or not to redirect HTTP traffic to HTTPS, removing HTTP access.
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+1: No redirect - Make no further changes to the webserver configuration.
+2: Redirect - Make all requests redirect to secure HTTPS access.
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Select the appropriate number [1-2] then [enter] (press &#39;c&#39; to cancel):</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>گزینه ۲ (Redirect) را انتخاب کنید.</strong> این بهترین روش امنیتی است و تضمین می‌کند که هیچ کاربری به نسخه ناامن سایت شما دسترسی نخواهد داشت.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">پس از این مرحله، Certbot به صورت خودکار فایل کانفیگ Nginx شما را ویرایش کرده، گواهی‌ها را نصب و Nginx را Reload می‌کند. سایت شما اکنون از طریق <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">https://your-domain.com</code> در دسترس است!</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>بخش ۲: تحلیل تغییرات و عیب‌یابی مشکلات رایج</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>کانفیگ جدید Nginx شما چه شکلی شده است؟</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">اگر فایل <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">/etc/nginx/sites-available/kestrel-mywebapp</code> را باز کنید، می‌بینید که Certbot آن را به شکل زیر تغییر داده است:</div><pre data-language="bash" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">server {
+    server_name your-domain.com www.your-domain.com;
+
+    location / {
+        # ... تنظیمات پراکسی شما
+    }
+
+    # این خطوط توسط Certbot اضافه شده‌اند
+    listen [::]:443 ssl ipv6only=on; # مدیریت شده توسط Certbot
+    listen 443 ssl; # مدیریت شده توسط Certbot
+    ssl_certificate /etc/letsencrypt/live/your-domain.com/fullchain.pem; # مدیریت شده توسط Certbot
+    ssl_certificate_key /etc/letsencrypt/live/your-domain.com/privkey.pem; # مدیریت شده توسط Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # مدیریت شده توسط Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # مدیریت شده توسط Certbot
+}
+
+server {
+    if ($host = www.your-domain.com) {
+        return 301 https://$host$request_uri;
+    } # مدیریت شده توسط Certbot
+
+    if ($host = your-domain.com) {
+        return 301 https://$host$request_uri;
+    } # مدیریت شده توسط Certbot
+
+    listen 80;
+    listen [::]:80;
+    server_name your-domain.com www.your-domain.com;
+    return 404; # مدیریت شده توسط Certbot
+}</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">همانطور که می‌بینید، یک بلاک <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">server</code> برای پورت 443 (HTTPS) با مسیر گواهی‌ها ایجاد شده و بلاک قبلی پورت 80 (HTTP) اکنون تمام درخواست‌ها را به نسخه HTTPS ریدایرکت می‌کند.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>مشکل شماره ۱: گواهی من ۳ ماه دیگر منقضی می‌شود، چه کار کنم؟</strong></div><ul><li><strong>علت:</strong> گواهی‌های Let&#39;s Encrypt فقط ۹۰ روز اعتبار دارند تا فرآیند خودکارسازی تشویق شود.</li><li><strong>راه‌حل:</strong> هیچ کاری لازم نیست انجام دهید! پکیج Certbot به صورت خودکار یک <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">systemd timer</code> یا <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">cron job</code> روی سیستم شما تنظیم می‌کند که دو بار در روز اجرا شده و گواهی‌هایی که نزدیک به تاریخ انقضا هستند را <strong>به صورت خودکار تمدید می‌کند</strong>.</li><li><strong>برای اطمینان خاطر:</strong> می‌توانید فرآیند تمدید را شبیه‌سازی کنید (بدون اینکه واقعاً گواهی را تمدید کند). </li></ul><pre data-language="bash" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">sudo certbot renew --dry-run</pre><ul><li> اگر این دستور بدون خطا اجرا شد، تمدید خودکار نیز به درستی کار خواهد کرد.</li></ul><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>مشکل شماره ۲: مرورگرم خطای &quot;Mixed Content&quot; نمایش می‌دهد.</strong></div><ul><li><strong>علت:</strong> صفحه اصلی سایت شما از طریق <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">HTTPS</code> بارگذاری شده، اما برخی از منابع آن (یک تصویر، یک فایل CSS یا JS) با آدرس <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">http://</code> فراخوانی شده‌اند.</li><li><strong>راه‌حل:</strong> مطمئن شوید هدر <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">X-Forwarded-Proto</code> که در فصل قبل تنظیم کردیم، وجود دارد. این کار اکثر لینک‌های سمت سرور را اصلاح می‌کند.</li><li>در کدهای سمت کلاینت (HTML, JS)، آدرس‌های <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">http://</code> را به <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">https://</code> تغییر دهید یا از آدرس‌های نسبی (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">/images/logo.png</code>) یا پروتکل-نسبی (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">//example.com/logo.png</code>) استفاده کنید.</li></ul><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>مشکل شماره ۳: چگونه امنیت Nginx را فراتر از SSL ببرم؟</strong></div><ul><li><strong>راه‌حل:</strong> چند هدر امنیتی ساده اما مؤثر را به بلاک <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">server</code> پورت 443 خود اضافه کنید: </li></ul><pre data-language="bash" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">server {
+    listen 443 ssl;
+    server_name your-domain.com;
+
+    # ... مسیر گواهی‌ها
+
+    # جلوگیری از نمایش سایت در یک iframe در سایت‌های دیگر (Clickjacking)
+    add_header X-Frame-Options &quot;SAMEORIGIN&quot;;
+    # جلوگیری از حملات MIME-type sniffing
+    add_header X-Content-Type-Options &quot;nosniff&quot;;
+    # فعال کردن حفاظت XSS در مرورگرهای سازگار
+    add_header X-XSS-Protection &quot;1; mode=block&quot;;
+
+    location / {
+        # ...
+    }
+}</pre><ul><li> همچنین برای مخفی کردن نسخه Nginx، فایل <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">/etc/nginx/nginx.conf</code> را باز کرده و در بلاک <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">http</code> خط زیر را اضافه (یا uncomment) کنید: <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">server_tokens off;</code></li></ul><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>مشکل شماره ۴: پورت Kestrel هنوز از بیرون قابل دسترس است!</strong></div><ul><li><strong>علت:</strong> این یک اشتباه امنیتی بزرگ است. ترافیک باید <strong>مجبور</strong> شود که از طریق Nginx عبور کند تا تمام قوانین امنیتی ما اعمال شوند.</li><li><strong>راه‌حل:</strong> فایروال سرور را طوری تنظیم کنید که فقط به Nginx اجازه عبور دهد. </li></ul><pre data-language="bash" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;"># اجازه به ترافیک رمزنگاری شده و استاندارد وب
+sudo ufw allow &#39;Nginx Full&#39;
+
+# بستن دسترسی مستقیم به پورت برنامه (مثلا 5000)
+sudo ufw deny 5000
+
+# اگر فایروال غیرفعال است، آن را فعال کنید
+sudo ufw enable</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>جمع‌بندی فصل ۴:</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">شما با موفقیت بزرگترین قدم را در امن‌سازی برنامه خود برداشتید. سایت شما اکنون از طریق HTTPS سرویس‌دهی می‌شود، گواهی آن به صورت خودکار تمدید می‌گردد، و با چند هدر امنیتی کلیدی و تنظیمات صحیح فایروال، بسیار مقاوم‌تر شده است. اکنون که یک زیرساخت کامل، پایدار، بهینه و امن داریم، وقت آن است که یاد بگیریم چگونه آن را زیر نظر بگیریم. در قسمت بعدی، به دنیای لاگ‌برداری و عیب‌یابی شیرجه می‌زنیم تا همیشه بدانیم در سیستم ما چه می‌گذرد و در صورت بروز مشکل، چگونه به سرعت ریشه آن را پیدا کنیم.</div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3559.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>NGINX برای توسعه‌دهندگان ASP.NET Core - قسمت سوم - پیکربندی‌های ضروری</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3574.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>چالش‌های متداول توسعه‌دهندگان ASP.NET Core هنگام استفاده از Nginx - قسمت هفتم - خودآزمایی</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3568.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>چالش‌های متداول توسعه‌دهندگان ASP.NET Core هنگام استفاده از Nginx - قسمت اول - راه‌اندازی اولیه و مشکلات پیکربندی</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3563.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span> NGINX برای توسعه‌دهندگان ASP.NET Core - قسمت هفتم - خودآزمایی</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3562.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span> NGINX برای توسعه‌دهندگان ASP.NET Core - قسمت ششم - پروژه عملی و جمع‌بندی</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3570.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>چالش‌های متداول توسعه‌دهندگان ASP.NET Core هنگام استفاده از Nginx - قسمت سوم - پیکربندی Nginx به عنوان Reverse Proxy</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3575.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>برگه خلاصه NGINX برای توسعه‌دهندگان ASP.NET Core</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3559.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>NGINX برای توسعه‌دهندگان ASP.NET Core - قسمت سوم - پیکربندی‌های ضروری</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3559.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>NGINX برای توسعه‌دهندگان ASP.NET Core - قسمت سوم - پیکربندی‌های ضروری</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3562.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span> NGINX برای توسعه‌دهندگان ASP.NET Core - قسمت ششم - پروژه عملی و جمع‌بندی</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

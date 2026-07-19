@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫مدیریت حافظه و جمع‌آوری زباله (Garbage Collection) - قسمت هفدهم</title>     <meta name="description" content="  استفاده از چندین نسل در Garbage Collection   اگر فقط دو نسل داشته باشیم، وقتی نسل جوان پر می‌شود، اشیای زنده باید به نسل قدیمی منتقل شوند. اما بعضی از این اشیاء هنوز خیلی جوان هستند و ممکن است زودتر از موعد بمیرند! مشکل چیست؟ ما داریم اشیاء را به نسل قدیمی منتقل می‌کنیم، ولی خیلی‌از آنها زود می‌میرند و فضای نسل قدیمی را بیهوده اشغال می‌کنند. این باعث می‌شود Full GC زودتر اجرا گردد و باعث توقف طولانی‌تر شود.  راه‌حل: استفاده از نسل‌های بی ...">
+    <meta name="author" content="امیر مکارچی">
+    <meta itemprop="name" content="مدیریت حافظه و جمع‌آوری زباله (Garbage Collection) - قسمت هفدهم">
+    <meta itemprop="description" content="  استفاده از چندین نسل در Garbage Collection   اگر فقط دو نسل داشته باشیم، وقتی نسل جوان پر می‌شود، اشیای زنده باید به نسل قدیمی منتقل شوند. اما بعضی از این اشیاء هنوز خیلی جوان هستند و ممکن است زودتر از موعد بمیرند! مشکل چیست؟ ما داریم اشیاء را به نسل قدیمی منتقل می‌کنیم، ولی خیلی‌از آنها زود می‌میرند و فضای نسل قدیمی را بیهوده اشغال می‌کنند. این باعث می‌شود Full GC زودتر اجرا گردد و باعث توقف طولانی‌تر شود.  راه‌حل: استفاده از نسل‌های بی ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="مدیریت حافظه و جمع‌آوری زباله (Garbage Collection) - قسمت هفدهم">
+    <meta property="og:description" content="  استفاده از چندین نسل در Garbage Collection   اگر فقط دو نسل داشته باشیم، وقتی نسل جوان پر می‌شود، اشیای زنده باید به نسل قدیمی منتقل شوند. اما بعضی از این اشیاء هنوز خیلی جوان هستند و ممکن است زودتر از موعد بمیرند! مشکل چیست؟ ما داریم اشیاء را به نسل قدیمی منتقل می‌کنیم، ولی خیلی‌از آنها زود می‌میرند و فضای نسل قدیمی را بیهوده اشغال می‌کنند. این باعث می‌شود Full GC زودتر اجرا گردد و باعث توقف طولانی‌تر شود.  راه‌حل: استفاده از نسل‌های بی ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="مدیریت حافظه و جمع‌آوری زباله (Garbage Collection) - قسمت هفدهم">
+    <meta name="twitter:description" content="  استفاده از چندین نسل در Garbage Collection   اگر فقط دو نسل داشته باشیم، وقتی نسل جوان پر می‌شود، اشیای زنده باید به نسل قدیمی منتقل شوند. اما بعضی از این اشیاء هنوز خیلی جوان هستند و ممکن است زودتر از موعد بمیرند! مشکل چیست؟ ما داریم اشیاء را به نسل قدیمی منتقل می‌کنیم، ولی خیلی‌از آنها زود می‌میرند و فضای نسل قدیمی را بیهوده اشغال می‌کنند. این باعث می‌شود Full GC زودتر اجرا گردد و باعث توقف طولانی‌تر شود.  راه‌حل: استفاده از نسل‌های بی ...">
+    <meta name="twitter:card" content="  استفاده از چندین نسل در Garbage Collection   اگر فقط دو نسل داشته باشیم، وقتی نسل جوان پر می‌شود، اشیای زنده باید به نسل قدیمی منتقل شوند. اما بعضی از این اشیاء هنوز خیلی جوان هستند و ممکن است زودتر از موعد بمیرند! مشکل چیست؟ ما داریم اشیاء را به نسل قدیمی منتقل می‌کنیم، ولی خیلی‌از آنها زود می‌میرند و فضای نسل قدیمی را بیهوده اشغال می‌کنند. این باعث می‌شود Full GC زودتر اجرا گردد و باعث توقف طولانی‌تر شود.  راه‌حل: استفاده از نسل‌های بی ...">
+    <meta property="article:published_time" content="Sat, 22 Feb 2025 20:25:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫مدیریت حافظه و جمع‌آوری زباله (Garbage Collection) - قسمت هفدهم";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-3544.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫مدیریت حافظه و جمع‌آوری زباله (Garbage Collection) - قسمت هجدهم</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-3542.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫مدیریت حافظه و جمع‌آوری زباله (Garbage Collection) - قسمت شانزدهم</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫مدیریت حافظه و جمع‌آوری زباله (Garbage Collection) - قسمت هفدهم</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>امیر مکارچی<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۳/۱۲/۰۴ ۲۳:۵۵</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-3543.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>استفاده از چندین نسل در Garbage Collection</strong></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl">اگر فقط دو نسل داشته باشیم، وقتی نسل جوان پر می‌شود، اشیای زنده باید به نسل قدیمی منتقل شوند. اما بعضی از این اشیاء هنوز خیلی جوان هستند و ممکن است زودتر از موعد بمیرند! مشکل چیست؟ ما داریم اشیاء را به نسل قدیمی منتقل می‌کنیم، ولی خیلی‌از آنها زود می‌میرند و فضای نسل قدیمی را بیهوده اشغال می‌کنند. این باعث می‌شود Full GC زودتر اجرا گردد و باعث توقف طولانی‌تر شود.</div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl">راه‌حل: استفاده از نسل‌های بیشتر! یک یا چند نسل میانی (Intermediate Generations) ایجاد می‌کنیم تا قبل از اینکه اشیاء به نسل قدیمی منتقل شوند، فیلتری روی آنها انجام شود!</div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>مزایای استفاده از چندین نسل</strong></div><ul><li>کاهش فشار روی نسل قدیمی: چون اشیای موقتی قبل از رسیدن به نسل قدیمی حذف می‌شوند.</li><li>بهینه‌سازی توقف‌های GC (Pause Time): تعداد دفعات اجرای Full GC کاهش پیدا می‌کند.</li><li>کاهش مشکل nepotism: چون اشیایی که خیلی زود می‌میرند، قبل از انتقال به نسل قدیمی، در نسل‌های میانی حذف می‌شوند.</li></ul><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>چالش‌ها و مشکلات استفاده از چندین نسل</strong></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl">با اینکه چندین نسل، مفید است، اما مشکلاتی هم ایجاد می‌کند:</div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>افزایش پیچیدگی پیاده‌سازی:</strong></div><ul><li>حالا GC باید بین چندین نسل مدیریت انجام بدهد، نه فقط دو نسل.</li><li>نوشتن الگوریتم‌های GC سخت‌تر و پردازش کندتر می‌شود.</li></ul><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>افزایش حجم ردیابی اشاره‌گرها (Inter-Generational Pointers):</strong></div><ul><li>حالا باید اشاره‌گرها را بین چندین نسل مختلف مدیریت کنیم، نه فقط بین دو نسل.</li><li>این باعث افزایش بار روی Write Barrier و کاهش عملکرد می‌شود.</li></ul><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>افزایش اندازه‌ی Root Set در نسل‌های جوان‌تر:</strong></div><ul><li>بعضی اشیاء که در نسل‌های میانی هستند، می‌توانستند درنسل جوان حذف شوند اما به‌جای آن ارتقا داده شدند.</li><li>این باعث می‌شود نسل جوان زودتر پر شود و Minor GCها بیشتر اجرا شوند.</li></ul><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>چرا امروزه اکثر GCها فقط دو نسل دارن؟</strong></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl">با این که سیستم‌هایی مثل Smalltalk و Lisp در گذشته از چندین نسل استفاده می‌کردند، اما بیشتر GCهای امروزی فقط دو نسل دارند.</div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl">دلیل این موضوع:</div><ul><li>مدیریت چندین نسل پیچیده و پرهزینه است.</li><li>تکنیک‌های بهینه‌سازی داخل خود نسل‌ها (مثل مدیریت ارتقای اشیاء در نسل جوان) می‌توانند مشکل را حل کنند.</li><li>افزایش تعداد نسل‌ها باعث افزایش هزینه‌ی Write Barrier و کاهش عملکرد کلی برنامه می‌شود.</li></ul><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl">چند روش هوشمندانه وجود دارد که بدون اضافه کردن نسل‌های جدید، همان مزایای نسل‌های میانی را به‌دست آوریم:</div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>۱. مدیریت نرخ ارتقاء (Promotion Rate Management)</strong></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl">به‌جای اینکه تمام اشیاء زنده‌ی نسل جوان را به صورت مستقیم به نسل قدیمی بفرستیم، از چندین &quot;Bucket&quot; برای کنترل نرخ ارتقاء استفاده می‌کنیم. مثلاً یک شیء باید حداقل 2-3 بار Minor GC را زنده بماند تا به نسل قدیمی منتقل شود.</div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>۲. بهینه‌سازی اندازه‌ی نسل جوان (Adaptive Nursery Sizing)</strong></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl">اندازه‌ی نسل جوان باید بهینه تنظیم شود تا قبل از ارتقا، اکثر اشیاء حذف شوند. اندازه‌ی نسل جوان را می‌شود بسته به میزان اشیای زنده، پویا تنظیم کرد!</div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>۳. استفاده از Write Barrier هوشمند (Intelligent Write Barrier)</strong></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl">Write Barrier نباید همه‌ی اشاره‌گرهای بین نسل‌ها را ثبت کند، بلکه فقط موارد بحرانی را پیگیری کند. این باعث کاهش بار Write Barrier و بهبود کارایی می‌شود.</div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl">GC باید یک روشی برای &quot;اندازه‌گیری سن&quot; اشیاء داشته باشد تا بتواند تصمیم بگیرد که آیا این شیء باید ارتقا پیدا کند یا خیر. چند روش مختلف برای این کار وجود دارد که هرکدام مزایا و معایب خود را دارند.</div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>روش ساده: ارتقای دسته‌جمعی (En Masse Promotion)</strong></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl">هر بار که یک Minor GC اجرا می‌شود، همه‌ی اشیاء زنده به نسل بعدی ارتقا پیدا می‌کنند!</div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><u>مشکل:</u></div><ul><li>خیلی از اشیاء زنده که تازه ایجاد شدند، زودتر از موعد ارتقاء پیدا می‌کنند.</li><li>این باعث افزایش نرخ ارتقاء (Promotion Rate) و کاهش فضای مفید نسل قدیمی می‌شود.</li><li>ممکن است 50% تا 100% اشیاء بیشتری ارتقاء پیدا کنند، نسبت به روش‌های بهینه‌تر!</li></ul><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><u>جمع‌بندی:</u></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl">خیلی ساده و بهینه از نظر پردازشی، اما بهینه از نظر استفاده از حافظه نیست!</div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>روش نیمه‌فضاهای سنی (Aging Semispaces)</strong></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl">نسل جوان به دو یا چند نیمه‌فضا (Semispace) تقسیم می‌شود. اشیاء قبل از اینکه ارتقاء پیدا کنند، چند بار بین این نیمه‌فضاها جابجا می‌شوند.به این دلیل خوب است که اشیایی که زود می‌میرند، قبل از رسیدن به نسل قدیمی حذف می‌شوند. این روش از ارتقای زودهنگام جلوگیری می‌کند!</div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><u>مشکل:</u></div><ul><li>نیاز به محاسبه‌ی سن اشیاء دارد، که سربار پردازشی اضافه می‌کند.</li><li>هر بار که GC اجرا می‌شود، اشیاء باید بین نیمه‌فضاها جابجا شوند.</li></ul><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><u>استفاده:</u></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl">ExactVM در Sun Microsystems این روش را با استفاده از 5 بیت در Header شیء برای ذخیره‌ی سن اجرا کرده بود!</div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>روش Bucket Brigade و Step Systems</strong></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl">نسل جوان به چند بخش کوچکتر تقسیم می‌شود، به اسم &quot;Buckets&quot; یا &quot;Steps&quot;. اشیاء به مرور از یک Step به Step بعدی منتقل می‌شوند تا زمانی که به حد کافی زنده بمانند و ارتقاء پیدا کنند.</div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><u>مزایا:</u></div><ul><li>دقیق‌تر از نیمه‌فضاها عمل می‌کند.</li><li>بدون نیاز به ذخیره‌ی سن برای هر شی، می‌توانیم ارتقاء را بهتر کنترل کنیم.</li><li>با هر اجرای Minor GC، فقط اشیای واقعاً پایدار ارتقا پیدا می‌کنند.</li></ul><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><u>استفاده:</u></div><ul><li>Glasgow Haskell Compiler و UMass GC Toolkit این روش را پیاده‌سازی کردند.</li><li>Shaw’s Bucket Brigade بهینه‌سازی خاصی داشت که باعث می‌شد ارتقاء بدون نیاز به جابجایی داده‌ها انجام شود!</li></ul><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>روش Survivor Spaces (فضاهای بازمانده)</strong></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl">یک بخش خاص از نسل جوان به اسم &quot;Eden&quot; داریم که همه‌ی اشیاء جدید درآن ساخته می‌شوند. دو فضای بازمانده (Survivor Spaces) داریم که اشیاء زنده از Eden به آن‌ها منتقل می‌شوند. اگر یک شیء چند بار در Survivor Space زنده بماند، به نسل قدیمی ارتقا پیدا می‌کند.</div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><u>مزایا:</u></div><ul><li>بهینه‌ترین روش برای استفاده از حافظه، چون Eden خیلی بزرگ است و فقط 6.25% فضا برای کپی رزرو می‌شود!</li><li>اشیای زودمرگ از بین می‌رود قبل از اینکه به نسل قدیمی برسند.</li><li>مدیریت ساده و موثر</li></ul><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>روش High Water Mark</strong></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl">در هر اجرای Minor GC، یک &quot;High Water Mark&quot; تعیین می‌کنیم. اگر یک شیء پایین‌تر از این مارک باشد، به Survivor Space منتقل می‌شود. اگر بالاتر از مارک باشد، به نسل قدیمی ارتقا پیدا می‌کند.</div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><u>مزایا:</u></div><ul><li>ارتقای اشیاء دقیق‌تر انجام می‌شود، چون فقط اشیاء واقعاً پایدار منتقل می‌شوند.</li><li>نیاز به ذخیره‌ی سن اشیاء نداریم، فقط از مقایسه‌ی آدرس‌ها استفاده می‌کنیم!</li></ul><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><u>استفاده:</u></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl">Scheme-48 و Standard ML از این روش استفاده کردند.</div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20339.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>معماری سه نسلی جمع‌آورنده زباله در دات‌نت: چرایی استفاده از سه نسل حافظه</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20521.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>نحوه بهبود مدیریت حافظه «آرایه‌های بسیار بزرگ» در برنامه‌های دات‌نتی</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-24210.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>درک مدیریت حافظه با جمع‌آوری زباله (GC) در ‎.NET</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3542.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مدیریت حافظه و جمع‌آوری زباله (Garbage Collection) - قسمت شانزدهم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3544.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مدیریت حافظه و جمع‌آوری زباله (Garbage Collection) - قسمت هجدهم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3541.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مدیریت حافظه و جمع‌آوری زباله (Garbage Collection) - قسمت پانزدهم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3551.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بررسی ساختار، عملکرد و تفاوت‌های Heap مدیریت‌شده و مدیریت‌نشده و مدل نسل‌بندی (Generations) در Garbage Collection</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3553.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بهینه‌سازی GC در دات‌نت 9 : تقویت مدیریت حافظه با کاهش Fragmentation و افزایش کارایی</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3546.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مدیریت حافظه و جمع‌آوری زباله (Garbage Collection) - قسمت نوزدهم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3641.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آماده شدن برای GC جدید در دات نت 10</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

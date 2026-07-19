@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫استفاده از چندین بانک اطلاعاتی به صورت همزمان در EF Code First</title>     <meta name="description" content="یکی از روش‌های تهیه‌ی  برنامه‌های چند مستاجری ، ایجاد بانک‌های اطلاعاتی مستقلی به ازای هر مشتری است؛ یا نمونه‌ی دیگر آن، برنامه‌هایی هستند که اطلاعات هر سال را در یک بانک اطلاعاتی جداگانه نگه‌داری می‌کنند. در ادامه قصد داریم، نحوه‌ی کار با این بانک‌های اطلاعاتی را به صورت همزمان، توسط EF Code first و در حالت استفاده از الگوی واحد کار و تزریق وابستگی‌ها، به همراه فعال سازی خودکار مباحث migrations و به روز رسانی ساختار تمام بانک‌های اطلاعاتی ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="استفاده از چندین بانک اطلاعاتی به صورت همزمان در EF Code First">
+    <meta itemprop="description" content="یکی از روش‌های تهیه‌ی  برنامه‌های چند مستاجری ، ایجاد بانک‌های اطلاعاتی مستقلی به ازای هر مشتری است؛ یا نمونه‌ی دیگر آن، برنامه‌هایی هستند که اطلاعات هر سال را در یک بانک اطلاعاتی جداگانه نگه‌داری می‌کنند. در ادامه قصد داریم، نحوه‌ی کار با این بانک‌های اطلاعاتی را به صورت همزمان، توسط EF Code first و در حالت استفاده از الگوی واحد کار و تزریق وابستگی‌ها، به همراه فعال سازی خودکار مباحث migrations و به روز رسانی ساختار تمام بانک‌های اطلاعاتی ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="استفاده از چندین بانک اطلاعاتی به صورت همزمان در EF Code First">
+    <meta property="og:description" content="یکی از روش‌های تهیه‌ی  برنامه‌های چند مستاجری ، ایجاد بانک‌های اطلاعاتی مستقلی به ازای هر مشتری است؛ یا نمونه‌ی دیگر آن، برنامه‌هایی هستند که اطلاعات هر سال را در یک بانک اطلاعاتی جداگانه نگه‌داری می‌کنند. در ادامه قصد داریم، نحوه‌ی کار با این بانک‌های اطلاعاتی را به صورت همزمان، توسط EF Code first و در حالت استفاده از الگوی واحد کار و تزریق وابستگی‌ها، به همراه فعال سازی خودکار مباحث migrations و به روز رسانی ساختار تمام بانک‌های اطلاعاتی ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="استفاده از چندین بانک اطلاعاتی به صورت همزمان در EF Code First">
+    <meta name="twitter:description" content="یکی از روش‌های تهیه‌ی  برنامه‌های چند مستاجری ، ایجاد بانک‌های اطلاعاتی مستقلی به ازای هر مشتری است؛ یا نمونه‌ی دیگر آن، برنامه‌هایی هستند که اطلاعات هر سال را در یک بانک اطلاعاتی جداگانه نگه‌داری می‌کنند. در ادامه قصد داریم، نحوه‌ی کار با این بانک‌های اطلاعاتی را به صورت همزمان، توسط EF Code first و در حالت استفاده از الگوی واحد کار و تزریق وابستگی‌ها، به همراه فعال سازی خودکار مباحث migrations و به روز رسانی ساختار تمام بانک‌های اطلاعاتی ...">
+    <meta name="twitter:card" content="یکی از روش‌های تهیه‌ی  برنامه‌های چند مستاجری ، ایجاد بانک‌های اطلاعاتی مستقلی به ازای هر مشتری است؛ یا نمونه‌ی دیگر آن، برنامه‌هایی هستند که اطلاعات هر سال را در یک بانک اطلاعاتی جداگانه نگه‌داری می‌کنند. در ادامه قصد داریم، نحوه‌ی کار با این بانک‌های اطلاعاتی را به صورت همزمان، توسط EF Code first و در حالت استفاده از الگوی واحد کار و تزریق وابستگی‌ها، به همراه فعال سازی خودکار مباحث migrations و به روز رسانی ساختار تمام بانک‌های اطلاعاتی ...">
+    <meta property="article:published_time" content="Sun, 01 Mar 2015 13:00:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫استفاده از چندین بانک اطلاعاتی به صورت همزمان در EF Code First";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-2030.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫معرفی Selector های CSS - قسمت 5</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-2028.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫مدیریت سشن‌ها در برنامه‌های وب به کمک تزریق وابستگی‌ها</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫استفاده از چندین بانک اطلاعاتی به صورت همزمان در EF Code First</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۳/۱۲/۱۰ ۱۳:۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-2029.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'>یکی از روش‌های تهیه‌ی <a href="www.dntips.ir-posts-1572.html">برنامه‌های چند مستاجری</a>، ایجاد بانک‌های اطلاعاتی مستقلی به ازای هر مشتری است؛ یا نمونه‌ی دیگر آن، برنامه‌هایی هستند که اطلاعات هر سال را در یک بانک اطلاعاتی جداگانه نگه‌داری می‌کنند. در ادامه قصد داریم، نحوه‌ی کار با این بانک‌های اطلاعاتی را به صورت همزمان، توسط EF Code first و در حالت استفاده از الگوی واحد کار و تزریق وابستگی‌ها، به همراه فعال سازی خودکار مباحث migrations و به روز رسانی ساختار تمام بانک‌های اطلاعاتی مورد استفاده، بررسی کنیم. <br> <br> <br> <b>
+
+مشخص سازی رشته‌های متفاوت اتصالی</b> <br> <br>
+
+
+
+
+فرض کنید برنامه‌ی جاری شما قرار است از دو بانک اطلاعاتی مشخص استفاده کند که تعاریف رشته‌های اتصالی آن‌ها در وب کانفیگ به صورت ذیل مشخص شده‌اند:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="XML" name="code">&nbsp;&nbsp;&lt;connectionStrings&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;clear&nbsp;/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;add&nbsp;name="Sample07Context"&nbsp;connectionString="Data&nbsp;Source=(local);Initial&nbsp;Catalog=TestDbIoC;Integrated&nbsp;Security&nbsp;=&nbsp;true"&nbsp;providerName="System.Data.SqlClient"&nbsp;/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;add&nbsp;name="Database2012"&nbsp;connectionString="Data&nbsp;Source=(local);Initial&nbsp;Catalog=testdb2012;Integrated&nbsp;Security&nbsp;=&nbsp;true"&nbsp;providerName="System.Data.SqlClient"&nbsp;/&gt;
+&nbsp;&nbsp;&lt;/connectionStrings&gt;</pre> </div>
+
+
+البته، ذکر این مورد کاملا اختیاری است و می‌توان رشته‌های اتصالی را به صورت پویا نیز در زمان اجرا مشخص و مقدار دهی کرد.<br> <br> <br> <b>
+
+تغییر Context برنامه جهت پذیرش رشته‌های اتصالی پویای قابل تغییر در زمان اجرا</b> <br> <br>
+
+
+
+
+اکنون که قرار است کاربران در حین ورود به برنامه، بانک اطلاعاتی مدنظر خود را انتخاب کنند و یا سیستم قرار است به ازای کاربری خاص، رشته‌ی اتصالی خاص او را به Context ارسال کند، نیاز است Context برنامه را به صورت ذیل تغییر دهیم:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">using&nbsp;System.Collections.Generic;
+using&nbsp;System.Data.Entity;
+using&nbsp;System.Linq;
+using&nbsp;EF_Sample07.DomainClasses;
+ 
+namespace&nbsp;EF_Sample07.DataLayer.Context
+{
+&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;class&nbsp;Sample07Context&nbsp;:&nbsp;DbContext,&nbsp;IUnitOfWork
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;DbSet&lt;Category&gt;&nbsp;Categories&nbsp;{&nbsp;set;&nbsp;get;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;DbSet&lt;Product&gt;&nbsp;Products&nbsp;{&nbsp;set;&nbsp;get;&nbsp;}
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;///&nbsp;&lt;summary&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;///&nbsp;It&nbsp;looks&nbsp;for&nbsp;a&nbsp;connection&nbsp;string&nbsp;named&nbsp;Sample07Context&nbsp;in&nbsp;the&nbsp;web.config&nbsp;file.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;///&nbsp;&lt;/summary&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;Sample07Context()
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;base("Sample07Context")
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;///&nbsp;&lt;summary&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;///&nbsp;To&nbsp;change&nbsp;the&nbsp;connection&nbsp;string&nbsp;at&nbsp;runtime.&nbsp;See&nbsp;the&nbsp;SmObjectFactory&nbsp;class&nbsp;for&nbsp;more&nbsp;info.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;///&nbsp;&lt;/summary&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;Sample07Context(string&nbsp;connectionString)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;base(connectionString)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//Note:&nbsp;defaultConnectionFactory&nbsp;in&nbsp;the&nbsp;web.config&nbsp;file&nbsp;should&nbsp;be&nbsp;set.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+ 
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;void&nbsp;SetConnectionString(string&nbsp;connectionString)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;this.Database.Connection.ConnectionString&nbsp;=&nbsp;connectionString;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;}
+}</pre> </div>
+
+
+در اینجا دو متد سازنده را مشاهده می‌کنید. سازنده‌ی پیش فرض، از رشته‌ای اتصالی با نامی مساوی Sample07Context استفاده می‌کند و سازنده‌ی دوم، امکان پذیرش یک رشته‌ی اتصالی پویا را دارد. مقدار پارامتر ورودی آن می‌تواند نام رشته‌ی اتصالی و یا حتی مقدار کامل رشته‌ی اتصالی باشد. حالت پذیرش نام رشته‌ی اتصالی زمانی مفید است که همانند مثال ابتدای بحث، این نام‌ها را پیشتر در فایل کانفیگ برنامه ثبت کرده باشید و حالت پذیرش مقدار کامل رشته‌ی اتصالی، جهت مقدار دهی پویای آن بدون نیاز به ثبت اطلاعاتی در فایل کانفیگ برنامه مفید است.<br> <br>
+
+
+
+
+یک متد دیگر هم در اینجا در انتهای کلاس به نام SetConnectionString تعریف شده‌است. از این متد در حین ورود کاربر به سایت می‌توان استفاده کرد. برای مثال حداقل دو نوع طراحی را می‌توان درنظر گرفت:<br>
+
+
+
+
+الف) کاربر با برنامه‌ای کار می‌کند که به ازای سال‌های مختلف، بانک‌های اطلاعاتی مختلفی دارد و در ابتدای ورود، یک drop down انتخاب سال کاری برای او درنظر گرفته شده‌است (علاوه بر سایر ورودی‌های استانداردی مانند نام کاربری و کلمه‌ی عبور). در این حالت بهتر است متد SetConnectionString نام رشته‌ی اتصالی را بر اساس سال انتخابی، در حین لاگین دریافت کند که اطلاعات آن در فایل کانفیگ سایت پیشتر مشخص شده‌است.<br>
+
+
+
+
+ب) کاربر یا مشتری پس از ورود به سایت، نیاز است صرفا از بانک اطلاعاتی خاص خودش استفاده کند. بنابراین اطلاعات تعریف کاربران و مشتری‌ها در یک بانک اطلاعاتی مجزا قرار دارند و پس از لاگین، نیاز است رشته‌ی اتصالی او به صورت پویا از بانک اطلاعاتی خوانده شده و سپس توسط متد SetConnectionString تنظیم گردد.<br> <br> <br> <b>
+
+مدیریت سشن‌های رشته‌ی اتصالی جاری</b> <br> <br>
+
+
+
+
+پس از اینکه کاربر، در حین ورود مشخص کرد که از چه بانک اطلاعاتی قرار است استفاده کند و یا اینکه برنامه بر اساس اطلاعات ثبت شده‌ی او تصمیم‌گیری کرد که باید از کدام رشته‌ی اتصالی استفاده کند، نگهداری این رشته‌ی اتصالی نیاز به سشن دارد تا به ازای هر کاربر متصل به سایت منحصربفرد باشد. در مورد مدیریت سشن‌ها در برنامه‌های وب، از نکات مطرح شده‌ی در مطلب «<a href="www.dntips.ir-posts-2028.html">مدیریت سشن‌ها در برنامه‌های وب به کمک تزریق وابستگی‌ها</a>» استفاده خواهیم کرد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">using&nbsp;System;
+using&nbsp;System.Threading;
+using&nbsp;System.Web;
+using&nbsp;EF_Sample07.DataLayer.Context;
+using&nbsp;EF_Sample07.ServiceLayer;
+using&nbsp;StructureMap;
+using&nbsp;StructureMap.Web;
+using&nbsp;StructureMap.Web.Pipeline;
+ 
+namespace&nbsp;EF_Sample07.IoCConfig
+{
+&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;static&nbsp;class&nbsp;SmObjectFactory
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;private&nbsp;static&nbsp;readonly&nbsp;Lazy&lt;Container&gt;&nbsp;_containerBuilder&nbsp;=
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;new&nbsp;Lazy&lt;Container&gt;(defaultContainer,&nbsp;LazyThreadSafetyMode.ExecutionAndPublication);
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;static&nbsp;IContainer&nbsp;Container
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;get&nbsp;{&nbsp;return&nbsp;_containerBuilder.Value;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;static&nbsp;void&nbsp;HttpContextDisposeAndClearAll()
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HttpContextLifecycle.DisposeAndClearAll();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;private&nbsp;static&nbsp;Container&nbsp;defaultContainer()
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;new&nbsp;Container(ioc&nbsp;=&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//&nbsp;session&nbsp;manager&nbsp;setup
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ioc.For&lt;ISessionProvider&gt;().Use&lt;DefaultWebSessionProvider&gt;();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ioc.For&lt;HttpSessionStateBase&gt;()
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.Use(ctx&nbsp;=&gt;&nbsp;new&nbsp;HttpSessionStateWrapper(HttpContext.Current.Session));
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ioc.For&lt;IUnitOfWork&gt;()
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.HybridHttpOrThreadLocalScoped()
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.Use&lt;Sample07Context&gt;()
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//&nbsp;Remove&nbsp;these&nbsp;2&nbsp;lines&nbsp;if&nbsp;you&nbsp;want&nbsp;to&nbsp;use&nbsp;a&nbsp;connection&nbsp;string&nbsp;named&nbsp;Sample07Context,&nbsp;defined&nbsp;in&nbsp;the&nbsp;web.config&nbsp;file.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.Ctor&lt;string&gt;("connectionString")
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.Is(ctx&nbsp;=&gt;&nbsp;getCurrentConnectionString(ctx));
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ioc.For&lt;ICategoryService&gt;().Use&lt;EfCategoryService&gt;();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ioc.For&lt;IProductService&gt;().Use&lt;EfProductService&gt;();
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ioc.For&lt;ICategoryService&gt;().Use&lt;EfCategoryService&gt;();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ioc.For&lt;IProductService&gt;().Use&lt;EfProductService&gt;();
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ioc.Policies.SetAllProperties(properties&nbsp;=&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;properties.OfType&lt;IUnitOfWork&gt;();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;properties.OfType&lt;ICategoryService&gt;();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;properties.OfType&lt;IProductService&gt;();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;properties.OfType&lt;ISessionProvider&gt;();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;});
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;});
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;private&nbsp;static&nbsp;string&nbsp;getCurrentConnectionString(IContext&nbsp;ctx)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(HttpContext.Current&nbsp;!=&nbsp;null)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//&nbsp;this&nbsp;is&nbsp;a&nbsp;web&nbsp;application
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;sessionProvider&nbsp;=&nbsp;ctx.GetInstance&lt;ISessionProvider&gt;();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;connectionString&nbsp;=&nbsp;sessionProvider.Get&lt;string&gt;("CurrentConnectionString");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(string.IsNullOrWhiteSpace(connectionString))
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//&nbsp;It's&nbsp;a&nbsp;default&nbsp;connectionString.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;connectionString&nbsp;=&nbsp;"Database2012";
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//&nbsp;this&nbsp;session&nbsp;value&nbsp;should&nbsp;be&nbsp;set&nbsp;during&nbsp;the&nbsp;login&nbsp;phase
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sessionProvider.Store("CurrentConnectionStringName",&nbsp;connectionString);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;connectionString;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//&nbsp;this&nbsp;is&nbsp;a&nbsp;desktop&nbsp;application,&nbsp;so&nbsp;you&nbsp;can&nbsp;store&nbsp;this&nbsp;value&nbsp;in&nbsp;a&nbsp;global&nbsp;static&nbsp;variable.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;"Database2012";
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;}
+}</pre> </div>
+
+
+در اینجا نحوه‌ی پویا سازی تامین رشته‌ی اتصالی را مشاهده می‌کنید. در مورد اینترفیس ISessionProvider و کلاس پایه HttpSessionStateBase پیشتر در مطلب «<a href="www.dntips.ir-posts-2028.html">مدیریت سشن‌ها در برنامه‌های وب به کمک تزریق وابستگی‌ها</a>» بحث شد.<br>
+
+
+
+
+نکته‌ی مهم این تنظیمات، قسمت مقدار دهی سازنده‌ی کلاس Context برنامه به صورت پویا توسط IoC Container جاری است. در اینجا هر زمانیکه قرار است وهله‌ای از Sample07Context ساخته شود، از سازنده‌ی دوم آن که دارای پارامتری به نام connectionString است، استفاده خواهد شد. همچنین مقدار آن به صورت پویا از متد getCurrentConnectionString که در انتهای کلاس تعریف شده‌است، دریافت می‌گردد.<br>
+
+
+
+
+در این متد ابتدا مقدار HttpContext.Current بررسی شده‌است. این مقدار اگر نال باشد، یعنی برنامه‌ی جاری یک برنامه‌ی دسکتاپ است و مدیریت رشته‌ی اتصالی جاری آن‌را توسط یک خاصیت Static یا <a href="www.dntips.ir-posts-1897.html">Singleton</a>  تعریف شده‌ی در برنامه نیز می‌توان تامین کرد. از این جهت که در هر زمان، تنها یک کاربر در App Domain جاری برنامه‌ی دسکتاپ می‌تواند وجود داشته باشد و Singleton یا Static تعریف شدن اطلاعات رشته‌ی اتصالی، مشکلی را ایجاد نمی‌کند. اما در برنامه‌های وب، چندین کاربر در یک App Domain به سیستم وارد می‌شوند. به همین جهت است که مشاهده می‌کنید در اینجا از تامین کننده‌ی سشن، برای نگهداری اطلاعات رشته‌ی اتصالی جاری کمک گرفته شده‌است. <br> <br>
+
+
+
+
+کلید این سشن نیز در این مثال مساوی CurrentConnectionStringName تعریف شده‌است. بنابراین در حین لاگین موفقیت آمیز کاربر، دو مرحله‌ی زیر باید طی شوند:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code"> sessionProvider.Store("CurrentConnectionString", "Sample07Context");
+uow.SetConnectionString(WebConfigurationManager.ConnectionStrings[_sessionProvider.Get&lt;string&gt;("CurrentConnectionString")].ConnectionString);</pre> </div>
+
+
+ابتدا باید سشن CurrentConnectionStringName به بانک اطلاعاتی انتخابی کاربر تنظیم شود. برای نمونه در این مثال خاص، از نام رشته‌ی اتصالی مشخص شده‌ی در وب کانفیگ برنامه (مثال ابتدای بحث) به نام Sample07Context استفاده شده‌است.<br>
+
+
+
+
+سپس از متد SetConnectionString برای خواندن مقدار نام مشخص شده در سشن CurrentConnectionStringName کمک گرفته‌ایم. هرچند سازنده‌ی کلاس Context برنامه، هر دو حالت استفاده از نام رشته‌ی اتصالی و یا مقدار کامل رشته‌ی اتصالی را پشتیبانی می‌کند، اما خاصیت this.Database.Connection.ConnectionString تنها رشته‌ی کامل اتصالی را می‌پذیرد (بکار رفته در متد SetConnectionString).<br> <br>
+
+
+
+
+تا اینجا کار پویا سازی انتخاب و استفاده از رشته‌ی اتصالی برنامه به پایان می‌رسد. هر زمانیکه قرار است Context برنامه توسط IoC Container نمونه سازی شود، به متد getCurrentConnectionString رجوع کرده و مقدار رشته‌ی اتصالی را از سشن تنظیم شده‌‌ای به نام CurrentConnectionStringName دریافت می‌کند. سپس از مقدار آن جهت مقدار دهی سازنده‌ی دوم کلاس Context استفاده خواهد کرد.<br> <br> <br> <b>
+
+مدیریت migrations خودکار برنامه در حالت استفاده از چندین بانک اطلاعاتی</b> <br> <br>
+
+
+
+
+یکی از مشکلات کار با برنامه‌های چند دیتابیسی، به روز رسانی ساختار تمام بانک‌های اطلاعاتی مورد استفاده، پس از تغییری در ساختار مدل‌های برنامه است. از این جهت که اگر تمام بانک‌های اطلاعاتی به روز نشوند، کوئری‌های جدید برنامه که از خواص و فیلدهای جدید استفاده می‌کنند، دیگر کار نخواهند کرد. پویا سازی اعمال این تغییرات را می‌توان به صورت ذیل انجام داد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">using&nbsp;System;
+using&nbsp;System.Data.Entity;
+using&nbsp;System.Web;
+using&nbsp;EF_Sample07.DataLayer.Context;
+using&nbsp;EF_Sample07.IoCConfig;
+ 
+namespace&nbsp;EF_Sample07.WebFormsAppSample
+{
+&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;class&nbsp;Global&nbsp;:&nbsp;HttpApplication
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void&nbsp;Application_Start(object&nbsp;sender,&nbsp;EventArgs&nbsp;e)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;initDatabases();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;private&nbsp;static&nbsp;void&nbsp;initDatabases()
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//&nbsp;defined&nbsp;in&nbsp;web.config
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;string[]&nbsp;connectionStringNames&nbsp;=
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Sample07Context",
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Database2012"
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;foreach&nbsp;(var&nbsp;connectionStringName&nbsp;in&nbsp;connectionStringNames)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Database.SetInitializer(
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;new&nbsp;MigrateDatabaseToLatestVersion&lt;Sample07Context,&nbsp;Configuration&gt;(connectionStringName));
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;using&nbsp;(var&nbsp;ctx&nbsp;=&nbsp;new&nbsp;Sample07Context(connectionStringName))
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ctx.Database.Initialize(force:&nbsp;true);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void&nbsp;Application_EndRequest(object&nbsp;sender,&nbsp;EventArgs&nbsp;e)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SmObjectFactory.HttpContextDisposeAndClearAll();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} 
+&nbsp;&nbsp;&nbsp;&nbsp;}
+}</pre> </div>
+
+
+نکته‌ی مهمی که در اینجا بکار گرفته شده‌است، مشخص سازی صریح سازنده‌ی شیء <a href="www.dntips.ir-posts-834.html">MigrateDatabaseToLatestVersion</a>  است. به صورت معمول در اکثر برنامه‌های تک دیتابیسی، نیازی به مشخص سازی پارامتر سازنده‌ی این کلاس نیست و در این حالت از سازنده‌ی بدون پارامتر کلاس Context برنامه استفاده خواهد شد. اما اگر سازنده‌ی آن‌را مشخص کنیم، به صورت خودکار از متد سازنده‌ای در کلاس Context استفاده می‌کند که پارامتر رشته‌ی اتصالی را به صورت پویا می‌پذیرد.<br>
+
+
+
+
+در این مثال خاص، متد initDatabases در حین آغاز برنامه فراخوانی شده‌است. منظور این است که اینکار در طول عمر برنامه تنها کافی است یکبار انجام شود و پس از آن است که EF Code first می‌تواند از رشته‌های اتصالی متفاوتی که به آن ارسال می‌شود، بدون مشکل استفاده کند. زیرا اطلاعات نگاشت کلاس‌های مدل برنامه به جداول بانک اطلاعاتی به این ترتیب است که کش می‌شوند و یا بر اساس کلاس Configuration به صورت خودکار به بانک اطلاعاتی اعمال می‌گردند.<br> <br> <br>
+
+
+
+
+کدهای کامل این مثال را که در حقیقت نمونه‌ی بهبود یافته‌ی مطلب «<a href="www.dntips.ir-posts-842.html">EF Code First #12</a>» است، از اینجا می‌توانید دریافت کنید:<br> <b> <a href="https://github.com/VahidN/UoW-Sample">UoW-Sample</a> </b></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/project-feedbacks/37/443#comment-788'><span class='badge bg-info bg-gradient rounded-pill me-2'>پاسخ به بازخورد‌های پروژه‌ها</span>رابط کاربری MongoDB</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/project-feedbacks/22/324#comment-552'><span class='badge bg-info bg-gradient rounded-pill me-2'>پاسخ به بازخورد‌های پروژه‌ها</span>ایجاد دیتابیس</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3244.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>امکان تغییر رشته‌ی اتصالی به بانک اطلاعاتی در EF Core در زمان اجرای برنامه</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-842.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>EF Code First #12</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3007.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>کار با چندین نوع بانک اطلاعاتی متفاوت در Entity Framework Core</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2028.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مدیریت سشن‌ها در برنامه‌های وب به کمک تزریق وابستگی‌ها</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2029.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>استفاده از چندین بانک اطلاعاتی به صورت همزمان در EF Code First</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1937.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>اعمال تزریق وابستگی‌ها به مثال رسمی ASP.NET Identity</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-832.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>EF Code First #2</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2252.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>ساخت دیتابیس sqlite با EF6 Code First</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>اس حیدری</strong>  در  <span dir='ltr'>۱۳۹۳/۱۲/۱۱ ۱۲:۳۰</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><p>سلام</p> <p>متد SetConnectionString&nbsp; که در واقع کانکشن استرینگ را ست می‌کند و تنها&nbsp;زمانی مفید خواهد بود که کانکشن استرینگ‌ها به یک نوع&nbsp;Rdbms متصل شوند . مثلا همه کانکشن استرینگ ها&nbsp;به کانکشن‌های مختلفی&nbsp; اشاره کند&nbsp;که&nbsp;همگی به دیتابیس‌های مختلف sql server متصل شوند.</p> <p>اما اگر یک کانکشن استرینگ به sql server و یک کانکشن استرینگ به دیتابیسی از نوع sql ce یا نوع‌های دیگه متصل شود با خطای provider مواجه خواهیم شد. چرا که کانکشن استرینگ ، کانکشن ست شده و Provider آن از کانکشن پیش فرض مقدار گرفته است . و عملا هم نمی‌توان provider را در این تابع مقدار داد چرا که Readonly است!</p></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۳/۱۲/۱۱ ۱۲:۴۸</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>امکان ساخت رشته‌ی اتصالی، به همراه ذکر صریح Provider مورد استفاده <a href="http://stackoverflow.com/a/6003101/298573">هم وجود دارد</a>. چند مثال:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">public static string CreateConnectionStringForSQLCe(string dbPath = @"|DataDirectory|\NerdDinners.sdf")
+{
+   SqlCeConnectionStringBuilder sqlConnection = new SqlCeConnectionStringBuilder();
+   sqlConnection.Password = "9023fase93";
+   sqlConnection.DataSource = dbPath;
+
+   EntityConnectionStringBuilder connection = new EntityConnectionStringBuilder();
+   connection.Metadata = @"res://*/NerdDinnersModel.csdl|res://*/NerdDinnersModel.ssdl|res://*/NerdDinnersModel.msl";
+   connection.Provider = "System.Data.SqlServerCe.3.5";
+   connection.ProviderConnectionString = sqlConnection.ToString();
+
+   return connection.ToString();
+}
+
+
+public&nbsp;static&nbsp;string&nbsp;CreateConnectionStringForSQLServer()
+{
+&nbsp;&nbsp;&nbsp;//Build&nbsp;an&nbsp;SQL&nbsp;connection&nbsp;string
+&nbsp;&nbsp;&nbsp;SqlConnectionStringBuilder&nbsp;sqlString&nbsp;=&nbsp;new&nbsp;SqlConnectionStringBuilder()
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DataSource&nbsp;=&nbsp;"MyPC",&nbsp;//&nbsp;Server&nbsp;name
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;InitialCatalog&nbsp;=&nbsp;"db1",&nbsp;&nbsp;//Database
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;UserID&nbsp;=&nbsp;"user1", &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//Username
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Password&nbsp;=&nbsp;"mypassword",&nbsp;&nbsp;//Password
+&nbsp;&nbsp;&nbsp;};
+&nbsp;
+&nbsp;&nbsp;&nbsp;//Build&nbsp;an&nbsp;Entity Framework&nbsp;connection&nbsp;string
+&nbsp;&nbsp;&nbsp;EntityConnectionStringBuilder&nbsp;entityString&nbsp;=&nbsp;new&nbsp;EntityConnectionStringBuilder
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Provider&nbsp;=&nbsp;"System.Data.SqlClient",
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Metadata&nbsp;=&nbsp;&nbsp;&nbsp;"res://*/testModel.csdl|res://*/testModel.ssdl|res://*/testModel.msl",
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ProviderConnectionString&nbsp;=&nbsp;sqlString.ToString()
+&nbsp;&nbsp;&nbsp;};
+  &nbsp;return&nbsp;entityString.ConnectionString;
+}</pre> </div> </div>
+
+
+
+
+این روش با EF code first هم کار می‌کند و در سازنده‌ی دوم کلاس Context که connectionString را می‌پذیرد، قابل استفاده‌است.</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>امیر هاشم زاده</strong>  در  <span dir='ltr'>۱۳۹۵/۰۸/۱۵ ۲۲:۴۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>2 کانتکست داریم، یکی از آنها از اوراکل پروایدار، که توسط code-based کانفیگ پروایدر رجیستر شده است در <a href="http://www.billfogg.com/2015/02/visual-studio-2013-entity-framework-6-and-oracle-odpnet.html">اینجا</a>  اشاره شده به آن،&nbsp; و دیگری از پروایدر SqlServer استفادده می‌کند. طی فرآیندی، ابتدا کانتکست اول که از پروایدر اوراکل استفاده میکنه فراخوانی میشه و بدون خطا به اوراکل وصل میشود و اطلاعات را دریافت می‌کنه ولی هنگامی که از روش پاسخ بالا جهت اتصال کانتکست دوم به اس کیو ال سرور استفاده می‌کنم (تنظیم پروایدر داخل متد و بصورت صریح)، خطایی از پروایدر اوراکل صادر میشه! ظاهرا کانتکست دوم سعی داره از پروایدر Oracle استفاده کنه.<br>
+
+
+چطور امکان داره که تنظیمات پروایدر اس کیو ال را هم بصورت صریح به کانتکست دوم معرفی کنم (code-based configuration)؟ بعبارت دیگر به چه شکل می‌تونیم code-based configuration برای هر دو تا پروایدر داشته باشیم؟</div>
+</div></li></ul></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>سالار ربال</strong>  در  <span dir='ltr'>۱۳۹۴/۰۲/۱۰ ۲۳:۴۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام.<br>
+در این مقاله با استفاده از سشن ، از پردازش‌های موازی چشم پوشی شده است ؟ با توجه به <a href="www.dntips.ir-posts-875.html">مطلبی </a> که در سایت ارائه داده بودید .آیا بهتر نبود&nbsp; این رشته در کنار اطلاعات کاربر در دیتابیس به عنوانی فیلدی در نظر گرفته شود؟ <br> <br>
+با تشکر</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۴/۰۲/۱۰ ۲۳:۵۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>- در اینجا بدون سشن رشته‌ی اتصالی، مشخص نیست کاربر جاری در صفحه‌ی X قرار است از چه بانک اطلاعاتی استفاده کند تا بخواهد از آن کوئری بگیرد.<br>
+
+
+
+
+
+- در این مطلب با توجه به اینکه سشن، توسط اینترفیس <a href="www.dntips.ir-posts-2028.html">ISessionProvider</a>  تامین می‌شود، تعویض پذیر است. یک SessionProvider سفارشی<span> </span>را برای مثال با کوکی‌های رمزنگاری شده یا روش‌های مشابه تهیه کنید. تزریق و استفاده‌ی از آن خودکار خواهد بود؛ بدون نیازی به تغییری در کدهای سایر قسمت‌های برنامه.</div>
+</div></li></ul></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

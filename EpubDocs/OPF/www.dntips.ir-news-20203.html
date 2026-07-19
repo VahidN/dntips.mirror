@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫تجزیه با الگوی Result، رویکردی قدرتمند در برنامه‌نویسی .NET</title>     <meta name="description" content="&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;مدیریت داده‌های ورودی در برنامه‌نویسی، به‌ویژه در اکوسیستم .NET، یکی از دغدغه‌های اصلی توسعه‌دهندگان است. این داده‌ها که از منابعی مانند کاربران، APIها یا پایگاه‌داده‌ها دریافت می‌شوند، باید به شکلی قابل اعتماد و ایمن پردازش شوند. رویکرد سنتی اعتبارسنجی (Validation) اغلب با بررسی‌های مکرر و پراکنده همراه است که می‌تواند کد را پیچیده و شکننده کند. الگوی &amp;quot;تجزیه به جای اعتبارسنجی&amp;quot; (Parse, Don’t Validate) پیشنهاد می‌کند که به جای اعتبارسنجی مداوم، داده‌ها را یک‌بار به نوع‌های مشخص و معتبر تبدیل کنیم. با افزودن &amp;quot;الگوی Result&amp;quot; به این مفهوم، می‌توانیم مدیریت خطاها را بهبود بخشیده و به جای پرتاب استثناء، نتایجی ساختاریافته ارائه دهیم. &lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مفهوم تجزیه و الگوی Result&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;ایده اصلی الگوی &amp;quot;تجزیه به جای اعتبارسنجی&amp;quot; این است که داده‌های خام را به نوع‌هایی تبدیل کنیم که ذاتاً معتبر باشند، به جای اینکه صرفاً با اعتبارسنجی، صحت آن‌ها را بررسی کنیم. تجزیه (Parsing) فرآیندی است که در آن داده ورودی تحلیل شده و به یک ساختار مشخص و قابل اعتماد تبدیل می‌شود. این کار معمولاً با تعریف نوع‌های سفارشی (Custom Types) انجام می‌شود که قوانین و محدودیت‌های مورد نظر را در خود جای داده‌اند. برخلاف اعتبارسنجی که فقط یک پاسخ بولی (Boolean) ارائه می‌دهد و نشان می‌دهد داده معتبر است یا خیر، تجزیه تضمین می‌کند که پس از تبدیل، داده دیگر نیازی به بررسی مجدد ندارد. &lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;به عنوان مثال، فرض کنید یک رشته (string) به عنوان ورودی دریافت می‌کنید که باید یک آدرس ایمیل باشد. در اعتبارسنجی سنتی، شما ممکن است چندین بار بررسی کنید که آیا این رشته شامل &amp;quot;@&amp;quot; و &amp;quot;.&amp;quot; است یا خیر. اما در تجزیه، این رشته را یک‌بار به یک نوع جدید مانند &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;EmailAddress&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; تبدیل می‌کنید که فقط در صورت رعایت قوانین مشخص، ایجاد می‌شود. این نوع جدید، خود به خود معتبر است و هر کجا که استفاده شود، نیازی به بررسی دوباره ندارد. &lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;اعتبارسنجی سنتی با مشکلاتی همراه است: &lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;تکرار&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: منطق اعتبارسنجی باید در نقاط مختلف برنامه تکرار شود، که می‌تواند به کد تکراری (Boilerplate Code) منجر شود. &lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;عدم اطمینان&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: حتی پس از اعتبارسنجی، داده ممکن است در مراحل بعدی تغییر کند و نامعتبر شود، زیرا هیچ مکانیزمی برای حفظ صحت آن وجود ندارد. &lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;پیچیدگی&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: شرط‌های پراکنده در کد، خوانایی و نگهداری را دشوار می‌کنند و منطق اصلی برنامه را تحت‌الشعاع قرار می‌دهند.&lt;/span&gt;&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;تجزیه این مشکلات را با تبدیل داده به نوع‌های معنادار حل می‌کند. با استفاده از الگوی Result، به جای پرتاب استثناء (Exception) در صورت شکست تجزیه، یک شیء نتیجه (Result Object) بازمی‌گردانیم که وضعیت موفقیت یا شکست را مشخص می‌کند. این روش نه تنها کنترل خطا را شفاف‌تر می‌کند، بلکه برنامه‌نویس را وادار می‌کند به صراحت به حالت‌های ناموفق رسیدگی کند، که این خود به پیش‌بینی‌پذیری بیشتر کد کمک می‌کند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;چرا این الگو مهم است؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در .NET، سیستم نوع‌ها (Type System) ابزاری قدرتمند برای اعمال محدودیت‌ها و تضمین صحت داده‌هاست. تجزیه به ما اجازه می‌دهد که از این سیستم به طور کامل استفاده کنیم و داده‌ها را به شکلی مدل‌سازی کنیم که قوانین کسب‌وکار (Business Rules) را در خودشان داشته باشند. ترکیب این رویکرد با الگوی Result، انعطاف‌پذیری بیشتری به ارمغان می‌آورد؛ زیرا به جای استفاده از استثناها که می‌توانند جریان برنامه را مختل کنند، نتایجی ساختاریافته ارائه می‌دهیم که به راحتی قابل مدیریت هستند. این کار خطاها را در نقطه ورود داده تشخیص داده و از تکرار کد جلوگیری می‌کند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;پیاده‌سازی در .NET&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;ابتدا یک نوع پایه برای Result تعریف می‌کنیم: &lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public abstract class Result&amp;lt;T&amp;gt;
+{
+    public static Success&amp;lt;T&amp;gt; Ok(T value) =&amp;gt; new Success&amp;lt;T&amp;gt;(value);
+    public static Failure&amp;lt;T&amp;gt; Fail(string error) =&amp;gt; new Failure&amp;lt;T&amp;gt;(error);
+}
+
+public class Success&amp;lt;T&amp;gt; : Result&amp;lt;T&amp;gt;
+{
+    public T Value { get; }
+    public Success(T value) =&amp;gt; Value = value;
+}
+
+public class Failure&amp;lt;T&amp;gt; : Result&amp;lt;T&amp;gt;
+{
+    public string Error { get; }
+    public Failure(string error) =&amp;gt; Error = error;
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مثال ساده: آدرس ایمیل&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;فرض کنید می‌خواهیم یک آدرس ایمیل را مدیریت کنیم. رویکرد سنتی ممکن است این‌گونه باشد: &lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public bool IsValidEmail(string email)
+{
+    if (string.IsNullOrEmpty(email)) return false;
+    return email.Contains(&amp;quot;@&amp;quot;) &amp;amp;&amp;amp; email.Contains(&amp;quot;.&amp;quot;);
+}
+
+public void SendEmail(string email)
+{
+    if (!IsValidEmail(email))
+        throw new ArgumentException(&amp;quot;Invalid email address&amp;quot;);
+    // ارسال ایمیل
+}&lt;/pre&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;حالا با تجزیه و الگوی Result: &lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class EmailAddress
+{
+    private readonly string _value;
+
+    private EmailAddress(string value)
+    {
+        _value = value;
+    }
+
+    public static Result&amp;lt;EmailAddress&amp;gt; Parse(string input)
+    {
+        if (string.IsNullOrEmpty(input) || !input.Contains(&amp;quot;@&amp;quot;) || !input.Contains(&amp;quot;.&amp;quot;))
+            return Result&amp;lt;EmailAddress&amp;gt;.Fail(&amp;quot;فرمت ایمیل نامعتبر است&amp;quot;);
+        return Result&amp;lt;EmailAddress&amp;gt;.Ok(new EmailAddress(input));
+    }
+
+    public string Value =&amp;gt; _value;
+
+    public override string ToString() =&amp;gt; _value;
+}
+
+public void SendEmail(EmailAddress email)
+{
+    // ارسال ایمیل بدون نیاز به بررسی اضافی
+}
+
+// استفاده
+var result = EmailAddress.Parse(&amp;quot;user@example.com&amp;quot;);
+if (result is Success&amp;lt;EmailAddress&amp;gt; success)
+    SendEmail(success.Value);
+else if (result is Failure&amp;lt;EmailAddress&amp;gt; failure)
+    Console.WriteLine(failure.Error);&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در این مثال، متد &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;Parse&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; داده خام (یک رشته) را تجزیه کرده و به یک نوع جدید (&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;EmailAddress&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;) تبدیل می‌کند. اگر تجزیه موفق باشد، یک شیء &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;Success&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; با مقدار معتبر برمی‌گرداند؛ در غیر این صورت، یک &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;Failure&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; با پیام خطا تولید می‌شود. این روش تضمین می‌کند که هر نمونه از &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;EmailAddress&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; معتبر است و نیازی به اعتبارسنجی اضافی در &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;SendEmail&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; نیست.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مثال پیچیده‌تر: تاریخ تولد&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;حالا فرض کنید می‌خواهیم تاریخ تولد را با شرط حداقل 18 سال سن مدیریت کنیم: &lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class AdultBirthDate
+{
+    private readonly DateTime _value;
+
+    private AdultBirthDate(DateTime value)
+    {
+        _value = value;
+    }
+
+    public static Result&amp;lt;AdultBirthDate&amp;gt; Parse(DateTime input)
+    {
+        if (input &amp;gt;= DateTime.Now || (DateTime.Now.Year - input.Year) &amp;lt; 18)
+            return Result&amp;lt;AdultBirthDate&amp;gt;.Fail(&amp;quot;کاربر باید حداقل 18 سال داشته باشد&amp;quot;);
+        return Result&amp;lt;AdultBirthDate&amp;gt;.Ok(new AdultBirthDate(input));
+    }
+
+    public DateTime Value =&amp;gt; _value;
+}
+
+public void RegisterUser(AdultBirthDate birthDate)
+{
+    // ثبت کاربر بدون نیاز به بررسی اضافی
+}
+
+// استفاده
+var result = AdultBirthDate.Parse(new DateTime(2000, 1, 1));
+if (result is Success&amp;lt;AdultBirthDate&amp;gt; success)
+    RegisterUser(success.Value);
+else if (result is Failure&amp;lt;AdultBirthDate&amp;gt; failure)
+    Console.WriteLine(failure.Error);&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;اینجا، تجزیه تاریخ ورودی را به یک نوع جدید (&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;AdultBirthDate&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;) تبدیل می‌کند که فقط برای بزرگسالان معتبر است. الگوی Result نتیجه را به صورت موفقیت یا شکست ارائه می‌دهد و استفاده‌کننده را مجبور به رسیدگی به هر دو حالت می‌کند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مزایای عملی&lt;/strong&gt;&lt;/div&gt;&lt;ol&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;ایمنی نوع‌ها&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: نوع‌های سفارشی ذاتاً معتبر هستند و نیازی به بررسی اضافی ندارند. &lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مدیریت خطا&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: الگوی Result خطاها را به صورت شفاف و بدون استثناء مدیریت می‌کند. &lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;کاهش پیچیدگی&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: حذف اعتبارسنجی‌های پراکنده، کد را متمرکز و خواناتر می‌کند. &lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;قابلیت استفاده مجدد&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: نوع‌های تعریف‌شده در سراسر برنامه قابل استفاده هستند.&lt;/span&gt;&lt;/li&gt;&lt;/ol&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;نکات کلیدی در پیاده‌سازی&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;تغییرناپذیری (Immutability)&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: نوع‌های سفارشی باید تغییرناپذیر باشند تا از دستکاری غیرمنتظره جلوگیری شود. &lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;کنترل جریان&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: استفاده از تطابق الگو (Pattern Matching) در C# برای بررسی نتایج، کد را ساده‌تر می‌کند. &lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;انعطاف‌پذیری&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: می‌توانید متدهایی مانند &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;TryParse&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; اضافه کنید که مشابه &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;int.TryParse&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; عمل کنند.&lt;/span&gt;&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;ترکیب تجزیه و الگوی Result یک رویکرد قدرتمند در برنامه‌نویسی .NET است که با بهره‌گیری از سیستم نوع‌ها و مدیریت صریح خطاها، کدهایی ایمن، خوانا و قابل نگهداری تولید می‌کند. تجزیه با تبدیل داده‌ها به نوع‌های معنادار، نیاز به اعتبارسنجی‌های تکراری را از بین می‌برد و الگوی Result با ارائه نتایج ساختاریافته، کنترل خطا را بهبود می‌بخشد. این الگو در پروژه‌های بزرگ که انسجام داده‌ها حیاتی است، ارزش خود را نشان می‌دهد.&lt;/span&gt;&lt;/div&gt;">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="تجزیه با الگوی Result، رویکردی قدرتمند در برنامه‌نویسی .NET">
+    <meta itemprop="description" content="&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;مدیریت داده‌های ورودی در برنامه‌نویسی، به‌ویژه در اکوسیستم .NET، یکی از دغدغه‌های اصلی توسعه‌دهندگان است. این داده‌ها که از منابعی مانند کاربران، APIها یا پایگاه‌داده‌ها دریافت می‌شوند، باید به شکلی قابل اعتماد و ایمن پردازش شوند. رویکرد سنتی اعتبارسنجی (Validation) اغلب با بررسی‌های مکرر و پراکنده همراه است که می‌تواند کد را پیچیده و شکننده کند. الگوی &amp;quot;تجزیه به جای اعتبارسنجی&amp;quot; (Parse, Don’t Validate) پیشنهاد می‌کند که به جای اعتبارسنجی مداوم، داده‌ها را یک‌بار به نوع‌های مشخص و معتبر تبدیل کنیم. با افزودن &amp;quot;الگوی Result&amp;quot; به این مفهوم، می‌توانیم مدیریت خطاها را بهبود بخشیده و به جای پرتاب استثناء، نتایجی ساختاریافته ارائه دهیم. &lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مفهوم تجزیه و الگوی Result&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;ایده اصلی الگوی &amp;quot;تجزیه به جای اعتبارسنجی&amp;quot; این است که داده‌های خام را به نوع‌هایی تبدیل کنیم که ذاتاً معتبر باشند، به جای اینکه صرفاً با اعتبارسنجی، صحت آن‌ها را بررسی کنیم. تجزیه (Parsing) فرآیندی است که در آن داده ورودی تحلیل شده و به یک ساختار مشخص و قابل اعتماد تبدیل می‌شود. این کار معمولاً با تعریف نوع‌های سفارشی (Custom Types) انجام می‌شود که قوانین و محدودیت‌های مورد نظر را در خود جای داده‌اند. برخلاف اعتبارسنجی که فقط یک پاسخ بولی (Boolean) ارائه می‌دهد و نشان می‌دهد داده معتبر است یا خیر، تجزیه تضمین می‌کند که پس از تبدیل، داده دیگر نیازی به بررسی مجدد ندارد. &lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;به عنوان مثال، فرض کنید یک رشته (string) به عنوان ورودی دریافت می‌کنید که باید یک آدرس ایمیل باشد. در اعتبارسنجی سنتی، شما ممکن است چندین بار بررسی کنید که آیا این رشته شامل &amp;quot;@&amp;quot; و &amp;quot;.&amp;quot; است یا خیر. اما در تجزیه، این رشته را یک‌بار به یک نوع جدید مانند &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;EmailAddress&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; تبدیل می‌کنید که فقط در صورت رعایت قوانین مشخص، ایجاد می‌شود. این نوع جدید، خود به خود معتبر است و هر کجا که استفاده شود، نیازی به بررسی دوباره ندارد. &lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;اعتبارسنجی سنتی با مشکلاتی همراه است: &lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;تکرار&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: منطق اعتبارسنجی باید در نقاط مختلف برنامه تکرار شود، که می‌تواند به کد تکراری (Boilerplate Code) منجر شود. &lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;عدم اطمینان&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: حتی پس از اعتبارسنجی، داده ممکن است در مراحل بعدی تغییر کند و نامعتبر شود، زیرا هیچ مکانیزمی برای حفظ صحت آن وجود ندارد. &lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;پیچیدگی&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: شرط‌های پراکنده در کد، خوانایی و نگهداری را دشوار می‌کنند و منطق اصلی برنامه را تحت‌الشعاع قرار می‌دهند.&lt;/span&gt;&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;تجزیه این مشکلات را با تبدیل داده به نوع‌های معنادار حل می‌کند. با استفاده از الگوی Result، به جای پرتاب استثناء (Exception) در صورت شکست تجزیه، یک شیء نتیجه (Result Object) بازمی‌گردانیم که وضعیت موفقیت یا شکست را مشخص می‌کند. این روش نه تنها کنترل خطا را شفاف‌تر می‌کند، بلکه برنامه‌نویس را وادار می‌کند به صراحت به حالت‌های ناموفق رسیدگی کند، که این خود به پیش‌بینی‌پذیری بیشتر کد کمک می‌کند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;چرا این الگو مهم است؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در .NET، سیستم نوع‌ها (Type System) ابزاری قدرتمند برای اعمال محدودیت‌ها و تضمین صحت داده‌هاست. تجزیه به ما اجازه می‌دهد که از این سیستم به طور کامل استفاده کنیم و داده‌ها را به شکلی مدل‌سازی کنیم که قوانین کسب‌وکار (Business Rules) را در خودشان داشته باشند. ترکیب این رویکرد با الگوی Result، انعطاف‌پذیری بیشتری به ارمغان می‌آورد؛ زیرا به جای استفاده از استثناها که می‌توانند جریان برنامه را مختل کنند، نتایجی ساختاریافته ارائه می‌دهیم که به راحتی قابل مدیریت هستند. این کار خطاها را در نقطه ورود داده تشخیص داده و از تکرار کد جلوگیری می‌کند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;پیاده‌سازی در .NET&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;ابتدا یک نوع پایه برای Result تعریف می‌کنیم: &lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public abstract class Result&amp;lt;T&amp;gt;
+{
+    public static Success&amp;lt;T&amp;gt; Ok(T value) =&amp;gt; new Success&amp;lt;T&amp;gt;(value);
+    public static Failure&amp;lt;T&amp;gt; Fail(string error) =&amp;gt; new Failure&amp;lt;T&amp;gt;(error);
+}
+
+public class Success&amp;lt;T&amp;gt; : Result&amp;lt;T&amp;gt;
+{
+    public T Value { get; }
+    public Success(T value) =&amp;gt; Value = value;
+}
+
+public class Failure&amp;lt;T&amp;gt; : Result&amp;lt;T&amp;gt;
+{
+    public string Error { get; }
+    public Failure(string error) =&amp;gt; Error = error;
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مثال ساده: آدرس ایمیل&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;فرض کنید می‌خواهیم یک آدرس ایمیل را مدیریت کنیم. رویکرد سنتی ممکن است این‌گونه باشد: &lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public bool IsValidEmail(string email)
+{
+    if (string.IsNullOrEmpty(email)) return false;
+    return email.Contains(&amp;quot;@&amp;quot;) &amp;amp;&amp;amp; email.Contains(&amp;quot;.&amp;quot;);
+}
+
+public void SendEmail(string email)
+{
+    if (!IsValidEmail(email))
+        throw new ArgumentException(&amp;quot;Invalid email address&amp;quot;);
+    // ارسال ایمیل
+}&lt;/pre&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;حالا با تجزیه و الگوی Result: &lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class EmailAddress
+{
+    private readonly string _value;
+
+    private EmailAddress(string value)
+    {
+        _value = value;
+    }
+
+    public static Result&amp;lt;EmailAddress&amp;gt; Parse(string input)
+    {
+        if (string.IsNullOrEmpty(input) || !input.Contains(&amp;quot;@&amp;quot;) || !input.Contains(&amp;quot;.&amp;quot;))
+            return Result&amp;lt;EmailAddress&amp;gt;.Fail(&amp;quot;فرمت ایمیل نامعتبر است&amp;quot;);
+        return Result&amp;lt;EmailAddress&amp;gt;.Ok(new EmailAddress(input));
+    }
+
+    public string Value =&amp;gt; _value;
+
+    public override string ToString() =&amp;gt; _value;
+}
+
+public void SendEmail(EmailAddress email)
+{
+    // ارسال ایمیل بدون نیاز به بررسی اضافی
+}
+
+// استفاده
+var result = EmailAddress.Parse(&amp;quot;user@example.com&amp;quot;);
+if (result is Success&amp;lt;EmailAddress&amp;gt; success)
+    SendEmail(success.Value);
+else if (result is Failure&amp;lt;EmailAddress&amp;gt; failure)
+    Console.WriteLine(failure.Error);&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در این مثال، متد &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;Parse&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; داده خام (یک رشته) را تجزیه کرده و به یک نوع جدید (&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;EmailAddress&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;) تبدیل می‌کند. اگر تجزیه موفق باشد، یک شیء &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;Success&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; با مقدار معتبر برمی‌گرداند؛ در غیر این صورت، یک &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;Failure&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; با پیام خطا تولید می‌شود. این روش تضمین می‌کند که هر نمونه از &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;EmailAddress&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; معتبر است و نیازی به اعتبارسنجی اضافی در &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;SendEmail&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; نیست.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مثال پیچیده‌تر: تاریخ تولد&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;حالا فرض کنید می‌خواهیم تاریخ تولد را با شرط حداقل 18 سال سن مدیریت کنیم: &lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class AdultBirthDate
+{
+    private readonly DateTime _value;
+
+    private AdultBirthDate(DateTime value)
+    {
+        _value = value;
+    }
+
+    public static Result&amp;lt;AdultBirthDate&amp;gt; Parse(DateTime input)
+    {
+        if (input &amp;gt;= DateTime.Now || (DateTime.Now.Year - input.Year) &amp;lt; 18)
+            return Result&amp;lt;AdultBirthDate&amp;gt;.Fail(&amp;quot;کاربر باید حداقل 18 سال داشته باشد&amp;quot;);
+        return Result&amp;lt;AdultBirthDate&amp;gt;.Ok(new AdultBirthDate(input));
+    }
+
+    public DateTime Value =&amp;gt; _value;
+}
+
+public void RegisterUser(AdultBirthDate birthDate)
+{
+    // ثبت کاربر بدون نیاز به بررسی اضافی
+}
+
+// استفاده
+var result = AdultBirthDate.Parse(new DateTime(2000, 1, 1));
+if (result is Success&amp;lt;AdultBirthDate&amp;gt; success)
+    RegisterUser(success.Value);
+else if (result is Failure&amp;lt;AdultBirthDate&amp;gt; failure)
+    Console.WriteLine(failure.Error);&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;اینجا، تجزیه تاریخ ورودی را به یک نوع جدید (&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;AdultBirthDate&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;) تبدیل می‌کند که فقط برای بزرگسالان معتبر است. الگوی Result نتیجه را به صورت موفقیت یا شکست ارائه می‌دهد و استفاده‌کننده را مجبور به رسیدگی به هر دو حالت می‌کند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مزایای عملی&lt;/strong&gt;&lt;/div&gt;&lt;ol&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;ایمنی نوع‌ها&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: نوع‌های سفارشی ذاتاً معتبر هستند و نیازی به بررسی اضافی ندارند. &lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مدیریت خطا&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: الگوی Result خطاها را به صورت شفاف و بدون استثناء مدیریت می‌کند. &lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;کاهش پیچیدگی&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: حذف اعتبارسنجی‌های پراکنده، کد را متمرکز و خواناتر می‌کند. &lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;قابلیت استفاده مجدد&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: نوع‌های تعریف‌شده در سراسر برنامه قابل استفاده هستند.&lt;/span&gt;&lt;/li&gt;&lt;/ol&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;نکات کلیدی در پیاده‌سازی&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;تغییرناپذیری (Immutability)&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: نوع‌های سفارشی باید تغییرناپذیر باشند تا از دستکاری غیرمنتظره جلوگیری شود. &lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;کنترل جریان&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: استفاده از تطابق الگو (Pattern Matching) در C# برای بررسی نتایج، کد را ساده‌تر می‌کند. &lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;انعطاف‌پذیری&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: می‌توانید متدهایی مانند &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;TryParse&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; اضافه کنید که مشابه &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;int.TryParse&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; عمل کنند.&lt;/span&gt;&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;ترکیب تجزیه و الگوی Result یک رویکرد قدرتمند در برنامه‌نویسی .NET است که با بهره‌گیری از سیستم نوع‌ها و مدیریت صریح خطاها، کدهایی ایمن، خوانا و قابل نگهداری تولید می‌کند. تجزیه با تبدیل داده‌ها به نوع‌های معنادار، نیاز به اعتبارسنجی‌های تکراری را از بین می‌برد و الگوی Result با ارائه نتایج ساختاریافته، کنترل خطا را بهبود می‌بخشد. این الگو در پروژه‌های بزرگ که انسجام داده‌ها حیاتی است، ارزش خود را نشان می‌دهد.&lt;/span&gt;&lt;/div&gt;">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="تجزیه با الگوی Result، رویکردی قدرتمند در برنامه‌نویسی .NET">
+    <meta property="og:description" content="&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;مدیریت داده‌های ورودی در برنامه‌نویسی، به‌ویژه در اکوسیستم .NET، یکی از دغدغه‌های اصلی توسعه‌دهندگان است. این داده‌ها که از منابعی مانند کاربران، APIها یا پایگاه‌داده‌ها دریافت می‌شوند، باید به شکلی قابل اعتماد و ایمن پردازش شوند. رویکرد سنتی اعتبارسنجی (Validation) اغلب با بررسی‌های مکرر و پراکنده همراه است که می‌تواند کد را پیچیده و شکننده کند. الگوی &amp;quot;تجزیه به جای اعتبارسنجی&amp;quot; (Parse, Don’t Validate) پیشنهاد می‌کند که به جای اعتبارسنجی مداوم، داده‌ها را یک‌بار به نوع‌های مشخص و معتبر تبدیل کنیم. با افزودن &amp;quot;الگوی Result&amp;quot; به این مفهوم، می‌توانیم مدیریت خطاها را بهبود بخشیده و به جای پرتاب استثناء، نتایجی ساختاریافته ارائه دهیم. &lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مفهوم تجزیه و الگوی Result&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;ایده اصلی الگوی &amp;quot;تجزیه به جای اعتبارسنجی&amp;quot; این است که داده‌های خام را به نوع‌هایی تبدیل کنیم که ذاتاً معتبر باشند، به جای اینکه صرفاً با اعتبارسنجی، صحت آن‌ها را بررسی کنیم. تجزیه (Parsing) فرآیندی است که در آن داده ورودی تحلیل شده و به یک ساختار مشخص و قابل اعتماد تبدیل می‌شود. این کار معمولاً با تعریف نوع‌های سفارشی (Custom Types) انجام می‌شود که قوانین و محدودیت‌های مورد نظر را در خود جای داده‌اند. برخلاف اعتبارسنجی که فقط یک پاسخ بولی (Boolean) ارائه می‌دهد و نشان می‌دهد داده معتبر است یا خیر، تجزیه تضمین می‌کند که پس از تبدیل، داده دیگر نیازی به بررسی مجدد ندارد. &lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;به عنوان مثال، فرض کنید یک رشته (string) به عنوان ورودی دریافت می‌کنید که باید یک آدرس ایمیل باشد. در اعتبارسنجی سنتی، شما ممکن است چندین بار بررسی کنید که آیا این رشته شامل &amp;quot;@&amp;quot; و &amp;quot;.&amp;quot; است یا خیر. اما در تجزیه، این رشته را یک‌بار به یک نوع جدید مانند &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;EmailAddress&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; تبدیل می‌کنید که فقط در صورت رعایت قوانین مشخص، ایجاد می‌شود. این نوع جدید، خود به خود معتبر است و هر کجا که استفاده شود، نیازی به بررسی دوباره ندارد. &lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;اعتبارسنجی سنتی با مشکلاتی همراه است: &lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;تکرار&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: منطق اعتبارسنجی باید در نقاط مختلف برنامه تکرار شود، که می‌تواند به کد تکراری (Boilerplate Code) منجر شود. &lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;عدم اطمینان&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: حتی پس از اعتبارسنجی، داده ممکن است در مراحل بعدی تغییر کند و نامعتبر شود، زیرا هیچ مکانیزمی برای حفظ صحت آن وجود ندارد. &lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;پیچیدگی&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: شرط‌های پراکنده در کد، خوانایی و نگهداری را دشوار می‌کنند و منطق اصلی برنامه را تحت‌الشعاع قرار می‌دهند.&lt;/span&gt;&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;تجزیه این مشکلات را با تبدیل داده به نوع‌های معنادار حل می‌کند. با استفاده از الگوی Result، به جای پرتاب استثناء (Exception) در صورت شکست تجزیه، یک شیء نتیجه (Result Object) بازمی‌گردانیم که وضعیت موفقیت یا شکست را مشخص می‌کند. این روش نه تنها کنترل خطا را شفاف‌تر می‌کند، بلکه برنامه‌نویس را وادار می‌کند به صراحت به حالت‌های ناموفق رسیدگی کند، که این خود به پیش‌بینی‌پذیری بیشتر کد کمک می‌کند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;چرا این الگو مهم است؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در .NET، سیستم نوع‌ها (Type System) ابزاری قدرتمند برای اعمال محدودیت‌ها و تضمین صحت داده‌هاست. تجزیه به ما اجازه می‌دهد که از این سیستم به طور کامل استفاده کنیم و داده‌ها را به شکلی مدل‌سازی کنیم که قوانین کسب‌وکار (Business Rules) را در خودشان داشته باشند. ترکیب این رویکرد با الگوی Result، انعطاف‌پذیری بیشتری به ارمغان می‌آورد؛ زیرا به جای استفاده از استثناها که می‌توانند جریان برنامه را مختل کنند، نتایجی ساختاریافته ارائه می‌دهیم که به راحتی قابل مدیریت هستند. این کار خطاها را در نقطه ورود داده تشخیص داده و از تکرار کد جلوگیری می‌کند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;پیاده‌سازی در .NET&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;ابتدا یک نوع پایه برای Result تعریف می‌کنیم: &lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public abstract class Result&amp;lt;T&amp;gt;
+{
+    public static Success&amp;lt;T&amp;gt; Ok(T value) =&amp;gt; new Success&amp;lt;T&amp;gt;(value);
+    public static Failure&amp;lt;T&amp;gt; Fail(string error) =&amp;gt; new Failure&amp;lt;T&amp;gt;(error);
+}
+
+public class Success&amp;lt;T&amp;gt; : Result&amp;lt;T&amp;gt;
+{
+    public T Value { get; }
+    public Success(T value) =&amp;gt; Value = value;
+}
+
+public class Failure&amp;lt;T&amp;gt; : Result&amp;lt;T&amp;gt;
+{
+    public string Error { get; }
+    public Failure(string error) =&amp;gt; Error = error;
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مثال ساده: آدرس ایمیل&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;فرض کنید می‌خواهیم یک آدرس ایمیل را مدیریت کنیم. رویکرد سنتی ممکن است این‌گونه باشد: &lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public bool IsValidEmail(string email)
+{
+    if (string.IsNullOrEmpty(email)) return false;
+    return email.Contains(&amp;quot;@&amp;quot;) &amp;amp;&amp;amp; email.Contains(&amp;quot;.&amp;quot;);
+}
+
+public void SendEmail(string email)
+{
+    if (!IsValidEmail(email))
+        throw new ArgumentException(&amp;quot;Invalid email address&amp;quot;);
+    // ارسال ایمیل
+}&lt;/pre&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;حالا با تجزیه و الگوی Result: &lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class EmailAddress
+{
+    private readonly string _value;
+
+    private EmailAddress(string value)
+    {
+        _value = value;
+    }
+
+    public static Result&amp;lt;EmailAddress&amp;gt; Parse(string input)
+    {
+        if (string.IsNullOrEmpty(input) || !input.Contains(&amp;quot;@&amp;quot;) || !input.Contains(&amp;quot;.&amp;quot;))
+            return Result&amp;lt;EmailAddress&amp;gt;.Fail(&amp;quot;فرمت ایمیل نامعتبر است&amp;quot;);
+        return Result&amp;lt;EmailAddress&amp;gt;.Ok(new EmailAddress(input));
+    }
+
+    public string Value =&amp;gt; _value;
+
+    public override string ToString() =&amp;gt; _value;
+}
+
+public void SendEmail(EmailAddress email)
+{
+    // ارسال ایمیل بدون نیاز به بررسی اضافی
+}
+
+// استفاده
+var result = EmailAddress.Parse(&amp;quot;user@example.com&amp;quot;);
+if (result is Success&amp;lt;EmailAddress&amp;gt; success)
+    SendEmail(success.Value);
+else if (result is Failure&amp;lt;EmailAddress&amp;gt; failure)
+    Console.WriteLine(failure.Error);&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در این مثال، متد &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;Parse&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; داده خام (یک رشته) را تجزیه کرده و به یک نوع جدید (&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;EmailAddress&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;) تبدیل می‌کند. اگر تجزیه موفق باشد، یک شیء &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;Success&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; با مقدار معتبر برمی‌گرداند؛ در غیر این صورت، یک &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;Failure&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; با پیام خطا تولید می‌شود. این روش تضمین می‌کند که هر نمونه از &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;EmailAddress&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; معتبر است و نیازی به اعتبارسنجی اضافی در &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;SendEmail&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; نیست.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مثال پیچیده‌تر: تاریخ تولد&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;حالا فرض کنید می‌خواهیم تاریخ تولد را با شرط حداقل 18 سال سن مدیریت کنیم: &lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class AdultBirthDate
+{
+    private readonly DateTime _value;
+
+    private AdultBirthDate(DateTime value)
+    {
+        _value = value;
+    }
+
+    public static Result&amp;lt;AdultBirthDate&amp;gt; Parse(DateTime input)
+    {
+        if (input &amp;gt;= DateTime.Now || (DateTime.Now.Year - input.Year) &amp;lt; 18)
+            return Result&amp;lt;AdultBirthDate&amp;gt;.Fail(&amp;quot;کاربر باید حداقل 18 سال داشته باشد&amp;quot;);
+        return Result&amp;lt;AdultBirthDate&amp;gt;.Ok(new AdultBirthDate(input));
+    }
+
+    public DateTime Value =&amp;gt; _value;
+}
+
+public void RegisterUser(AdultBirthDate birthDate)
+{
+    // ثبت کاربر بدون نیاز به بررسی اضافی
+}
+
+// استفاده
+var result = AdultBirthDate.Parse(new DateTime(2000, 1, 1));
+if (result is Success&amp;lt;AdultBirthDate&amp;gt; success)
+    RegisterUser(success.Value);
+else if (result is Failure&amp;lt;AdultBirthDate&amp;gt; failure)
+    Console.WriteLine(failure.Error);&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;اینجا، تجزیه تاریخ ورودی را به یک نوع جدید (&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;AdultBirthDate&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;) تبدیل می‌کند که فقط برای بزرگسالان معتبر است. الگوی Result نتیجه را به صورت موفقیت یا شکست ارائه می‌دهد و استفاده‌کننده را مجبور به رسیدگی به هر دو حالت می‌کند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مزایای عملی&lt;/strong&gt;&lt;/div&gt;&lt;ol&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;ایمنی نوع‌ها&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: نوع‌های سفارشی ذاتاً معتبر هستند و نیازی به بررسی اضافی ندارند. &lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مدیریت خطا&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: الگوی Result خطاها را به صورت شفاف و بدون استثناء مدیریت می‌کند. &lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;کاهش پیچیدگی&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: حذف اعتبارسنجی‌های پراکنده، کد را متمرکز و خواناتر می‌کند. &lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;قابلیت استفاده مجدد&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: نوع‌های تعریف‌شده در سراسر برنامه قابل استفاده هستند.&lt;/span&gt;&lt;/li&gt;&lt;/ol&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;نکات کلیدی در پیاده‌سازی&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;تغییرناپذیری (Immutability)&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: نوع‌های سفارشی باید تغییرناپذیر باشند تا از دستکاری غیرمنتظره جلوگیری شود. &lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;کنترل جریان&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: استفاده از تطابق الگو (Pattern Matching) در C# برای بررسی نتایج، کد را ساده‌تر می‌کند. &lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;انعطاف‌پذیری&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: می‌توانید متدهایی مانند &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;TryParse&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; اضافه کنید که مشابه &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;int.TryParse&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; عمل کنند.&lt;/span&gt;&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;ترکیب تجزیه و الگوی Result یک رویکرد قدرتمند در برنامه‌نویسی .NET است که با بهره‌گیری از سیستم نوع‌ها و مدیریت صریح خطاها، کدهایی ایمن، خوانا و قابل نگهداری تولید می‌کند. تجزیه با تبدیل داده‌ها به نوع‌های معنادار، نیاز به اعتبارسنجی‌های تکراری را از بین می‌برد و الگوی Result با ارائه نتایج ساختاریافته، کنترل خطا را بهبود می‌بخشد. این الگو در پروژه‌های بزرگ که انسجام داده‌ها حیاتی است، ارزش خود را نشان می‌دهد.&lt;/span&gt;&lt;/div&gt;">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="تجزیه با الگوی Result، رویکردی قدرتمند در برنامه‌نویسی .NET">
+    <meta name="twitter:description" content="&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;مدیریت داده‌های ورودی در برنامه‌نویسی، به‌ویژه در اکوسیستم .NET، یکی از دغدغه‌های اصلی توسعه‌دهندگان است. این داده‌ها که از منابعی مانند کاربران، APIها یا پایگاه‌داده‌ها دریافت می‌شوند، باید به شکلی قابل اعتماد و ایمن پردازش شوند. رویکرد سنتی اعتبارسنجی (Validation) اغلب با بررسی‌های مکرر و پراکنده همراه است که می‌تواند کد را پیچیده و شکننده کند. الگوی &amp;quot;تجزیه به جای اعتبارسنجی&amp;quot; (Parse, Don’t Validate) پیشنهاد می‌کند که به جای اعتبارسنجی مداوم، داده‌ها را یک‌بار به نوع‌های مشخص و معتبر تبدیل کنیم. با افزودن &amp;quot;الگوی Result&amp;quot; به این مفهوم، می‌توانیم مدیریت خطاها را بهبود بخشیده و به جای پرتاب استثناء، نتایجی ساختاریافته ارائه دهیم. &lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مفهوم تجزیه و الگوی Result&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;ایده اصلی الگوی &amp;quot;تجزیه به جای اعتبارسنجی&amp;quot; این است که داده‌های خام را به نوع‌هایی تبدیل کنیم که ذاتاً معتبر باشند، به جای اینکه صرفاً با اعتبارسنجی، صحت آن‌ها را بررسی کنیم. تجزیه (Parsing) فرآیندی است که در آن داده ورودی تحلیل شده و به یک ساختار مشخص و قابل اعتماد تبدیل می‌شود. این کار معمولاً با تعریف نوع‌های سفارشی (Custom Types) انجام می‌شود که قوانین و محدودیت‌های مورد نظر را در خود جای داده‌اند. برخلاف اعتبارسنجی که فقط یک پاسخ بولی (Boolean) ارائه می‌دهد و نشان می‌دهد داده معتبر است یا خیر، تجزیه تضمین می‌کند که پس از تبدیل، داده دیگر نیازی به بررسی مجدد ندارد. &lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;به عنوان مثال، فرض کنید یک رشته (string) به عنوان ورودی دریافت می‌کنید که باید یک آدرس ایمیل باشد. در اعتبارسنجی سنتی، شما ممکن است چندین بار بررسی کنید که آیا این رشته شامل &amp;quot;@&amp;quot; و &amp;quot;.&amp;quot; است یا خیر. اما در تجزیه، این رشته را یک‌بار به یک نوع جدید مانند &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;EmailAddress&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; تبدیل می‌کنید که فقط در صورت رعایت قوانین مشخص، ایجاد می‌شود. این نوع جدید، خود به خود معتبر است و هر کجا که استفاده شود، نیازی به بررسی دوباره ندارد. &lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;اعتبارسنجی سنتی با مشکلاتی همراه است: &lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;تکرار&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: منطق اعتبارسنجی باید در نقاط مختلف برنامه تکرار شود، که می‌تواند به کد تکراری (Boilerplate Code) منجر شود. &lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;عدم اطمینان&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: حتی پس از اعتبارسنجی، داده ممکن است در مراحل بعدی تغییر کند و نامعتبر شود، زیرا هیچ مکانیزمی برای حفظ صحت آن وجود ندارد. &lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;پیچیدگی&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: شرط‌های پراکنده در کد، خوانایی و نگهداری را دشوار می‌کنند و منطق اصلی برنامه را تحت‌الشعاع قرار می‌دهند.&lt;/span&gt;&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;تجزیه این مشکلات را با تبدیل داده به نوع‌های معنادار حل می‌کند. با استفاده از الگوی Result، به جای پرتاب استثناء (Exception) در صورت شکست تجزیه، یک شیء نتیجه (Result Object) بازمی‌گردانیم که وضعیت موفقیت یا شکست را مشخص می‌کند. این روش نه تنها کنترل خطا را شفاف‌تر می‌کند، بلکه برنامه‌نویس را وادار می‌کند به صراحت به حالت‌های ناموفق رسیدگی کند، که این خود به پیش‌بینی‌پذیری بیشتر کد کمک می‌کند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;چرا این الگو مهم است؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در .NET، سیستم نوع‌ها (Type System) ابزاری قدرتمند برای اعمال محدودیت‌ها و تضمین صحت داده‌هاست. تجزیه به ما اجازه می‌دهد که از این سیستم به طور کامل استفاده کنیم و داده‌ها را به شکلی مدل‌سازی کنیم که قوانین کسب‌وکار (Business Rules) را در خودشان داشته باشند. ترکیب این رویکرد با الگوی Result، انعطاف‌پذیری بیشتری به ارمغان می‌آورد؛ زیرا به جای استفاده از استثناها که می‌توانند جریان برنامه را مختل کنند، نتایجی ساختاریافته ارائه می‌دهیم که به راحتی قابل مدیریت هستند. این کار خطاها را در نقطه ورود داده تشخیص داده و از تکرار کد جلوگیری می‌کند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;پیاده‌سازی در .NET&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;ابتدا یک نوع پایه برای Result تعریف می‌کنیم: &lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public abstract class Result&amp;lt;T&amp;gt;
+{
+    public static Success&amp;lt;T&amp;gt; Ok(T value) =&amp;gt; new Success&amp;lt;T&amp;gt;(value);
+    public static Failure&amp;lt;T&amp;gt; Fail(string error) =&amp;gt; new Failure&amp;lt;T&amp;gt;(error);
+}
+
+public class Success&amp;lt;T&amp;gt; : Result&amp;lt;T&amp;gt;
+{
+    public T Value { get; }
+    public Success(T value) =&amp;gt; Value = value;
+}
+
+public class Failure&amp;lt;T&amp;gt; : Result&amp;lt;T&amp;gt;
+{
+    public string Error { get; }
+    public Failure(string error) =&amp;gt; Error = error;
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مثال ساده: آدرس ایمیل&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;فرض کنید می‌خواهیم یک آدرس ایمیل را مدیریت کنیم. رویکرد سنتی ممکن است این‌گونه باشد: &lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public bool IsValidEmail(string email)
+{
+    if (string.IsNullOrEmpty(email)) return false;
+    return email.Contains(&amp;quot;@&amp;quot;) &amp;amp;&amp;amp; email.Contains(&amp;quot;.&amp;quot;);
+}
+
+public void SendEmail(string email)
+{
+    if (!IsValidEmail(email))
+        throw new ArgumentException(&amp;quot;Invalid email address&amp;quot;);
+    // ارسال ایمیل
+}&lt;/pre&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;حالا با تجزیه و الگوی Result: &lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class EmailAddress
+{
+    private readonly string _value;
+
+    private EmailAddress(string value)
+    {
+        _value = value;
+    }
+
+    public static Result&amp;lt;EmailAddress&amp;gt; Parse(string input)
+    {
+        if (string.IsNullOrEmpty(input) || !input.Contains(&amp;quot;@&amp;quot;) || !input.Contains(&amp;quot;.&amp;quot;))
+            return Result&amp;lt;EmailAddress&amp;gt;.Fail(&amp;quot;فرمت ایمیل نامعتبر است&amp;quot;);
+        return Result&amp;lt;EmailAddress&amp;gt;.Ok(new EmailAddress(input));
+    }
+
+    public string Value =&amp;gt; _value;
+
+    public override string ToString() =&amp;gt; _value;
+}
+
+public void SendEmail(EmailAddress email)
+{
+    // ارسال ایمیل بدون نیاز به بررسی اضافی
+}
+
+// استفاده
+var result = EmailAddress.Parse(&amp;quot;user@example.com&amp;quot;);
+if (result is Success&amp;lt;EmailAddress&amp;gt; success)
+    SendEmail(success.Value);
+else if (result is Failure&amp;lt;EmailAddress&amp;gt; failure)
+    Console.WriteLine(failure.Error);&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در این مثال، متد &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;Parse&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; داده خام (یک رشته) را تجزیه کرده و به یک نوع جدید (&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;EmailAddress&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;) تبدیل می‌کند. اگر تجزیه موفق باشد، یک شیء &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;Success&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; با مقدار معتبر برمی‌گرداند؛ در غیر این صورت، یک &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;Failure&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; با پیام خطا تولید می‌شود. این روش تضمین می‌کند که هر نمونه از &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;EmailAddress&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; معتبر است و نیازی به اعتبارسنجی اضافی در &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;SendEmail&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; نیست.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مثال پیچیده‌تر: تاریخ تولد&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;حالا فرض کنید می‌خواهیم تاریخ تولد را با شرط حداقل 18 سال سن مدیریت کنیم: &lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class AdultBirthDate
+{
+    private readonly DateTime _value;
+
+    private AdultBirthDate(DateTime value)
+    {
+        _value = value;
+    }
+
+    public static Result&amp;lt;AdultBirthDate&amp;gt; Parse(DateTime input)
+    {
+        if (input &amp;gt;= DateTime.Now || (DateTime.Now.Year - input.Year) &amp;lt; 18)
+            return Result&amp;lt;AdultBirthDate&amp;gt;.Fail(&amp;quot;کاربر باید حداقل 18 سال داشته باشد&amp;quot;);
+        return Result&amp;lt;AdultBirthDate&amp;gt;.Ok(new AdultBirthDate(input));
+    }
+
+    public DateTime Value =&amp;gt; _value;
+}
+
+public void RegisterUser(AdultBirthDate birthDate)
+{
+    // ثبت کاربر بدون نیاز به بررسی اضافی
+}
+
+// استفاده
+var result = AdultBirthDate.Parse(new DateTime(2000, 1, 1));
+if (result is Success&amp;lt;AdultBirthDate&amp;gt; success)
+    RegisterUser(success.Value);
+else if (result is Failure&amp;lt;AdultBirthDate&amp;gt; failure)
+    Console.WriteLine(failure.Error);&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;اینجا، تجزیه تاریخ ورودی را به یک نوع جدید (&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;AdultBirthDate&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;) تبدیل می‌کند که فقط برای بزرگسالان معتبر است. الگوی Result نتیجه را به صورت موفقیت یا شکست ارائه می‌دهد و استفاده‌کننده را مجبور به رسیدگی به هر دو حالت می‌کند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مزایای عملی&lt;/strong&gt;&lt;/div&gt;&lt;ol&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;ایمنی نوع‌ها&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: نوع‌های سفارشی ذاتاً معتبر هستند و نیازی به بررسی اضافی ندارند. &lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مدیریت خطا&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: الگوی Result خطاها را به صورت شفاف و بدون استثناء مدیریت می‌کند. &lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;کاهش پیچیدگی&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: حذف اعتبارسنجی‌های پراکنده، کد را متمرکز و خواناتر می‌کند. &lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;قابلیت استفاده مجدد&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: نوع‌های تعریف‌شده در سراسر برنامه قابل استفاده هستند.&lt;/span&gt;&lt;/li&gt;&lt;/ol&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;نکات کلیدی در پیاده‌سازی&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;تغییرناپذیری (Immutability)&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: نوع‌های سفارشی باید تغییرناپذیر باشند تا از دستکاری غیرمنتظره جلوگیری شود. &lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;کنترل جریان&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: استفاده از تطابق الگو (Pattern Matching) در C# برای بررسی نتایج، کد را ساده‌تر می‌کند. &lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;انعطاف‌پذیری&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: می‌توانید متدهایی مانند &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;TryParse&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; اضافه کنید که مشابه &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;int.TryParse&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; عمل کنند.&lt;/span&gt;&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;ترکیب تجزیه و الگوی Result یک رویکرد قدرتمند در برنامه‌نویسی .NET است که با بهره‌گیری از سیستم نوع‌ها و مدیریت صریح خطاها، کدهایی ایمن، خوانا و قابل نگهداری تولید می‌کند. تجزیه با تبدیل داده‌ها به نوع‌های معنادار، نیاز به اعتبارسنجی‌های تکراری را از بین می‌برد و الگوی Result با ارائه نتایج ساختاریافته، کنترل خطا را بهبود می‌بخشد. این الگو در پروژه‌های بزرگ که انسجام داده‌ها حیاتی است، ارزش خود را نشان می‌دهد.&lt;/span&gt;&lt;/div&gt;">
+    <meta name="twitter:card" content="&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;مدیریت داده‌های ورودی در برنامه‌نویسی، به‌ویژه در اکوسیستم .NET، یکی از دغدغه‌های اصلی توسعه‌دهندگان است. این داده‌ها که از منابعی مانند کاربران، APIها یا پایگاه‌داده‌ها دریافت می‌شوند، باید به شکلی قابل اعتماد و ایمن پردازش شوند. رویکرد سنتی اعتبارسنجی (Validation) اغلب با بررسی‌های مکرر و پراکنده همراه است که می‌تواند کد را پیچیده و شکننده کند. الگوی &amp;quot;تجزیه به جای اعتبارسنجی&amp;quot; (Parse, Don’t Validate) پیشنهاد می‌کند که به جای اعتبارسنجی مداوم، داده‌ها را یک‌بار به نوع‌های مشخص و معتبر تبدیل کنیم. با افزودن &amp;quot;الگوی Result&amp;quot; به این مفهوم، می‌توانیم مدیریت خطاها را بهبود بخشیده و به جای پرتاب استثناء، نتایجی ساختاریافته ارائه دهیم. &lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مفهوم تجزیه و الگوی Result&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;ایده اصلی الگوی &amp;quot;تجزیه به جای اعتبارسنجی&amp;quot; این است که داده‌های خام را به نوع‌هایی تبدیل کنیم که ذاتاً معتبر باشند، به جای اینکه صرفاً با اعتبارسنجی، صحت آن‌ها را بررسی کنیم. تجزیه (Parsing) فرآیندی است که در آن داده ورودی تحلیل شده و به یک ساختار مشخص و قابل اعتماد تبدیل می‌شود. این کار معمولاً با تعریف نوع‌های سفارشی (Custom Types) انجام می‌شود که قوانین و محدودیت‌های مورد نظر را در خود جای داده‌اند. برخلاف اعتبارسنجی که فقط یک پاسخ بولی (Boolean) ارائه می‌دهد و نشان می‌دهد داده معتبر است یا خیر، تجزیه تضمین می‌کند که پس از تبدیل، داده دیگر نیازی به بررسی مجدد ندارد. &lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;به عنوان مثال، فرض کنید یک رشته (string) به عنوان ورودی دریافت می‌کنید که باید یک آدرس ایمیل باشد. در اعتبارسنجی سنتی، شما ممکن است چندین بار بررسی کنید که آیا این رشته شامل &amp;quot;@&amp;quot; و &amp;quot;.&amp;quot; است یا خیر. اما در تجزیه، این رشته را یک‌بار به یک نوع جدید مانند &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;EmailAddress&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; تبدیل می‌کنید که فقط در صورت رعایت قوانین مشخص، ایجاد می‌شود. این نوع جدید، خود به خود معتبر است و هر کجا که استفاده شود، نیازی به بررسی دوباره ندارد. &lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;اعتبارسنجی سنتی با مشکلاتی همراه است: &lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;تکرار&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: منطق اعتبارسنجی باید در نقاط مختلف برنامه تکرار شود، که می‌تواند به کد تکراری (Boilerplate Code) منجر شود. &lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;عدم اطمینان&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: حتی پس از اعتبارسنجی، داده ممکن است در مراحل بعدی تغییر کند و نامعتبر شود، زیرا هیچ مکانیزمی برای حفظ صحت آن وجود ندارد. &lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;پیچیدگی&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: شرط‌های پراکنده در کد، خوانایی و نگهداری را دشوار می‌کنند و منطق اصلی برنامه را تحت‌الشعاع قرار می‌دهند.&lt;/span&gt;&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;تجزیه این مشکلات را با تبدیل داده به نوع‌های معنادار حل می‌کند. با استفاده از الگوی Result، به جای پرتاب استثناء (Exception) در صورت شکست تجزیه، یک شیء نتیجه (Result Object) بازمی‌گردانیم که وضعیت موفقیت یا شکست را مشخص می‌کند. این روش نه تنها کنترل خطا را شفاف‌تر می‌کند، بلکه برنامه‌نویس را وادار می‌کند به صراحت به حالت‌های ناموفق رسیدگی کند، که این خود به پیش‌بینی‌پذیری بیشتر کد کمک می‌کند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;چرا این الگو مهم است؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در .NET، سیستم نوع‌ها (Type System) ابزاری قدرتمند برای اعمال محدودیت‌ها و تضمین صحت داده‌هاست. تجزیه به ما اجازه می‌دهد که از این سیستم به طور کامل استفاده کنیم و داده‌ها را به شکلی مدل‌سازی کنیم که قوانین کسب‌وکار (Business Rules) را در خودشان داشته باشند. ترکیب این رویکرد با الگوی Result، انعطاف‌پذیری بیشتری به ارمغان می‌آورد؛ زیرا به جای استفاده از استثناها که می‌توانند جریان برنامه را مختل کنند، نتایجی ساختاریافته ارائه می‌دهیم که به راحتی قابل مدیریت هستند. این کار خطاها را در نقطه ورود داده تشخیص داده و از تکرار کد جلوگیری می‌کند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;پیاده‌سازی در .NET&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;ابتدا یک نوع پایه برای Result تعریف می‌کنیم: &lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public abstract class Result&amp;lt;T&amp;gt;
+{
+    public static Success&amp;lt;T&amp;gt; Ok(T value) =&amp;gt; new Success&amp;lt;T&amp;gt;(value);
+    public static Failure&amp;lt;T&amp;gt; Fail(string error) =&amp;gt; new Failure&amp;lt;T&amp;gt;(error);
+}
+
+public class Success&amp;lt;T&amp;gt; : Result&amp;lt;T&amp;gt;
+{
+    public T Value { get; }
+    public Success(T value) =&amp;gt; Value = value;
+}
+
+public class Failure&amp;lt;T&amp;gt; : Result&amp;lt;T&amp;gt;
+{
+    public string Error { get; }
+    public Failure(string error) =&amp;gt; Error = error;
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مثال ساده: آدرس ایمیل&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;فرض کنید می‌خواهیم یک آدرس ایمیل را مدیریت کنیم. رویکرد سنتی ممکن است این‌گونه باشد: &lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public bool IsValidEmail(string email)
+{
+    if (string.IsNullOrEmpty(email)) return false;
+    return email.Contains(&amp;quot;@&amp;quot;) &amp;amp;&amp;amp; email.Contains(&amp;quot;.&amp;quot;);
+}
+
+public void SendEmail(string email)
+{
+    if (!IsValidEmail(email))
+        throw new ArgumentException(&amp;quot;Invalid email address&amp;quot;);
+    // ارسال ایمیل
+}&lt;/pre&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;حالا با تجزیه و الگوی Result: &lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class EmailAddress
+{
+    private readonly string _value;
+
+    private EmailAddress(string value)
+    {
+        _value = value;
+    }
+
+    public static Result&amp;lt;EmailAddress&amp;gt; Parse(string input)
+    {
+        if (string.IsNullOrEmpty(input) || !input.Contains(&amp;quot;@&amp;quot;) || !input.Contains(&amp;quot;.&amp;quot;))
+            return Result&amp;lt;EmailAddress&amp;gt;.Fail(&amp;quot;فرمت ایمیل نامعتبر است&amp;quot;);
+        return Result&amp;lt;EmailAddress&amp;gt;.Ok(new EmailAddress(input));
+    }
+
+    public string Value =&amp;gt; _value;
+
+    public override string ToString() =&amp;gt; _value;
+}
+
+public void SendEmail(EmailAddress email)
+{
+    // ارسال ایمیل بدون نیاز به بررسی اضافی
+}
+
+// استفاده
+var result = EmailAddress.Parse(&amp;quot;user@example.com&amp;quot;);
+if (result is Success&amp;lt;EmailAddress&amp;gt; success)
+    SendEmail(success.Value);
+else if (result is Failure&amp;lt;EmailAddress&amp;gt; failure)
+    Console.WriteLine(failure.Error);&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در این مثال، متد &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;Parse&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; داده خام (یک رشته) را تجزیه کرده و به یک نوع جدید (&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;EmailAddress&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;) تبدیل می‌کند. اگر تجزیه موفق باشد، یک شیء &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;Success&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; با مقدار معتبر برمی‌گرداند؛ در غیر این صورت، یک &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;Failure&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; با پیام خطا تولید می‌شود. این روش تضمین می‌کند که هر نمونه از &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;EmailAddress&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; معتبر است و نیازی به اعتبارسنجی اضافی در &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;SendEmail&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; نیست.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مثال پیچیده‌تر: تاریخ تولد&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;حالا فرض کنید می‌خواهیم تاریخ تولد را با شرط حداقل 18 سال سن مدیریت کنیم: &lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class AdultBirthDate
+{
+    private readonly DateTime _value;
+
+    private AdultBirthDate(DateTime value)
+    {
+        _value = value;
+    }
+
+    public static Result&amp;lt;AdultBirthDate&amp;gt; Parse(DateTime input)
+    {
+        if (input &amp;gt;= DateTime.Now || (DateTime.Now.Year - input.Year) &amp;lt; 18)
+            return Result&amp;lt;AdultBirthDate&amp;gt;.Fail(&amp;quot;کاربر باید حداقل 18 سال داشته باشد&amp;quot;);
+        return Result&amp;lt;AdultBirthDate&amp;gt;.Ok(new AdultBirthDate(input));
+    }
+
+    public DateTime Value =&amp;gt; _value;
+}
+
+public void RegisterUser(AdultBirthDate birthDate)
+{
+    // ثبت کاربر بدون نیاز به بررسی اضافی
+}
+
+// استفاده
+var result = AdultBirthDate.Parse(new DateTime(2000, 1, 1));
+if (result is Success&amp;lt;AdultBirthDate&amp;gt; success)
+    RegisterUser(success.Value);
+else if (result is Failure&amp;lt;AdultBirthDate&amp;gt; failure)
+    Console.WriteLine(failure.Error);&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;اینجا، تجزیه تاریخ ورودی را به یک نوع جدید (&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;AdultBirthDate&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;) تبدیل می‌کند که فقط برای بزرگسالان معتبر است. الگوی Result نتیجه را به صورت موفقیت یا شکست ارائه می‌دهد و استفاده‌کننده را مجبور به رسیدگی به هر دو حالت می‌کند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مزایای عملی&lt;/strong&gt;&lt;/div&gt;&lt;ol&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;ایمنی نوع‌ها&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: نوع‌های سفارشی ذاتاً معتبر هستند و نیازی به بررسی اضافی ندارند. &lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مدیریت خطا&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: الگوی Result خطاها را به صورت شفاف و بدون استثناء مدیریت می‌کند. &lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;کاهش پیچیدگی&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: حذف اعتبارسنجی‌های پراکنده، کد را متمرکز و خواناتر می‌کند. &lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;قابلیت استفاده مجدد&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: نوع‌های تعریف‌شده در سراسر برنامه قابل استفاده هستند.&lt;/span&gt;&lt;/li&gt;&lt;/ol&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;نکات کلیدی در پیاده‌سازی&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;تغییرناپذیری (Immutability)&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: نوع‌های سفارشی باید تغییرناپذیر باشند تا از دستکاری غیرمنتظره جلوگیری شود. &lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;کنترل جریان&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: استفاده از تطابق الگو (Pattern Matching) در C# برای بررسی نتایج، کد را ساده‌تر می‌کند. &lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;انعطاف‌پذیری&lt;/strong&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;: می‌توانید متدهایی مانند &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;TryParse&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; اضافه کنید که مشابه &lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot; class=&quot;ql-font-monospace&quot;&gt;int.TryParse&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt; عمل کنند.&lt;/span&gt;&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;ترکیب تجزیه و الگوی Result یک رویکرد قدرتمند در برنامه‌نویسی .NET است که با بهره‌گیری از سیستم نوع‌ها و مدیریت صریح خطاها، کدهایی ایمن، خوانا و قابل نگهداری تولید می‌کند. تجزیه با تبدیل داده‌ها به نوع‌های معنادار، نیاز به اعتبارسنجی‌های تکراری را از بین می‌برد و الگوی Result با ارائه نتایج ساختاریافته، کنترل خطا را بهبود می‌بخشد. این الگو در پروژه‌های بزرگ که انسجام داده‌ها حیاتی است، ارزش خود را نشان می‌دهد.&lt;/span&gt;&lt;/div&gt;">
+    <meta property="article:published_time" content="Fri, 28 Mar 2025 05:03:24 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫تجزیه با الگوی Result، رویکردی قدرتمند در برنامه‌نویسی .NET";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-news-20204.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫استفاده از دستورالعمل‌های سفارشی و تنظیمات Visual Studio Code برای بهبود توسعه با GitHub Copilot</span>
+   </h6>
+</a><a href='www.dntips.ir-news-20202.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫آموزش اصول نگارش پرامت‌های مؤثر برای توسعه‌دهندگان دات‌نت</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫تجزیه با الگوی Result، رویکردی قدرتمند در برنامه‌نویسی .NET</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۴/۰۱/۰۸ ۰۸:۳۳</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-news-20203.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><span style="background-color: transparent; color: black;">مدیریت داده‌های ورودی در برنامه‌نویسی، به‌ویژه در اکوسیستم .NET، یکی از دغدغه‌های اصلی توسعه‌دهندگان است. این داده‌ها که از منابعی مانند کاربران، APIها یا پایگاه‌داده‌ها دریافت می‌شوند، باید به شکلی قابل اعتماد و ایمن پردازش شوند. رویکرد سنتی اعتبارسنجی (Validation) اغلب با بررسی‌های مکرر و پراکنده همراه است که می‌تواند کد را پیچیده و شکننده کند. الگوی &quot;تجزیه به جای اعتبارسنجی&quot; (Parse, Don’t Validate) پیشنهاد می‌کند که به جای اعتبارسنجی مداوم، داده‌ها را یک‌بار به نوع‌های مشخص و معتبر تبدیل کنیم. با افزودن &quot;الگوی Result&quot; به این مفهوم، می‌توانیم مدیریت خطاها را بهبود بخشیده و به جای پرتاب استثناء، نتایجی ساختاریافته ارائه دهیم. </span></div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><strong style="background-color: transparent; color: black;">مفهوم تجزیه و الگوی Result</strong></div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><span style="background-color: transparent; color: black;">ایده اصلی الگوی &quot;تجزیه به جای اعتبارسنجی&quot; این است که داده‌های خام را به نوع‌هایی تبدیل کنیم که ذاتاً معتبر باشند، به جای اینکه صرفاً با اعتبارسنجی، صحت آن‌ها را بررسی کنیم. تجزیه (Parsing) فرآیندی است که در آن داده ورودی تحلیل شده و به یک ساختار مشخص و قابل اعتماد تبدیل می‌شود. این کار معمولاً با تعریف نوع‌های سفارشی (Custom Types) انجام می‌شود که قوانین و محدودیت‌های مورد نظر را در خود جای داده‌اند. برخلاف اعتبارسنجی که فقط یک پاسخ بولی (Boolean) ارائه می‌دهد و نشان می‌دهد داده معتبر است یا خیر، تجزیه تضمین می‌کند که پس از تبدیل، داده دیگر نیازی به بررسی مجدد ندارد. </span></div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><span style="background-color: transparent; color: black;">به عنوان مثال، فرض کنید یک رشته (string) به عنوان ورودی دریافت می‌کنید که باید یک آدرس ایمیل باشد. در اعتبارسنجی سنتی، شما ممکن است چندین بار بررسی کنید که آیا این رشته شامل &quot;@&quot; و &quot;.&quot; است یا خیر. اما در تجزیه، این رشته را یک‌بار به یک نوع جدید مانند </span><span style="background-color: transparent; color: black;" class="ql-font-monospace">EmailAddress</span><span style="background-color: transparent; color: black;"> تبدیل می‌کنید که فقط در صورت رعایت قوانین مشخص، ایجاد می‌شود. این نوع جدید، خود به خود معتبر است و هر کجا که استفاده شود، نیازی به بررسی دوباره ندارد. </span></div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><strong style="background-color: transparent; color: black;">اعتبارسنجی سنتی با مشکلاتی همراه است: </strong></div><ul><li><strong style="background-color: transparent; color: black;">تکرار</strong><span style="background-color: transparent; color: black;">: منطق اعتبارسنجی باید در نقاط مختلف برنامه تکرار شود، که می‌تواند به کد تکراری (Boilerplate Code) منجر شود. </span></li><li><strong style="background-color: transparent; color: black;">عدم اطمینان</strong><span style="background-color: transparent; color: black;">: حتی پس از اعتبارسنجی، داده ممکن است در مراحل بعدی تغییر کند و نامعتبر شود، زیرا هیچ مکانیزمی برای حفظ صحت آن وجود ندارد. </span></li><li><strong style="background-color: transparent; color: black;">پیچیدگی</strong><span style="background-color: transparent; color: black;">: شرط‌های پراکنده در کد، خوانایی و نگهداری را دشوار می‌کنند و منطق اصلی برنامه را تحت‌الشعاع قرار می‌دهند.</span></li></ul><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><span style="background-color: transparent; color: black;">تجزیه این مشکلات را با تبدیل داده به نوع‌های معنادار حل می‌کند. با استفاده از الگوی Result، به جای پرتاب استثناء (Exception) در صورت شکست تجزیه، یک شیء نتیجه (Result Object) بازمی‌گردانیم که وضعیت موفقیت یا شکست را مشخص می‌کند. این روش نه تنها کنترل خطا را شفاف‌تر می‌کند، بلکه برنامه‌نویس را وادار می‌کند به صراحت به حالت‌های ناموفق رسیدگی کند، که این خود به پیش‌بینی‌پذیری بیشتر کد کمک می‌کند.</span></div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><strong style="background-color: transparent; color: black;">چرا این الگو مهم است؟</strong></div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><span style="background-color: transparent; color: black;">در .NET، سیستم نوع‌ها (Type System) ابزاری قدرتمند برای اعمال محدودیت‌ها و تضمین صحت داده‌هاست. تجزیه به ما اجازه می‌دهد که از این سیستم به طور کامل استفاده کنیم و داده‌ها را به شکلی مدل‌سازی کنیم که قوانین کسب‌وکار (Business Rules) را در خودشان داشته باشند. ترکیب این رویکرد با الگوی Result، انعطاف‌پذیری بیشتری به ارمغان می‌آورد؛ زیرا به جای استفاده از استثناها که می‌توانند جریان برنامه را مختل کنند، نتایجی ساختاریافته ارائه می‌دهیم که به راحتی قابل مدیریت هستند. این کار خطاها را در نقطه ورود داده تشخیص داده و از تکرار کد جلوگیری می‌کند.</span></div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><strong style="background-color: transparent; color: black;">پیاده‌سازی در .NET</strong></div><div style="text-align: right;" dir="rtl" class="ql-direction-rtl"><span style="background-color: transparent; color: black;">ابتدا یک نوع پایه برای Result تعریف می‌کنیم: </span></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public abstract class Result&lt;T&gt;
+{
+    public static Success&lt;T&gt; Ok(T value) =&gt; new Success&lt;T&gt;(value);
+    public static Failure&lt;T&gt; Fail(string error) =&gt; new Failure&lt;T&gt;(error);
+}
+
+public class Success&lt;T&gt; : Result&lt;T&gt;
+{
+    public T Value { get; }
+    public Success(T value) =&gt; Value = value;
+}
+
+public class Failure&lt;T&gt; : Result&lt;T&gt;
+{
+    public string Error { get; }
+    public Failure(string error) =&gt; Error = error;
+}</pre><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><strong style="background-color: transparent; color: black;">مثال ساده: آدرس ایمیل</strong></div><div style="text-align: right;" dir="rtl" class="ql-direction-rtl"><span style="background-color: transparent; color: black;">فرض کنید می‌خواهیم یک آدرس ایمیل را مدیریت کنیم. رویکرد سنتی ممکن است این‌گونه باشد: </span></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public bool IsValidEmail(string email)
+{
+    if (string.IsNullOrEmpty(email)) return false;
+    return email.Contains(&quot;@&quot;) &amp;&amp; email.Contains(&quot;.&quot;);
+}
+
+public void SendEmail(string email)
+{
+    if (!IsValidEmail(email))
+        throw new ArgumentException(&quot;Invalid email address&quot;);
+    // ارسال ایمیل
+}</pre><div style="text-align: right;" dir="rtl" class="ql-direction-rtl"><span style="background-color: transparent; color: black;">حالا با تجزیه و الگوی Result: </span></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public class EmailAddress
+{
+    private readonly string _value;
+
+    private EmailAddress(string value)
+    {
+        _value = value;
+    }
+
+    public static Result&lt;EmailAddress&gt; Parse(string input)
+    {
+        if (string.IsNullOrEmpty(input) || !input.Contains(&quot;@&quot;) || !input.Contains(&quot;.&quot;))
+            return Result&lt;EmailAddress&gt;.Fail(&quot;فرمت ایمیل نامعتبر است&quot;);
+        return Result&lt;EmailAddress&gt;.Ok(new EmailAddress(input));
+    }
+
+    public string Value =&gt; _value;
+
+    public override string ToString() =&gt; _value;
+}
+
+public void SendEmail(EmailAddress email)
+{
+    // ارسال ایمیل بدون نیاز به بررسی اضافی
+}
+
+// استفاده
+var result = EmailAddress.Parse(&quot;user@example.com&quot;);
+if (result is Success&lt;EmailAddress&gt; success)
+    SendEmail(success.Value);
+else if (result is Failure&lt;EmailAddress&gt; failure)
+    Console.WriteLine(failure.Error);</pre><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><span style="background-color: transparent; color: black;">در این مثال، متد </span><span style="background-color: transparent; color: black;" class="ql-font-monospace">Parse</span><span style="background-color: transparent; color: black;"> داده خام (یک رشته) را تجزیه کرده و به یک نوع جدید (</span><span style="background-color: transparent; color: black;" class="ql-font-monospace">EmailAddress</span><span style="background-color: transparent; color: black;">) تبدیل می‌کند. اگر تجزیه موفق باشد، یک شیء </span><span style="background-color: transparent; color: black;" class="ql-font-monospace">Success</span><span style="background-color: transparent; color: black;"> با مقدار معتبر برمی‌گرداند؛ در غیر این صورت، یک </span><span style="background-color: transparent; color: black;" class="ql-font-monospace">Failure</span><span style="background-color: transparent; color: black;"> با پیام خطا تولید می‌شود. این روش تضمین می‌کند که هر نمونه از </span><span style="background-color: transparent; color: black;" class="ql-font-monospace">EmailAddress</span><span style="background-color: transparent; color: black;"> معتبر است و نیازی به اعتبارسنجی اضافی در </span><span style="background-color: transparent; color: black;" class="ql-font-monospace">SendEmail</span><span style="background-color: transparent; color: black;"> نیست.</span></div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><strong style="background-color: transparent; color: black;">مثال پیچیده‌تر: تاریخ تولد</strong></div><div style="text-align: right;" dir="rtl" class="ql-direction-rtl"><span style="background-color: transparent; color: black;">حالا فرض کنید می‌خواهیم تاریخ تولد را با شرط حداقل 18 سال سن مدیریت کنیم: </span></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public class AdultBirthDate
+{
+    private readonly DateTime _value;
+
+    private AdultBirthDate(DateTime value)
+    {
+        _value = value;
+    }
+
+    public static Result&lt;AdultBirthDate&gt; Parse(DateTime input)
+    {
+        if (input &gt;= DateTime.Now || (DateTime.Now.Year - input.Year) &lt; 18)
+            return Result&lt;AdultBirthDate&gt;.Fail(&quot;کاربر باید حداقل 18 سال داشته باشد&quot;);
+        return Result&lt;AdultBirthDate&gt;.Ok(new AdultBirthDate(input));
+    }
+
+    public DateTime Value =&gt; _value;
+}
+
+public void RegisterUser(AdultBirthDate birthDate)
+{
+    // ثبت کاربر بدون نیاز به بررسی اضافی
+}
+
+// استفاده
+var result = AdultBirthDate.Parse(new DateTime(2000, 1, 1));
+if (result is Success&lt;AdultBirthDate&gt; success)
+    RegisterUser(success.Value);
+else if (result is Failure&lt;AdultBirthDate&gt; failure)
+    Console.WriteLine(failure.Error);</pre><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><span style="background-color: transparent; color: black;">اینجا، تجزیه تاریخ ورودی را به یک نوع جدید (</span><span style="background-color: transparent; color: black;" class="ql-font-monospace">AdultBirthDate</span><span style="background-color: transparent; color: black;">) تبدیل می‌کند که فقط برای بزرگسالان معتبر است. الگوی Result نتیجه را به صورت موفقیت یا شکست ارائه می‌دهد و استفاده‌کننده را مجبور به رسیدگی به هر دو حالت می‌کند.</span></div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><strong style="background-color: transparent; color: black;">مزایای عملی</strong></div><ol><li><strong style="background-color: transparent; color: black;">ایمنی نوع‌ها</strong><span style="background-color: transparent; color: black;">: نوع‌های سفارشی ذاتاً معتبر هستند و نیازی به بررسی اضافی ندارند. </span></li><li><strong style="background-color: transparent; color: black;">مدیریت خطا</strong><span style="background-color: transparent; color: black;">: الگوی Result خطاها را به صورت شفاف و بدون استثناء مدیریت می‌کند. </span></li><li><strong style="background-color: transparent; color: black;">کاهش پیچیدگی</strong><span style="background-color: transparent; color: black;">: حذف اعتبارسنجی‌های پراکنده، کد را متمرکز و خواناتر می‌کند. </span></li><li><strong style="background-color: transparent; color: black;">قابلیت استفاده مجدد</strong><span style="background-color: transparent; color: black;">: نوع‌های تعریف‌شده در سراسر برنامه قابل استفاده هستند.</span></li></ol><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><strong style="background-color: transparent; color: black;">نکات کلیدی در پیاده‌سازی</strong></div><ul><li><strong style="background-color: transparent; color: black;">تغییرناپذیری (Immutability)</strong><span style="background-color: transparent; color: black;">: نوع‌های سفارشی باید تغییرناپذیر باشند تا از دستکاری غیرمنتظره جلوگیری شود. </span></li><li><strong style="background-color: transparent; color: black;">کنترل جریان</strong><span style="background-color: transparent; color: black;">: استفاده از تطابق الگو (Pattern Matching) در C# برای بررسی نتایج، کد را ساده‌تر می‌کند. </span></li><li><strong style="background-color: transparent; color: black;">انعطاف‌پذیری</strong><span style="background-color: transparent; color: black;">: می‌توانید متدهایی مانند </span><span style="background-color: transparent; color: black;" class="ql-font-monospace">TryParse</span><span style="background-color: transparent; color: black;"> اضافه کنید که مشابه </span><span style="background-color: transparent; color: black;" class="ql-font-monospace">int.TryParse</span><span style="background-color: transparent; color: black;"> عمل کنند.</span></li></ul><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><strong style="background-color: transparent; color: black;">نتیجه‌گیری</strong></div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><span style="background-color: transparent; color: black;">ترکیب تجزیه و الگوی Result یک رویکرد قدرتمند در برنامه‌نویسی .NET است که با بهره‌گیری از سیستم نوع‌ها و مدیریت صریح خطاها، کدهایی ایمن، خوانا و قابل نگهداری تولید می‌کند. تجزیه با تبدیل داده‌ها به نوع‌های معنادار، نیاز به اعتبارسنجی‌های تکراری را از بین می‌برد و الگوی Result با ارائه نتایج ساختاریافته، کنترل خطا را بهبود می‌بخشد. این الگو در پروژه‌های بزرگ که انسجام داده‌ها حیاتی است، ارزش خود را نشان می‌دهد.</span></div></div><br><br><a href='https://medium.com/@vikpoca/parse-dont-validate-a-powerful-design-pattern-for-c-and-net-developers-4e07398ef950'>مشاهده مطلب اصلی</a></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20200.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>پیاده‌سازی الگوی Result در #C</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20341.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>معرفی InterpolatedParser: جایگزینی خواناتر برای Regex در سی شارپ</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20478.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>درک توسعه مبتنی بر استثناء (Exception-Driven Development): یک ضدالگو در برنامه‌نویسی</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20197.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>ترک استفاده از Try-Catch در همه‌جا: راهی هوشمندانه‌تر برای مدیریت خطاها</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2893.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>طراحی و پیاده سازی زیرساختی برای مدیریت خطاهای حاصل از Business Rule Validationها در ServiceLayer</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3668.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>نوع‌های اتحادیه (Union Types) در C# 15 و NET 11.</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2889.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Defensive Programming - بازگشت نتایج قابل پیش بینی توسط متدها</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3621.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Domain-Driven Design (DDD)؛ بخش پنجم: موجودیت‌ها</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2889.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>Defensive Programming - بازگشت نتایج قابل پیش بینی توسط متدها</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3630.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>هنر استثناهای سفارشی در توسعه نرم‌افزار با NET.: رویکردی بر پایه طراحی دامنه محور (DDD)</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

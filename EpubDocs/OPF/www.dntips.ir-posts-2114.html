@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫آشنایی با CLR: قسمت ششم</title>     <meta name="description" content="در  مقاله قبلی   مبحث کامپایلر JIT را آغاز کردیم. در این قسمت قصد داریم مبحث کارآیی CLR و مباحث دیباگینگ را پیش بکشیم. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ از آنجا که یک کد مدیریت نشده، مبحث کارهای JIT را ندارد، ولی CLR مجبور است وقتی را برای آن بگذارد، به نظر می‌رسد ما با یک نقص کوچک در کارآیی روبرو هستیم. گفتیم که جیت کدها را در حافظه‌ی پویا ذخیره می‌کند. به همین خاطر با terminate شدن یا خاتمه دادن به برنامه، این کدها از بین می‌روند یا اینکه اگر  ...">
+    <meta name="author" content="علی یگانه مقدم">
+    <meta itemprop="name" content="آشنایی با CLR: قسمت ششم">
+    <meta itemprop="description" content="در  مقاله قبلی   مبحث کامپایلر JIT را آغاز کردیم. در این قسمت قصد داریم مبحث کارآیی CLR و مباحث دیباگینگ را پیش بکشیم. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ از آنجا که یک کد مدیریت نشده، مبحث کارهای JIT را ندارد، ولی CLR مجبور است وقتی را برای آن بگذارد، به نظر می‌رسد ما با یک نقص کوچک در کارآیی روبرو هستیم. گفتیم که جیت کدها را در حافظه‌ی پویا ذخیره می‌کند. به همین خاطر با terminate شدن یا خاتمه دادن به برنامه، این کدها از بین می‌روند یا اینکه اگر  ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="آشنایی با CLR: قسمت ششم">
+    <meta property="og:description" content="در  مقاله قبلی   مبحث کامپایلر JIT را آغاز کردیم. در این قسمت قصد داریم مبحث کارآیی CLR و مباحث دیباگینگ را پیش بکشیم. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ از آنجا که یک کد مدیریت نشده، مبحث کارهای JIT را ندارد، ولی CLR مجبور است وقتی را برای آن بگذارد، به نظر می‌رسد ما با یک نقص کوچک در کارآیی روبرو هستیم. گفتیم که جیت کدها را در حافظه‌ی پویا ذخیره می‌کند. به همین خاطر با terminate شدن یا خاتمه دادن به برنامه، این کدها از بین می‌روند یا اینکه اگر  ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="آشنایی با CLR: قسمت ششم">
+    <meta name="twitter:description" content="در  مقاله قبلی   مبحث کامپایلر JIT را آغاز کردیم. در این قسمت قصد داریم مبحث کارآیی CLR و مباحث دیباگینگ را پیش بکشیم. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ از آنجا که یک کد مدیریت نشده، مبحث کارهای JIT را ندارد، ولی CLR مجبور است وقتی را برای آن بگذارد، به نظر می‌رسد ما با یک نقص کوچک در کارآیی روبرو هستیم. گفتیم که جیت کدها را در حافظه‌ی پویا ذخیره می‌کند. به همین خاطر با terminate شدن یا خاتمه دادن به برنامه، این کدها از بین می‌روند یا اینکه اگر  ...">
+    <meta name="twitter:card" content="در  مقاله قبلی   مبحث کامپایلر JIT را آغاز کردیم. در این قسمت قصد داریم مبحث کارآیی CLR و مباحث دیباگینگ را پیش بکشیم. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ از آنجا که یک کد مدیریت نشده، مبحث کارهای JIT را ندارد، ولی CLR مجبور است وقتی را برای آن بگذارد، به نظر می‌رسد ما با یک نقص کوچک در کارآیی روبرو هستیم. گفتیم که جیت کدها را در حافظه‌ی پویا ذخیره می‌کند. به همین خاطر با terminate شدن یا خاتمه دادن به برنامه، این کدها از بین می‌روند یا اینکه اگر  ...">
+    <meta property="article:published_time" content="Wed, 17 Jun 2015 00:55:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫آشنایی با CLR: قسمت ششم";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-2115.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='ltr'>CoffeeScript #1</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-2113.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='ltr'>OpenCVSharp #13</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫آشنایی با CLR: قسمت ششم</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>علی یگانه مقدم<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۴/۰۳/۲۷ ۰:۵۵</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-2114.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><div align="justify">در <a href="www.dntips.ir-posts-2112.html">مقاله قبلی</a>  مبحث کامپایلر JIT را آغاز کردیم. در این قسمت قصد داریم مبحث کارآیی CLR و مباحث دیباگینگ را پیش بکشیم.<br>
+
+
+
+
+
+
+
+
+از آنجا که یک کد مدیریت نشده، مبحث کارهای JIT را ندارد، ولی CLR مجبور است وقتی را برای آن بگذارد، به نظر می‌رسد ما با یک نقص کوچک در کارآیی روبرو هستیم. گفتیم که جیت کدها را در حافظه‌ی پویا ذخیره می‌کند. به همین خاطر با terminate شدن یا خاتمه دادن به برنامه، این کدها از بین می‌روند یا اینکه اگر دو نمونه از برنامه را اجرا کنیم، هر کدام جداگانه کد را تولید می‌کنند و هر کدام برای خودشان حافظه‌ای بر خواهند داشت و اگر مقایسه‌ای با کدهای مدیریت نشده داشته باشید، در مورد مصرف حافظه یک مشکل ایجاد می‌کند. همچنین JIT در حین تبدیل به کدهای بومی یک بهینه سازی روی کد هم انجام میدهد که این بهینه سازی وقتی را به خود اختصاص می‌دهد ولی همین بهینه سازی کد موجب کارآیی بهتر برنامه می‌گردد.<br>
+
+
+
+
+
+
+
+در زبان سی شارپ دو سوئیچ وجود دارند که بر بهینه سازی کد تاثیر گذار هستند؛ سوئیچ‌های debug و optimize. در جدول زیر تاثیر هر یک از سوئیچ‌ها را بر کیفیت کد IL و JIT در تبدیل به کد بومی را نشان میدهد.<br> </div> <p style="display:block; margin-left: auto; margin-right: auto;"> <img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/png;base64,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"> </p> <p style="display:block; margin-left: auto; margin-right: auto;" align="justify">موقعیکه از دستور -optimize استفاده می‌شود، کد IL تولید شده شامل تعداد زیادی از دستورات بدون دستورالعمل<a href="http://en.wikipedia.org/wiki/NOP"> No Operation</a>  یا به اختصار NOP و پرش‌های شاخه‌ای به خط کد بعدی می‌باشد. این دستور العمل‌ها ما را قادر میسازند تا ویژگی edit &amp; Continue را برای دیباگ کردن و یک سری دستورالعمل‌ها را برای کدنویسی راحت‌تر برای دیباگ کردن و ایجاد break point‌ها داشته باشیم.</p> <p style="display:block; margin-left: auto; margin-right: auto;" align="justify">موقعی که کد IL بهینه شده تولید شود، این خصوصیات اضافه حذف خواهند شد و دنبال کردن خط به خط کد، کار سختی می‌شود. ولی در عوض فایل نهایی exe یا dll، کوچکتر خواهد شد. بهینه سازی IL توسط JIT حذف خواهد شد و برای کسانی که دوست دارند کدهای IL را تحلیل و آنالیز کنند، خواندنش ساده‌تر و آسان‌تر خواهد بود.</p> <p style="display:block;color:rgb(35,31,32);font-style:normal;font-variant:normal;" align="justify">نکته‌ی بعدی اینکه موقعیکه شما از سوئیچ (/debug(+/full/pdbonly<span style="color:rgb(35,31,32);font-style:normal;font-variant:normal;"> استفاده می‌کنید، یک فایل PDB&nbsp; یا Program Database ایجاد می‌شود. این فایل به دیباگرها کمک می‌کند تا متغیرهای محلی را شناسایی و به کدهای IL متصل شوند. کلمه‌ی full بدین معنی است که JIT می‌تواند دستورات بومی را ردیابی کند تا مبداء آن کد را پیدا کند. سبب می‌شود که ویژوال استودیو به یک دیباگر متصل شده تا در حین اجرای پروسه، آن را دیباگ کند. در صورتی که این سوئیچ را استفاده نکنید، به طور پیش فرض پروسه اجرا و مصرف حافظه کمتر می‌شود.</span> <span style="color:rgb(35,31,32);font-style:normal;font-variant:normal;"> </span> <span style="color:rgb(35,31,32);font-style:normal;font-variant:normal;"> اگر شما پروسه‌ای را اجرا کنید که دیباگر به آن متصل شود، به طور اجباری JIT مجبور به انجام عملیات ردیابی خواهد شد؛ مگر اینکه گزینه‌ی suppress jit&nbsp; optimization on module load را غیرفعال کرده باشید.</span> <br> <span style="color:rgb(35,31,32);font-style:normal;font-variant:normal;">موقعیکه در ویژوال استودیو دو حالت دیباگ و ریلیز را انتخاب می‌کنید، در واقع تنظیمات زیر را اجرا می‌کنید:</span> </p> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">//debug
+
+/optimize­ 
+/debug:full
+
+//=======================
+
+//Release
+
+/optimize+
+/debug:pdbonly</pre> </div> <div align="justify">احتمالا موارد بالا به شما می‌گویند که یک سیستم مبتنی بر CLR مشکلات زیادی دارد که یکی از آن‌ها، زمان‌بر بودن انجام عملیات فرآیند پردازش است و دیگری مصرف زیاد حافظه و عدم اشترک حافظه که در مورد کامپایل جیت به آن اشاره کردیم. ولی در بند بعدی قصد داریم نظرتان را عوض کنم.<br> <br>
+
+
+
+
+اگر خیلی شک دارید که واقعا یک برنامه‌ی CLR کارآیی یک برنامه را پایین می‌آورد، بهتر هست به بررسی کارآیی چند برنامه غیر آزمایشی noTrial که حتی خود مایکروسافت آن برنامه‌ها را ایجاد کرده است بپردازید و آن‌ها را با یک برنامه‌ی unmanaged مقایسه کنید. قطعا باعث تعجب شما خواهد شد. این نکته دلایل زیادی دارد که در زیر تعدادی از آن‌ها را بررسی می‌کنیم.<br>
+
+
+
+
+اینکه CLR در محیط اجرا قصد کمپایل دارد، باعث آشنایی کامپایلر با محیط اجرا می‌گردد. از این رو تصمیماتی را که می‌گیرد، می‌تواند به کارآیی یک برنامه کمک کند. در صورتیکه یک برنامه‌ی unmanaged که قبلا کمپایل شده و با محیط‌های متفاوتی که روی آن‌ها اجرا میشود، هیچ آشنایی ندارد و نمیتواند از آن محیط‌ها حداکثر بهره‌وری لازم را به عمل آورد.<br>
+
+
+
+
+برای آشنایی با این ویژگی‌ها توجه شما را به نکات ذیل جلب می‌کنم:<br> <br> <i> <b>یک.&nbsp;</b> </i>JIT می‌تواند با نوع پردازنده آشنا شود که آیا این پردازنده از نسل پنتیوم 4 است یا نسل Core i. به همین علت می‌تواند از این مزیت استفاده کرده و دستورات اختصاصی آن‌ها را به کار گیرد، تا برنامه با performance بالاتری اجرا گردد. در صورتی که unmanaged باید حتما دستورات را در پایین‌ترین سطح ممکن و عمومی اجرا کند؛ در صورتیکه شاید یک دستور اختصاصی در یک سی پی یو خاص، در یک عملیات موجب 4 برابر، اجرای سریعتر شود.<br> <br> <i> <b>دو.&nbsp;</b> </i>JIT میتواند بررسی هایی را که برابر false هستند، تشخیص دهد. برای فهم بهتر، کد زیر را در نظر بگیرید:<br> </div> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">if (numberOfCPUs &gt; 1) {
+...
+}</pre> </div> <br> <div align="justify">کد بالا در صورتیکه پردازنده تک هسته‌ای باشد یک کد بلا استفاده است که جیت باید وقتی را برای کامپایل آن اختصاص دهد؛ در صورتیکه JIT باهوش‌تر از این حرفاست و در کدی که تولید می‌کند، این دستورات حذف خواهند شد و باعث کوچکتر شدن کد و اجرای سریعتر می‌گردد.<br> <br> <b> <i>سه.</i> </b> مورد بعدی که هنوز پیاده سازی نشده، ولی احتمال اجرای آن در آینده است، این است که یک کد می‌تواند جهت تصحیح بعضی موارد چون مسائل مربوط به دیباگ کردن و مرتب سازی‌های مجدد، عمل کامپایل را مجددا برای یک کد اعمال نماید.<br>
+
+
+
+
+دلایل بالا تنها قسمت کوچکی است که به ما اثبات می‌کند که چرا CLR می‌تواند کارآیی بهتری را نسبت به زبان‌های unmanaged امروزی داشته باشد. همچنین قول‌هایی از سازندگان برای بهبود کیفیت هر چه بیشتر این سیستم‌ها به گوش می‌رسد.<br> <br> <i> <b>کارآیی بالاتر</b> </i> <br>
+
+
+
+
+اگر برنامه‌ای توسط شما بررسی شد و دیدید که نتایج مورد نیاز در مورد performance را نشان نمی‌دهد، می‌توانید از ابزار کمکی که مایکروسافت در بسته‌های فریمورک دات نت قرار داده است استفاده کنید. نام این ابزار Ngen.exe است و وظیفه‌ی آن این است که وقتی برنامه بر روی یک سیستم برای اولین مرتبه اجرا می‌گردد، کد همه‌ی اسمبلی‌ها را تبدیل کرده و آن‌ها روی دیسک ذخیره می‌کند. بدین ترتیب در دفعات بعدی اجرا، JIT بررسی می‌کند که آیا کد کامپایل شده‌ی اسمبلی از قبل موجود است یا خیر. در صورت وجود، عملیات کامپایل به کد بومی لغو شده و از کد ذخیره شده استفاده خواهد کرد.<br>
+
+
+
+
+نکته‌ای که باید در حین استفاده از این ابزار به آن دقت کنید این است که کد در محیط‌های واقعی اجرا چندان بهینه نیست. بعدا در مورد این ابزار به تفصیل صحبت می‌کنیم.<br> <br> <i> <b>system.runtime.profileoptimization</b> </i> <br>
+
+
+
+
+کلاس بالا سبب می‌شود که CLR در یک فایل ثبت کند که چه متدهایی در حین اجرای برنامه کمپایل شوند تا در آینده در حین آغاز اجرای برنامه کامپایلر JIT بتواند همزمان این متدها را در ترد دیگری کامپایل کند. اگر برنامه‌ی شما روی یک پردازنده‌ی چند هسته‌ای اجرا می‌شود، در نتیجه اجرای سریعتری خواهید داشت. به این دلیل که چندین متد به طور همزمان در حال کمپایل شدن هستند و همزمان با آماده سازی برنامه برای اجرا اتفاق می‌افتد؛ به جای اینکه عمل کمپایل همزمان با تعامل کاربر با برنامه باشد.<br> </div> <br> <p style="display:block;color:rgb(35,31,32);font-style:normal;font-variant:normal;" align="justify"> <span style="color:rgb(35,31,32);font-style:normal;font-variant:normal;"> </span> </p></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20304.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>چگونه متدهای virtual، sealed و static بر عملکرد کدها در #C تأثیر می‌گذارند؟</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20305.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>Tiered Compilation در دات‌نت 9: مفاهیم، نکات کلیدی و کاربردها</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20118.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>زیرساخت پیاده سازی Async در دات‌نت به‌زودی تغییر خواهد کرد</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2121.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با CLR: قسمت هشتم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2112.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با CLR: قسمت پنجم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2118.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با CLR: قسمت هفتم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1845.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>فعال سازی Multicore JIT</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2052.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>NET Just-In-Time Optimization.</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-12.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>اهمیت ارائه‌ی برنامه‌های دات نت به صورت release</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2933.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>توسعه برنامه های Cross Platform با Xamarin Forms & Bit Framework - قسمت چهارم</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

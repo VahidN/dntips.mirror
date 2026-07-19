@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫MongoDb در سی شارپ (بخش اول)</title>     <meta name="description" content="MongoDb   یک دیتابیس Nosql سندگراست که توسط ++C نوشته شده است و از پشتیبانی خوبی در بسیاری از زبان‌ها برخوردار است. مونگو از ساختاری به نام  Bson  که ساختاری مشابه  Json 
+   را دارد استفاده می‌کند؛ با این تفاوت که در Json مبحث دیتاتایپ یا نوع 
+ داده وجود ندارد، ولی در Bson دیتاتایپ‌ها تعریف می‌شوند. برای دیدن نوع‌های
+  Bson و نحوه نوشته شدن سند آن می‌توانید مقاله  MongoDb#7  را مطالعه بفرمایید.     
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ ...">
+    <meta name="author" content="علی یگانه مقدم">
+    <meta itemprop="name" content="MongoDb در سی شارپ (بخش اول)">
+    <meta itemprop="description" content="MongoDb   یک دیتابیس Nosql سندگراست که توسط ++C نوشته شده است و از پشتیبانی خوبی در بسیاری از زبان‌ها برخوردار است. مونگو از ساختاری به نام  Bson  که ساختاری مشابه  Json 
+   را دارد استفاده می‌کند؛ با این تفاوت که در Json مبحث دیتاتایپ یا نوع 
+ داده وجود ندارد، ولی در Bson دیتاتایپ‌ها تعریف می‌شوند. برای دیدن نوع‌های
+  Bson و نحوه نوشته شدن سند آن می‌توانید مقاله  MongoDb#7  را مطالعه بفرمایید.     
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="MongoDb در سی شارپ (بخش اول)">
+    <meta property="og:description" content="MongoDb   یک دیتابیس Nosql سندگراست که توسط ++C نوشته شده است و از پشتیبانی خوبی در بسیاری از زبان‌ها برخوردار است. مونگو از ساختاری به نام  Bson  که ساختاری مشابه  Json 
+   را دارد استفاده می‌کند؛ با این تفاوت که در Json مبحث دیتاتایپ یا نوع 
+ داده وجود ندارد، ولی در Bson دیتاتایپ‌ها تعریف می‌شوند. برای دیدن نوع‌های
+  Bson و نحوه نوشته شدن سند آن می‌توانید مقاله  MongoDb#7  را مطالعه بفرمایید.     
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="MongoDb در سی شارپ (بخش اول)">
+    <meta name="twitter:description" content="MongoDb   یک دیتابیس Nosql سندگراست که توسط ++C نوشته شده است و از پشتیبانی خوبی در بسیاری از زبان‌ها برخوردار است. مونگو از ساختاری به نام  Bson  که ساختاری مشابه  Json 
+   را دارد استفاده می‌کند؛ با این تفاوت که در Json مبحث دیتاتایپ یا نوع 
+ داده وجود ندارد، ولی در Bson دیتاتایپ‌ها تعریف می‌شوند. برای دیدن نوع‌های
+  Bson و نحوه نوشته شدن سند آن می‌توانید مقاله  MongoDb#7  را مطالعه بفرمایید.     
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ ...">
+    <meta name="twitter:card" content="MongoDb   یک دیتابیس Nosql سندگراست که توسط ++C نوشته شده است و از پشتیبانی خوبی در بسیاری از زبان‌ها برخوردار است. مونگو از ساختاری به نام  Bson  که ساختاری مشابه  Json 
+   را دارد استفاده می‌کند؛ با این تفاوت که در Json مبحث دیتاتایپ یا نوع 
+ داده وجود ندارد، ولی در Bson دیتاتایپ‌ها تعریف می‌شوند. برای دیدن نوع‌های
+  Bson و نحوه نوشته شدن سند آن می‌توانید مقاله  MongoDb#7  را مطالعه بفرمایید.     
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ ...">
+    <meta property="article:published_time" content="Sat, 25 Feb 2017 20:20:02 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫MongoDb در سی شارپ (بخش اول)";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-2597.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫مدیریت هدایت خودکار صفحات در حین خطاهای عملیاتی ای‌جکسی در ASP.NET MVC</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-2595.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫پیاده سازی عملیات CRUD در Kendo UI Treeview یک پروژه‌ی ASP.NET MVC</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫MongoDb در سی شارپ (بخش اول)</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>علی یگانه مقدم<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۵/۱۲/۰۷ ۲۰:۲۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-2596.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><div align="justify"> <a href="https://www.mongodb.com/">MongoDb&nbsp; </a>یک دیتابیس Nosql سندگراست که توسط ++C نوشته شده است و از پشتیبانی خوبی در بسیاری از زبان‌ها برخوردار است. مونگو از ساختاری به نام <a href="https://en.wikipedia.org/wiki/BSON">Bson </a>که ساختاری مشابه <a href="http://www.json.org/">Json</a>
+  را دارد استفاده می‌کند؛ با این تفاوت که در Json مبحث دیتاتایپ یا نوع 
+داده وجود ندارد، ولی در Bson دیتاتایپ‌ها تعریف می‌شوند. برای دیدن نوع‌های
+ Bson و نحوه نوشته شدن سند آن می‌توانید مقاله<a href="www.dntips.ir-posts-1973.html"> MongoDb#7</a> را مطالعه بفرمایید.<br> <br> <br>
+
+
+
+
+
+
+
+
+
+
+
+برای آغاز به کار با این دیتابیس ابتدا باید آن را از سایت اصلی دریافت و 
+بر روی سیستم نصب نمایید. متاسفانه سایت مونگو برای کشور ایران محدودیتی 
+قرار داده است و باید از روش‌های دیگری آن را دریافت نمایید و بر روی سیستم
+ خود نصب نمایید. نحوه نصب این دیتابیس را میتوانید در مقاله <a href="www.dntips.ir-posts-1965.html">MongoDb#3</a>  مشاهده نمایید.<br> <br>
+
+
+
+
+
+
+
+
+
+
+
+شاید نیاز باشد بجای کار کردن با محیط کنسول این دیتابیس، با یک محیط 
+گرافیکی شبیه آن چیزی که Raven دارد کار کنید وتغییرات را مشاهده نمایید؛ 
+برای همین به<a href="https://docs.mongodb.com/ecosystem/tools/administration-interfaces/"> این آدرس </a> رفته و محیط دلخواه خود را انتخاب نمایید. <br> <br>
+
+
+
+
+
+
+
+
+
+&nbsp;
+
+یک پروژه از نوع کنسول را در ویژوال استادیو ایجاد کنید و سپس درایور رسمی مونگو را از<a href="http://mongodb.github.io/mongo-csharp-driver/?_ga=1.87397592.13523022.1487099687"> این آدرس</a>  یا از طریق <a href="https://www.nuget.org/packages/mongocsharpdriver/">nuget </a> نصب نمایید:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre name="code" language="CSharp">Install-Package mongocsharpdriver</pre> </div> <br>
+
+
+
+
+
+
+
+
+
+
+
+ابتدا سه مدل را به شکل زیر ایجاد میکنیم:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre name="code" language="CSharp">  public class Author
+    {
+        public ObjectId Id { get; set; }
+        public string Name { get; set; }
+    }</pre> </div> <br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre name="code" language="CSharp">public class Language
+    {
+        public ObjectId Id { get; set; }
+        public string Name { get; set; }
+    }</pre> </div> <br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre name="code" language="CSharp">  public class Book
+    {
+        public ObjectId Id { get; set; }
+        public string Title { get; set; }
+        public string ISBN { get; set; }
+        public int Price { get; set; }
+        public List&lt;Author&gt; Authors { get; set; }
+        public Language Language { get; set; }
+    }</pre> </div> <br>
+
+
+
+
+
+
+
+
+
+
+نوع ObjectId، نوعی است که توسط مونگو برای مشخص کردن کلید یکتای سند معرفی میشود.<br> <br>
+
+
+
+
+
+
+
+
+
+
+
+در خطوط اولیه کد زیر، یک شیء از مدل بالا را ساخته و آن را مقداردهی می‌کنیم:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre name="code" language="CSharp">           var book =new Book()
+           {
+               Title = "Gone With Wind",
+               ISBN = "43442424",
+               Price = 50000,
+               Language = new Language()
+               {
+                  Name = "Persian"
+               },
+               Authors = new List&lt;Author&gt;()
+               {
+                   new Author()
+                   {
+                       Name = "Margaret Mitchell"
+                   },
+                     new Author()
+                   {
+                       Name = "Ali Mahboobi (Translator)"
+                   },
+               }
+           };</pre> </div> <br>
+
+
+
+
+
+
+
+
+
+
+
+بعد از آن یک شیء کلاینت از نوع mongoClient میسازیم که نوع خروجی آن یک 
+اینترفیس میباشد که توسط کلاسی از جنس آن مقداردهی شده است. بیشتر 
+خروجی‌های مونگو در این کتابخانه از نوع اینترفیس هستند. شیء کلاینت وظیفه 
+دارد تا ارتباط شما را با سرور مونگو برقرار کند:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre name="code" language="CSharp">var client = new MongoClient();</pre> </div>
+
+
+
+
+
+
+
+
+
+
+
+البته در این حالت سرور اتصالی مونگو، سیستم جاری و پورت شماره 27017 فرض 
+میشود. در صورتیکه بخواهید آدرسی غیر از آن را بدهید یا حتی همین آدرس را به 
+طور دستی تعیین کنید، از طریق زیر امکان پذیر است. پارامترهای سازنده این شیء
+ کلاینت میتوانند به صورت رشته‌ای، رشته اتصال را دریافت کنند و یا از طریق 
+شیء MangoClientSettings آن را پاس کنید.<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre name="code" language="CSharp"> string connectionString = "mongodb://localhost:27017";
+            MongoClientSettings settings = MongoClientSettings.FromUrl(new MongoUrl(connectionString));
+            var client = new MongoClient(settings);</pre> </div> <br>
+در قسمت بعد لازم است که از سرور جاری، دیتابیس خود را دریافت کنیم. در 
+صورتیکه دیتابیس درخواستی وجود نداشته باشد، یک دیتابیس جدید با آن نام 
+ساخته خواهد شد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre name="code" language="CSharp">var db = client.GetDatabase("publisher");</pre> </div>
+
+
+
+
+
+
+
+
+
+
+
+در نمونه کدهای قدیمی مونگو، قبل از دریافت سرور بایستی شیء Server را از طریق متد GetServer نیز دریافت میکردید که <a href="https://github.com/mongodb/mongo-csharp-driver/releases">از نسخه دو به بعد، آن را منسوخ اعلام کرده‌اند</a>  و همین تنظیمات بالا کفایت میکند.<br>
+
+
+
+
+
+
+
+
+
+
+در مونگو اصطلاحی به نام collection وجود دارد که اسناد در آن قرار گرفته و
+ ارتباط با اسناد از طریق آنها انجام می‌پذیرد. پس در اینجا قبل از هر کاری
+ باید یک collection را ایجاد کرد و در صورتیکه کالکشن درخواستی وجود نداشته 
+باشد، آن را تولید و ارتباط با آن را برخواهد گرداند.<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre name="code" language="CSharp">var collection = db.GetCollection&lt;Book&gt;("books");</pre> </div> <br>
+
+
+
+
+
+
+
+
+
+در اینجا کالکشنی با نام books با تبدیلاتی بر اساس مدل Book ایجاد میشود. 
+در مرحله بعد لازم است که شیء ایجاد شده بر اساس کلاس مدل را با استفاده از 
+متدهای insert شیء کالکشن، در دیتابیس ارسال کنیم.<br>
+
+
+
+
+
+
+
+
+
+شی‌ءهای درج یک سند جدید به دیتابیس حالات مختلفی را دارد: افزودن تک سند، افزودن چند سند و دو مورد قبلی به صورت غیر همزمان میباشند:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre name="code" language="CSharp">collection.InsertOneAsync(book);</pre> </div>
+ متد بالا سند جدید را به صورت غیرهمزمان در سیستم درج میکند. نمونه ذخیره 
+شده این سند را که توسط برنامه Mongo Compass نمایش داده شده است، 
+می‌توانید در زیر ببینید:<br> <p style="display:block; margin-left: auto; margin-right: auto;"> <img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/png;base64,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"> </p> <p style="display:block; margin-left: auto; margin-right: auto;">فعلا 
+موجودیت‌های مؤلفان و زبان به دلیل اینکه سند اختصاصی برای خود ندارند، با 
+صفر پر شده‌اند؛ ولی شناسه یکتای سند، مقدار خود را گرفته است.</p> <p style="display:block; margin-left: auto; margin-right: auto;"> <br> </p> <p style="display:block; margin-left: auto; margin-right: auto;"> <b>عملیات خواندن </b> <br> </p>
+
+
+
+
+
+
+
+
+
+برای خواندن یک یا چند سند از دیتابیس میتوانید از دو شیوه موجود Linq و 
+queryBuilder‌ها استفاده کرد. از آنجائیکه با کار با Linq آشنایی داریم، 
+ابتدای شیوه کوئری بیلدر را مورد بررسی قرار میدهیم و سپس نحوه کار با لینک 
+را بررسی میکنیم.<br>
+
+
+
+
+
+
+
+
+
+قبل از هر چیزی برای اینکه در مانور دادن بر روی داده‌ها راحت باشیم و 
+اطلاعات را با فیلترهای متفاوتی واکشی کنیم، 7 عدد کتاب را با مشخصات زیر 
+اضافه میکنیم. دو فیلد سال و تاریخ آخرین موجودی انبار را هم اضافه 
+می‌کنیم.<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre name="code" language="CSharp">       var client = new MongoClient();
+            var db = client.GetDatabase("publisher");
+            db.DropCollection("books");
+            var collection = db.GetCollection&lt;Book&gt;("books");
+            
+            var book =new Book()
+           {
+               Title = "Gone With Wind",
+               ISBN = "43442424",
+               Price = 50000,
+               Year = 1936,
+               LastStock = DateTime.Now.AddDays(-13),
+               Language = new Language()
+               {
+                  Name = "Persian"
+               },
+               Authors = new List&lt;Author&gt;()
+               {
+                   new Author()
+                   {
+                       Name = "Margaret Mitchell"
+                   },
+                     new Author()
+                   {
+                       Name = "Ali Mahboobi (Translator)"
+                   },
+               }
+           };
+
+            var book2 = new Book()
+            {
+                Title = "Jane Eyre",
+                ISBN = "87897897",
+                Price = 60000,
+                Year = 1847,
+                LastStock = DateTime.Now.AddDays(-5),
+                Language = new Language()
+                {
+                    Name = "English"
+                },
+                Authors = new List&lt;Author&gt;()
+               {
+                   new Author()
+                   {
+                       Name = "Charlotte Brontë"
+                   },
+                   
+               }
+            };
+
+
+            var book3 = new Book()
+            {
+                Title = "White Fang",
+                ISBN = "43442424",
+                Price = 50000,
+                Year = 1936,
+                LastStock = DateTime.Now.AddDays(-13),
+                Language = new Language()
+                {
+                    Name = "English"
+                },
+                Authors = new List&lt;Author&gt;()
+               {
+                   new Author()
+                   {
+                       Name = "Jack London"
+                   },
+                     new Author()
+                   {
+                       Name = "Philippe Mignon"
+                   },
+               }
+            };
+
+            var book4 = new Book()
+            {
+                Title = "The Lost Symbol",
+                ISBN = "43442424",
+                Price = 3500000,
+                Year = 2009,
+                LastStock = DateTime.Now.AddDays(-17),
+                Language = new Language()
+                {
+                    Name = "Persian"
+                },
+                Authors = new List&lt;Author&gt;()
+               {
+                   new Author()
+                   {
+                       Name = "Dan Brown"
+                   },
+                     new Author()
+                   {
+                       Name = "Mehrdad"
+                   },
+               }
+            };
+
+            var book7 = new Book()
+            {
+                Title = "The Lost Symbol",
+                ISBN = "43442424",
+                Price = 47000000,
+                Year = 2009,
+                LastStock = DateTime.Now.AddDays(-56),
+                Language = new Language()
+                {
+                    Name = "Persian"
+                },
+                Authors = new List&lt;Author&gt;()
+               {
+                   new Author()
+                   {
+                       Name = "Dan Brown"
+                   },
+                     new Author()
+                   {
+                       Name = "Mehrdad"
+                   },
+               }
+            };
+            var book5= new Book()
+            {
+                Title = "The Help",
+                ISBN = "45345e3er3",
+                Price = 9000000,
+                Year = 2009,
+                LastStock = DateTime.Now.AddDays(-2),
+                Language = new Language()
+                {
+                    Name = "Enlish"
+                },
+                Authors = new List&lt;Author&gt;()
+               {
+                   new Author()
+                   {
+                       Name = "Kathryn Stockett"
+                   },
+                    
+               }
+            };
+
+            var book6 = new Book()
+            {
+                Title = "City of Glass",
+                ISBN = "454534545",
+                Price = 500000,
+                Year = 2009,
+                LastStock = DateTime.Now,
+                Language = new Language()
+                {
+                    Name = "Persian"
+                },
+                Authors = new List&lt;Author&gt;()
+               {
+                   new Author()
+                   {
+                       Name = "Cassandra Clare"
+                   },
+                   new Author()
+                   {
+                       Name = "Ali"
+                   },
+
+               }
+            };
+            var books = new List&lt;Book&gt; {book, book2, book3, book4, book5, book6,book7};
+
+            collection.InsertManyAsync(books);</pre> </div> <br>
+
+
+
+
+
+
+
+
+
+برای واکشی دیتاها کالکشنی از آن نوع را همانند قبل درخواست می‌کنیم. بعد 
+از آن نیاز است که فیلتری برای واکشی اطلاعات تعریف کنیم که این فیلتر در 
+قالب یک کلاس به نام BsonDocument ایجاد می‌شود که ما در اینجا، به دلیل 
+اینکه میخواهیم همه اسناد را واکشی کنیم ، این سند Bson را مقداردهی 
+نمیکنیم و توسط متد Find آن را در واکشی دیتاها شرکت میدهیم و سپس با صدا 
+زدن متد ToList، عملیات واکشی را انجام میدهیم، برای اینکار می‌توانیم از 
+عملیات غیرهمزمان هم استفاده کنیم.<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre name="code" language="CSharp">            var client = new MongoClient();
+            var db = client.GetDatabase("publisher");
+            var collection = db.GetCollection&lt;Book&gt;("books");
+            
+            var filter=new BsonDocument();
+            var docs = collection.Find(filter).ToList();
+            foreach (var book in docs)
+            {
+                Console.WriteLine(book.Title + " By "+ book.Authors[0].Name);
+            }</pre> </div> <br>
+
+
+
+
+
+
+
+
+
+با اجرای کد بالا به نتایج زیر میرسیم:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre name="code" language="CSharp">Gone With Wind By Margaret Mitchell
+Jane Eyre By Charlotte Brontë
+White Fang By Jack London
+The Lost Symbol By Dan Brown
+The Help By Kathryn Stockett
+City of Glass By Cassandra Clare
+The Lost Symbol By Dan Brown</pre> </div> <br>
+
+
+
+
+
+
+
+
+
+اگر بخواهید فیلتری را بر روی این واکشی قرار دهید و مثلا بخواهید کتاب‌های 
+منتشر شده در سال 2009 را واکشی نمایید، باید این سند Bson را مقداردهی 
+نمایید. ولی برای راحتی اینکار، این&nbsp; کتابخانه شامل یک بیلدر Builder بوده 
+که میتوان از طریق آن فیلترهای متنوعی را به صورت ساده‌تر طراحی کنید:<br> <br>
+
+
+
+
+
+
+
+
+
+در خطوط بالا ابتدا یک بیلدر را برای کلاس مورد نظر ایجاد کرده و از خصوصیت
+ Filter آن استفاده میکنیم و این خصوصیت شامل متدهای فراوانی است که 
+میتوانید برای ایجاد شرط یا فیلتر استفاده کنید. تعدادی از متدهای پر 
+استفاده آن همانند eq (برابری) ، gt (برزگتر از ...) ، gte (بزرگتر مساوی 
+...) و طبیعتا خانواده lt و ... موجود هستند.<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre name="code" language="CSharp">var filter = Builders&lt;Book&gt;.Filter.Eq("Year", 2009);
+
+            var docs = collection.Find(filter).ToList();
+            foreach (var book in docs)
+            {
+                Console.WriteLine(book.Title + " By "+ book.Authors[0].Name);
+            }</pre> </div>
+
+
+
+
+
+
+
+
+
+در کد بالا ما از متد eq برای بررسی برابر بودن استفاده کردیم و درخواست 
+اسنادی را کردیم که دارای فیلد سال انتشار هستند و مقدار آن برابر 2009 
+میباشد و نتیجه آن به صورت زیر نمایش داده میشود:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre name="code" language="CSharp">The Lost Symbol By Dan Brown
+The Help By Kathryn Stockett
+City of Glass By Cassandra Clare
+The Lost Symbol By Dan Brown</pre> </div>
+
+
+
+
+
+
+
+
+حتی می‌توانید با استفاده از شیء فیلتر، ترکیبات شرطی زیر را نیز اعمال نمایید:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre name="code" language="CSharp">   // var filter=new BsonDocument();
+            var filterBuilder = Builders&lt;Book&gt;.Filter;
+            var filter= filterBuilder.Eq("Year", 2009) | filterBuilder.Gte("Price",700000);
+
+            var docs = collection.Find(filter).ToList();
+            foreach (var book in docs)
+            {
+                Console.WriteLine(book.Title + " By "+ book.Authors[0].Name);
+            }</pre> </div>
+
+
+
+
+
+
+
+
+در بالا ابتدا نوعی از شیء Filter را از کلاس Builder دریافت میکنیم و سپس 
+با استفاده عملیات بیتی آن‌ها را با یکدیگر Or میکنیم. در این پرس و جو 
+باید کتابهایی که در سال 2009 منتشر شده‌اند یا قیمتی کمتر از پنجاه هزار 
+ریال یا برابر را دارند، نمایش داده شوند.<br> <br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre name="code" language="CSharp">Gone With Wind By Margaret Mitchell
+White Fang By Jack London
+The Lost Symbol By Dan Brown
+The Help By Kathryn Stockett
+City of Glass By Cassandra Clare
+The Lost Symbol By Dan Brown</pre> </div> <br>
+
+
+
+
+برای اینکه بتوانید از linq به جای queryBuilder استفاده کنید، میتوانید از خصوصیت AsQueryable استفاده کنید. خط زیر همان شرط یا فیلتر بالا را توسط Linq اعمال میکند<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">var docs = collection.AsQueryable().Where(x =&gt; x.Year == 2009 || x.Price &lt;= 50000).ToList();</pre> </div> <b> <br>
+Sort کردن داده‌ها<br>
+
+&nbsp;
+
+  </b> برای مرتب سازی اطلاعات به شیوه کوئری بیلدر، همانند فیلتر که از کلاس Builder استفاده میکردیم، از همین شیء استفاده میکنیم؛ با این تفاوت که بجای استفاده از خصوصیت Filter، از Sort استفاده میکنیم و شیء ایجاد شده را به متد Sort میدهیم:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">  var sort = Builders&lt;Book&gt;.Sort.Ascending("Title").Descending("Price");
+            var docs = collection.Find(filter).Sort(sort).ToList();
+            foreach (var book in docs)
+            {
+                Console.WriteLine(book.Title + " By "+ book.Authors[0].Name);
+            }</pre> </div>
+در نتیجه خطوط بالا کتاب‌ها ابتدا بر اساس نام به صورت صعودی و سپس بر اساس قیمت به صورت نزولی لیست می‌شوند.<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">City of Glass By Cassandra Clare
+Gone With Wind By Margaret Mitchell
+The Help By Kathryn Stockett
+The Lost Symbol By Dan Brown
+The Lost Symbol By Dan Brown
+White Fang By Jack London</pre> </div> <br>
+
+توجه داشته باشید که متد sort بعد از فیلتر گذاری، یعنی عمل Find در دسترس میباشد.<br> <br>
+
+
+
+
+
+
+
+
+در قسمت بعدی به روزرسانی، حذف و ایندکس گذاری را مورد بررسی قرار می‌دهیم.  </div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20669.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>EF Core 10: جوین‌ها را دوباره زیبا می‌کند؛ خداحافظ DefaultIfEmpty!</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/courses/topic/13/319f31c8-c8c5-43cb-b43b-9434e0380b29#comment-483'><span class='badge bg-light text-dark bg-gradient rounded-pill me-2'>بازخوردهای دوره</span>تهیه کوئری بر روی ایندکس‌های Full Text Search</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2604.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>MongoDb در سی شارپ (بخش هفتم)</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2598.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>MongoDb در سی شارپ (بخش دوم)</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3426.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>معرفی واژه‌ی کلیدی جدید required در C# 11</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1329.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مدیریت تغییرات در سیستم های مبتنی بر WCF</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3354.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بررسی الگوی Visitor در جاوا اسکریپت</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3259.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>امکان داشتن خروجی‌های Covariant در C# 9.0</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/courses/topic/12/09fd3eac-2e0c-458d-bb7e-68ed21445ef3'><span class='badge bg-warning rounded-pill me-2'>مطالب دوره‌ها</span>استفاده از Full Text Search بر روی اسناد XML</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1803.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>چگونگی گزارشگیری از  Business Objects مانند List توسط StimulSoft</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>ابوالفضل بهاری س</strong>  در  <span dir='ltr'>۱۳۹۵/۱۲/۰۸ ۰:۴۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام<div>ممنون از مطلب مفیدتون</div> <div>سوالی داشتم: آیا می‌شود به جای نوشتن نام فیلدها از خود Property &nbsp;ها استفاده کرد؟</div> <div>از نظر سرعت عملکرد بانک اطلاعاتی به چه صورت هست؟</div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>محسن خان</strong>  در  <span dir='ltr'>۱۳۹۵/۱۲/۰۸ ۹:۲۸</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>از عملگر nameof استفاده کنید (بدون هیچ سرباری): <a href="www.dntips.ir-posts-2232.html">C# 6 - The nameof Operator</a> <span>&nbsp;</span></div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مرتضی رییسی</strong>  در  <span dir='ltr'>۱۳۹۵/۱۲/۰۸ ۱۶:۳۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>ممنون<br>
+راهکاری برای پشتیبانی از شمای پویا وجود داره یا بخاطر ذات سی شارپ، حذف شده؟<br>
+الگوی واحد کاری را چگونه پیاده سازی کنیم؟ برای معکوس کردن و تزریق وابستگی‌ها چه تمهیداتی وجود داره؟</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>علی یگانه مقدم</strong>  در  <span dir='ltr'>۱۳۹۵/۱۲/۰۸ ۱۶:۳۸</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>همه این موارد را در قسمت‌های آینده تکمیل خواهم کرد.</div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>علی یگانه مقدم</strong>  در  <span dir='ltr'>۱۳۹۶/۰۱/۲۴ ۱۵:۴۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><a href="www.dntips.ir-posts-2604.html">قسمت هفتم</a> <br> <a href="www.dntips.ir-posts-2606.html">قسمت هشتم</a></div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>نادر صفری</strong>  در  <span dir='ltr'>۱۳۹۵/۱۲/۱۶ ۷:۲۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام؛ در&nbsp;<a href="www.dntips.ir-posts-1479.html">اینجا</a>&nbsp;توضیح داده شده از بانک‌های nosql در «<span style="box-sizing: border-box; color: rgb(51, 51, 51);"> <b>برنامه‌های مدیریت محتوا» </b>میتوان استفاده نمود.</span> <span style="box-sizing: border-box; color: rgb(51, 51, 51);"> اگر قصد ایجاد یک CMS را داشته باشیم آیا MongoDB &nbsp;گزینه مناسبی هست؟ و اینکه در CMS‌ها از بانکهای nosql استفاده شده؟</span></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>علی یگانه مقدم</strong>  در  <span dir='ltr'>۱۳۹۵/۱۲/۱۶ ۱۰:۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>به نظرم بله، به خصوص بانک‌های سندگرا برای این مورد مناسب‌تر هستند. چون سیستم‌های مدیریت محتوا در هنگام واکشی دیتا شامل جوین‌ها و اطلاعاتی زیادی هستند این عمل هزینه بر است ولی در این نوع بانک‌ها تنها یک سند است که بیرون کشیده می‌شود. اتفاقا چند وقت پیش بود فکر کنم در اشتراک سایت یک سیستم مدیریتی با ravendb معرفی شده بود.</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>نادر صفری</strong>  در  <span dir='ltr'>۱۳۹۵/۱۲/۱۶ ۱۳:۹</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>اگر قرار باشد برای CMS &nbsp;گزارشات متنوع و کاملی استفاده شود چطور ؟<div>"<b style="box-sizing: border-box; color: rgb(51, 51, 51);">زبان‌های کوئری نویسی پیشرفته<span>&nbsp;"<br> </span> </b> </div> <div> <b style="box-sizing: border-box; color: rgb(51, 51, 51);">"</b> <b style="box-sizing: border-box; color: rgb(51, 51, 51);">&nbsp;نیاز به امکانات گزارشگیری پیشرفته<span>&nbsp;"<br> </span> </b> </div> <div> <span style="box-sizing: border-box; color: rgb(51, 51, 51);">به نظر دو مورد فوق رو بخوبی نمیتونه انجام بده ، درسته ؟<br> </span> </div> <div> <span style="box-sizing: border-box; color: rgb(51, 51, 51);"> <br> </span> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>علی یگانه مقدم</strong>  در  <span dir='ltr'>۱۳۹۵/۱۲/۱۶ ۱۳:۳۷</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>بستگی به نیازهای شما دارد.<br>
+بهتر است مطالب را مطالعه کنید تا متوجه شوید ارتباط با اطلاعات این بانک چگونه است.<br>
+ولی در یک جمله به شما بگویم اگر انتقال دیتا در سرورها زیاد است. مدل‌های شما دارای اسکیماهای متنوع هستند و نیاز به مدل‌های متنوع زیاد دیده میشود بهترین اینتخاب این نوع بانک‌ها هستند</div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>نادر صفری</strong>  در  <span dir='ltr'>۱۳۹۶/۰۱/۲۴ ۱۶:۵۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>برای گزارشگیری&nbsp;<a href="https://slamdata.com/">slamdata</a>&nbsp;و&nbsp;<a href="http://jsonstudio.com/">jsonstudio</a>&nbsp; مناسب هستند</div>
+</div></li></ul></li></ul></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>پریسا زاهدی</strong>  در  <span dir='ltr'>۱۳۹۵/۱۲/۱۷ ۲۱:۳۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>شما خودتون از چه محیط گرافیکی برای کار با MongoDb استفاده می‌کنید ؟</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>علی یگانه مقدم</strong>  در  <span dir='ltr'>۱۳۹۵/۱۲/۱۷ ۲۲:۵</span>
+  </div>
+  <div style='text-align: left; font-family:inherit; font-size:inherit;' dir='ltr'>Mongodb Compass</div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>علی یگانه مقدم</strong>  در  <span dir='ltr'>۱۴۰۰/۰۴/۲۳ ۳:۱۷</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>در جدیدترین نسخه‌های اخیر روش کار به شکل زیر تغییر کرده است:<div>برای دریافت آخرین نسخه درایور به&nbsp;<a href="https://www.nuget.org/packages/MongoDB.Driver/">کتابخانه&nbsp;</a>زیر مراجعه فرمایید:</div> <div> <div align="left" dir="ltr" style="direction: ltr;"> <pre language="CSharp" name="code">dotnet add package MongoDB.Driver</pre> </div>
+همچنین برای درج Id در مدل‌ها بهتر است به شکل زیر عمل شود:</div> <div> <div align="left" dir="ltr" style="direction: ltr;"> <pre language="CSharp" name="code">public class Book
+    {
+        [BsonId]
+        [BsonRepresentation((BsonType.ObjectId))]
+        public string Id { get; set; }
+    }</pre> </div>
+با اولین ویژگی این خصوصیت را کلید اصلی معرفی میکنیم و در ویژگی دوم میگوییم این نوع قرار است یک ObjectId باشد ولی زحمت تبدیل این کلید به رشته یا بلعکس در پشت صحنه انجام میگردد&nbsp; از این لحاظ شما لازم نیست با نوع ObjectId چالشی داشته باشید.</div> <div> <br> </div></div>
+</div></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

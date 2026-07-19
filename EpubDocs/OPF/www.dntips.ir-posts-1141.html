@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫اعمال صفحه بندی به کمک OFFSET و FETCH در SQL Server 2012</title>     <meta name="description" content="در T-SQL 2012 قابلیت صفحه بندی، نمایش خروجی یک Query فراهم گردیده است، که برای نرم افزارهای تحت وب بسیار پرکاربرد میباشد، به عنوان مثال، از جمله کاربردهای بارز آن، می‌توان به نمایش نتیجه یک جستجو بصورت صفحه بندی با تعداد رکورد محدود،اشاره نمود.
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  مایکروسافت برای ایجاد قابلیت صفحه بندی و محدود نمودن نمایش خروجی یک Query، تغییراتی را در Syntax مربوط به Order by ایجاد نموده است، که در ذیل مشاهده می‌نمایید:
+ 
+ 
+  ...">
+    <meta name="author" content="فرهاد فرهمندخواه">
+    <meta itemprop="name" content="اعمال صفحه بندی به کمک OFFSET و FETCH در SQL Server 2012">
+    <meta itemprop="description" content="در T-SQL 2012 قابلیت صفحه بندی، نمایش خروجی یک Query فراهم گردیده است، که برای نرم افزارهای تحت وب بسیار پرکاربرد میباشد، به عنوان مثال، از جمله کاربردهای بارز آن، می‌توان به نمایش نتیجه یک جستجو بصورت صفحه بندی با تعداد رکورد محدود،اشاره نمود.
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  مایکروسافت برای ایجاد قابلیت صفحه بندی و محدود نمودن نمایش خروجی یک Query، تغییراتی را در Syntax مربوط به Order by ایجاد نموده است، که در ذیل مشاهده می‌نمایید:
+ 
+ 
+  ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="اعمال صفحه بندی به کمک OFFSET و FETCH در SQL Server 2012">
+    <meta property="og:description" content="در T-SQL 2012 قابلیت صفحه بندی، نمایش خروجی یک Query فراهم گردیده است، که برای نرم افزارهای تحت وب بسیار پرکاربرد میباشد، به عنوان مثال، از جمله کاربردهای بارز آن، می‌توان به نمایش نتیجه یک جستجو بصورت صفحه بندی با تعداد رکورد محدود،اشاره نمود.
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  مایکروسافت برای ایجاد قابلیت صفحه بندی و محدود نمودن نمایش خروجی یک Query، تغییراتی را در Syntax مربوط به Order by ایجاد نموده است، که در ذیل مشاهده می‌نمایید:
+ 
+ 
+  ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="اعمال صفحه بندی به کمک OFFSET و FETCH در SQL Server 2012">
+    <meta name="twitter:description" content="در T-SQL 2012 قابلیت صفحه بندی، نمایش خروجی یک Query فراهم گردیده است، که برای نرم افزارهای تحت وب بسیار پرکاربرد میباشد، به عنوان مثال، از جمله کاربردهای بارز آن، می‌توان به نمایش نتیجه یک جستجو بصورت صفحه بندی با تعداد رکورد محدود،اشاره نمود.
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  مایکروسافت برای ایجاد قابلیت صفحه بندی و محدود نمودن نمایش خروجی یک Query، تغییراتی را در Syntax مربوط به Order by ایجاد نموده است، که در ذیل مشاهده می‌نمایید:
+ 
+ 
+  ...">
+    <meta name="twitter:card" content="در T-SQL 2012 قابلیت صفحه بندی، نمایش خروجی یک Query فراهم گردیده است، که برای نرم افزارهای تحت وب بسیار پرکاربرد میباشد، به عنوان مثال، از جمله کاربردهای بارز آن، می‌توان به نمایش نتیجه یک جستجو بصورت صفحه بندی با تعداد رکورد محدود،اشاره نمود.
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  مایکروسافت برای ایجاد قابلیت صفحه بندی و محدود نمودن نمایش خروجی یک Query، تغییراتی را در Syntax مربوط به Order by ایجاد نموده است، که در ذیل مشاهده می‌نمایید:
+ 
+ 
+  ...">
+    <meta property="article:published_time" content="Wed, 05 Dec 2012 16:15:50 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫اعمال صفحه بندی به کمک OFFSET و FETCH در SQL Server 2012";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-1142.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫آشنایی با Window Function ها در SQL Server بخش اول</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-1140.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫تغییر اندازه تصاویر #1</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫اعمال صفحه بندی به کمک OFFSET و FETCH در SQL Server 2012</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>فرهاد فرهمندخواه<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۱/۰۹/۱۵ ۱۶:۱۵</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-1141.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><div style="text-align: justify;">در T-SQL 2012 قابلیت صفحه بندی، نمایش خروجی یک Query فراهم گردیده است، که برای نرم افزارهای تحت وب بسیار پرکاربرد میباشد، به عنوان مثال، از جمله کاربردهای بارز آن، می‌توان به نمایش نتیجه یک جستجو بصورت صفحه بندی با تعداد رکورد محدود،اشاره نمود.</div>
+
+
+
+
+
+
+
+
+
+<div style="text-align: justify;">&nbsp;مایکروسافت برای ایجاد قابلیت صفحه بندی و محدود نمودن نمایش خروجی یک Query، تغییراتی را در Syntax مربوط به Order by ایجاد نموده است، که در ذیل مشاهده می‌نمایید:</div>
+
+
+
+
+
+
+
+
+
+<div style="text-align: justify;"><div align="left" dir="ltr">
+
+
+
+
+
+
+
+
+
+<pre language="CSharp" name="code">ORDER BY order_by_expression
+    [ COLLATE collation_name ] 
+    [ ASC | DESC ] 
+    [ ,...n ] 
+[ &lt;offset_fetch&gt; ]
+
+
+&lt;offset_fetch&gt; ::=
+{ 
+    OFFSET { integer_constant | offset_row_count_expression } { ROW | ROWS }
+    [
+      FETCH { FIRST | NEXT } {integer_constant | fetch_row_count_expression } { ROW | ROWS } ONLY
+    ]
+}
+</pre>
+
+
+
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<div style="text-align: justify;">OFFSET (نقطه شروع) : &nbsp;شامل یک پارامتر است،بطوریکه،پارامتر فوق می‌تواند یک عدد (integer_constant) یا یک عبارت (offset_row_count_expression)&nbsp;بپذیرد. در اینجا منظور از عبارت می‌تواند یک Subquery باشد، که خروجی آن فقط یک مقدار عددی است. یا یک متغیر و غیرو...&nbsp;</div>
+
+
+
+
+
+<div style="text-align: justify;">در مورد ROW یا ROWS باید بگویم باهم فرقی ندارند.</div>
+
+
+
+
+
+<div style="text-align: justify;">FETCH : همانند OFFSET شامل یک پارامتر است، و پارامتر آن می‌تواند یک عدد یا عبارت بپذیرد.</div>
+
+
+
+
+
+<div style="text-align: justify;">Next یا First نیز با هم تفاوتی ندارند و جهت سازگاری با ANSI می‌باشند.</div>
+
+
+
+
+
+<div style="text-align: justify;">OFFSET&nbsp;: در وافع تعداد سطر قابل حذف، پیش از نمایش اولین سطر در خروجی را بیان می‌کند.</div>
+
+
+
+
+
+<div style="text-align: justify;">FETCH : بیانگر تعداد رکورد قابل نمایش در یک صفحه می‌باشد.</div>
+
+
+
+
+
+<div style="text-align: justify;">برای درک بیشتر مثالی می‌زنیم:
+
+</div>
+
+
+
+<div style="text-align: justify;">ابتدا بوسیله Script زیر یک جدول ایجاد می‌نماییم، سپس چند رکورد درون آن درج می‌کنیم:</div>
+
+
+
+<div style="text-align: justify;"><div align="left" dir="ltr">
+
+
+
+<pre language="CSharp" name="code">Create Table Testoffset
+(BusinessEntityID int,
+FirstName varchar(100) ,
+LastName varchar(100)
+);
+
+Insert into Testoffset (BusinessEntityID,FirstName,LastName)
+            Values(1,'Ken','Sánchez')
+    ,(2,'Terri','Duffy')
+,(3,'Roberto','Tamburello')
+,(4,'Rob','Walters')
+,(5,'Gail','Erickson')
+,(6,'Jossef','Goldberg')
+,(7,'Dylan','Miller')
+,(8,'Diane','Margheim')
+,(9,'Gigi','Matthew')
+,(10,'Michael','Raheem')</pre>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+<div style="text-align: justify;">در ادامه Script زیر را اجرا نمایید، تا تعداد رکورد‌های درج شده را مشاهده کنید:</div>
+
+
+
+<div style="text-align: justify;"><p><img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/png;base64,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"></p>
+
+
+
+</div>
+
+
+
+<div style="text-align: justify;">
+
+
+</div>
+
+
+
+<div style="text-align: justify;">در شکل، سه سطر (منظور رکورد 4و5و6) در کادر قرمز رنگ دیده می‌شود، می‌خواهیم Script ی ایجاد نماییم، که فقط سه سطر فوق را نمایش دهد. بنابراین خواهیم داشت:</div>
+
+
+
+<div style="text-align: justify;"><div align="left" dir="ltr">
+
+
+
+<pre language="CSharp" name="code">SELECT BusinessEntityID, FirstName, LastName
+FROM Testoffset
+ORDER BY BusinessEntityID
+OFFSET 3 ROWS
+FETCH First 3 ROWS only</pre>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+<div style="text-align: justify;">خروجی:</div>
+
+
+
+<div style="text-align: justify;"><p><img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/png;base64,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"></p>
+
+
+
+</div>
+
+
+
+<div style="text-align: justify;">اگر به Query اجرا شده دقت کنیم. در قسمت Order By جلوی Offset مقدار 3 اختصاص داده شده بود، یعنی نقطه شروع از سطر چهارم میباشد، به عبارت دیگر مقداری که به Offset اختصاص داده می‌شود، به SQL Server می‌فهماند،چه تعداد رکورد را نمایش ندهد. اگر شکل اول و دوم را با هم مقایسه نمایید، براحتی متوجه می‌شوید که OFFSET نقطه شروع را مشخص کرده است.</div>
+
+
+
+<div style="text-align: justify;">مقداریکه برای Fetch در نظر گرفته شده بود برابر 3 است، که بیانگر تعداد سطر نمایش داده شده در خروجی از نقطه آغازین (offset) می‌باشد.</div>
+
+
+
+<div style="text-align: justify;">امیدوارم مفید واقع شده باشد.</div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-5958.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>صفحه بندی یک کوئری با Sql Server</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1142.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با Window Function ها در SQL Server بخش اول</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1156.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با Window Function ها در SQL Server بخش سوم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1143.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>گرفتن خروجی XML از جداول در SQL Server 2012</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1284.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با Window Function ها در SQL Server بخش پنجم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1141.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>اعمال صفحه بندی به کمک OFFSET و FETCH در SQL Server 2012</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1141.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>اعمال صفحه بندی به کمک OFFSET و FETCH در SQL Server 2012</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2498.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>شروع به کار با EF Core 1.0 - قسمت 8 - بررسی رابطه‌ی Many-to-Many</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1891.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>پیاده سازی عملیات صفحه بندی (paging) در sql server</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1891.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>پیاده سازی عملیات صفحه بندی (paging) در sql server</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>Ara</strong>  در  <span dir='ltr'>۱۳۹۱/۰۹/۲۸ ۲۲:۳۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>بعضی وقتها مایکروسافت یکسری کارها رو اونقدر سخت می‌کنه !<br>
+
+
+<br>
+
+
+paging&nbsp; هم یکی از همون‌ها بود تازه داره پخته می‌شه <br>
+
+
+<br>
+
+
+این syntax من رو یاد mysql&nbsp; انداخت <br>
+
+
+<br>
+<div dir="ltr" align="left">
+<pre language="Sql" name="code">SELECT column FROM table
+LIMIT 10 OFFSET 10</pre>
+</div>
+<br></div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>سعید شیرزادیان</strong>  در  <span dir='ltr'>۱۳۹۱/۰۹/۲۹ ۰:۱۰</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام<br> می‌خواستم بدونم امکان هست مرتب سازی را به صورت پارامتری ارسال کنیم. یعنی می‌خواهم به نوعی صفحه بندی را در وب همراه با مرتب سازی دلخواه کاربر انجام بدهم. متشکرم<br></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>فرهاد فرهمندخواه</strong>  در  <span dir='ltr'>۱۳۹۱/۰۹/۲۹ ۸:۵</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام &nbsp;<div style="text-align: justify;">من منظور سئوال شما رو،بدرستی متوجه نشدم، به هرحال اگر بخواهید با کد نویسی سمت سرور، Script خود را Generate نمایید، اینکار، بستگی به نگرش کدنویسی تان و Interface ی که در اختیار کاربر قرار می‌دهید، دارد.</div>
+
+<div>اگر بخواهید در SQL Server اینکار را انجام دهید، با استفاده از Case ، در قسمت Order By می‌توانید اینکار را انجام دهید. به عنوان مثال:</div>
+
+<div><div align="left" dir="ltr">
+
+<pre language="CSharp" name="code">DECLARE @Varsort varchar(50)
+DECLARE @Varsort1 varchar(50)
+
+SET  @Varsort=''
+SET  @Varsort1='BusinessEntityID'
+
+SELECT BusinessEntityID, FirstName, LastName
+FROM Testoffset
+ORDER BY case when  @Varsort='Firstname'then  Firstname End ASC,
+         case when  @Varsort1= 'BusinessEntityID'then  BusinessEntityID End ASC
+OFFSET 3 ROWS
+FETCH First 3 ROWS only</pre>
+
+</div>
+
+</div>
+
+<div>امیدوارم پاسخ تان را گرفته باشید.<br>
+
+</div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>سعید شیرزادیان</strong>  در  <span dir='ltr'>۱۳۹۱/۰۹/۲۹ ۲۰:۴۸</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام<br>
+ممنون از جواب شما. فقط اگر تعداد ستونها بیشتر بود و یا اینکه کاربر درخواست مرتب سازی بصورت صعودی و نزولی را هم داشت (در این مثال شما به صورت پیش فرض مرتب سازی صعودی را اعمال کردید) راهکاری دارید؟<br>
+با تشکر<br></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۹۱/۰۹/۳۰ ۶:۵۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام &nbsp;<div>دوست عزیز، مثالی که برای شما زده شد، امکان سورت دلخواه را فراهم می‌کند، شما می‌توانید، هر کدام را به دلخواه نزولی یا صعودی نمایید، محدودیتی ندارد، برای مطالعه بیشتر می‌توانید به آدرس زیر مراجعه نمایید:</div>
+<div><a href="http://www.dominicpettifer.co.uk/Blog/21/dynamic-conditional-order-by-clause-in-sql-server-t-sql">Dynamic/Conditional Order By Clause in SQL Server/T-SQL</a>&nbsp;<br>
+</div>
+<div>یادآور شوم،چنانچه Performance برای شما اهمیت دارد، بهتر است از Case در Order by استفاده ننمایید، و بهتر است در زمان Run Time از طریق کد نویسی سمت سرور، Script خود را Generate نمایید، به عنوان مثال</div>
+<div><div align="left" dir="ltr">
+<pre language="Sql" name="code">SELECT BusinessEntityID, FirstName, LastName
+FROM Testoffset
+ORDER BY BusinessEntityID Desc,Firstname ASC
+OFFSET 3 ROWS
+FETCH First 3 ROWS only</pre>
+</div>
+</div>
+<div>موفق باشید.</div></div>
+</div></li></ul></li></ul></li></ul></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

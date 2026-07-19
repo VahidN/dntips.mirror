@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫درج یک باره چندین رکورد بصورت همزمان هنگام استفاده از ORMها</title>     <meta name="description" content="همونطور که میدونیم درج یکباره چندین رکورد هنگام استفاده از Entity Framework فعلا امکان پذیر نیست و باید از یک حلقه استفاده کرد و آنها رو یک به یک وارد کرد که هنگامی تعداد رکوردها زیاد باشن زمان اجرا یکم زیاد میشه. برای رفع این مشکل در EF Code First میتونین خاصیت AutoDetectChangesEnabled رو برای Context غیرفعال کنید که استفاده از این روش قبلا در این مقاله توضیح داده شده است. راه دیگه استفاده از SqlBulkCopy هست که میتوانید هنگام استفاده از O ...">
+    <meta name="author" content="محسن اسماعیل پور">
+    <meta itemprop="name" content="درج یک باره چندین رکورد بصورت همزمان هنگام استفاده از ORMها">
+    <meta itemprop="description" content="همونطور که میدونیم درج یکباره چندین رکورد هنگام استفاده از Entity Framework فعلا امکان پذیر نیست و باید از یک حلقه استفاده کرد و آنها رو یک به یک وارد کرد که هنگامی تعداد رکوردها زیاد باشن زمان اجرا یکم زیاد میشه. برای رفع این مشکل در EF Code First میتونین خاصیت AutoDetectChangesEnabled رو برای Context غیرفعال کنید که استفاده از این روش قبلا در این مقاله توضیح داده شده است. راه دیگه استفاده از SqlBulkCopy هست که میتوانید هنگام استفاده از O ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="درج یک باره چندین رکورد بصورت همزمان هنگام استفاده از ORMها">
+    <meta property="og:description" content="همونطور که میدونیم درج یکباره چندین رکورد هنگام استفاده از Entity Framework فعلا امکان پذیر نیست و باید از یک حلقه استفاده کرد و آنها رو یک به یک وارد کرد که هنگامی تعداد رکوردها زیاد باشن زمان اجرا یکم زیاد میشه. برای رفع این مشکل در EF Code First میتونین خاصیت AutoDetectChangesEnabled رو برای Context غیرفعال کنید که استفاده از این روش قبلا در این مقاله توضیح داده شده است. راه دیگه استفاده از SqlBulkCopy هست که میتوانید هنگام استفاده از O ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="درج یک باره چندین رکورد بصورت همزمان هنگام استفاده از ORMها">
+    <meta name="twitter:description" content="همونطور که میدونیم درج یکباره چندین رکورد هنگام استفاده از Entity Framework فعلا امکان پذیر نیست و باید از یک حلقه استفاده کرد و آنها رو یک به یک وارد کرد که هنگامی تعداد رکوردها زیاد باشن زمان اجرا یکم زیاد میشه. برای رفع این مشکل در EF Code First میتونین خاصیت AutoDetectChangesEnabled رو برای Context غیرفعال کنید که استفاده از این روش قبلا در این مقاله توضیح داده شده است. راه دیگه استفاده از SqlBulkCopy هست که میتوانید هنگام استفاده از O ...">
+    <meta name="twitter:card" content="همونطور که میدونیم درج یکباره چندین رکورد هنگام استفاده از Entity Framework فعلا امکان پذیر نیست و باید از یک حلقه استفاده کرد و آنها رو یک به یک وارد کرد که هنگامی تعداد رکوردها زیاد باشن زمان اجرا یکم زیاد میشه. برای رفع این مشکل در EF Code First میتونین خاصیت AutoDetectChangesEnabled رو برای Context غیرفعال کنید که استفاده از این روش قبلا در این مقاله توضیح داده شده است. راه دیگه استفاده از SqlBulkCopy هست که میتوانید هنگام استفاده از O ...">
+    <meta property="article:published_time" content="Sun, 26 May 2013 19:10:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫درج یک باره چندین رکورد بصورت همزمان هنگام استفاده از ORMها";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-1335.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫مقایسه بین حلقه های تکرار (Lambda ForEach و for و foreach)</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-1333.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫Globalization در ASP.NET MVC - قسمت پنجم</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫درج یک باره چندین رکورد بصورت همزمان هنگام استفاده از ORMها</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>محسن اسماعیل پور<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۲/۰۳/۰۵ ۱۹:۱۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-1334.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'>همونطور که میدونیم درج یکباره چندین رکورد هنگام استفاده از&nbsp;Entity Framework&nbsp;فعلا امکان پذیر نیست و باید از یک حلقه استفاده کرد و آنها رو یک به یک وارد کرد که هنگامی تعداد رکوردها زیاد باشن زمان اجرا یکم زیاد میشه. برای رفع این مشکل در&nbsp;<span style="Calibri&quot;,&quot;sans-serif&quot;;">EF Code First&nbsp;</span><span dir="RTL" style="Arial&quot;,&quot;sans-serif&quot;;">میتونین خاصیت <span style="Tahoma&quot;,&quot;sans-serif&quot;;">AutoDetectChangesEnabled&nbsp;</span></span><span dir="RTL" style="Tahoma&quot;,&quot;sans-serif&quot;;">رو برای Context&nbsp;</span><span dir="RTL" style="Tahoma&quot;,&quot;sans-serif&quot;;">غیرفعال کنید که استفاده از این روش قبلا در&nbsp;<a href="www.dntips.ir-posts-1332.html">این</a>&nbsp;مقاله توضیح داده شده است. راه دیگه استفاده از SqlBulkCopy&nbsp;</span><span style="text-align: right;">هست که میتوانید هنگام استفاده از </span><span dir="LTR" style="text-align: right;">ORM</span><span style="text-align: right;">ها
+ازش استفاده کنید. اگه قبلا از </span><span dir="LTR" style="text-align: right;">ADO.NET</span><span dir="RTL" style=" text-align: right;"></span><span dir="RTL" style=" text-align: right;"></span><span style="text-align: right;"><span dir="RTL"></span><span dir="RTL"></span> استفاده کرده باشید و خواسته باشید تعداد
+زیادی رکورد رو بصورت همزمان وارد دیتابیس کنید حتما با </span><span dir="LTR" style="text-align: right;">SqlBulkCopy</span><span dir="RTL" style=" text-align: right;"></span><span dir="RTL" style=" text-align: right;"></span><span style="text-align: right;"><span dir="RTL"></span><span dir="RTL"></span> آشنایی دارید.</span><div><p><span style="Tahoma&quot;,&quot;sans-serif&quot;;">فرض کنید دارید در پروژه، از </span><span dir="LTR" style="Tahoma&quot;,&quot;sans-serif&quot;;">Entity Framework</span><span dir="RTL"></span><span dir="RTL"></span><span style="Tahoma&quot;,&quot;sans-serif&quot;;"><span dir="RTL"></span><span dir="RTL"></span> استفاده میکنید و یک مدل با نام </span><span dir="LTR" style="Tahoma&quot;,&quot;sans-serif&quot;;">Person</span><span dir="RTL"></span><span dir="RTL"></span><span style="Tahoma&quot;,&quot;sans-serif&quot;;"><span dir="RTL"></span><span dir="RTL"></span> دارید که
+تعریفش به صورت زیر است&nbsp;</span></p><div dir="ltr" align="left"><pre language="CSharp" name="code">public class Person
+{
+     public int PersonId { get; set; }
+
+     public string Name { get; set; }
+}</pre></div><p><span style="Tahoma&quot;,&quot;sans-serif&quot;;">حالا میخوایم تعداد ٥٠٠٠ رکورد از
+</span><span dir="LTR" style="Tahoma&quot;,&quot;sans-serif&quot;;">Person</span><span dir="RTL"></span><span dir="RTL"></span><span style="Tahoma&quot;,&quot;sans-serif&quot;;"><span dir="RTL"></span><span dir="RTL"></span> رو یکجا
+وارد دیتابیس کنیم. برای استفاده از </span><span dir="LTR" style="Tahoma&quot;,&quot;sans-serif&quot;;">SqlBulkCopy</span><span dir="RTL"></span><span dir="RTL"></span><span style="Tahoma&quot;,&quot;sans-serif&quot;;"><span dir="RTL"></span><span dir="RTL"></span>، روش به این شکل هست که ابتدا یک</span><span dir="LTR" style="Tahoma&quot;,&quot;sans-serif&quot;;">DataTable </span><span dir="RTL"></span><span dir="RTL"></span><span style="Tahoma&quot;,&quot;sans-serif&quot;;"><span dir="RTL"></span><span dir="RTL"></span>&nbsp;ایجاد میکنیم. سپس ستونهای
+متناظر با جدول </span><span dir="LTR" style="line-height:
+107%;Tahoma&quot;,&quot;sans-serif&quot;;">Person</span><span dir="RTL"></span><span dir="RTL"></span><span style="Tahoma&quot;,&quot;sans-serif&quot;;"><span dir="RTL"></span><span dir="RTL"></span> رو با استفاده از </span><span dir="LTR" style="Tahoma&quot;,&quot;sans-serif&quot;;">DataColumn</span><span dir="RTL"></span><span dir="RTL"></span><span style="Tahoma&quot;,&quot;sans-serif&quot;;"><span dir="RTL"></span><span dir="RTL"></span> ایجاد
+میکنیم و </span><span dir="LTR" style="Tahoma&quot;,&quot;sans-serif&quot;;">DataColumn</span><span style="Tahoma&quot;,&quot;sans-serif&quot;;">های ایجاد شده رو به </span><span dir="LTR" style="Tahoma&quot;,&quot;sans-serif&quot;;">DataTable</span><span dir="RTL"></span><span dir="RTL"></span><span style="Tahoma&quot;,&quot;sans-serif&quot;;"><span dir="RTL"></span><span dir="RTL"></span> اضافه
+میکنیم و سپس اطلاعات رو وارد </span><span dir="LTR" style="Tahoma&quot;,&quot;sans-serif&quot;;">DataTable</span><span dir="RTL"></span><span dir="RTL"></span><span style="Tahoma&quot;,&quot;sans-serif&quot;;"><span dir="RTL"></span><span dir="RTL"></span> میکنیم و اون رو با استفاده از </span><span dir="LTR" style="Tahoma&quot;,&quot;sans-serif&quot;;">SqlBulkCopy</span><span dir="RTL"></span><span dir="RTL"></span><span style="Tahoma&quot;,&quot;sans-serif&quot;;"><span dir="RTL"></span><span dir="RTL"></span> وارد
+دیتابیس میکنیم که این روش یکم وقتگیر و خسته کننده است.&nbsp;</span></p><p><span style="Tahoma&quot;,&quot;sans-serif&quot;;">راه آسانتر استفاده از یک کتابخانه با نام
+</span><span dir="LTR" style=" background-position: initial initial; background-repeat: initial initial;">EntityDataReader</span><span dir="RTL"></span><span dir="RTL"></span><span style=" background-position: initial initial; background-repeat: initial initial;"><span dir="RTL"></span><span dir="RTL"></span> هست که توسط مایکروسافت نوشته شده که دیگه نیازی به ساختن</span><span dir="LTR" style=" background-position: initial initial; background-repeat: initial initial;">DataTable </span><span dir="RTL"></span><span dir="RTL"></span><span style=" background-position: initial initial; background-repeat: initial initial;"><span dir="RTL"></span><span dir="RTL"></span>&nbsp;نیست و این </span><span style="Tahoma&quot;,&quot;sans-serif&quot;;">کتابخانه <span style="background-position: initial initial; background-repeat: initial initial;">کارهای
+لازم رو خودش انجام میده. در پروژەتون یک کلاس با نام</span></span><span dir="LTR" style=" background-position: initial initial; background-repeat: initial initial;">EntityDataReader</span><span dir="RTL"></span><span dir="RTL"></span><span style=" background-position: initial initial; background-repeat: initial initial;"><span dir="RTL"></span><span dir="RTL"></span> ایجاد کنید و سورس مربوط این کلاس رو از&nbsp;</span><a href="https://github.com/matthewschrager/Repository/blob/master/Repository.EntityFramework/EntityDataReader.cs">اینجا</a>&nbsp;copy و در&nbsp;<span dir="RTL">داخل کلاس paste&nbsp;</span>کنید.&nbsp;</p><p><span dir="LTR" style="Tahoma&quot;,&quot;sans-serif&quot;;"></span></p><div><p><span style=" background-position: initial initial; background-repeat: initial initial;">حالا
+یک لیست از </span><span dir="LTR" style=" background-position: initial initial; background-repeat: initial initial;">Pesron</span><span dir="RTL"></span><span dir="RTL"></span><span style=" background-position: initial initial; background-repeat: initial initial;"><span dir="RTL"></span><span dir="RTL"></span> با نام </span><span dir="LTR" style=" background-position: initial initial; background-repeat: initial initial;">personList</span><span dir="RTL"></span><span dir="RTL"></span><span style=" background-position: initial initial; background-repeat: initial initial;"><span dir="RTL"></span><span dir="RTL"></span> ایجاد
+مینماییم و&nbsp;</span>با
+استفاده از یک حلقه تعداد ٥٠٠٠ تا نمونه از Person&nbsp;<span dir="RTL">ایجاد و به لیست اضافه میکنیم.</span></p><p><span style=" background-position: initial initial; background-repeat: initial initial;"></span></p><div dir="ltr" align="left"><pre language="CSharp" name="code">var personList = new List&lt;Person&gt;();
+for (var i = 0; i &lt; 5000; i++)
+{
+    var person = new Person
+        {
+            Name = "John Doe",
+        };
+}</pre></div><p><span style=" background-position: initial initial; background-repeat: initial initial;">در
+ادامه برای استفاده از </span><span dir="LTR" style="line-height:
+107%;Tahoma&quot;,&quot;sans-serif&quot;;">SqlBulkCopy</span><span dir="RTL"></span><span dir="RTL"></span><span style="Tahoma&quot;,&quot;sans-serif&quot;;"><span dir="RTL"></span><span dir="RTL"></span> نیاز به </span><span dir="LTR" style="Tahoma&quot;,&quot;sans-serif&quot;;">ConnectionString</span><span dir="RTL"></span><span dir="RTL"></span><span style="Tahoma&quot;,&quot;sans-serif&quot;;"><span dir="RTL"></span><span dir="RTL"></span> و نام جدول متناظر با کلاس </span><span dir="LTR" style="Tahoma&quot;,&quot;sans-serif&quot;;">Person</span><span dir="RTL"></span><span dir="RTL"></span><span style="Tahoma&quot;,&quot;sans-serif&quot;;"><span dir="RTL"></span><span dir="RTL"></span> در دیتابیس
+داریم</span>. </p><p><span dir="RTL" style="Tahoma&quot;,&quot;sans-serif&quot;;">اگر از پروژ وب استفاده میکنید میتونید با این خط
+کد ConnectionString&nbsp;</span>رو که در فایل web.config&nbsp;ذخیره شده است بروگردونید که در اینجا&nbsp;DataConnection&nbsp;نام&nbsp;ConnectionString ذخیره شده در web.config&nbsp;هست.</p><div dir="ltr" align="left"><pre language="CSharp" name="code">var connectionString = ConfigurationManager.ConnectionStrings["DataConnection"].ConnectionString;</pre></div><p>اگر از&nbsp;EF Code First&nbsp;<span dir="RTL">استفاده میکنید و در تنظیمات Context&nbsp;</span><span dir="RTL"><span dir="RTL">خاصیت PluralizingTableNameConvention&nbsp;</span></span>رو حذف کردیدەاید نام جدول dbo.Person هست و&nbsp;<span dir="RTL">در غیر اینصورت db.People&nbsp;</span><span dir="RTL"><span dir="RTL">هست</span><span dir="LTR"></span><span dir="LTR"></span><span dir="LTR"></span><span dir="LTR"></span>.</span></p><p><span dir="RTL">و در ادامه داریم:</span>&nbsp; &nbsp;</p><div align="left" dir="ltr"><pre language="CSharp" name="code">var connectionString = ConfigurationManager.ConnectionStrings["DataConnection"].ConnectionString;
+var bulkCopy = new SqlBulkCopy(connectionString) { DestinationTableName = "dbo.Person" };
+bulkCopy.WriteToServer(personList.AsDataReader()  );</pre></div><p>سرعت این روش بسیار بالاست و برای درجهای با تعداد بالا بهینه است.<br></p><p>برای ویرایش و حذف چندین رکورد بصورت همزمان متیونید از کتابخانه&nbsp;<a href="https://github.com/loresoft/EntityFramework.Extended">Entity Framework Extended Library</a>&nbsp;استفاده کنید که امکانات دیگری هم داره و از طریق nuget هم قابل نصب است.</p></div></div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2542.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مقایسه سرعت نگاشت AutoMapper</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2252.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>ساخت دیتابیس sqlite با EF6 Code First</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2874.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>تولید اطلاعات تصادفی توسط GenFu</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1704.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>خواندن سریع اطلاعات فایل اکسل و ذخیره در بانک SQL</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1308.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>روش های ارث بری در Entity Framework - قسمت اول</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-995.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>سازگار سازی EFTracingProvider با EF Code first</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1650.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مهاجرت از SQL Membership به ASP.NET Identity</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1316.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>روش های ارث بری در Entity Framework - قسمت دوم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2490.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>شروع به کار با EF Core 1.0 - قسمت 2 - به روز رسانی ساختار بانک اطلاعاتی</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1143.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>گرفتن خروجی XML از جداول در SQL Server 2012</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مصطفی بستانی</strong>  در  <span dir='ltr'>۱۳۹۲/۰۳/۰۵ ۲۰:۱۰</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>این روش یک مشکل خیلی بد داره که اگه تو کلاس مدل از complextype استفاده کرده باشین دیگه نمیشه از کلاس EntityDataReader استفاده کرد<div>مشکل دوم اینه که اگه پراپرتی‌های مدلتون رو تو فایل کانفیگ به یک ستون غیر هم نام مپ کرده باشین بازم نمیشه از این روش استفاده کرد</div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>محسن اسماعیل پور</strong>  در  <span dir='ltr'>۱۳۹۲/۰۳/۰۵ ۲۲:۱۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>برای رفع مشکل دوم میتونید از DataTable استفاده کنید و نام خاصیتی که ستون متناظرش در جدول فرق داره رو هنگام تعریف DataColumn عوض کنید. روال کار همینه فقط اضافه کاری داره.</div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۹۲/۰۳/۰۶ ۱۸:۴۵</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>جسارتا در انتهای مقاله به گمانم غلط تایپی یا اشتباه لبی باشد:<div><i><span style="color: rgb(78, 68, 60); background-color: rgb(252, 252, 250);">"و&nbsp;</span><span dir="RTL" style="margin: 0px; padding: 0px; border: 0px; vertical-align: baseline; color: rgb(78, 68, 60); background-color: rgb(252, 252, 250);">در غیر اینصورت db.Persons&nbsp;</span><span dir="RTL" style="margin: 0px; padding: 0px; border: 0px; vertical-align: baseline; color: rgb(78, 68, 60); background-color: rgb(252, 252, 250);"><span dir="RTL" style="margin: 0px; padding: 0px; border: 0px; font-variant: inherit; vertical-align: baseline;">هست</span><span dir="LTR" style="margin: 0px; padding: 0px; border: 0px; font-variant: inherit; vertical-align: baseline;"></span><span dir="LTR" style="margin: 0px; padding: 0px; border: 0px; font-variant: inherit; vertical-align: baseline;"></span><span dir="LTR" style="margin: 0px; padding: 0px; border: 0px; font-variant: inherit; vertical-align: baseline;"></span><span dir="LTR" style="margin: 0px; padding: 0px; border: 0px; font-variant: inherit; vertical-align: baseline;"></span>.<span>&nbsp;"</span></span></i><br></div><div><span style="color: #4e443c;">باید باشد: " و در غیر اینصورت db.People هست</span></div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>محسن اسماعیل پور</strong>  در  <span dir='ltr'>۱۳۹۲/۰۳/۰۶ ۲۳:۱۵</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>با تشکر از توجه شما، اصلاح گردید.</div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۲/۰۳/۱۴ ۸:۲۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><b>یک خبر خوب:</b><br>
+
+
+
+
+
+
+در EF 6 نسخه بتا، متدی اضافه شده به نام AddRange<span> که افزودن تعداد زیادی رکورد رو سهولت بخشیده<br></span><a href="http://erikej.blogspot.com/2013/06/inserting-many-rows-with-entity.html"> INSERTing many rows with Entity Framework 6 beta 1 and SQL Server Compact</a><span>&nbsp;<span>&nbsp;</span></span></div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۹۲/۰۳/۲۳ ۱۱:۵۰</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام<br>
+
+
+
+
+
+
+من خطای زیر رو دارم. برای ویرایش چند رکورد به صورت یکجا از Entity Framework Extended Library استفاده کردم. اما  مشکلی دارم این است من یک جدول در پایگاه دارم که می‌خوام به صورت 
+یکجا ویرایش کنم به این صورت که ابتدا شماره فیلد هایی که را قرار است 
+تغییر دهم(فیلد ID) داخل یک لیست ریختم و سپس از جدول فقط اون فیلدها رو 
+ویرایش کنم<br>
+
+
+
+
+
+
+
+
+
+
+چند روش برای join جدول با این لیست امتحان کردم یا join خطا می‌دهد اگر 
+join نیز مشکلی نداشت مقدار برگشتی از نوع enumerable هست و زمانی که از 
+update کلاس Entity Framework Extended Libraryاستفاده میکنم<br>
+
+
+
+
+
+
+
+
+
+
+خطا می‌دهد که لیستی که قرار است update شود باید از نوع dbquery باشد
+&nbsp;
+                    <br>
+
+&nbsp;
+
+<br>
+
+
+
+
+
+
+Unable
+ to create a constant value of type 'extendeexample.MyClass'. Only 
+primitive types or enumeration types are supported in this context.<br><br>
+
+
+
+
+
+
+سورس پروژه به همراه پایگاه داده<br><a href="https://www.dntips.ir/file/userfile?name=project.rar">project.rar</a><br></div>
+</div></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫ارسال ویدیو بصورت Async توسط Web Api</title>     <meta name="description" content="فریم ورک ASP.NET Web API صرفا برای ساخت سرویس‌های ساده‌ای که می‌شناسیم، نیست و در واقع مدل جدیدی برای برنامه نویسی HTTP است. کارهای بسیار زیادی را می‌توان توسط این فریم ورک انجام داد که در این مقاله به یکی از آنها می‌پردازم. فرض کنید می‌خواهیم یک فایل ویدیو را بصورت Asynchronous به کلاینت ارسال کنیم.   
+ 
+ 
+ 
+ 
+ ابتدا پروژه جدیدی از نوع ASP.NET Web Application بسازید و قالب آن را MVC + Web API انتخاب کنید.           
+ 
+ 
+ 
+ 
+ ابت ...">
+    <meta name="author" content="آرمین ضیاء">
+    <meta itemprop="name" content="ارسال ویدیو بصورت Async توسط Web Api">
+    <meta itemprop="description" content="فریم ورک ASP.NET Web API صرفا برای ساخت سرویس‌های ساده‌ای که می‌شناسیم، نیست و در واقع مدل جدیدی برای برنامه نویسی HTTP است. کارهای بسیار زیادی را می‌توان توسط این فریم ورک انجام داد که در این مقاله به یکی از آنها می‌پردازم. فرض کنید می‌خواهیم یک فایل ویدیو را بصورت Asynchronous به کلاینت ارسال کنیم.   
+ 
+ 
+ 
+ 
+ ابتدا پروژه جدیدی از نوع ASP.NET Web Application بسازید و قالب آن را MVC + Web API انتخاب کنید.           
+ 
+ 
+ 
+ 
+ ابت ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="ارسال ویدیو بصورت Async توسط Web Api">
+    <meta property="og:description" content="فریم ورک ASP.NET Web API صرفا برای ساخت سرویس‌های ساده‌ای که می‌شناسیم، نیست و در واقع مدل جدیدی برای برنامه نویسی HTTP است. کارهای بسیار زیادی را می‌توان توسط این فریم ورک انجام داد که در این مقاله به یکی از آنها می‌پردازم. فرض کنید می‌خواهیم یک فایل ویدیو را بصورت Asynchronous به کلاینت ارسال کنیم.   
+ 
+ 
+ 
+ 
+ ابتدا پروژه جدیدی از نوع ASP.NET Web Application بسازید و قالب آن را MVC + Web API انتخاب کنید.           
+ 
+ 
+ 
+ 
+ ابت ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="ارسال ویدیو بصورت Async توسط Web Api">
+    <meta name="twitter:description" content="فریم ورک ASP.NET Web API صرفا برای ساخت سرویس‌های ساده‌ای که می‌شناسیم، نیست و در واقع مدل جدیدی برای برنامه نویسی HTTP است. کارهای بسیار زیادی را می‌توان توسط این فریم ورک انجام داد که در این مقاله به یکی از آنها می‌پردازم. فرض کنید می‌خواهیم یک فایل ویدیو را بصورت Asynchronous به کلاینت ارسال کنیم.   
+ 
+ 
+ 
+ 
+ ابتدا پروژه جدیدی از نوع ASP.NET Web Application بسازید و قالب آن را MVC + Web API انتخاب کنید.           
+ 
+ 
+ 
+ 
+ ابت ...">
+    <meta name="twitter:card" content="فریم ورک ASP.NET Web API صرفا برای ساخت سرویس‌های ساده‌ای که می‌شناسیم، نیست و در واقع مدل جدیدی برای برنامه نویسی HTTP است. کارهای بسیار زیادی را می‌توان توسط این فریم ورک انجام داد که در این مقاله به یکی از آنها می‌پردازم. فرض کنید می‌خواهیم یک فایل ویدیو را بصورت Asynchronous به کلاینت ارسال کنیم.   
+ 
+ 
+ 
+ 
+ ابتدا پروژه جدیدی از نوع ASP.NET Web Application بسازید و قالب آن را MVC + Web API انتخاب کنید.           
+ 
+ 
+ 
+ 
+ ابت ...">
+    <meta property="article:published_time" content="Sun, 17 Aug 2014 15:10:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫ارسال ویدیو بصورت Async توسط Web Api";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-1862.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫استفاده از AvalonEdit در WPF</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-1860.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫به روز رسانی ساده‌تر اجزاء ارتباطات در EF Code first به کمک GraphDiff</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫ارسال ویدیو بصورت Async توسط Web Api</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>آرمین ضیاء<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۳/۰۵/۲۶ ۱۵:۱۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-1861.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'>فریم ورک ASP.NET Web API صرفا برای ساخت سرویس‌های ساده‌ای که می‌شناسیم، نیست و در واقع مدل جدیدی برای برنامه نویسی HTTP است. کارهای بسیار زیادی را می‌توان توسط این فریم ورک انجام داد که در این مقاله به یکی از آنها می‌پردازم. فرض کنید می‌خواهیم یک فایل ویدیو را بصورت Asynchronous به کلاینت ارسال کنیم.<br> <br>
+
+
+
+
+ابتدا پروژه جدیدی از نوع ASP.NET Web Application بسازید و قالب آن را MVC + Web API انتخاب کنید.<br> <br> <p> <img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/PNG;base64,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"> </p> <br>
+
+
+
+
+ابتدا به فایل <i>WebApiConfig.cs</i> در پوشه <i>App_Start</i> مراجعه کنید و مسیر پیش فرض را حذف کنید. برای مسیریابی سرویس‌ها از قابلیت جدید <i>Attribute Routing</i> استفاده خواهیم کرد. فایل مذکور باید مانند لیست زیر باشد.<br> <div dir="ltr" align="left"> <pre language="CSharp" name="code">public static class WebApiConfig
+{
+    public static void Register(HttpConfiguration config)
+    {
+        // Web API configuration and services
+
+        // Web API routes
+        config.MapHttpAttributeRoutes();
+    }
+}</pre> </div>
+ حال در مسیر ریشه پروژه، پوشه جدیدی با نام <i>Videos</i> ایجاد کنید و یک فایل ویدیو نمونه بنام <i>sample.mp4</i> در آن کپی کنید. دقت کنید که فرمت فایل ویدیو در مثال جاری <i>mp4</i> در نظر گرفته شده اما به سادگی می‌توانید آن را تغییر دهید.<br>
+
+
+
+
+سپس در پوشه <i>Models</i> کلاس جدیدی بنام <i>VideoStream</i> ایجاد کنید. این کلاس مسئول نوشتن داده فایل‌های ویدیویی در OutputStream خواهد بود. کد کامل این کلاس را در لیست زیر مشاهده می‌کنید.<br> <div dir="ltr" align="left"> <pre language="CSharp" name="code">public class VideoStream
+{
+    private readonly string _filename;
+    private long _contentLength;
+
+    public long FileLength
+    {
+        get { return _contentLength; }
+    }
+
+    public VideoStream(string videoPath)
+    {
+        _filename = videoPath;
+        using (var video = File.Open(_filename, FileMode.Open, FileAccess.Read, FileShare.Read))
+        {
+            _contentLength = video.Length;
+        }
+    }
+
+    public async void WriteToStream(Stream outputStream,
+        HttpContent content, TransportContext context)
+    {
+        try
+        {
+            var buffer = new byte[65536];
+
+            using (var video = File.Open(_filename, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                var length = (int)video.Length;
+                var bytesRead = 1;
+
+                while (length &gt; 0 &amp;&amp; bytesRead &gt; 0)
+                {
+                    bytesRead = video.Read(buffer, 0, Math.Min(length, buffer.Length));
+                    await outputStream.WriteAsync(buffer, 0, bytesRead);
+                    length -= bytesRead;
+                }
+            }
+        }
+        catch (HttpException)
+        {
+            return;
+        }
+        finally
+        {
+            outputStream.Close();
+        }
+    }
+}</pre> </div> <br> <b>شرح کلاس VideoStream</b> <br>
+
+
+
+
+این کلاس ابتدا دو فیلد خصوصی تعریف می‌کند. یکی <i>filename_</i> که فقط-خواندنی است و نام فایل ویدیو درخواستی را نگهداری می‌کند. و دیگری <i>contentLength_</i> که سایز فایل ویدیو درخواستی را نگهداری می‌کند.<br> <br>
+
+
+
+
+یک خاصیت عمومی بنام <i>FileLength</i> نیز تعریف شده که مقدار خاصیت contentLength_ را بر می‌گرداند.<br> <br>
+
+
+
+
+متد سازنده این کلاس پارامتری از نوع رشته بنام <i>videoPath</i> را می‌پذیرد که مسیر کامل فایل ویدیوی مورد نظر است. در این متد، متغیر‌های filename_ و contentLength_ مقدار دهی می‌شوند. نکته‌ی قابل توجه در این متد استفاده از پارامتر FileShare.Read است که باعث می‌شود فایل مورد نظر هنگام باز شدن قفل نشود و برای پروسه‌های دیگر قابل دسترسی باشد.<br> <br>
+
+
+
+
+در آخر متد <i>WriteToStream</i> را داریم که مسئول نوشتن داده فایل‌ها به OutputStream است. اول از همه دقت کنید که این متد از کلمه کلیدی async استفاده می‌کند بنابراین بصورت asynchronous اجرا خواهد شد. در بدنه این متد متغیری بنام <i>buffer</i> داریم که یک آرایه بایت با سایز 64KB را تعریف می‌کند. به بیان دیگر اطلاعات فایل‌ها را در پکیج‌های 64 کیلوبایتی برای کلاینت ارسال خواهیم کرد. در ادامه فایل مورد نظر را باز می‌کنیم (مجددا با استفاده از FileShare.Read) و شروع به خواندن اطلاعات آن می‌کنیم. هر 64 کیلوبایت خوانده شده بصورت async در جریان خروجی نوشته می‌شود و تا هنگامی که به آخر فایل نرسیده ایم این روند ادامه پیدا می‌کند.<br> <div dir="ltr" align="left"> <pre language="CSharp" name="code">while (length &gt; 0 &amp;&amp; bytesRead &gt; 0)
+{
+    bytesRead = video.Read(buffer, 0, Math.Min(length, buffer.Length));
+    await outputStream.WriteAsync(buffer, 0, bytesRead);
+    length -= bytesRead;
+}</pre> </div>
+ اگر دقت کنید تمام کد بدنه این متد در یک بلاک try/catch قرار گرفته است. در صورتی که با خطایی از نوع HttpException مواجه شویم (مثلا هنگام قطع شدن کاربر) عملیات متوقف می‌شود و در آخر نیز جریان خروجی (outputStream) بسته خواهد شد. نکته دیگری که باید بدان اشاره کرد این است که کاربر حتی پس از قطع شدن از سرور می‌تواند ویدیو را تا جایی که دریافت کرده مشاهده کند. مثلا ممکن است 10 پکیج از اطلاعات را دریافت کرده باشد و هنگام مشاهده پکیج دوم از سرور قطع شود. در این صورت امکان مشاهده ویدیو تا انتهای پکیج دهم وجود خواهد داشت.<br> <br>
+
+
+
+
+حال که کلاس VideoStream را در اختیار داریم می‌توانیم پروژه را تکمیل کنیم. در پوشه کنترلر‌ها کلاسی بنام <i>VideoController</i>بسازید. کد کامل این کلاس را در لیست زیر مشاهده می‌کنید.<br> <div dir="ltr" align="left"> <pre language="CSharp" name="code">public class VideoController : ApiController
+{
+    [Route("api/video/{ext}/{fileName}")]
+    public HttpResponseMessage Get(string ext, string fileName)
+    {
+        string videoPath = HostingEnvironment.MapPath(string.Format("~/Videos/{0}.{1}", fileName, ext));
+        if (File.Exists(videoPath))
+        {
+            FileInfo fi = new FileInfo(videoPath);
+            var video = new VideoStream(videoPath);
+
+            var response = Request.CreateResponse();
+
+            response.Content = new PushStreamContent((Action&lt;Stream, HttpContent, TransportContext&gt;)video.WriteToStream,
+                new MediaTypeHeaderValue("video/" + ext));
+
+            response.Content.Headers.Add("Content-Disposition", "attachment;filename=" + fi.Name.Replace(" ", ""));
+            response.Content.Headers.Add("Content-Length", video.FileLength.ToString());
+
+            return response;
+        }
+        else
+        {
+            return Request.CreateResponse(HttpStatusCode.NotFound);
+        }
+    }
+}</pre> </div> <br> <b>شرح کلاس VideoController<br> </b>همانطور که می‌بینید مسیر دستیابی به این کنترلر با استفاده از قابلیت Attribute Routing تعریف شده است.<br> <br> <div dir="ltr" align="left"> <pre language="CSharp" name="code">[Route("api/video/{ext}/{fileName}")]</pre> </div>
+ نمونه ای از یک درخواست که به این مسیر نگاشت می‌شود:<br> <div dir="ltr" align="left"> <pre language="CSharp" name="code">api/video/mp4/sample</pre> </div>
+ بنابراین این مسیر فرمت و نام فایل مورد نظر را بدین شکل می‌پذیرد. در نمونه جاری ما فایل <i>sample.mp4</i> را درخواست کرده ایم.<br>
+
+
+
+
+متد Get این کنترلر دو پارامتر با نام‌های ext و fileName را می‌پذیرد که همان فرمت و نام فایل هستند. سپس با استفاده از کلاس <i>HostingEnvironment</i> سعی می‌کنیم مسیر کامل فایل درخواست شده را بدست آوریم.<br> <div dir="ltr" align="left"> <pre language="CSharp" name="code">string videoPath = HostingEnvironment.MapPath(string.Format("~/Videos/{0}.{1}", fileName, ext));</pre> </div>
+ استفاده از این کلاس با Server.MapPath تفاوتی نمی‌کند. در واقع خود Server.MapPath نهایتا همین کلاس HostingEnvironment را فراخوانی می‌کند. اما در کنترلر‌های Web Api به کلاس <i>Server</i> دسترسی نداریم. همانطور که مشاهده می‌کنید فایل مورد نظر در پوشه <i>Videos</i> جستجو می‌شود، که در ریشه سایت هم قرار دارد. در ادامه اگر فایل درخواست شده وجود داشت وهله جدیدی از کلاس VideoStream می‌سازیم و مسیر کامل فایل را به آن پاس می‌دهیم.<br> <div dir="ltr" align="left"> <pre language="CSharp" name="code">var video = new VideoStream(videoPath);</pre> </div>
+ سپس آبجکت پاسخ را وهله سازی می‌کنیم و با استفاده از کلاس <i>PushStreamContent</i> اطلاعات را به کلاینت می‌فرستیم.<br> <div dir="ltr" align="left"> <pre language="CSharp" name="code">var response = Request.CreateResponse();
+
+response.Content = new PushStreamContent((Action&lt;Stream, HttpContent, TransportContext&gt;)video.WriteToStream, new MediaTypeHeaderValue("video/" + ext));</pre> </div> <br>
+
+
+
+
+کلاس PushStreamContent در فضای نام System.Net.Http وجود دارد. همانطور که می‌بینید امضای Action پاس داده شده، با امضای متد WriteToStream در کلاس VideoStream مطابقت دارد.<br> <br>
+
+
+
+
+در آخر دو Header به پاسخ ارسالی اضافه می‌کنیم تا نوع داده ارسالی و سایز آن را مشخص کنیم.<br> <div dir="ltr" align="left"> <pre language="CSharp" name="code">response.Content.Headers.Add("Content-Disposition", "attachment;filename=" + fileName);
+response.Content.Headers.Add("Content-Length", video.FileLength.ToString());</pre> </div>
+ افزودن این دو مقدار مهم است. در صورتی که این Header‌‌ها را تعریف نکنید سایز فایل دریافتی و مدت زمان آن نامعلوم خواهد بود که تجربه کاربری خوبی بدست نمی‌دهد. نهایتا هم آبجکت پاسخ را به کلاینت ارسال می‌کنیم. در صورتی هم که فایل مورد نظر در پوشه Videos پیدا نشود پاسخ NotFound را بر می‌گردانیم.<br> <div dir="ltr" align="left"> <pre language="CSharp" name="code">if(File.Exists(videoPath))
+{
+    // removed for bravity
+}
+else
+{
+    return Request.CreateResponse(HttpStatusCode.NotFound);
+}</pre> </div>
+ خوب، برای تست این مکانیزم نیاز به یک کنترلر MVC و یک View داریم. در پوشه کنترلر‌ها کلاسی بنام <i>HomeController</i> ایجاد کنید که با لیست زیر مطابقت داشته باشد.<br> <div dir="ltr" align="left"> <pre language="CSharp" name="code">public class HomeController : Controller
+{
+    // GET: Home
+    public ActionResult Index()
+    {
+        return View();
+    }
+}</pre> </div>
+ نمای این متد را بسازید (با کلیک راست روی متد Index و انتخاب گزینه Add View) و کد آن را مطابق لیست زیر تکمیل کنید.<br> <div dir="ltr" align="left"> <pre language="CSharp" name="code">&lt;div&gt;
+    &lt;div&gt;
+        &lt;video width="480" height="270" controls="controls" preload="auto"&gt;
+            &lt;source src="/api/video/mp4/sample" type="video/mp4" /&gt;
+            Your browser does not support the video tag.
+        &lt;/video&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</pre> </div>
+ همانطور که مشاهده می‌کنید یک المنت ویدیو تعریف کرده ایم که خواص طول، عرض و غیره آن نیز مقدار دهی شده اند. زیر تگ source متنی درج شده که در صورت لزوم به کاربر نشان داده می‌شود. گرچه اکثر مرورگرهای مدرن از المنت ویدیو پشتیبانی می‌کنند. تگ سورس فایلی با مشخصات <i>sample.mp4 </i>را درخواست می‌کند و نوع آن را نیز <i>video/mp4 </i>مشخص کرده ایم.<br> <br>
+
+
+
+
+اگر پروژه را اجرا کنید می‌بینید که ویدیو مورد نظر آماده پخش است. برای اینکه ببینید چطور داده‌های ویدیو در قالب پکیج‌های 64 کیلو بایتی دریافت می‌شوند از ابزار مرورگرتان استفاده کنید. مثلا در گوگل کروم F12 را بزنید و به قسمت Network بروید. صفحه را یکبار مجددا بارگذاری کنید تا ارتباطات شبکه مانیتور شود. اگر به المنت <i>sample</i> دقت کنید می‌بینید که با شروع پخش ویدیو پکیج‌های اطلاعات یکی پس از دیگری دریافت می‌شوند و اطلاعات ریز آن را می‌توانید مشاهده کنید.<br> <br>
+
+
+
+
+پروژه نمونه به این مقاله ضمیمه شده است. قابلیت Package Restore فعال شده و برای صرفه جویی در حجم فایل، تمام پکیج‌ها و محتویات پوشه bin حذف شده اند. برای تست بیشتر می‌توانید فایل sample.mp4 را با فایلی حجیم‌تر جایگزین کنید تا نحوه دریافت اطلاعات را با روشی که در بالا بدان اشاره شد مشاهده کنید.<br> <br> <a href="https://www.dntips.ir/file/userfile?name=AsyncVideoStreaming.rar">AsyncVideoStreaming.rar</a> &nbsp;</div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20350.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>کاهش مصرف حافظه HttpClient در دات‌نت 10</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20522.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>ArrayPool: مدیریت هوشمند حافظه و کلید عملکرد فوق‌العاده در دات‌نت</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/project-feedbacks/6/71'><span class='badge bg-warning bg-gradient rounded-pill me-2'>بازخوردهای پروژه‌ها</span>نیاز به کمی Refactoring</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-920.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>محدود کردن کاربر‌ها به آپلود فایل‌هایی خاص در ASP.NET MVC</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2818.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Span در C# 7.2</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2371.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>الگوی نماینده (پروکسی) Proxy Pattern</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1687.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>استفاده از EF در اپلیکیشن های N-Tier : قسمت اول</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1258.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>نمایش یک فایل PDF پویا در یک iframe در ASP.NET</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1028.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>ایجاد Helper سفارشی جهت نمایش ویدئو در ASP.NET MVC</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1028.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>ایجاد Helper سفارشی جهت نمایش ویدئو در ASP.NET MVC</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۹۳/۰۶/۱۰ ۱۷:۵۵</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام<br>
+امروز این مطلب رو دیدم و چند روز پیش خودم انجامش داده بودم. نکته‌ی عجیب اینه که وقتی از این حالت برای پخش ویدئو استفاده می‌کنیم، پلیر میزان فریم‌های بافر شده از ویدیو را نمایش نمیده، در واقع کاربر متوجه نمیشه که تا کجای فیلم از سرور دانلود شده (در صورتی که در حالت پخش مستقیم ویدیو از لینک مستقیم اینگونه نیست).<br> <br>
+ممنون میشم اگر به این سه سوال پاسخ بدین :<br>
+1- مزیت این روش نسبت به روشی که از لینک مستقیم فایل ویدیو استفاد می‌کنیم چیه ؟<br>
+2- آیا استفاده از این روش باری بر روی پردازنده، رم و... سرور اضافه می‌کنه ؟<br>
+3- برای پخش ویدیو از این روش استفاده کنیم بهتره یا از لینک مستقیم ؟<br> <br>
+با تشکر</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۶/۱۱/۰۷ ۲۲:۲۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>ASP.NET Core 2.0 پشتیبانی توکاری را از این مساله ارائه کرده: «<a href="www.dntips.ir-posts-2803.html">پشتیبانی توکار ASP.NET Core 2.0 از Range headers</a>». به این ترتیب کاربر می‌تواند از قسمت خاصی شروع به درخواست نمایش کند (همان از سرگیری مجدد)، یا نمایشگر قسمت‌های بعدی را پیشتر درخواست و بافر کند.</div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>رضا بهشتی</strong>  در  <span dir='ltr'>۱۳۹۴/۰۱/۲۶ ۱۶:۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>بسیار عالی بود، &nbsp;شما میدونید چجوری میشود بجای یک فایل ویدویی از یک منبع مثلا وب کم استفاده کرد؟</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>محسن خان</strong>  در  <span dir='ltr'>۱۳۹۴/۰۱/۲۶ ۱۶:۴۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><p>IIS یک سری ابزار برای اینکار داره:</p> <p>IIS Media Services: <a href="http://www.iis.net/media">http://www.iis.net/media</a> <br>
+Smooth Streaming Client: <a href="http://www.iis.net/download/SmoothClient">http://www.iis.net/download/SmoothClient</a> </p> <p>همچنین اصل کار به DirectX ختم میشه. دو نمونه پیاده سازی:</p> <p> <a href="http://www.codeproject.com/Articles/7637/DirectX-Video-Stream-and-frame-capture">http://www.codeproject.com/Articles/7637/DirectX-Video-Stream-and-frame-capture</a> </p> <p> <a href="http://channel9.msdn.com/forums/TechOff/93476-Programatically-Using-A-Webcam-In-C/">http://channel9.msdn.com/forums/TechOff/93476-Programatically-Using-A-Webcam-In-C/</a> </p></div>
+</div></li></ul></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

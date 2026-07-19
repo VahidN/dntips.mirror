@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫به روز رسانی اطلاعات Master-Detail یا Master-Detail-DetailOfDetail با استفاده از EF Core</title>     <meta name="description" content="یکی از چالش‌هایی که در طراحی زیرساخت برای Domain هایی که تعداد زیادی عملیات CRUD را در  back office  سیستم خود دارند، داشتن مکانیزمی برای ذخیره سازی اطلاعات Master-Detail یا چه بسا Master-Detail-DetailOfDetail می‌باشد. در ادامه نحوه برخورد با چنین سناریوهایی را در EF Core و همچنین با استفاده از AutoMapper و FluentValidation بررسی خواهیم کرد.               موجودیت‌های فرضی           public abstract class Entity : IHaveTrackingState
+ {
+   ...">
+    <meta name="author" content="سالار ربال">
+    <meta itemprop="name" content="به روز رسانی اطلاعات Master-Detail یا Master-Detail-DetailOfDetail با استفاده از EF Core">
+    <meta itemprop="description" content="یکی از چالش‌هایی که در طراحی زیرساخت برای Domain هایی که تعداد زیادی عملیات CRUD را در  back office  سیستم خود دارند، داشتن مکانیزمی برای ذخیره سازی اطلاعات Master-Detail یا چه بسا Master-Detail-DetailOfDetail می‌باشد. در ادامه نحوه برخورد با چنین سناریوهایی را در EF Core و همچنین با استفاده از AutoMapper و FluentValidation بررسی خواهیم کرد.               موجودیت‌های فرضی           public abstract class Entity : IHaveTrackingState
+ {
+   ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="به روز رسانی اطلاعات Master-Detail یا Master-Detail-DetailOfDetail با استفاده از EF Core">
+    <meta property="og:description" content="یکی از چالش‌هایی که در طراحی زیرساخت برای Domain هایی که تعداد زیادی عملیات CRUD را در  back office  سیستم خود دارند، داشتن مکانیزمی برای ذخیره سازی اطلاعات Master-Detail یا چه بسا Master-Detail-DetailOfDetail می‌باشد. در ادامه نحوه برخورد با چنین سناریوهایی را در EF Core و همچنین با استفاده از AutoMapper و FluentValidation بررسی خواهیم کرد.               موجودیت‌های فرضی           public abstract class Entity : IHaveTrackingState
+ {
+   ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="به روز رسانی اطلاعات Master-Detail یا Master-Detail-DetailOfDetail با استفاده از EF Core">
+    <meta name="twitter:description" content="یکی از چالش‌هایی که در طراحی زیرساخت برای Domain هایی که تعداد زیادی عملیات CRUD را در  back office  سیستم خود دارند، داشتن مکانیزمی برای ذخیره سازی اطلاعات Master-Detail یا چه بسا Master-Detail-DetailOfDetail می‌باشد. در ادامه نحوه برخورد با چنین سناریوهایی را در EF Core و همچنین با استفاده از AutoMapper و FluentValidation بررسی خواهیم کرد.               موجودیت‌های فرضی           public abstract class Entity : IHaveTrackingState
+ {
+   ...">
+    <meta name="twitter:card" content="یکی از چالش‌هایی که در طراحی زیرساخت برای Domain هایی که تعداد زیادی عملیات CRUD را در  back office  سیستم خود دارند، داشتن مکانیزمی برای ذخیره سازی اطلاعات Master-Detail یا چه بسا Master-Detail-DetailOfDetail می‌باشد. در ادامه نحوه برخورد با چنین سناریوهایی را در EF Core و همچنین با استفاده از AutoMapper و FluentValidation بررسی خواهیم کرد.               موجودیت‌های فرضی           public abstract class Entity : IHaveTrackingState
+ {
+   ...">
+    <meta property="article:published_time" content="Wed, 15 Aug 2018 18:55:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫به روز رسانی اطلاعات Master-Detail یا Master-Detail-DetailOfDetail با استفاده از EF Core";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-2901.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫تشخیص باز و مشاهده شدن ایمیل‌های ارسالی از یک برنامه وب توسط کاربران</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-2899.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫جایگزین کردن jQuery با JavaScript خالص - قسمت ششم - رخدادهای مرورگرها</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫به روز رسانی اطلاعات Master-Detail یا Master-Detail-DetailOfDetail با استفاده از EF Core</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>سالار ربال<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۷/۰۵/۲۴ ۱۸:۵۵</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-2900.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><p>یکی از چالش‌هایی که در طراحی زیرساخت برای Domain هایی که تعداد زیادی عملیات CRUD را در&nbsp;<span style="color: rgb(51, 51, 51);">back office</span>&nbsp;سیستم خود دارند، داشتن مکانیزمی برای ذخیره سازی اطلاعات Master-Detail یا چه بسا Master-Detail-DetailOfDetail می‌باشد. در ادامه نحوه برخورد با چنین سناریوهایی را در EF Core و همچنین با استفاده از AutoMapper و FluentValidation بررسی خواهیم کرد.</p> <p> <b> <br> </b> </p> <p> <b>موجودیت‌های فرضی  </b> </p> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">public abstract class Entity : IHaveTrackingState
+{
+    public long Id { get; set; }
+    [NotMapped] public TrackingState TrackingState { get; set; }
+}
+
+public class Master : Entity
+{
+    public string Title { get; set; }
+    public ICollection&lt;Detail&gt; Details { get; set; }
+}
+
+public class Detail : Entity
+{
+    public string Title { get; set; }
+
+    public ICollection&lt;DetailOfDetail&gt; Details { get; set; }
+    public Master Master { get; set; }
+    public long MasterId { get; set; }
+}
+
+public class DetailOfDetail : Entity
+{
+    public string Title { get; set; }
+    public Detail Detail { get; set; }
+    public long DetailId { get; set; }
+}</pre> </div> </div> <div> <b> <br> </b> </div> <p> <b>DbContext برنامه</b> </p> <div> <div dir="ltr" style="direction: ltr;" align="left"> </div> <div dir="ltr" style="direction: ltr;" align="left"> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">public class ProjectDbContext : DbContext
+{
+    public DbSet&lt;Master&gt; Masters { get; set; }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        base.OnConfiguring(optionsBuilder);
+
+        optionsBuilder.UseInMemoryDatabase("SharedDatabaseName");
+    }
+}</pre> </div> <br> </div> <b>واسط IHaveTrackingState</b> </div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">public interface IHaveTrackingState
+{
+    TrackingState TrackingState { get; set; }
+    //ICollection&lt;string&gt; ModifiedProperties { get; set; }
+}
+
+public enum TrackingState
+{
+    Unchanged = 0,
+    Added = 1,
+    Modified = 2,
+    Deleted = 3
+}</pre> </div> <p>با استفاده از پراپرتی TrackingState بالا، امکان مشخص کردن صریح State رکورد ارسالی توسط کلاینت مهیا می‌شود. قبلا نیز&nbsp;<a href="www.dntips.ir-posts-1692.html">مطلبی</a>&nbsp;در راستای STE یا همان Self-Tracking Entity تهیه شده است؛ و همچنین&nbsp;<a href="www.dntips.ir-posts-844.html">نظرات ارسالی این مطلب</a>&nbsp;نیز می‌تواند مفید واقع شود.&nbsp;</p> <div> <b> <br> </b> </div> <p> <b>DTO‌های متناظر با موجودیت‌های فرضی</b> </p> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">public abstract class Model : IHaveTrackingState
+{
+    public long Id { get; set; }
+    public TrackingState TrackingState { get; set; }
+}
+
+public class MasterModel : Model
+{
+    public string Title { get; set; }
+    public ICollection&lt;DetailModel&gt; Details { get; set; }
+}
+
+public class DetailModel : Model
+{
+    public string Title { get; set; }
+    public ICollection&lt;DetailOfDetailModel&gt; Details { get; set; }
+}
+
+public class DetailOfDetailModel : Model
+{
+    public string Title { get; set; }
+}</pre> </div> <br> </div> <div> <b>تنظیمات نگاشت موجودیت‌ها و DTOها</b> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">Mapper.Initialize(expression =&gt;
+{
+    expression.CreateMap&lt;MasterModel, Master&gt;(MemberList.None).ReverseMap();
+    expression.CreateMap&lt;DetailModel, Detail&gt;(MemberList.None).ReverseMap();
+    expression.CreateMap&lt;DetailOfDetailModel, DetailOfDetail&gt;(MemberList.None).ReverseMap();
+});</pre> </div> <p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+البته بهتر است این تنظیمات در درون Profile‌های مرتبط با AutoMapper کپسوله شوند و در زمان مورد نیاز نیز برای انجام نگاشت‌ها، واسط IMapper تزریق شده و استفاده شود.</p> </div> <p> <b> <br> </b> </p> <p> <b>تهیه داده ارسالی فرضی توسط کلاینت</b> </p> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">var masterModel = new MasterModel
+    {
+        Title = "Master-Title",
+        TrackingState = TrackingState.Added,
+        Details = new List&lt;DetailModel&gt;
+        {
+            new DetailModel
+            {
+                Title = "Detail-Title",
+                TrackingState = TrackingState.Added,
+                Details = new List&lt;DetailOfDetailModel&gt;
+                {
+                    new DetailOfDetailModel
+                    {
+                        Title = "DetailOfDetail-Title",
+                        TrackingState = TrackingState.Added,
+                    }
+                }
+            }
+        }
+    };</pre> </div> </div> <div> <b> <br> </b> </div> <p> <b>ذخیره سازی اطلاعات</b> </p> <p>در<a href="www.dntips.ir-posts-2507.html"> EF Core</a>،&nbsp;متد جدید context.ChangeTracker.TrackGraph&nbsp;برای به روز رسانی وضعیت یک گراف از اشیاء مشابه به اطلاعات ارسالی ذکر شده در بالا، اضافه شده است. این مکانیزم مفهوم کاملا جدیدی در EF Core می‌باشد که امکان کنترل نهایی برروی اشیایی را که قرار است توسط Context ردیابی شوند، مهیا می‌کند. با پیمایش یک گراف، امکان اجرای عملیات مورد نظر شما را برروی تک تک اشیاء، مهیا می‌سازد.&nbsp;</p> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">using (var context = new ProjectDbContext())
+{
+    Console.WriteLine("################ Create Master and Details and DetailsOfDetail ##################");
+    Print(masterModel);
+
+    var masterEntity = Mapper.Map&lt;Master&gt;(masterModel);
+
+    context.ChangeTracker.TrackGraph(
+        masterEntity,
+        n =&gt;
+        {
+            var entity = (IHaveTrackingState) n.Entry.Entity;
+            n.Entry.State = entity.TrackingState.ToEntityState();
+        });
+
+    context.SaveChanges();
+}</pre> </div> <p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+در تکه کد بالا، پس از انجام عملیات نگاشت، توسط متد TrackGraph به صورت صریح، وضعیت موجودیت‌ها مشخص شده است؛ این کار با تغییر State ارسالی توسط کلاینت به State قابل فهم توسط EF انجام شده‌است. برای این منظور دو متد الحاقی زیر را می‌توان در نظر گرفت:</p> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">public static class TrackingStateExtensions
+{
+    public static EntityState ToEntityState(this TrackingState trackingState)
+    {
+        switch (trackingState)
+        {
+            case TrackingState.Added:
+                return EntityState.Added;
+
+            case TrackingState.Modified:
+                return EntityState.Modified;
+
+            case TrackingState.Deleted:
+                return EntityState.Deleted;
+
+            case TrackingState.Unchanged:
+                return EntityState.Unchanged;
+
+            default:
+                return EntityState.Unchanged;
+        }
+    }
+
+    public static TrackingState ToTrackingState(this EntityState state)
+    {
+        switch (state)
+        {
+            case EntityState.Added:
+                return TrackingState.Added;
+
+            case EntityState.Modified:
+                return TrackingState.Modified;
+
+            case EntityState.Deleted:
+                return TrackingState.Deleted;
+
+            case EntityState.Unchanged:
+                return TrackingState.Unchanged;
+
+            default:
+                return TrackingState.Unchanged;
+        }
+    }
+}</pre> </div> <b> <div> <b> <br> </b> </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+شبیه سازی عملیات ویرایش</b> </div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">//GetForEditAsync
+var masterModel = context.Masters
+    .ProjectTo&lt;MasterModel&gt;()
+    .AsNoTracking().Single(a =&gt; a.Id == 1);
+
+//Client
+var detail1 = masterModel.Details.First();
+detail1.Title = "Details-EditedTitle";
+detail1.TrackingState = TrackingState.Modified;
+
+foreach (var detail in detail1.Details)
+{
+    detail.TrackingState = TrackingState.Deleted;
+    //detail.Title = "DetailOfDetails-EditedTitle";
+}</pre> </div> <p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+متدی تحت عنوان GetForEditAsync که یک MasterModel را بازگشت می‌دهد، در نظر بگیرید؛ کلاینت از طریق API، این Object Graph را دریافت می‌کند و تغییرات خود را اعمال کرده و همانطور که مشخص می‌باشد به دلیل اینکه تنظیمات نگاشت بین Detail و DetailModel در ابتدای بحث نیز انجام شده است، این بار دیگر نیاز به استفاده از متد Include نمی‌باشد و این عملیات توسط متد ProjectTo خودکار می‌باشد. در نهایت داده ارسالی توسط کلاینت را دریافت کرده و به شکل زیر عملیات به روز رسانی انجام می‌شود:</p> <div> <div dir="ltr" style="direction: ltr;" align="left"> </div> <div dir="ltr" style="direction: ltr;" align="left"> </div> </div> <div> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">using (var context = new ProjectDbContext())
+{
+    Console.WriteLine(
+        "################ Unchanged Master and Modified Details and Deleted DetailsOfDetail ##################");
+    Print(masterModel);
+
+    var masterEntity = Mapper.Map&lt;Master&gt;(masterModel);
+
+    context.ChangeTracker.TrackGraph(
+        masterEntity,
+        n =&gt;
+        {
+            var entity = (IHaveTrackingState) n.Entry.Entity;
+            n.Entry.State = entity.TrackingState.ToEntityState();
+        });
+
+    context.SaveChanges();
+}</pre> </div> <b> <div> <b> <br> </b> </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+با خروجی زیر:</b> </div> <div> <p style="margin-left: auto; margin-right: auto;"> </p> <p style="margin-left: auto; margin-right: auto;"> </p> <p style="margin-left: auto; margin-right: auto;"> <img style="display:block; margin-left: auto; margin-right: auto;" src="data:image/PNG;base64,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"> </p> <p style="margin-left: auto; margin-right: auto;">برای بحث اعتبارسنجی هم می‌توان به شکل زیر عمل کرد:</p> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">public class MasterValidator : AbstractValidator&lt;MasterModel&gt;
+{
+    public MasterValidator()
+    {
+        RuleFor(a =&gt; a.Title).NotEmpty();
+        RuleForEach(a =&gt; a.Details).SetValidator(new DetailValidator());
+    }
+}
+
+public class DetailValidator : AbstractValidator&lt;DetailModel&gt;
+{
+    public DetailValidator()
+    {
+        RuleFor(a =&gt; a.Title).NotEmpty();
+        RuleForEach(a =&gt; a.Details).SetValidator(new DetailOfDetailValidator());
+    }
+}
+
+public class DetailOfDetailValidator : AbstractValidator&lt;DetailOfDetailModel&gt;
+{
+    public DetailOfDetailValidator()
+    {
+        RuleFor(a =&gt; a.Title).NotEmpty();
+    }
+}</pre> </div> <p style="margin-left: auto; margin-right: auto;">با استفاده از متد RuleForEach و SetValidator موجود در کتابخانه FluentValidation، امکان مشخص کردن اعتبارسنج برای Detail موجود در شیء Master را خواهیم داشت.</p> <p style="margin-left: auto; margin-right: auto;">همچنین با توجه به این که برای عملیات Create و Edit از یک مدل (DTO) استفاده خواهیم کرد، شاید لازم باشد اعتبارسنجی خاصی را فقط در زمان ویرایش لازم داشته باشیم، که در این صورت می‌توان از امکانات&nbsp;<a href="https://fluentvalidation.net/start#rulesets">RuleSet</a>&nbsp;استفاده کنید. در مطلب «<a href="www.dntips.ir-posts-2729.html">طراحی و پیاده سازی ServiceLayer به همراه خودکارسازی Business Validationها</a>» با استفاده&nbsp;<span style="color: rgb(51, 51, 51); text-align: right;">ValidateWithRuleAttribute</span> <span style="color: rgb(51, 51, 51); text-align: right;"> امکان مشخص کردن RuleSet مورد نظر برای اعتبارسنجی ورودی متد سرویس نیز در نظر گرفته شده است. </span> </p> <p style="margin-left: auto; margin-right: auto;"> <span style="color: rgb(51, 51, 51); text-align: right;"> <br> </span> </p> <p style="margin-left: auto; margin-right: auto;"> <span style="color: #333333;"> <b>منابع تکمیلی</b> </span> </p> <p style="margin-left: auto; margin-right: auto;"> </p> <ul> <li> <span style="color: rgb(51, 51, 51);"> <a href="http://www.entityframeworktutorial.net/efcore/changetracker-trackgraph-ef-core.aspx">ChangeTracker.TrackGraph() in Entity Framework Core</a>&nbsp; </span> </li> <li> <span style="color: #333333;"> <a href="https://docs.microsoft.com/en-us/ef/core/saving/disconnected-entities#trackgraph">Disconnected entities</a>&nbsp;</span> </li> <li> <span style="color: #333333;"> <a href="https://msdn.microsoft.com/magazine/mt694083">https://msdn.microsoft.com/magazine/mt694083</a>&nbsp;</span> </li> <li> <span style="color: #333333;"> <a href="https://msdn.microsoft.com/magazine/mt767693">https://msdn.microsoft.com/magazine/mt767693</a> </span> <br> </li> <li> <span style="color: #333333;"> <a href="https://blog.tonysneed.com/2017/10/01/trackable-entities-for-ef-core/">https://blog.tonysneed.com/2017/10/01/trackable-entities-for-ef-core/</a>&nbsp;<br> </span> </li> <li> <a href="https://www.oreilly.com/library/view/programming-entity-framework/9781449331825/ch04s06.html">Tracking Individually Modified Properties</a>&nbsp;<br> </li> </ul> <div> <span style="color: #333333;"> <b>کتابخانه کمکی</b> </span> </div> <div> <a href="https://github.com/TrackableEntities/TrackableEntities.Core">TrackableEntities.Core</a> <span style="color: rgb(51, 51, 51);">&nbsp;</span> <span style="color: rgb(51, 51, 51);">&nbsp;</span> <br> </div> <hr> </div> <div> <b>کدهای کامل مطلب جاری را&nbsp;</b> <a href="https://github.com/rabbal/EFCoreMasterDetailCrud">از اینجا</a> <b>می‌توانید دریافت کنید.</b> </div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/courses/topic/16/98930360-cce3-444d-9784-aa3d7fdbd369#comment-644'><span class='badge bg-light text-dark bg-gradient rounded-pill me-2'>بازخوردهای دوره</span>خلاصه‌ای از اعمال متداول با AutoMapper و Entity Framework</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/project-feedbacks/3/114#comment-416'><span class='badge bg-info bg-gradient rounded-pill me-2'>پاسخ به بازخورد‌های پروژه‌ها</span>استفاده از اشیاء پیچیده در حالت StronglyTypedList</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2998.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>شروع به کار با DNTFrameworkCore - قسمت 3 - پیاده‌سازی سرویس‌های موجودیت‌ها</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2996.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>شروع به کار با DNTFrameworkCore - قسمت 2 - طراحی موجودیت‌های سیستم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1692.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>استفاده از EF در اپلیکیشن های N-Tier : قسمت چهارم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3178.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>شروع به کار با DNTFrameworkCore - قسمت 7 - ارتقاء به نسخه ‭4.5.x</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3003.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>شروع به کار با DNTFrameworkCore - قسمت 5 - مکانیزم Eventing و استفاده از سرویس‌های موجودیت‌ها</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3229.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>سری بررسی SQL Smell در EF Core - ایجاد روابط Polymorphic - بخش دوم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3227.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>سری بررسی SQL Smell در EF Core - ایجاد روابط Polymorphic - بخش اول</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1430.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>طراحی گزارش در Stimulsoft Reports.Net – بخش 2</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

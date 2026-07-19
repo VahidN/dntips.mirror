@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫شروع به کار با EF Core 1.0 - قسمت 15 - نوشتن آزمون‌های واحد</title>     <meta name="description" content="یکی از مشخصات آزمون‌های واحد، عدم خروج از مرزهای IO سیستم، در حین اجرای آن‌ها است و چون درهنگام کار با بانک‌های اطلاعاتی حتما از مرزهای IO سیستم رد خواهیم شد (کار با شبکه، کار با فایل سیستم، برای به روز رسانی و درج اطلاعات)، نوشتن آزمون‌های واحد واقعی، برای برنامه‌هایی که از ORMها استفاده می‌کنند مشکل است. به همین جهت مباحث mocking، تقلید قسمت‌های مختلف ORMها و جایگزین کردن آن‌ها با نمونه‌های درون حافظه‌ای بسیار مرسوم است. برای رفع این مشک ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="شروع به کار با EF Core 1.0 - قسمت 15 - نوشتن آزمون‌های واحد">
+    <meta itemprop="description" content="یکی از مشخصات آزمون‌های واحد، عدم خروج از مرزهای IO سیستم، در حین اجرای آن‌ها است و چون درهنگام کار با بانک‌های اطلاعاتی حتما از مرزهای IO سیستم رد خواهیم شد (کار با شبکه، کار با فایل سیستم، برای به روز رسانی و درج اطلاعات)، نوشتن آزمون‌های واحد واقعی، برای برنامه‌هایی که از ORMها استفاده می‌کنند مشکل است. به همین جهت مباحث mocking، تقلید قسمت‌های مختلف ORMها و جایگزین کردن آن‌ها با نمونه‌های درون حافظه‌ای بسیار مرسوم است. برای رفع این مشک ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="شروع به کار با EF Core 1.0 - قسمت 15 - نوشتن آزمون‌های واحد">
+    <meta property="og:description" content="یکی از مشخصات آزمون‌های واحد، عدم خروج از مرزهای IO سیستم، در حین اجرای آن‌ها است و چون درهنگام کار با بانک‌های اطلاعاتی حتما از مرزهای IO سیستم رد خواهیم شد (کار با شبکه، کار با فایل سیستم، برای به روز رسانی و درج اطلاعات)، نوشتن آزمون‌های واحد واقعی، برای برنامه‌هایی که از ORMها استفاده می‌کنند مشکل است. به همین جهت مباحث mocking، تقلید قسمت‌های مختلف ORMها و جایگزین کردن آن‌ها با نمونه‌های درون حافظه‌ای بسیار مرسوم است. برای رفع این مشک ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="شروع به کار با EF Core 1.0 - قسمت 15 - نوشتن آزمون‌های واحد">
+    <meta name="twitter:description" content="یکی از مشخصات آزمون‌های واحد، عدم خروج از مرزهای IO سیستم، در حین اجرای آن‌ها است و چون درهنگام کار با بانک‌های اطلاعاتی حتما از مرزهای IO سیستم رد خواهیم شد (کار با شبکه، کار با فایل سیستم، برای به روز رسانی و درج اطلاعات)، نوشتن آزمون‌های واحد واقعی، برای برنامه‌هایی که از ORMها استفاده می‌کنند مشکل است. به همین جهت مباحث mocking، تقلید قسمت‌های مختلف ORMها و جایگزین کردن آن‌ها با نمونه‌های درون حافظه‌ای بسیار مرسوم است. برای رفع این مشک ...">
+    <meta name="twitter:card" content="یکی از مشخصات آزمون‌های واحد، عدم خروج از مرزهای IO سیستم، در حین اجرای آن‌ها است و چون درهنگام کار با بانک‌های اطلاعاتی حتما از مرزهای IO سیستم رد خواهیم شد (کار با شبکه، کار با فایل سیستم، برای به روز رسانی و درج اطلاعات)، نوشتن آزمون‌های واحد واقعی، برای برنامه‌هایی که از ORMها استفاده می‌کنند مشکل است. به همین جهت مباحث mocking، تقلید قسمت‌های مختلف ORMها و جایگزین کردن آن‌ها با نمونه‌های درون حافظه‌ای بسیار مرسوم است. برای رفع این مشک ...">
+    <meta property="article:published_time" content="Wed, 07 Sep 2016 21:20:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫شروع به کار با EF Core 1.0 - قسمت 15 - نوشتن آزمون‌های واحد";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-2511.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫ساخت بسته‌های نیوگت مخصوص NET Core.</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-2509.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫شروع به کار با EF Core 1.0 - قسمت 14 - لایه بندی و تزریق وابستگی‌ها</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫شروع به کار با EF Core 1.0 - قسمت 15 - نوشتن آزمون‌های واحد</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۵/۰۶/۱۷ ۲۱:۲۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-2510.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'>یکی از مشخصات آزمون‌های واحد، عدم خروج از مرزهای IO سیستم، در حین اجرای آن‌ها است و چون درهنگام کار با بانک‌های اطلاعاتی حتما از مرزهای IO سیستم رد خواهیم شد (کار با شبکه، کار با فایل سیستم، برای به روز رسانی و درج اطلاعات)، نوشتن آزمون‌های واحد واقعی، برای برنامه‌هایی که از ORMها استفاده می‌کنند مشکل است. به همین جهت مباحث mocking، تقلید قسمت‌های مختلف ORMها و جایگزین کردن آن‌ها با نمونه‌های درون حافظه‌ای بسیار مرسوم است. برای رفع این مشکلات، تیم EF Core، یک تامین کننده‌ی بانک اطلاعاتی ویژه‌ی «درون حافظه‌ای» را به نام «Entity Framework Core InMemory provider» ارائه داده‌است. به این ترتیب، این محل ذخیره سازی اطلاعات درون حافظه‌ای، مشکل رد شدن از مرزهای IO سیستم را برطرف کرده و عملا نیاز به کار کردن با فریم ورک‌های mocking را منتفی می‌کند (حداقل برای تقلید قسمت‌های مختلف EF Core).<br>
+
+
+در این قسمت ابتدا نحوه‌ی فعال سازی فریم ورک آزمون‌های واحد مایکروسافت و سپس نحوه‌ی فعال سازی این تامین کننده‌ی بانک اطلاعاتی درون حافظه‌ای را بررسی خواهیم کرد. به علاوه برای سرویس بلاگ‌های <a href="www.dntips.ir-posts-2509.html">قسمت قبل</a>  نیز آزمون واحد خواهیم نوشت.<br> <br> <br> <b>
+
+نحوه‌ی فعالسازی فریم ورک MSTest در یک پروژه‌ی Class library از نوع NET Core.</b> <br> <br> <p style="display:block; margin-left: auto; margin-right: auto;"> <img style="display:block; margin-left: auto; margin-right: auto;" src="data:image/png;base64,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"> </p> <br>
+
+
+تنها نکته‌ی مهم فعالسازی MSTest در یک پروژه‌ی Class library جدید که برای نوشتن آزمون‌های واحد مورد استفاده قرار خواهیم داد، تنظیمات فایل project.json آن است که در ذیل آمده است:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="JScript" name="code">{
+&nbsp;&nbsp;&nbsp;&nbsp;"version":&nbsp;"1.0.0-*",
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;"testRunner":&nbsp;"mstest",
+&nbsp;&nbsp;&nbsp;&nbsp;"dependencies":&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Microsoft.NETCore.App":&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"type":&nbsp;"platform",
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"version":&nbsp;"1.0.0"
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"dotnet-test-mstest":&nbsp;"1.1.1-preview",
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"MSTest.TestFramework":&nbsp;"1.0.1-preview",
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"NETStandard.Library":&nbsp;"1.6.0",
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Microsoft.EntityFrameworkCore":&nbsp;"1.0.0",
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Microsoft.EntityFrameworkCore.InMemory":&nbsp;"1.0.0",
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Core1RtmEmptyTest.DataLayer":&nbsp;"1.0.0-*",
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Core1RtmEmptyTest.Entities":&nbsp;"1.0.0-*",
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Core1RtmEmptyTest.Services":&nbsp;"1.0.0-*",
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Core1RtmEmptyTest.ViewModels":&nbsp;"1.0.0-*"
+&nbsp;&nbsp;&nbsp;&nbsp;},
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;"frameworks":&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"netcoreapp1.0":&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"imports":&nbsp;[
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"dnxcore50",
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"portable-net45+win8"
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;}
+}</pre> </div>
+- در اینجا قید testRunner الزامی است؛ در غیراینصورت آزمون‌های واحد شما شناسایی نخواهند شد. همچنین بسته‌های dotnet-test-mstest و MSTest.TestFramework نیز باید اضافه شوند.<br>
+- به علاوه در اینجا ارجاعاتی را به اسمبلی‌های موجودیت‌ها، Services و DataLayer که در قسمت «<a href="www.dntips.ir-posts-2509.html">شروع به کار با EF Core 1.0 - قسمت 14 - لایه بندی و تزریق وابستگی‌ها</a>» بررسی شدند نیز ملاحظه می‌کنید.<br>
+- همچنین وابستگی جدید Microsoft.EntityFrameworkCore.InMemory نیز در اینجا قابل ملاحظه است. این وابستگی را تنها به پروژه‌ی آزمون‌های واحد خود اضافه می‌کنیم. از این جهت که تنظیمات آن صرفا در این قسمت جدید قید می‌شوند و نه در سایر قسمت‌های برنامه.<br> <br>
+
+
+&nbsp;پس از آن، کار با این فریم ورک، همانند سایر نگارش‌های دات نت خواهد بود:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">using&nbsp;Microsoft.VisualStudio.TestTools.UnitTesting;
+ 
+namespace&nbsp;EFCore.MsTests
+{
+&nbsp;&nbsp;&nbsp;&nbsp;[TestClass]
+&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;class&nbsp;CoreTests
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[TestMethod]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;void&nbsp;Test1()
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Assert.IsTrue(true);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;}
+}</pre> </div>
+ابتدا کلاس مدنظر، با ویژگی TestClass مزین می‌شود. سپس متد آزمون واحد نوشته شده نیز باید به صورت public void و مزین شده‌ی با ویژگی TestMethod، ارائه شود. <br>
+
+
+پس از نوشتن اولین آزمون واحد، یکبار پروژه را build کرده و سپس از منوی Test، گزینه‌ی Windows را انتخاب کرده و در اینجا گزینه‌ی Test Explorer را انتخاب کنید. اندکی صبر کنید تا آزمون‌های واحد شما شناسایی شوند و سپس گزینه‌ی Run All را انتخاب کنید:<br> <br> <p style="display:block; margin-left: auto; margin-right: auto;"> <img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/png;base64,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"> </p> <br> <br> <b>تغییرات Context برنامه جهت استفاده‌ی از تامین کننده‌ی داخل حافظه‌ای</b> <br> <br>
+
+
+در مورد نحوه‌ی تعریف و افزودن وابستگی‌های EF Core در مطلب «<a href="www.dntips.ir-posts-2488.html">شروع به کار با EF Core 1.0 - قسمت 1 - برپایی تنظیمات اولیه</a>» پیشتر بحث شد و همچنین در مطلب «<a href="www.dntips.ir-posts-2491.html">شروع به کار با EF Core 1.0 - قسمت 3 - انتقال مهاجرت‌ها به یک اسمبلی دیگر</a>»، اطلاعات Context برنامه را به اسمبلی دیگری منتقل کردیم.<br>
+
+
+اگر از روش بازنویسی متد OnConfiguring برای تنظیم تامین کننده‌ی بانک اطلاعاتی مورد نظر استفاده می‌کنید، متد OnConfiguring کلاس Context برنامه چنین شکلی را پیدا می‌کند: <br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">public&nbsp;class&nbsp;ApplicationDbContext&nbsp;:&nbsp;DbContext,&nbsp;IUnitOfWork
+{
+&nbsp;&nbsp;&nbsp;&nbsp;private&nbsp;readonly&nbsp;IConfigurationRoot&nbsp;_configuration;
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;ApplicationDbContext(IConfigurationRoot&nbsp;configuration)
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_configuration&nbsp;=&nbsp;configuration;
+&nbsp;&nbsp;&nbsp;&nbsp;}
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;ApplicationDbContext(DbContextOptions&lt;ApplicationDbContext&gt;&nbsp;options)&nbsp;:&nbsp;base(options)
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;} 
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;protected&nbsp;override&nbsp;void&nbsp;OnConfiguring(DbContextOptionsBuilder&nbsp;optionsBuilder)
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(!optionsBuilder.IsConfigured)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;optionsBuilder.UseSqlServer(
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_configuration["ConnectionStrings:ApplicationDbContextConnection"]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;,&nbsp;serverDbContextOptionsBuilder&nbsp;=&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;minutes&nbsp;=&nbsp;(int)TimeSpan.FromMinutes(3).TotalSeconds;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;serverDbContextOptionsBuilder.CommandTimeout(minutes);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;});
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;}</pre> </div>
+در اینجا دو تغییر جدید قابل ملاحظه هستند:<br>
+
+
+الف) اضافه شدن سازنده‌ی دومی که &lt;DbContextOptions&lt;ApplicationDbContext را دریافت می‌کند. از آن در سمت کدهای آزمون واحد برنامه جهت ثبت ()options.UseInMemoryDatabase استفاده می‌شود.<br>
+
+
+ب) به متد OnConfiguring، بررسی optionsBuilder.IsConfigured هم اضافه شده‌است. چون در سمت کدهای آزمون واحد، تامین کننده‌ی بانک اطلاعاتی درون حافظه‌ای اضافه می‌شود، مقدار optionsBuilder.IsConfigured به true تنظیم خواهد شد و دیگر از تامین کننده‌ی SQL Server استفاده نمی‌شود. <br> <br>
+
+
+اگر از متد OnConfiguring به این شکل استفاده نمی‌کنید، تنها ذکر سازنده‌ی دوم ضروری است. از این جهت که در آزمون‌های واحد، از تنظیمات متد ConfigureServices کلاس آغازین برنامه استفاده نخواهد شد.<br> <br> <br> <b>
+
+نوشتن آزمون‌های واحد مخصوص EF Core</b> <br> <br>
+
+
+پس از برپایی پیشنیازهای نوشتن آزمون‌ها واحد، شامل تنظیمات فریم ورک MSTest و همچنین افزودن وابستگی‌های مرتبط با فایل project.json ایی که در ابتدای بحث عنوان شد و اصلاح سازنده و متد OnConfiguring کلاس Context برنامه جهت آماده سازی آن‌ها برای پذیرش تامین کننده‌های دیگر، اکنون یک نمونه از آزمون‌های واحد درون حافظه‌ای EF Core، چنین شکلی را خواهد داشت:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">using&nbsp;System;
+using&nbsp;System.Linq;
+using&nbsp;Core1RtmEmptyTest.DataLayer;
+using&nbsp;Core1RtmEmptyTest.Entities;
+using&nbsp;Core1RtmEmptyTest.Services;
+using&nbsp;Microsoft.EntityFrameworkCore;
+using&nbsp;Microsoft.Extensions.DependencyInjection;
+using&nbsp;Microsoft.VisualStudio.TestTools.UnitTesting;
+ 
+namespace&nbsp;Core1RtmEmptyTest.MsTests
+{
+&nbsp;&nbsp;&nbsp;&nbsp;[TestClass]
+&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;class&nbsp;CoreTests
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;private&nbsp;readonly&nbsp;IServiceProvider&nbsp;_serviceProvider;
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;CoreTests()
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;services&nbsp;=&nbsp;new&nbsp;ServiceCollection();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;services.AddEntityFrameworkInMemoryDatabase()
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.AddDbContext&lt;ApplicationDbContext&gt;(options&nbsp;=&gt;&nbsp;options.UseInMemoryDatabase());
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;services.AddScoped&lt;IUnitOfWork,&nbsp;ApplicationDbContext&gt;();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;services.AddScoped&lt;IBlogService,&nbsp;BlogService&gt;();
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_serviceProvider&nbsp;=&nbsp;services.BuildServiceProvider();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[TestMethod]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;void&nbsp;Find_searches_url()
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//&nbsp;Insert&nbsp;seed&nbsp;data&nbsp;into&nbsp;the&nbsp;database&nbsp;using&nbsp;one&nbsp;instance&nbsp;of&nbsp;the&nbsp;context
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;using&nbsp;(var&nbsp;serviceScope&nbsp;=&nbsp;_serviceProvider.GetRequiredService&lt;IServiceScopeFactory&gt;().CreateScope())
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;using&nbsp;(var&nbsp;context&nbsp;=&nbsp;serviceScope.ServiceProvider.GetRequiredService&lt;IUnitOfWork&gt;())
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;context.Set&lt;Blog&gt;().Add(new&nbsp;Blog&nbsp;{&nbsp;Url&nbsp;=&nbsp;"http://sample.com/cats"&nbsp;});
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;context.Set&lt;Blog&gt;().Add(new&nbsp;Blog&nbsp;{&nbsp;Url&nbsp;=&nbsp;"http://sample.com/catfish"&nbsp;});
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;context.Set&lt;Blog&gt;().Add(new&nbsp;Blog&nbsp;{&nbsp;Url&nbsp;=&nbsp;"http://sample.com/dogs"&nbsp;});
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;context.SaveAllChanges();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//&nbsp;Use&nbsp;a&nbsp;separate&nbsp;instance&nbsp;of&nbsp;the&nbsp;context&nbsp;to&nbsp;verify&nbsp;correct&nbsp;data&nbsp;was&nbsp;saved&nbsp;to&nbsp;database
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;using&nbsp;(var&nbsp;serviceScope&nbsp;=&nbsp;_serviceProvider.GetRequiredService&lt;IServiceScopeFactory&gt;().CreateScope())
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;using&nbsp;(var&nbsp;context&nbsp;=&nbsp;serviceScope.ServiceProvider.GetRequiredService&lt;IUnitOfWork&gt;())
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Assert.AreEqual(3,&nbsp;context.Set&lt;Blog&gt;().Count());
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Assert.AreEqual("http://sample.com/cats",&nbsp;context.Set&lt;Blog&gt;().First().Url);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//&nbsp;Use&nbsp;a&nbsp;clean&nbsp;instance&nbsp;of&nbsp;the&nbsp;context&nbsp;to&nbsp;run&nbsp;the&nbsp;test
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;using&nbsp;(var&nbsp;serviceScope&nbsp;=&nbsp;_serviceProvider.GetRequiredService&lt;IServiceScopeFactory&gt;().CreateScope())
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;blogService&nbsp;=&nbsp;serviceScope.ServiceProvider.GetRequiredService&lt;IBlogService&gt;();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;results&nbsp;=&nbsp;blogService.GetPagedBlogsAsNoTracking(pageNumber:&nbsp;0,&nbsp;recordsPerPage:&nbsp;10);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Assert.AreEqual(3,&nbsp;results.Count);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;}
+}</pre> </div> <b>توضیحات:</b> <br>
+
+
+همانطور که در قسمت «تغییرات Context برنامه جهت استفاده‌ی از تامین کننده‌ی داخل حافظه‌ای» فوق عنوان شد، در حین انجام آزمون‌های واحد، دیگر به کلاس آغازین برنامه و تنظیمات آن مراجعه نمی‌شود. بنابراین باید شبیه به عملکرد متد ConfigureServices آن‌را در اینجا پیاده سازی کرد. نمونه‌ای از انجام اینکار را در سازنده‌ی کلاس انجام آزمون‌های واحد مشاهده می‌کنید:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;private&nbsp;readonly&nbsp;IServiceProvider&nbsp;_serviceProvider;
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;CoreTests()
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;services&nbsp;=&nbsp;new&nbsp;ServiceCollection();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;services.AddEntityFrameworkInMemoryDatabase()
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.AddDbContext&lt;ApplicationDbContext&gt;(options&nbsp;=&gt;&nbsp;options.UseInMemoryDatabase());
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;services.AddScoped&lt;IUnitOfWork,&nbsp;ApplicationDbContext&gt;();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;services.AddScoped&lt;IBlogService,&nbsp;BlogService&gt;();
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_serviceProvider&nbsp;=&nbsp;services.BuildServiceProvider();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</pre> </div>
+در اینجا است که توسط متد AddEntityFrameworkInMemoryDatabase، کار افزودن تامین کننده‌ی بانک اطلاعاتی درون حافظه‌ای انجام شده و سپس Context برنامه نیز از آن مطلع می‌شود (علت افزودن سازنده‌ی دومی که &lt;DbContextOptions&lt;ApplicationDbContext را دریافت می‌کند).<br>
+
+
+سپس همانند قبل، باید تمام سرویس‌های مدنظر تنظیم شوند تا بتوان از آن‌ها استفاده کرد.<br> <br>
+
+
+نکته‌ی مهم دیگری را که باید به آن دقت داشت، ایجاد scope و سپس دسترسی به سرویس‌ها از طریق این Scope است. از این جهت که چون خارج از طول عمر یک درخواست وب قرار داریم، دیگر Scopeها برای ما به صورت خودکار ایجاد و تخریب نمی‌شوند و باید همان‌کاری را که ASP.NET Core در پشت صحنه انجام می‌دهد، به صورت دستی پیاده سازی کنیم:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;using&nbsp;(var&nbsp;serviceScope&nbsp;=&nbsp;_serviceProvider.GetRequiredService&lt;IServiceScopeFactory&gt;().CreateScope())
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;using&nbsp;(var&nbsp;context&nbsp;=&nbsp;serviceScope.ServiceProvider.GetRequiredService&lt;IUnitOfWork&gt;())
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</pre> </div>
+اگر اینکار صورت نگیرد، چون Scope ایی ایجاد و تخریب نمی‌شود، کار کردن با متد serviceProvider.GetRequiredService_ اشتباه بوده و همیشه یک وهله از Context را باز می‌گرداند که مدنظر ما نیست. شبیه به این نکته را در قسمت «<a href="www.dntips.ir-posts-2490.html">مقدار دهی اولیه‌ی جداول بانک‌های اطلاعاتی در EF Core</a>» پیشتر ملاحظه کرده‌اید.<br> <br> <br> <b>یک نکته‌ی تکمیلی</b> <br> <br>
+
+
+EF Core به همراه تامین کننده‌ی بانک اطلاعاتی SQLite نیز هست. یکی از نکات ویژه‌ی بانک اطلاعاتی SQLite، امکان تنظیم پارامتری است در رشته‌ی اتصالی آن، که آن‌را نیز تبدیل به یک «بانک اطلاعاتی درون حافظه‌ای» می‌کند. این روش سال‌ها است که جهت انجام آزمون‌های واحد ORMها مورد استفاده قرار می‌گیرد. بنابراین می‌توان آن‌را به عنوان جایگزینی برای مطلب جاری نیز درنظر گرفت.<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code"> var connectionStringBuilder = new SqliteConnectionStringBuilder { DataSource = ":memory:" };
+var connectionString = connectionStringBuilder.ToString();
+var connection = new SqliteConnection(connectionString);
+services.AddEntityFrameworkSqlite().AddDbContext&lt;CmsDbContext&gt;(options =&gt; options.UseSqlite(connection));</pre> </div>
+اهمیت آن در اینجا است که تامین کننده‌ی بانک اطلاعاتی درون حافظه‌ای EF، <a href="https://github.com/aspnet/EntityFramework/issues/2166">قیود را اعمال نمی‌کند</a> ؛ اما بانک اطلاعاتی <a href="http://www.sqlite.org/inmemorydb.html">درون حافظه‌ای SQLite</a>  واقعا همانند یک بانک اطلاعاتی رابطه‌ای کامل عمل می‌کند.<span> <br> </span></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2509.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>شروع به کار با EF Core 1.0 - قسمت 14 - لایه بندی و تزریق وابستگی‌ها</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2490.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>شروع به کار با EF Core 1.0 - قسمت 2 - به روز رسانی ساختار بانک اطلاعاتی</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2507.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>شروع به کار با EF Core 1.0 - قسمت 13 - بررسی سیستم ردیابی تغییرات</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2488.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>شروع به کار با EF Core 1.0 - قسمت 1 - برپایی تنظیمات اولیه</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2739.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>ویژگی Batching در EF Core</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2577.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>سفارشی سازی ASP.NET Core Identity - قسمت اول - موجودیت‌های پایه و DbContext برنامه</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2510.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>شروع به کار با EF Core 1.0 - قسمت 15 - نوشتن آزمون‌های واحد</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3415.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>روش ذخیره‌ی لاگ‌های ILogger در پایگاه داده در Blazor</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2969.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>مهارت‌های تزریق وابستگی‌ها در برنامه‌های NET Core. - قسمت دوم - الگوی Service Locator</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2717.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>غیرمعتبر شدن کوکی‌های برنامه‌های ASP.NET Core هاست شده‌ی در IIS پس از ری‌استارت آن</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۵/۰۶/۲۷ ۹:۴۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><b>راه حل دوم برای اینکه در کلاس Context بیشتر از یک سازنده تعریف نکنیم</b> <br> <br>
+
+
+
+اضافه کردن سازنده‌ی دوم به کلاس Context می‌تواند عملیات Migrations را با مشکل مواجه کند. بنابراین جهت ساده سازی آن، به فایل appsettings.json یک مدخل جدید را اضافه می‌کنیم:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="JScript" name="code">{
+   "UseInMemoryDatabase": false
+}</pre> </div>
+
+سپس این مدخل را در متد OnConfiguring کلاس Context مورد استفاده قرار خواهیم داد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">protected&nbsp;override&nbsp;void&nbsp;OnConfiguring(DbContextOptionsBuilder&nbsp;optionsBuilder)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;useInMemoryDatabase&nbsp;=&nbsp;_configuration["UseInMemoryDatabase"].Equals("true",&nbsp;StringComparison.OrdinalIgnoreCase);
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(useInMemoryDatabase)
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;optionsBuilder.UseInMemoryDatabase();
+&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;else
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;optionsBuilder.UseSqlServer(
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_configuration["ConnectionStrings:ApplicationDbContextConnection"]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;,&nbsp;serverDbContextOptionsBuilder&nbsp;=&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;minutes&nbsp;=&nbsp;(int)TimeSpan.FromMinutes(3).TotalSeconds;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;serverDbContextOptionsBuilder.CommandTimeout(minutes);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;});
+&nbsp;&nbsp;&nbsp;&nbsp;}
+}</pre> </div>
+
+در اینجا بررسی شده‌است که مقدار کلید سفارشی UseInMemoryDatabase در تنظیمات برنامه چیست و بر این اساس تصمیم گیری شده‌است.<br>
+
+
+
+در این حالت در سمت کدهای آزمون واحد، مقدار کلید UseInMemoryDatabase را توسط یک InMemoryCollection تامین می‌کنیم و همچنین افزودن AddDbContext نیز معمولی خواهد بود:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">var&nbsp;services&nbsp;=&nbsp;new&nbsp;ServiceCollection();
+ 
+services.AddSingleton&lt;IConfigurationRoot&gt;(provider&nbsp;=&gt;
+{
+&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;new&nbsp;Microsoft.Extensions.Configuration.ConfigurationBuilder()
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.AddInMemoryCollection(new[]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;new&nbsp;KeyValuePair&lt;string,string&gt;("UseInMemoryDatabase",&nbsp;"true"),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;})
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.Build();
+});
+ 
+services.AddEntityFrameworkInMemoryDatabase().AddDbContext&lt;SampleContext&gt;(ServiceLifetime.Scoped);</pre> </div></div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>سیروان عفیفی</strong>  در  <span dir='ltr'>۱۳۹۵/۱۰/۱۸ ۱۲:۳۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>قسمت using‌ها را می‌توانیم درون یک متد جنریک به اینصورت نیز کپسوله کنیم:<div align="left" dir="ltr" style="direction: ltr;"> <pre language="CSharp" name="code">private void ScopeContext&lt;T&gt;(Action&lt;IUnitOfWork, T&gt; callback)
+        {
+            using (var serviceScope = _serviceProvider.GetRequiredService&lt;IServiceScopeFactory&gt;().CreateScope())
+            {
+                using (var context = serviceScope.ServiceProvider.GetRequiredService&lt;IUnitOfWork&gt;())
+                {
+                    callback(context, serviceScope.ServiceProvider.GetRequiredService&lt;T&gt;());
+                }
+            }
+        }</pre> </div> <br> <div> <div align="left" dir="ltr" style="direction: ltr;"> </div>
+
+در اینحالت خواهیم داشت:</div> <div> <div align="left" dir="ltr" style="direction: ltr;"> </div> <div align="left" dir="ltr" style="direction: ltr;"> </div> <div align="left" dir="ltr" style="direction: ltr;"> <pre language="CSharp" name="code">ScopeContext&lt;IBlogService&gt;(async (context, scope) =&gt;
+{
+                Assert.AreEqual(3, context.Set&lt;Blog&gt;().Count());
+                Assert.AreEqual("http://sample.com/cats", context.Set&lt;Blog&gt;().First().Url);
+});</pre> </div> <br> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۷/۰۱/۲۹ ۱۴:۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>این نکته به <a href="https://github.com/VahidN/DNTCommon.Web.Core/blob/master/src/DNTCommon.Web.Core/DependencyInjection/IServiceProviderExtensions.cs">IServiceProviderExtensions</a> <span>&nbsp;کتابخانه </span> <strong> <a data-pjax="#js-repo-pjax-container" href="https://github.com/VahidN/DNTCommon.Web.Core">DNTCommon.Web.Core</a> </strong> <span>اضافه شد.<br> </span> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">PM&gt; Install-Package DNTCommon.Web.Core<span>&nbsp;</span> <span> </span> </pre> </div></div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۶/۰۱/۱۰ ۱۱:۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><b>به روز رسانی</b> <br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+با حذف فایل project.json در VS 2017، اکنون با کلیک راست بر روی گروه نام 
+پروژه (فایل csproj)، گزینه‌ی Edit آن ظاهر شده و مداخل ذکر شده‌ی در مطلب 
+فوق، چنین تعاریفی را پیدا می‌کنند:&nbsp;        <br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="XML" name="code">&lt;Project Sdk="Microsoft.NET.Sdk"&gt;
+
+  &lt;PropertyGroup&gt;
+    &lt;TargetFramework&gt;netcoreapp1.1&lt;/TargetFramework&gt;
+    &lt;GenerateRuntimeConfigurationFiles&gt;true&lt;/GenerateRuntimeConfigurationFiles&gt;
+    &lt;PackageTargetFallback&gt;$(PackageTargetFallback);dnxcore50;portable-net45+win8&lt;/PackageTargetFallback&gt;
+  &lt;/PropertyGroup&gt;
+
+  &lt;ItemGroup&gt;
+    &lt;None Update="..\Sample\appsettings.json"&gt;
+      &lt;CopyToOutputDirectory&gt;PreserveNewest&lt;/CopyToOutputDirectory&gt;
+    &lt;/None&gt;
+  &lt;/ItemGroup&gt;
+
+  &lt;ItemGroup&gt;
+    &lt;ProjectReference Include="..\Sample\DataLayer.csproj" /&gt;
+  &lt;/ItemGroup&gt;
+
+  &lt;ItemGroup&gt;
+    &lt;PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-preview-20170106-08" /&gt;
+    &lt;PackageReference Include="MSTest.TestAdapter" Version="1.1.13" /&gt;
+    &lt;PackageReference Include="Microsoft.EntityFrameworkCore" Version="1.1.1" /&gt;
+    &lt;PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="1.1.1" PrivateAssets="All" /&gt;
+    &lt;PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="1.1.1" /&gt;
+    &lt;PackageReference Include="Microsoft.Extensions.Configuration" Version="1.1.1" /&gt;
+    &lt;PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="1.1.1" /&gt;
+    &lt;PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.1.1" /&gt;
+    &lt;PackageReference Include="MSTest.TestFramework" Version="1.1.13" /&gt;
+  &lt;/ItemGroup&gt;
+&lt;/Project&gt;</pre> </div>
+
+
+
+در اینجا روش استفاده‌ی از فایل appsettings.json پروژه‌ی اصلی را هم مشاهده می‌کنید.</div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۷/۰۲/۰۹ ۱۱:۳۹</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><b>یک نکته‌ی تکمیلی: روش کپی کردن فایل appsettings.json جهت دسترسی به آن در آزمون‌های واحد</b> <br> <br>
+
+
+
+ابتدا پس از build، فایل appsettings.json را در کنار خروجی برنامه کپی می‌کنیم (از پوشه‌ی وب، به پوشه‌ی bin\Debug\netcoreapp2.0 تست جاری)<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="XML" name="code">&lt;Target Name="CopyConfig" AfterTargets="AfterBuild"&gt;
+    &lt;Copy SourceFiles="..\MyWebApp\appsettings.json" DestinationFolder="$(OutDir)" /&gt;
+&lt;/Target&gt;</pre> </div>
+
+روش دیگر CopyToOutputDirectory زیر زمانیکه از SDK استفاده می‌شود، کار نمی‌کند:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="XML" name="code">  &lt;ItemGroup&gt;
+    &lt;None Update="..\MyWebApp\appsettings.json"&gt;
+      &lt;CopyToOutputDirectory&gt;PreserveNewest&lt;/CopyToOutputDirectory&gt;
+    &lt;/None&gt;
+  &lt;/ItemGroup&gt;</pre> </div> <br>
+
+سپس جائیکه ServiceCollection اولیه آزمون‌ها ساخته می‌شود، محل این فایل کپی شده را معرفی می‌کنیم:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">var services = new ServiceCollection();
+var configuration = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
+   .AddJsonFile("appsettings.json", reloadOnChange: true, optional: false)
+   .AddInMemoryCollection(new[]
+     {
+       new KeyValuePair&lt;string,string&gt;("UseInMemoryDatabase", "true"),
+     })
+   .Build();
+services.AddSingleton&lt;IConfigurationRoot&gt;(provider =&gt; configuration);</pre> </div></div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>سالار ربال</strong>  در  <span dir='ltr'>۱۳۹۷/۰۶/۲۲ ۰:۱۷</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><b>نکته تکمیلی</b> <div> <div>برای مقدار دهی خودکار فیلد مرتبط با مباحث همزمانی برای تامین کننده SQLite&nbsp;<a href="https://github.com/aspnet/EntityFrameworkCore/issues/12260#issuecomment-395509124">می توان به شکل زیر عمل کرد</a>:</div> <div> <b>هنگام ثبت رکورد جدید</b> </div> <div> <div align="left" dir="ltr" style="direction: ltr;"> </div> <div align="left" dir="ltr" style="direction: ltr;"> <pre language="CSharp" name="code">public static void SetRowVersionOnInsert(this IUnitOfWork uow, string table)
+{
+    uow.ExecuteSqlCommand(
+        $@"
+            CREATE TRIGGER Set{table}RowVersion
+            AFTER INSERT ON {table}
+            BEGIN
+                UPDATE {table}
+                SET RowVersion = randomblob(8)
+                WHERE Id = NEW.Id;
+            END
+            ");
+}</pre> </div> <br> <div> <b>هنگام ویرایش رکورد موجود</b> </div> <div> <div align="left" dir="ltr" style="direction: ltr;"> <pre language="CSharp" name="code">public static void SetRowVersionOnUpdate(this IUnitOfWork uow, string table)
+{
+    uow.ExecuteSqlCommand(
+        $@"
+            CREATE TRIGGER Set{table}RowVersion
+            AFTER UPDATE ON {table}
+            BEGIN
+                UPDATE {table}
+                SET RowVersion = randomblob(8)
+                WHERE Id = NEW.Id;
+            END
+            ");
+}</pre> </div> <br> </div>
+
+
+
+و استفاده از آن در هنگام کار با داده‌های تست:</div> <div> <div align="left" dir="ltr" style="direction: ltr;"> <pre language="CSharp" name="code">_serviceProvider.RunScopedService&lt;IUnitOfWork&gt;(uow =&gt;
+{
+    uow.SetRowVersionOnInsert(nameof(MeasurementUnit));
+    
+    uow.Set&lt;MeasurementUnit&gt;().Add(measurementUnit1);
+    uow.Set&lt;MeasurementUnit&gt;().Add(measurementUnit2);
+    uow.Set&lt;MeasurementUnit&gt;().Add(measurementUnit3);
+    uow.SaveChanges();
+});</pre> </div> <br> </div> </div></div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهدی سعیدی فر</strong>  در  <span dir='ltr'>۱۴۰۱/۰۳/۲۴ ۱۴:۵۵</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>فرض کنید که برای متد Create سرویس BookService،&nbsp;تست‌های مختلفی نوشته باشیم. حال اگر بخواهیم برای متد Update سرویس BookService نیز تست بنویسیم، بهتر است که در مرحله Arrange تست، از متد Create همان BookService که قبلا برای آن تست نوشته ایم استفاده کنیم یا مستقیما با استفاده از متد‌های Entity Framework، کتاب مورد نظر را مستقیما در دیتابیس درج کنیم و برای ویرایش آن تست بنویسیم؟</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۴۰۱/۰۳/۲۴ ۱۸:۴۰</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><a href="https://stackoverflow.com/a/9018501/298573">هر دو حالت مشکلی ندارد.</a></div>
+</div></li></ul></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

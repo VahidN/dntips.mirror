@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫واژه کلیدی جدید extension در دات‌نت 10: ویژگی‌ها و کاربردهای آن</title>     <meta name="description" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در نسخه پیش‌نمایش سوم دات‌نت 10 (Preview 3) که با زبان برنامه‌نویسی سی‌شارپ 14 (C# 14) همراه است، واژه کلیدی جدید extension معرفی شده است. این ویژگی، امتداد و تکامل متدهای الحاقی (Extension Methods) قدیمی است که از نسخه‌های پیشین سی‌شارپ وجود داشتند. واژه کلیدی extension امکان تعریف بلوک‌های افزونه‌ای (Extension Blocks) را برای هر نوع داده فراهم می‌کند و قابلیت‌هایی مانند افزودن خصوصیات (Properties)، فیلدهای پشتیبان خصوصی (Private Backing Fields)، و حتی بلوک‌های افزونه‌ای استاتیک را به توسعه‌دهندگان می‌دهد. این مقاله به بررسی این ویژگی جدید، نحوه کارکرد آن، و کاربردهای عملی آن در توسعه نرم‌افزارهای دات‌نت می‌پردازد. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;واژه کلیدی extension چیست؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;واژه کلیدی extension در سی‌شارپ 14 به توسعه‌دهندگان اجازه می‌دهد تا بلوک‌های افزونه‌ای را برای انواع داده‌ها (چه تعریف‌شده توسط خودشان و چه انواع خارجی) تعریف کنند. برخلاف متدهای الحاقی قدیمی که صرفاً امکان افزودن متدهای استاتیک به انواع را فراهم می‌کردند، این ویژگی جدید قابلیت‌های گسترده‌تری را ارائه می‌دهد. این قابلیت‌ها شامل موارد زیر هستند:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;افزودن خصوصیات افزونه‌ای (Extension Properties):&lt;/strong&gt; امکان تعریف خصوصیاتی که به‌صورت منطقی به یک نوع تعلق دارند، بدون نیاز به تغییر ساختار اصلی آن نوع.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;فیلدهای پشتیبان خصوصی (Private Backing Fields):&lt;/strong&gt; امکان ذخیره‌سازی داده‌های موقت یا کش‌شده در بلوک افزونه برای بهبود عملکرد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;بلوک‌های استاتیک افزونه‌ای (Static Extension Blocks):&lt;/strong&gt; برای تعریف متدهای استاتیک یا خصوصیات کمکی مرتبط با نوع.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;سازمان‌دهی منطقی‌تر کدها:&lt;/strong&gt; گروه‌بندی منطقی رفتارها و خصوصیات مرتبط در یک بلوک واحد.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این ویژگی به‌ویژه برای توسعه‌دهندگانی که به معماری تمیز (Clean Architecture) و مدل‌سازی دامنه غنی (Rich Domain Modeling) اهمیت می‌دهند، یک ابزار قدرتمند محسوب می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نحوه استفاده از extension: سینتکس و ساختار&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای استفاده از واژه کلیدی extension، باید یک کلاس استاتیک تعریف کرد و سپس بلوک‌های افزونه‌ای را درون آن برای نوع هدف مشخص نمود. ساختار کلی سینتکس به‌صورت زیر است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static class MyExtensions
+{
+    extension(TargetType instance)
+    {
+        public ReturnType PropertyOrMethod =&amp;gt; ...;
+    }
+
+    extension static
+    {
+        public static ReturnType StaticHelper() =&amp;gt; ...;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این ساختار:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;TargetType نوع داده‌ای است که می‌خواهیم برای آن افزونه تعریف کنیم (مثلاً HttpContext یا یک DTO خارجی).&lt;/li&gt;&lt;li&gt;بلوک extension(TargetType instance) برای تعریف خصوصیات و متدهای نمونه‌ای (Instance Members) استفاده می‌شود.&lt;/li&gt;&lt;li&gt;بلوک extension static برای تعریف متدهای استاتیک یا خصوصیات کمکی مرتبط با نوع به کار می‌رود.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این سینتکس امکان تعریف رفتارهای منسجم و متمرکز را فراهم می‌کند و از پراکندگی کدها جلوگیری می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;کاربردهای عملی واژه کلیدی extension&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای درک بهتر این ویژگی، دو نمونه واقعی از کاربردهای آن بررسی می‌شوند که نشان‌دهنده قدرت و انعطاف‌پذیری آن در حل مسائل پیچیده توسعه نرم‌افزار هستند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;1. مدیریت منطق چنداجاره‌ای (Multi-Tenant) در برنامه‌های SaaS&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;در توسعه برنامه‌های نرم‌افزاری به‌عنوان سرویس (SaaS) که چندین مشتری (Tenant) از یک نمونه نرم‌افزار استفاده می‌کنند، مدیریت اطلاعات مرتبط با هر مشتری چالش‌برانگیز است. فرض کنید نیاز دارید اطلاعاتی مانند شناسه مشتری (TenantId)، شناسه کاربر (UserId)، وضعیت مدیریت مشتری، و هدرهای سفارشی را از یک شیء HttpContext استخراج کنید. در روش‌های سنتی، این منطق در متدهای استاتیک پراکنده پیاده‌سازی می‌شد که خوانایی و نگهداری را دشوار می‌کرد. با استفاده از extension، می‌توان این منطق را به‌صورت متمرکز و خوانا پیاده‌سازی کرد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static class MultiTenantHttpContextExtensions
+{
+    extension(HttpContext ctx)
+    {
+        private string? _tenantId;
+        private Guid? _userId;
+
+        public string TenantId =&amp;gt;
+            _tenantId ??=
+                ctx.User.Claims.FirstOrDefault(c =&amp;gt; c.Type == &amp;quot;tenant_id&amp;quot;)?.Value
+                ?? throw new UnauthorizedAccessException(&amp;quot;Tenant ID missing&amp;quot;);
+
+        public Guid UserId =&amp;gt;
+            _userId ??=
+                Guid.TryParse(
+                    ctx.User.Claims.FirstOrDefault(c =&amp;gt; c.Type == &amp;quot;user_id&amp;quot;)?.Value, out var id)
+                ? id
+                : throw new UnauthorizedAccessException(&amp;quot;User ID invalid&amp;quot;);
+
+        public bool IsTenantAdmin =&amp;gt;
+            ctx.User.IsInRole(&amp;quot;Admin&amp;quot;) || ctx.Request.Headers[&amp;quot;X-Tenant-Admin&amp;quot;] == &amp;quot;true&amp;quot;;
+
+        public string? GetHeader(string name) =&amp;gt;
+            ctx.Request.Headers.TryGetValue(name, out var value)
+                ? value.ToString()
+                : null;
+    }
+
+    extension static
+    {
+        public static string DefaultTenantId =&amp;gt; &amp;quot;public&amp;quot;;
+
+        public static bool IsValidTenantId(string? id) =&amp;gt;
+            !string.IsNullOrWhiteSpace(id) &amp;amp;&amp;amp; id.All(char.IsLetterOrDigit);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مزایای این پیاده‌سازی عبارتند از:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;خوانایی بالا:&lt;/strong&gt; تمام منطق مرتبط با HttpContext در یک بلوک متمرکز قرار دارد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;کش‌سازی تنبل (Lazy Caching):&lt;/strong&gt; استفاده از فیلدهای خصوصی مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;_tenantId&lt;/code&gt; و &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;_userId&lt;/code&gt; برای جلوگیری از محاسبات تکراری.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;انسجام دامنه:&lt;/strong&gt; منطق مرتبط با مشتری به‌صورت یکپارچه در کنار هم قرار گرفته و نگهداری آن آسان‌تر است.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-ltr&quot; dir=&quot;ltr&quot; style=&quot;text-align: left;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;2. گسترش مدل‌های خارجی (External DTOs)&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;یکی دیگر از کاربردهای رایج extension، افزودن منطق دامنه به مدل‌های داده‌ای خارجی (مانند DTOهای تولیدشده توسط کتابخانه‌های شخص ثالث) است. فرض کنید با یک مدل OrderDto کار می‌کنید که امکان تغییر مستقیم آن را ندارید:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class OrderDto
+{
+    public List&amp;lt;OrderItemDto&amp;gt; Items { get; set; }
+    public string Status { get; set; }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;با استفاده از extension، می‌توان خصوصیات محاسباتی مانند مجموع مبلغ سفارش یا تعداد کل اقلام را به این مدل اضافه کرد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static class OrderExtensions
+{
+    extension(OrderDto order)
+    {
+        public decimal TotalAmount =&amp;gt;
+            order.Items.Sum(i =&amp;gt; i.Quantity * i.PricePerUnit);
+
+        public bool IsComplete =&amp;gt;
+            order.Status == &amp;quot;Completed&amp;quot;;
+
+        public int TotalItems =&amp;gt;
+            order.Items.Sum(i =&amp;gt; i.Quantity);
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;استفاده از این افزونه‌ها در کد به‌صورت زیر خواهد بود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;if (order.TotalAmount &amp;gt; 1000 &amp;amp;&amp;amp; order.IsComplete)
+{
+    // انجام عملیات موردنظر
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رویکرد امکان افزودن رفتارهای غنی به مدل‌های خارجی را بدون تغییر ساختار اصلی آن‌ها فراهم می‌کند و کد را خواناتر و معنادارتر می‌سازد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چرا extension از متدهای الحاقی سنتی بهتر است؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;اگرچه متدهای الحاقی سنتی همچنان در دات‌نت 10 پشتیبانی می‌شوند، واژه کلیدی extension مزایای قابل‌توجهی دارد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;سازمان‌دهی بهتر:&lt;/strong&gt; به‌جای پراکندگی متدها در کلاس‌های استاتیک، می‌توان تمام رفتارهای مرتبط را در یک بلوک واحد گروه‌بندی کرد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;پشتیبانی از خصوصیات و فیلدهای خصوصی:&lt;/strong&gt; امکان تعریف خصوصیات و کش‌سازی داده‌ها که در متدهای الحاقی سنتی ممکن نبود.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;انعطاف‌پذیری بیشتر:&lt;/strong&gt; پشتیبانی از بلوک‌های استاتیک برای تعریف متدهای کمکی مرتبط.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این ویژگی به توسعه‌دهندگان اجازه می‌دهد تا کدی با معماری تمیزتر و نگهداری‌پذیرتر تولید کنند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نکات و توصیه‌ها&lt;/strong&gt;&lt;/div&gt;&lt;ol&gt;&lt;li&gt;وضعیت کنونی: واژه کلیدی extension در حال حاضر در نسخه پیش‌نمایش سوم دات‌نت 10 (Preview 3) و سی‌شارپ 14 در دسترس است. &lt;strong&gt;&lt;em&gt;این ویژگی ممکن است در نسخه‌های بعدی با تغییراتی در سینتکس یا ابزارهای پشتیبانی همراه باشد.&lt;/em&gt;&lt;/strong&gt;&lt;/li&gt;&lt;li&gt;سازگاری با کدهای موجود: متدهای الحاقی سنتی همچنان کار می‌کنند و این ویژگی کاملاً افزوده‌ای (Additive) است، بنابراین نیازی به بازنویسی کدهای قدیمی نیست.&lt;/li&gt;&lt;li&gt;موارد استفاده پیشنهادی: از extension برای سناریوهایی مانند تبدیل DTOها، مدیریت منطق HTTP، افزودن مقادیر محاسباتی به مدل‌ها، و بهبودهای خاص دامنه استفاده کنید.&lt;/li&gt;&lt;li&gt;احتیاط: از استفاده بیش‌ازحد این ویژگی که ممکن است منجر به پیچیدگی غیرضروری شود، خودداری کنید. تنها زمانی از آن استفاده کنید که رفتارها به‌صورت منطقی به یک نوع تعلق دارند.&lt;/li&gt;&lt;/ol&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;واژه کلیدی extension در دات‌نت 10 و سی‌شارپ 14 یک ابزار قدرتمند و تحول‌آفرین برای توسعه‌دهندگان است که امکان تعریف بلوک‌های افزونه‌ای منسجم و خوانا را فراهم می‌کند. این ویژگی با ارائه قابلیت‌هایی مانند خصوصیات افزونه‌ای، فیلدهای پشتیبان خصوصی، و بلوک‌های استاتیک، به توسعه‌دهندگان اجازه می‌دهد تا منطق دامنه را به‌صورت متمرکز و کارآمد پیاده‌سازی کنند. کاربردهای عملی آن، از مدیریت سیستم‌های چنداجاره‌ای گرفته تا گسترش مدل‌های خارجی، نشان‌دهنده انعطاف‌پذیری و ارزش آن در پروژه‌های واقعی است. با توجه به اینکه این ویژگی هنوز در مرحله پیش‌نمایش است، توسعه‌دهندگان باید با دقت از آن استفاده کنند و منتظر بهبودهای احتمالی در نسخه‌های بعدی باشند. در نهایت، extension گامی مهم در جهت بهبود معماری نرم‌افزار و تولید کدهای تمیزتر و نگهداری‌پذیرتر در اکوسیستم دات‌نت است.&lt;/div&gt;">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="واژه کلیدی جدید extension در دات‌نت 10: ویژگی‌ها و کاربردهای آن">
+    <meta itemprop="description" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در نسخه پیش‌نمایش سوم دات‌نت 10 (Preview 3) که با زبان برنامه‌نویسی سی‌شارپ 14 (C# 14) همراه است، واژه کلیدی جدید extension معرفی شده است. این ویژگی، امتداد و تکامل متدهای الحاقی (Extension Methods) قدیمی است که از نسخه‌های پیشین سی‌شارپ وجود داشتند. واژه کلیدی extension امکان تعریف بلوک‌های افزونه‌ای (Extension Blocks) را برای هر نوع داده فراهم می‌کند و قابلیت‌هایی مانند افزودن خصوصیات (Properties)، فیلدهای پشتیبان خصوصی (Private Backing Fields)، و حتی بلوک‌های افزونه‌ای استاتیک را به توسعه‌دهندگان می‌دهد. این مقاله به بررسی این ویژگی جدید، نحوه کارکرد آن، و کاربردهای عملی آن در توسعه نرم‌افزارهای دات‌نت می‌پردازد. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;واژه کلیدی extension چیست؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;واژه کلیدی extension در سی‌شارپ 14 به توسعه‌دهندگان اجازه می‌دهد تا بلوک‌های افزونه‌ای را برای انواع داده‌ها (چه تعریف‌شده توسط خودشان و چه انواع خارجی) تعریف کنند. برخلاف متدهای الحاقی قدیمی که صرفاً امکان افزودن متدهای استاتیک به انواع را فراهم می‌کردند، این ویژگی جدید قابلیت‌های گسترده‌تری را ارائه می‌دهد. این قابلیت‌ها شامل موارد زیر هستند:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;افزودن خصوصیات افزونه‌ای (Extension Properties):&lt;/strong&gt; امکان تعریف خصوصیاتی که به‌صورت منطقی به یک نوع تعلق دارند، بدون نیاز به تغییر ساختار اصلی آن نوع.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;فیلدهای پشتیبان خصوصی (Private Backing Fields):&lt;/strong&gt; امکان ذخیره‌سازی داده‌های موقت یا کش‌شده در بلوک افزونه برای بهبود عملکرد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;بلوک‌های استاتیک افزونه‌ای (Static Extension Blocks):&lt;/strong&gt; برای تعریف متدهای استاتیک یا خصوصیات کمکی مرتبط با نوع.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;سازمان‌دهی منطقی‌تر کدها:&lt;/strong&gt; گروه‌بندی منطقی رفتارها و خصوصیات مرتبط در یک بلوک واحد.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این ویژگی به‌ویژه برای توسعه‌دهندگانی که به معماری تمیز (Clean Architecture) و مدل‌سازی دامنه غنی (Rich Domain Modeling) اهمیت می‌دهند، یک ابزار قدرتمند محسوب می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نحوه استفاده از extension: سینتکس و ساختار&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای استفاده از واژه کلیدی extension، باید یک کلاس استاتیک تعریف کرد و سپس بلوک‌های افزونه‌ای را درون آن برای نوع هدف مشخص نمود. ساختار کلی سینتکس به‌صورت زیر است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static class MyExtensions
+{
+    extension(TargetType instance)
+    {
+        public ReturnType PropertyOrMethod =&amp;gt; ...;
+    }
+
+    extension static
+    {
+        public static ReturnType StaticHelper() =&amp;gt; ...;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این ساختار:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;TargetType نوع داده‌ای است که می‌خواهیم برای آن افزونه تعریف کنیم (مثلاً HttpContext یا یک DTO خارجی).&lt;/li&gt;&lt;li&gt;بلوک extension(TargetType instance) برای تعریف خصوصیات و متدهای نمونه‌ای (Instance Members) استفاده می‌شود.&lt;/li&gt;&lt;li&gt;بلوک extension static برای تعریف متدهای استاتیک یا خصوصیات کمکی مرتبط با نوع به کار می‌رود.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این سینتکس امکان تعریف رفتارهای منسجم و متمرکز را فراهم می‌کند و از پراکندگی کدها جلوگیری می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;کاربردهای عملی واژه کلیدی extension&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای درک بهتر این ویژگی، دو نمونه واقعی از کاربردهای آن بررسی می‌شوند که نشان‌دهنده قدرت و انعطاف‌پذیری آن در حل مسائل پیچیده توسعه نرم‌افزار هستند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;1. مدیریت منطق چنداجاره‌ای (Multi-Tenant) در برنامه‌های SaaS&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;در توسعه برنامه‌های نرم‌افزاری به‌عنوان سرویس (SaaS) که چندین مشتری (Tenant) از یک نمونه نرم‌افزار استفاده می‌کنند، مدیریت اطلاعات مرتبط با هر مشتری چالش‌برانگیز است. فرض کنید نیاز دارید اطلاعاتی مانند شناسه مشتری (TenantId)، شناسه کاربر (UserId)، وضعیت مدیریت مشتری، و هدرهای سفارشی را از یک شیء HttpContext استخراج کنید. در روش‌های سنتی، این منطق در متدهای استاتیک پراکنده پیاده‌سازی می‌شد که خوانایی و نگهداری را دشوار می‌کرد. با استفاده از extension، می‌توان این منطق را به‌صورت متمرکز و خوانا پیاده‌سازی کرد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static class MultiTenantHttpContextExtensions
+{
+    extension(HttpContext ctx)
+    {
+        private string? _tenantId;
+        private Guid? _userId;
+
+        public string TenantId =&amp;gt;
+            _tenantId ??=
+                ctx.User.Claims.FirstOrDefault(c =&amp;gt; c.Type == &amp;quot;tenant_id&amp;quot;)?.Value
+                ?? throw new UnauthorizedAccessException(&amp;quot;Tenant ID missing&amp;quot;);
+
+        public Guid UserId =&amp;gt;
+            _userId ??=
+                Guid.TryParse(
+                    ctx.User.Claims.FirstOrDefault(c =&amp;gt; c.Type == &amp;quot;user_id&amp;quot;)?.Value, out var id)
+                ? id
+                : throw new UnauthorizedAccessException(&amp;quot;User ID invalid&amp;quot;);
+
+        public bool IsTenantAdmin =&amp;gt;
+            ctx.User.IsInRole(&amp;quot;Admin&amp;quot;) || ctx.Request.Headers[&amp;quot;X-Tenant-Admin&amp;quot;] == &amp;quot;true&amp;quot;;
+
+        public string? GetHeader(string name) =&amp;gt;
+            ctx.Request.Headers.TryGetValue(name, out var value)
+                ? value.ToString()
+                : null;
+    }
+
+    extension static
+    {
+        public static string DefaultTenantId =&amp;gt; &amp;quot;public&amp;quot;;
+
+        public static bool IsValidTenantId(string? id) =&amp;gt;
+            !string.IsNullOrWhiteSpace(id) &amp;amp;&amp;amp; id.All(char.IsLetterOrDigit);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مزایای این پیاده‌سازی عبارتند از:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;خوانایی بالا:&lt;/strong&gt; تمام منطق مرتبط با HttpContext در یک بلوک متمرکز قرار دارد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;کش‌سازی تنبل (Lazy Caching):&lt;/strong&gt; استفاده از فیلدهای خصوصی مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;_tenantId&lt;/code&gt; و &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;_userId&lt;/code&gt; برای جلوگیری از محاسبات تکراری.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;انسجام دامنه:&lt;/strong&gt; منطق مرتبط با مشتری به‌صورت یکپارچه در کنار هم قرار گرفته و نگهداری آن آسان‌تر است.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-ltr&quot; dir=&quot;ltr&quot; style=&quot;text-align: left;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;2. گسترش مدل‌های خارجی (External DTOs)&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;یکی دیگر از کاربردهای رایج extension، افزودن منطق دامنه به مدل‌های داده‌ای خارجی (مانند DTOهای تولیدشده توسط کتابخانه‌های شخص ثالث) است. فرض کنید با یک مدل OrderDto کار می‌کنید که امکان تغییر مستقیم آن را ندارید:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class OrderDto
+{
+    public List&amp;lt;OrderItemDto&amp;gt; Items { get; set; }
+    public string Status { get; set; }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;با استفاده از extension، می‌توان خصوصیات محاسباتی مانند مجموع مبلغ سفارش یا تعداد کل اقلام را به این مدل اضافه کرد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static class OrderExtensions
+{
+    extension(OrderDto order)
+    {
+        public decimal TotalAmount =&amp;gt;
+            order.Items.Sum(i =&amp;gt; i.Quantity * i.PricePerUnit);
+
+        public bool IsComplete =&amp;gt;
+            order.Status == &amp;quot;Completed&amp;quot;;
+
+        public int TotalItems =&amp;gt;
+            order.Items.Sum(i =&amp;gt; i.Quantity);
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;استفاده از این افزونه‌ها در کد به‌صورت زیر خواهد بود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;if (order.TotalAmount &amp;gt; 1000 &amp;amp;&amp;amp; order.IsComplete)
+{
+    // انجام عملیات موردنظر
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رویکرد امکان افزودن رفتارهای غنی به مدل‌های خارجی را بدون تغییر ساختار اصلی آن‌ها فراهم می‌کند و کد را خواناتر و معنادارتر می‌سازد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چرا extension از متدهای الحاقی سنتی بهتر است؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;اگرچه متدهای الحاقی سنتی همچنان در دات‌نت 10 پشتیبانی می‌شوند، واژه کلیدی extension مزایای قابل‌توجهی دارد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;سازمان‌دهی بهتر:&lt;/strong&gt; به‌جای پراکندگی متدها در کلاس‌های استاتیک، می‌توان تمام رفتارهای مرتبط را در یک بلوک واحد گروه‌بندی کرد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;پشتیبانی از خصوصیات و فیلدهای خصوصی:&lt;/strong&gt; امکان تعریف خصوصیات و کش‌سازی داده‌ها که در متدهای الحاقی سنتی ممکن نبود.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;انعطاف‌پذیری بیشتر:&lt;/strong&gt; پشتیبانی از بلوک‌های استاتیک برای تعریف متدهای کمکی مرتبط.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این ویژگی به توسعه‌دهندگان اجازه می‌دهد تا کدی با معماری تمیزتر و نگهداری‌پذیرتر تولید کنند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نکات و توصیه‌ها&lt;/strong&gt;&lt;/div&gt;&lt;ol&gt;&lt;li&gt;وضعیت کنونی: واژه کلیدی extension در حال حاضر در نسخه پیش‌نمایش سوم دات‌نت 10 (Preview 3) و سی‌شارپ 14 در دسترس است. &lt;strong&gt;&lt;em&gt;این ویژگی ممکن است در نسخه‌های بعدی با تغییراتی در سینتکس یا ابزارهای پشتیبانی همراه باشد.&lt;/em&gt;&lt;/strong&gt;&lt;/li&gt;&lt;li&gt;سازگاری با کدهای موجود: متدهای الحاقی سنتی همچنان کار می‌کنند و این ویژگی کاملاً افزوده‌ای (Additive) است، بنابراین نیازی به بازنویسی کدهای قدیمی نیست.&lt;/li&gt;&lt;li&gt;موارد استفاده پیشنهادی: از extension برای سناریوهایی مانند تبدیل DTOها، مدیریت منطق HTTP، افزودن مقادیر محاسباتی به مدل‌ها، و بهبودهای خاص دامنه استفاده کنید.&lt;/li&gt;&lt;li&gt;احتیاط: از استفاده بیش‌ازحد این ویژگی که ممکن است منجر به پیچیدگی غیرضروری شود، خودداری کنید. تنها زمانی از آن استفاده کنید که رفتارها به‌صورت منطقی به یک نوع تعلق دارند.&lt;/li&gt;&lt;/ol&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;واژه کلیدی extension در دات‌نت 10 و سی‌شارپ 14 یک ابزار قدرتمند و تحول‌آفرین برای توسعه‌دهندگان است که امکان تعریف بلوک‌های افزونه‌ای منسجم و خوانا را فراهم می‌کند. این ویژگی با ارائه قابلیت‌هایی مانند خصوصیات افزونه‌ای، فیلدهای پشتیبان خصوصی، و بلوک‌های استاتیک، به توسعه‌دهندگان اجازه می‌دهد تا منطق دامنه را به‌صورت متمرکز و کارآمد پیاده‌سازی کنند. کاربردهای عملی آن، از مدیریت سیستم‌های چنداجاره‌ای گرفته تا گسترش مدل‌های خارجی، نشان‌دهنده انعطاف‌پذیری و ارزش آن در پروژه‌های واقعی است. با توجه به اینکه این ویژگی هنوز در مرحله پیش‌نمایش است، توسعه‌دهندگان باید با دقت از آن استفاده کنند و منتظر بهبودهای احتمالی در نسخه‌های بعدی باشند. در نهایت، extension گامی مهم در جهت بهبود معماری نرم‌افزار و تولید کدهای تمیزتر و نگهداری‌پذیرتر در اکوسیستم دات‌نت است.&lt;/div&gt;">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="واژه کلیدی جدید extension در دات‌نت 10: ویژگی‌ها و کاربردهای آن">
+    <meta property="og:description" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در نسخه پیش‌نمایش سوم دات‌نت 10 (Preview 3) که با زبان برنامه‌نویسی سی‌شارپ 14 (C# 14) همراه است، واژه کلیدی جدید extension معرفی شده است. این ویژگی، امتداد و تکامل متدهای الحاقی (Extension Methods) قدیمی است که از نسخه‌های پیشین سی‌شارپ وجود داشتند. واژه کلیدی extension امکان تعریف بلوک‌های افزونه‌ای (Extension Blocks) را برای هر نوع داده فراهم می‌کند و قابلیت‌هایی مانند افزودن خصوصیات (Properties)، فیلدهای پشتیبان خصوصی (Private Backing Fields)، و حتی بلوک‌های افزونه‌ای استاتیک را به توسعه‌دهندگان می‌دهد. این مقاله به بررسی این ویژگی جدید، نحوه کارکرد آن، و کاربردهای عملی آن در توسعه نرم‌افزارهای دات‌نت می‌پردازد. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;واژه کلیدی extension چیست؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;واژه کلیدی extension در سی‌شارپ 14 به توسعه‌دهندگان اجازه می‌دهد تا بلوک‌های افزونه‌ای را برای انواع داده‌ها (چه تعریف‌شده توسط خودشان و چه انواع خارجی) تعریف کنند. برخلاف متدهای الحاقی قدیمی که صرفاً امکان افزودن متدهای استاتیک به انواع را فراهم می‌کردند، این ویژگی جدید قابلیت‌های گسترده‌تری را ارائه می‌دهد. این قابلیت‌ها شامل موارد زیر هستند:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;افزودن خصوصیات افزونه‌ای (Extension Properties):&lt;/strong&gt; امکان تعریف خصوصیاتی که به‌صورت منطقی به یک نوع تعلق دارند، بدون نیاز به تغییر ساختار اصلی آن نوع.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;فیلدهای پشتیبان خصوصی (Private Backing Fields):&lt;/strong&gt; امکان ذخیره‌سازی داده‌های موقت یا کش‌شده در بلوک افزونه برای بهبود عملکرد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;بلوک‌های استاتیک افزونه‌ای (Static Extension Blocks):&lt;/strong&gt; برای تعریف متدهای استاتیک یا خصوصیات کمکی مرتبط با نوع.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;سازمان‌دهی منطقی‌تر کدها:&lt;/strong&gt; گروه‌بندی منطقی رفتارها و خصوصیات مرتبط در یک بلوک واحد.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این ویژگی به‌ویژه برای توسعه‌دهندگانی که به معماری تمیز (Clean Architecture) و مدل‌سازی دامنه غنی (Rich Domain Modeling) اهمیت می‌دهند، یک ابزار قدرتمند محسوب می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نحوه استفاده از extension: سینتکس و ساختار&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای استفاده از واژه کلیدی extension، باید یک کلاس استاتیک تعریف کرد و سپس بلوک‌های افزونه‌ای را درون آن برای نوع هدف مشخص نمود. ساختار کلی سینتکس به‌صورت زیر است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static class MyExtensions
+{
+    extension(TargetType instance)
+    {
+        public ReturnType PropertyOrMethod =&amp;gt; ...;
+    }
+
+    extension static
+    {
+        public static ReturnType StaticHelper() =&amp;gt; ...;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این ساختار:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;TargetType نوع داده‌ای است که می‌خواهیم برای آن افزونه تعریف کنیم (مثلاً HttpContext یا یک DTO خارجی).&lt;/li&gt;&lt;li&gt;بلوک extension(TargetType instance) برای تعریف خصوصیات و متدهای نمونه‌ای (Instance Members) استفاده می‌شود.&lt;/li&gt;&lt;li&gt;بلوک extension static برای تعریف متدهای استاتیک یا خصوصیات کمکی مرتبط با نوع به کار می‌رود.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این سینتکس امکان تعریف رفتارهای منسجم و متمرکز را فراهم می‌کند و از پراکندگی کدها جلوگیری می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;کاربردهای عملی واژه کلیدی extension&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای درک بهتر این ویژگی، دو نمونه واقعی از کاربردهای آن بررسی می‌شوند که نشان‌دهنده قدرت و انعطاف‌پذیری آن در حل مسائل پیچیده توسعه نرم‌افزار هستند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;1. مدیریت منطق چنداجاره‌ای (Multi-Tenant) در برنامه‌های SaaS&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;در توسعه برنامه‌های نرم‌افزاری به‌عنوان سرویس (SaaS) که چندین مشتری (Tenant) از یک نمونه نرم‌افزار استفاده می‌کنند، مدیریت اطلاعات مرتبط با هر مشتری چالش‌برانگیز است. فرض کنید نیاز دارید اطلاعاتی مانند شناسه مشتری (TenantId)، شناسه کاربر (UserId)، وضعیت مدیریت مشتری، و هدرهای سفارشی را از یک شیء HttpContext استخراج کنید. در روش‌های سنتی، این منطق در متدهای استاتیک پراکنده پیاده‌سازی می‌شد که خوانایی و نگهداری را دشوار می‌کرد. با استفاده از extension، می‌توان این منطق را به‌صورت متمرکز و خوانا پیاده‌سازی کرد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static class MultiTenantHttpContextExtensions
+{
+    extension(HttpContext ctx)
+    {
+        private string? _tenantId;
+        private Guid? _userId;
+
+        public string TenantId =&amp;gt;
+            _tenantId ??=
+                ctx.User.Claims.FirstOrDefault(c =&amp;gt; c.Type == &amp;quot;tenant_id&amp;quot;)?.Value
+                ?? throw new UnauthorizedAccessException(&amp;quot;Tenant ID missing&amp;quot;);
+
+        public Guid UserId =&amp;gt;
+            _userId ??=
+                Guid.TryParse(
+                    ctx.User.Claims.FirstOrDefault(c =&amp;gt; c.Type == &amp;quot;user_id&amp;quot;)?.Value, out var id)
+                ? id
+                : throw new UnauthorizedAccessException(&amp;quot;User ID invalid&amp;quot;);
+
+        public bool IsTenantAdmin =&amp;gt;
+            ctx.User.IsInRole(&amp;quot;Admin&amp;quot;) || ctx.Request.Headers[&amp;quot;X-Tenant-Admin&amp;quot;] == &amp;quot;true&amp;quot;;
+
+        public string? GetHeader(string name) =&amp;gt;
+            ctx.Request.Headers.TryGetValue(name, out var value)
+                ? value.ToString()
+                : null;
+    }
+
+    extension static
+    {
+        public static string DefaultTenantId =&amp;gt; &amp;quot;public&amp;quot;;
+
+        public static bool IsValidTenantId(string? id) =&amp;gt;
+            !string.IsNullOrWhiteSpace(id) &amp;amp;&amp;amp; id.All(char.IsLetterOrDigit);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مزایای این پیاده‌سازی عبارتند از:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;خوانایی بالا:&lt;/strong&gt; تمام منطق مرتبط با HttpContext در یک بلوک متمرکز قرار دارد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;کش‌سازی تنبل (Lazy Caching):&lt;/strong&gt; استفاده از فیلدهای خصوصی مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;_tenantId&lt;/code&gt; و &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;_userId&lt;/code&gt; برای جلوگیری از محاسبات تکراری.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;انسجام دامنه:&lt;/strong&gt; منطق مرتبط با مشتری به‌صورت یکپارچه در کنار هم قرار گرفته و نگهداری آن آسان‌تر است.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-ltr&quot; dir=&quot;ltr&quot; style=&quot;text-align: left;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;2. گسترش مدل‌های خارجی (External DTOs)&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;یکی دیگر از کاربردهای رایج extension، افزودن منطق دامنه به مدل‌های داده‌ای خارجی (مانند DTOهای تولیدشده توسط کتابخانه‌های شخص ثالث) است. فرض کنید با یک مدل OrderDto کار می‌کنید که امکان تغییر مستقیم آن را ندارید:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class OrderDto
+{
+    public List&amp;lt;OrderItemDto&amp;gt; Items { get; set; }
+    public string Status { get; set; }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;با استفاده از extension، می‌توان خصوصیات محاسباتی مانند مجموع مبلغ سفارش یا تعداد کل اقلام را به این مدل اضافه کرد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static class OrderExtensions
+{
+    extension(OrderDto order)
+    {
+        public decimal TotalAmount =&amp;gt;
+            order.Items.Sum(i =&amp;gt; i.Quantity * i.PricePerUnit);
+
+        public bool IsComplete =&amp;gt;
+            order.Status == &amp;quot;Completed&amp;quot;;
+
+        public int TotalItems =&amp;gt;
+            order.Items.Sum(i =&amp;gt; i.Quantity);
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;استفاده از این افزونه‌ها در کد به‌صورت زیر خواهد بود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;if (order.TotalAmount &amp;gt; 1000 &amp;amp;&amp;amp; order.IsComplete)
+{
+    // انجام عملیات موردنظر
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رویکرد امکان افزودن رفتارهای غنی به مدل‌های خارجی را بدون تغییر ساختار اصلی آن‌ها فراهم می‌کند و کد را خواناتر و معنادارتر می‌سازد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چرا extension از متدهای الحاقی سنتی بهتر است؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;اگرچه متدهای الحاقی سنتی همچنان در دات‌نت 10 پشتیبانی می‌شوند، واژه کلیدی extension مزایای قابل‌توجهی دارد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;سازمان‌دهی بهتر:&lt;/strong&gt; به‌جای پراکندگی متدها در کلاس‌های استاتیک، می‌توان تمام رفتارهای مرتبط را در یک بلوک واحد گروه‌بندی کرد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;پشتیبانی از خصوصیات و فیلدهای خصوصی:&lt;/strong&gt; امکان تعریف خصوصیات و کش‌سازی داده‌ها که در متدهای الحاقی سنتی ممکن نبود.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;انعطاف‌پذیری بیشتر:&lt;/strong&gt; پشتیبانی از بلوک‌های استاتیک برای تعریف متدهای کمکی مرتبط.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این ویژگی به توسعه‌دهندگان اجازه می‌دهد تا کدی با معماری تمیزتر و نگهداری‌پذیرتر تولید کنند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نکات و توصیه‌ها&lt;/strong&gt;&lt;/div&gt;&lt;ol&gt;&lt;li&gt;وضعیت کنونی: واژه کلیدی extension در حال حاضر در نسخه پیش‌نمایش سوم دات‌نت 10 (Preview 3) و سی‌شارپ 14 در دسترس است. &lt;strong&gt;&lt;em&gt;این ویژگی ممکن است در نسخه‌های بعدی با تغییراتی در سینتکس یا ابزارهای پشتیبانی همراه باشد.&lt;/em&gt;&lt;/strong&gt;&lt;/li&gt;&lt;li&gt;سازگاری با کدهای موجود: متدهای الحاقی سنتی همچنان کار می‌کنند و این ویژگی کاملاً افزوده‌ای (Additive) است، بنابراین نیازی به بازنویسی کدهای قدیمی نیست.&lt;/li&gt;&lt;li&gt;موارد استفاده پیشنهادی: از extension برای سناریوهایی مانند تبدیل DTOها، مدیریت منطق HTTP، افزودن مقادیر محاسباتی به مدل‌ها، و بهبودهای خاص دامنه استفاده کنید.&lt;/li&gt;&lt;li&gt;احتیاط: از استفاده بیش‌ازحد این ویژگی که ممکن است منجر به پیچیدگی غیرضروری شود، خودداری کنید. تنها زمانی از آن استفاده کنید که رفتارها به‌صورت منطقی به یک نوع تعلق دارند.&lt;/li&gt;&lt;/ol&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;واژه کلیدی extension در دات‌نت 10 و سی‌شارپ 14 یک ابزار قدرتمند و تحول‌آفرین برای توسعه‌دهندگان است که امکان تعریف بلوک‌های افزونه‌ای منسجم و خوانا را فراهم می‌کند. این ویژگی با ارائه قابلیت‌هایی مانند خصوصیات افزونه‌ای، فیلدهای پشتیبان خصوصی، و بلوک‌های استاتیک، به توسعه‌دهندگان اجازه می‌دهد تا منطق دامنه را به‌صورت متمرکز و کارآمد پیاده‌سازی کنند. کاربردهای عملی آن، از مدیریت سیستم‌های چنداجاره‌ای گرفته تا گسترش مدل‌های خارجی، نشان‌دهنده انعطاف‌پذیری و ارزش آن در پروژه‌های واقعی است. با توجه به اینکه این ویژگی هنوز در مرحله پیش‌نمایش است، توسعه‌دهندگان باید با دقت از آن استفاده کنند و منتظر بهبودهای احتمالی در نسخه‌های بعدی باشند. در نهایت، extension گامی مهم در جهت بهبود معماری نرم‌افزار و تولید کدهای تمیزتر و نگهداری‌پذیرتر در اکوسیستم دات‌نت است.&lt;/div&gt;">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="واژه کلیدی جدید extension در دات‌نت 10: ویژگی‌ها و کاربردهای آن">
+    <meta name="twitter:description" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در نسخه پیش‌نمایش سوم دات‌نت 10 (Preview 3) که با زبان برنامه‌نویسی سی‌شارپ 14 (C# 14) همراه است، واژه کلیدی جدید extension معرفی شده است. این ویژگی، امتداد و تکامل متدهای الحاقی (Extension Methods) قدیمی است که از نسخه‌های پیشین سی‌شارپ وجود داشتند. واژه کلیدی extension امکان تعریف بلوک‌های افزونه‌ای (Extension Blocks) را برای هر نوع داده فراهم می‌کند و قابلیت‌هایی مانند افزودن خصوصیات (Properties)، فیلدهای پشتیبان خصوصی (Private Backing Fields)، و حتی بلوک‌های افزونه‌ای استاتیک را به توسعه‌دهندگان می‌دهد. این مقاله به بررسی این ویژگی جدید، نحوه کارکرد آن، و کاربردهای عملی آن در توسعه نرم‌افزارهای دات‌نت می‌پردازد. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;واژه کلیدی extension چیست؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;واژه کلیدی extension در سی‌شارپ 14 به توسعه‌دهندگان اجازه می‌دهد تا بلوک‌های افزونه‌ای را برای انواع داده‌ها (چه تعریف‌شده توسط خودشان و چه انواع خارجی) تعریف کنند. برخلاف متدهای الحاقی قدیمی که صرفاً امکان افزودن متدهای استاتیک به انواع را فراهم می‌کردند، این ویژگی جدید قابلیت‌های گسترده‌تری را ارائه می‌دهد. این قابلیت‌ها شامل موارد زیر هستند:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;افزودن خصوصیات افزونه‌ای (Extension Properties):&lt;/strong&gt; امکان تعریف خصوصیاتی که به‌صورت منطقی به یک نوع تعلق دارند، بدون نیاز به تغییر ساختار اصلی آن نوع.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;فیلدهای پشتیبان خصوصی (Private Backing Fields):&lt;/strong&gt; امکان ذخیره‌سازی داده‌های موقت یا کش‌شده در بلوک افزونه برای بهبود عملکرد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;بلوک‌های استاتیک افزونه‌ای (Static Extension Blocks):&lt;/strong&gt; برای تعریف متدهای استاتیک یا خصوصیات کمکی مرتبط با نوع.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;سازمان‌دهی منطقی‌تر کدها:&lt;/strong&gt; گروه‌بندی منطقی رفتارها و خصوصیات مرتبط در یک بلوک واحد.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این ویژگی به‌ویژه برای توسعه‌دهندگانی که به معماری تمیز (Clean Architecture) و مدل‌سازی دامنه غنی (Rich Domain Modeling) اهمیت می‌دهند، یک ابزار قدرتمند محسوب می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نحوه استفاده از extension: سینتکس و ساختار&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای استفاده از واژه کلیدی extension، باید یک کلاس استاتیک تعریف کرد و سپس بلوک‌های افزونه‌ای را درون آن برای نوع هدف مشخص نمود. ساختار کلی سینتکس به‌صورت زیر است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static class MyExtensions
+{
+    extension(TargetType instance)
+    {
+        public ReturnType PropertyOrMethod =&amp;gt; ...;
+    }
+
+    extension static
+    {
+        public static ReturnType StaticHelper() =&amp;gt; ...;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این ساختار:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;TargetType نوع داده‌ای است که می‌خواهیم برای آن افزونه تعریف کنیم (مثلاً HttpContext یا یک DTO خارجی).&lt;/li&gt;&lt;li&gt;بلوک extension(TargetType instance) برای تعریف خصوصیات و متدهای نمونه‌ای (Instance Members) استفاده می‌شود.&lt;/li&gt;&lt;li&gt;بلوک extension static برای تعریف متدهای استاتیک یا خصوصیات کمکی مرتبط با نوع به کار می‌رود.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این سینتکس امکان تعریف رفتارهای منسجم و متمرکز را فراهم می‌کند و از پراکندگی کدها جلوگیری می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;کاربردهای عملی واژه کلیدی extension&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای درک بهتر این ویژگی، دو نمونه واقعی از کاربردهای آن بررسی می‌شوند که نشان‌دهنده قدرت و انعطاف‌پذیری آن در حل مسائل پیچیده توسعه نرم‌افزار هستند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;1. مدیریت منطق چنداجاره‌ای (Multi-Tenant) در برنامه‌های SaaS&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;در توسعه برنامه‌های نرم‌افزاری به‌عنوان سرویس (SaaS) که چندین مشتری (Tenant) از یک نمونه نرم‌افزار استفاده می‌کنند، مدیریت اطلاعات مرتبط با هر مشتری چالش‌برانگیز است. فرض کنید نیاز دارید اطلاعاتی مانند شناسه مشتری (TenantId)، شناسه کاربر (UserId)، وضعیت مدیریت مشتری، و هدرهای سفارشی را از یک شیء HttpContext استخراج کنید. در روش‌های سنتی، این منطق در متدهای استاتیک پراکنده پیاده‌سازی می‌شد که خوانایی و نگهداری را دشوار می‌کرد. با استفاده از extension، می‌توان این منطق را به‌صورت متمرکز و خوانا پیاده‌سازی کرد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static class MultiTenantHttpContextExtensions
+{
+    extension(HttpContext ctx)
+    {
+        private string? _tenantId;
+        private Guid? _userId;
+
+        public string TenantId =&amp;gt;
+            _tenantId ??=
+                ctx.User.Claims.FirstOrDefault(c =&amp;gt; c.Type == &amp;quot;tenant_id&amp;quot;)?.Value
+                ?? throw new UnauthorizedAccessException(&amp;quot;Tenant ID missing&amp;quot;);
+
+        public Guid UserId =&amp;gt;
+            _userId ??=
+                Guid.TryParse(
+                    ctx.User.Claims.FirstOrDefault(c =&amp;gt; c.Type == &amp;quot;user_id&amp;quot;)?.Value, out var id)
+                ? id
+                : throw new UnauthorizedAccessException(&amp;quot;User ID invalid&amp;quot;);
+
+        public bool IsTenantAdmin =&amp;gt;
+            ctx.User.IsInRole(&amp;quot;Admin&amp;quot;) || ctx.Request.Headers[&amp;quot;X-Tenant-Admin&amp;quot;] == &amp;quot;true&amp;quot;;
+
+        public string? GetHeader(string name) =&amp;gt;
+            ctx.Request.Headers.TryGetValue(name, out var value)
+                ? value.ToString()
+                : null;
+    }
+
+    extension static
+    {
+        public static string DefaultTenantId =&amp;gt; &amp;quot;public&amp;quot;;
+
+        public static bool IsValidTenantId(string? id) =&amp;gt;
+            !string.IsNullOrWhiteSpace(id) &amp;amp;&amp;amp; id.All(char.IsLetterOrDigit);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مزایای این پیاده‌سازی عبارتند از:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;خوانایی بالا:&lt;/strong&gt; تمام منطق مرتبط با HttpContext در یک بلوک متمرکز قرار دارد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;کش‌سازی تنبل (Lazy Caching):&lt;/strong&gt; استفاده از فیلدهای خصوصی مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;_tenantId&lt;/code&gt; و &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;_userId&lt;/code&gt; برای جلوگیری از محاسبات تکراری.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;انسجام دامنه:&lt;/strong&gt; منطق مرتبط با مشتری به‌صورت یکپارچه در کنار هم قرار گرفته و نگهداری آن آسان‌تر است.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-ltr&quot; dir=&quot;ltr&quot; style=&quot;text-align: left;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;2. گسترش مدل‌های خارجی (External DTOs)&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;یکی دیگر از کاربردهای رایج extension، افزودن منطق دامنه به مدل‌های داده‌ای خارجی (مانند DTOهای تولیدشده توسط کتابخانه‌های شخص ثالث) است. فرض کنید با یک مدل OrderDto کار می‌کنید که امکان تغییر مستقیم آن را ندارید:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class OrderDto
+{
+    public List&amp;lt;OrderItemDto&amp;gt; Items { get; set; }
+    public string Status { get; set; }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;با استفاده از extension، می‌توان خصوصیات محاسباتی مانند مجموع مبلغ سفارش یا تعداد کل اقلام را به این مدل اضافه کرد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static class OrderExtensions
+{
+    extension(OrderDto order)
+    {
+        public decimal TotalAmount =&amp;gt;
+            order.Items.Sum(i =&amp;gt; i.Quantity * i.PricePerUnit);
+
+        public bool IsComplete =&amp;gt;
+            order.Status == &amp;quot;Completed&amp;quot;;
+
+        public int TotalItems =&amp;gt;
+            order.Items.Sum(i =&amp;gt; i.Quantity);
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;استفاده از این افزونه‌ها در کد به‌صورت زیر خواهد بود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;if (order.TotalAmount &amp;gt; 1000 &amp;amp;&amp;amp; order.IsComplete)
+{
+    // انجام عملیات موردنظر
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رویکرد امکان افزودن رفتارهای غنی به مدل‌های خارجی را بدون تغییر ساختار اصلی آن‌ها فراهم می‌کند و کد را خواناتر و معنادارتر می‌سازد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چرا extension از متدهای الحاقی سنتی بهتر است؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;اگرچه متدهای الحاقی سنتی همچنان در دات‌نت 10 پشتیبانی می‌شوند، واژه کلیدی extension مزایای قابل‌توجهی دارد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;سازمان‌دهی بهتر:&lt;/strong&gt; به‌جای پراکندگی متدها در کلاس‌های استاتیک، می‌توان تمام رفتارهای مرتبط را در یک بلوک واحد گروه‌بندی کرد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;پشتیبانی از خصوصیات و فیلدهای خصوصی:&lt;/strong&gt; امکان تعریف خصوصیات و کش‌سازی داده‌ها که در متدهای الحاقی سنتی ممکن نبود.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;انعطاف‌پذیری بیشتر:&lt;/strong&gt; پشتیبانی از بلوک‌های استاتیک برای تعریف متدهای کمکی مرتبط.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این ویژگی به توسعه‌دهندگان اجازه می‌دهد تا کدی با معماری تمیزتر و نگهداری‌پذیرتر تولید کنند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نکات و توصیه‌ها&lt;/strong&gt;&lt;/div&gt;&lt;ol&gt;&lt;li&gt;وضعیت کنونی: واژه کلیدی extension در حال حاضر در نسخه پیش‌نمایش سوم دات‌نت 10 (Preview 3) و سی‌شارپ 14 در دسترس است. &lt;strong&gt;&lt;em&gt;این ویژگی ممکن است در نسخه‌های بعدی با تغییراتی در سینتکس یا ابزارهای پشتیبانی همراه باشد.&lt;/em&gt;&lt;/strong&gt;&lt;/li&gt;&lt;li&gt;سازگاری با کدهای موجود: متدهای الحاقی سنتی همچنان کار می‌کنند و این ویژگی کاملاً افزوده‌ای (Additive) است، بنابراین نیازی به بازنویسی کدهای قدیمی نیست.&lt;/li&gt;&lt;li&gt;موارد استفاده پیشنهادی: از extension برای سناریوهایی مانند تبدیل DTOها، مدیریت منطق HTTP، افزودن مقادیر محاسباتی به مدل‌ها، و بهبودهای خاص دامنه استفاده کنید.&lt;/li&gt;&lt;li&gt;احتیاط: از استفاده بیش‌ازحد این ویژگی که ممکن است منجر به پیچیدگی غیرضروری شود، خودداری کنید. تنها زمانی از آن استفاده کنید که رفتارها به‌صورت منطقی به یک نوع تعلق دارند.&lt;/li&gt;&lt;/ol&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;واژه کلیدی extension در دات‌نت 10 و سی‌شارپ 14 یک ابزار قدرتمند و تحول‌آفرین برای توسعه‌دهندگان است که امکان تعریف بلوک‌های افزونه‌ای منسجم و خوانا را فراهم می‌کند. این ویژگی با ارائه قابلیت‌هایی مانند خصوصیات افزونه‌ای، فیلدهای پشتیبان خصوصی، و بلوک‌های استاتیک، به توسعه‌دهندگان اجازه می‌دهد تا منطق دامنه را به‌صورت متمرکز و کارآمد پیاده‌سازی کنند. کاربردهای عملی آن، از مدیریت سیستم‌های چنداجاره‌ای گرفته تا گسترش مدل‌های خارجی، نشان‌دهنده انعطاف‌پذیری و ارزش آن در پروژه‌های واقعی است. با توجه به اینکه این ویژگی هنوز در مرحله پیش‌نمایش است، توسعه‌دهندگان باید با دقت از آن استفاده کنند و منتظر بهبودهای احتمالی در نسخه‌های بعدی باشند. در نهایت، extension گامی مهم در جهت بهبود معماری نرم‌افزار و تولید کدهای تمیزتر و نگهداری‌پذیرتر در اکوسیستم دات‌نت است.&lt;/div&gt;">
+    <meta name="twitter:card" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در نسخه پیش‌نمایش سوم دات‌نت 10 (Preview 3) که با زبان برنامه‌نویسی سی‌شارپ 14 (C# 14) همراه است، واژه کلیدی جدید extension معرفی شده است. این ویژگی، امتداد و تکامل متدهای الحاقی (Extension Methods) قدیمی است که از نسخه‌های پیشین سی‌شارپ وجود داشتند. واژه کلیدی extension امکان تعریف بلوک‌های افزونه‌ای (Extension Blocks) را برای هر نوع داده فراهم می‌کند و قابلیت‌هایی مانند افزودن خصوصیات (Properties)، فیلدهای پشتیبان خصوصی (Private Backing Fields)، و حتی بلوک‌های افزونه‌ای استاتیک را به توسعه‌دهندگان می‌دهد. این مقاله به بررسی این ویژگی جدید، نحوه کارکرد آن، و کاربردهای عملی آن در توسعه نرم‌افزارهای دات‌نت می‌پردازد. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;واژه کلیدی extension چیست؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;واژه کلیدی extension در سی‌شارپ 14 به توسعه‌دهندگان اجازه می‌دهد تا بلوک‌های افزونه‌ای را برای انواع داده‌ها (چه تعریف‌شده توسط خودشان و چه انواع خارجی) تعریف کنند. برخلاف متدهای الحاقی قدیمی که صرفاً امکان افزودن متدهای استاتیک به انواع را فراهم می‌کردند، این ویژگی جدید قابلیت‌های گسترده‌تری را ارائه می‌دهد. این قابلیت‌ها شامل موارد زیر هستند:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;افزودن خصوصیات افزونه‌ای (Extension Properties):&lt;/strong&gt; امکان تعریف خصوصیاتی که به‌صورت منطقی به یک نوع تعلق دارند، بدون نیاز به تغییر ساختار اصلی آن نوع.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;فیلدهای پشتیبان خصوصی (Private Backing Fields):&lt;/strong&gt; امکان ذخیره‌سازی داده‌های موقت یا کش‌شده در بلوک افزونه برای بهبود عملکرد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;بلوک‌های استاتیک افزونه‌ای (Static Extension Blocks):&lt;/strong&gt; برای تعریف متدهای استاتیک یا خصوصیات کمکی مرتبط با نوع.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;سازمان‌دهی منطقی‌تر کدها:&lt;/strong&gt; گروه‌بندی منطقی رفتارها و خصوصیات مرتبط در یک بلوک واحد.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این ویژگی به‌ویژه برای توسعه‌دهندگانی که به معماری تمیز (Clean Architecture) و مدل‌سازی دامنه غنی (Rich Domain Modeling) اهمیت می‌دهند، یک ابزار قدرتمند محسوب می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نحوه استفاده از extension: سینتکس و ساختار&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای استفاده از واژه کلیدی extension، باید یک کلاس استاتیک تعریف کرد و سپس بلوک‌های افزونه‌ای را درون آن برای نوع هدف مشخص نمود. ساختار کلی سینتکس به‌صورت زیر است:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static class MyExtensions
+{
+    extension(TargetType instance)
+    {
+        public ReturnType PropertyOrMethod =&amp;gt; ...;
+    }
+
+    extension static
+    {
+        public static ReturnType StaticHelper() =&amp;gt; ...;
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در این ساختار:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;TargetType نوع داده‌ای است که می‌خواهیم برای آن افزونه تعریف کنیم (مثلاً HttpContext یا یک DTO خارجی).&lt;/li&gt;&lt;li&gt;بلوک extension(TargetType instance) برای تعریف خصوصیات و متدهای نمونه‌ای (Instance Members) استفاده می‌شود.&lt;/li&gt;&lt;li&gt;بلوک extension static برای تعریف متدهای استاتیک یا خصوصیات کمکی مرتبط با نوع به کار می‌رود.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این سینتکس امکان تعریف رفتارهای منسجم و متمرکز را فراهم می‌کند و از پراکندگی کدها جلوگیری می‌کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;کاربردهای عملی واژه کلیدی extension&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای درک بهتر این ویژگی، دو نمونه واقعی از کاربردهای آن بررسی می‌شوند که نشان‌دهنده قدرت و انعطاف‌پذیری آن در حل مسائل پیچیده توسعه نرم‌افزار هستند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;1. مدیریت منطق چنداجاره‌ای (Multi-Tenant) در برنامه‌های SaaS&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;در توسعه برنامه‌های نرم‌افزاری به‌عنوان سرویس (SaaS) که چندین مشتری (Tenant) از یک نمونه نرم‌افزار استفاده می‌کنند، مدیریت اطلاعات مرتبط با هر مشتری چالش‌برانگیز است. فرض کنید نیاز دارید اطلاعاتی مانند شناسه مشتری (TenantId)، شناسه کاربر (UserId)، وضعیت مدیریت مشتری، و هدرهای سفارشی را از یک شیء HttpContext استخراج کنید. در روش‌های سنتی، این منطق در متدهای استاتیک پراکنده پیاده‌سازی می‌شد که خوانایی و نگهداری را دشوار می‌کرد. با استفاده از extension، می‌توان این منطق را به‌صورت متمرکز و خوانا پیاده‌سازی کرد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static class MultiTenantHttpContextExtensions
+{
+    extension(HttpContext ctx)
+    {
+        private string? _tenantId;
+        private Guid? _userId;
+
+        public string TenantId =&amp;gt;
+            _tenantId ??=
+                ctx.User.Claims.FirstOrDefault(c =&amp;gt; c.Type == &amp;quot;tenant_id&amp;quot;)?.Value
+                ?? throw new UnauthorizedAccessException(&amp;quot;Tenant ID missing&amp;quot;);
+
+        public Guid UserId =&amp;gt;
+            _userId ??=
+                Guid.TryParse(
+                    ctx.User.Claims.FirstOrDefault(c =&amp;gt; c.Type == &amp;quot;user_id&amp;quot;)?.Value, out var id)
+                ? id
+                : throw new UnauthorizedAccessException(&amp;quot;User ID invalid&amp;quot;);
+
+        public bool IsTenantAdmin =&amp;gt;
+            ctx.User.IsInRole(&amp;quot;Admin&amp;quot;) || ctx.Request.Headers[&amp;quot;X-Tenant-Admin&amp;quot;] == &amp;quot;true&amp;quot;;
+
+        public string? GetHeader(string name) =&amp;gt;
+            ctx.Request.Headers.TryGetValue(name, out var value)
+                ? value.ToString()
+                : null;
+    }
+
+    extension static
+    {
+        public static string DefaultTenantId =&amp;gt; &amp;quot;public&amp;quot;;
+
+        public static bool IsValidTenantId(string? id) =&amp;gt;
+            !string.IsNullOrWhiteSpace(id) &amp;amp;&amp;amp; id.All(char.IsLetterOrDigit);
+    }
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مزایای این پیاده‌سازی عبارتند از:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;خوانایی بالا:&lt;/strong&gt; تمام منطق مرتبط با HttpContext در یک بلوک متمرکز قرار دارد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;کش‌سازی تنبل (Lazy Caching):&lt;/strong&gt; استفاده از فیلدهای خصوصی مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;_tenantId&lt;/code&gt; و &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;_userId&lt;/code&gt; برای جلوگیری از محاسبات تکراری.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;انسجام دامنه:&lt;/strong&gt; منطق مرتبط با مشتری به‌صورت یکپارچه در کنار هم قرار گرفته و نگهداری آن آسان‌تر است.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-ltr&quot; dir=&quot;ltr&quot; style=&quot;text-align: left;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;2. گسترش مدل‌های خارجی (External DTOs)&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;یکی دیگر از کاربردهای رایج extension، افزودن منطق دامنه به مدل‌های داده‌ای خارجی (مانند DTOهای تولیدشده توسط کتابخانه‌های شخص ثالث) است. فرض کنید با یک مدل OrderDto کار می‌کنید که امکان تغییر مستقیم آن را ندارید:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class OrderDto
+{
+    public List&amp;lt;OrderItemDto&amp;gt; Items { get; set; }
+    public string Status { get; set; }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;با استفاده از extension، می‌توان خصوصیات محاسباتی مانند مجموع مبلغ سفارش یا تعداد کل اقلام را به این مدل اضافه کرد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public static class OrderExtensions
+{
+    extension(OrderDto order)
+    {
+        public decimal TotalAmount =&amp;gt;
+            order.Items.Sum(i =&amp;gt; i.Quantity * i.PricePerUnit);
+
+        public bool IsComplete =&amp;gt;
+            order.Status == &amp;quot;Completed&amp;quot;;
+
+        public int TotalItems =&amp;gt;
+            order.Items.Sum(i =&amp;gt; i.Quantity);
+    }
+}&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;استفاده از این افزونه‌ها در کد به‌صورت زیر خواهد بود:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;if (order.TotalAmount &amp;gt; 1000 &amp;amp;&amp;amp; order.IsComplete)
+{
+    // انجام عملیات موردنظر
+}&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این رویکرد امکان افزودن رفتارهای غنی به مدل‌های خارجی را بدون تغییر ساختار اصلی آن‌ها فراهم می‌کند و کد را خواناتر و معنادارتر می‌سازد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;چرا extension از متدهای الحاقی سنتی بهتر است؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;اگرچه متدهای الحاقی سنتی همچنان در دات‌نت 10 پشتیبانی می‌شوند، واژه کلیدی extension مزایای قابل‌توجهی دارد:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;سازمان‌دهی بهتر:&lt;/strong&gt; به‌جای پراکندگی متدها در کلاس‌های استاتیک، می‌توان تمام رفتارهای مرتبط را در یک بلوک واحد گروه‌بندی کرد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;پشتیبانی از خصوصیات و فیلدهای خصوصی:&lt;/strong&gt; امکان تعریف خصوصیات و کش‌سازی داده‌ها که در متدهای الحاقی سنتی ممکن نبود.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;انعطاف‌پذیری بیشتر:&lt;/strong&gt; پشتیبانی از بلوک‌های استاتیک برای تعریف متدهای کمکی مرتبط.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این ویژگی به توسعه‌دهندگان اجازه می‌دهد تا کدی با معماری تمیزتر و نگهداری‌پذیرتر تولید کنند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نکات و توصیه‌ها&lt;/strong&gt;&lt;/div&gt;&lt;ol&gt;&lt;li&gt;وضعیت کنونی: واژه کلیدی extension در حال حاضر در نسخه پیش‌نمایش سوم دات‌نت 10 (Preview 3) و سی‌شارپ 14 در دسترس است. &lt;strong&gt;&lt;em&gt;این ویژگی ممکن است در نسخه‌های بعدی با تغییراتی در سینتکس یا ابزارهای پشتیبانی همراه باشد.&lt;/em&gt;&lt;/strong&gt;&lt;/li&gt;&lt;li&gt;سازگاری با کدهای موجود: متدهای الحاقی سنتی همچنان کار می‌کنند و این ویژگی کاملاً افزوده‌ای (Additive) است، بنابراین نیازی به بازنویسی کدهای قدیمی نیست.&lt;/li&gt;&lt;li&gt;موارد استفاده پیشنهادی: از extension برای سناریوهایی مانند تبدیل DTOها، مدیریت منطق HTTP، افزودن مقادیر محاسباتی به مدل‌ها، و بهبودهای خاص دامنه استفاده کنید.&lt;/li&gt;&lt;li&gt;احتیاط: از استفاده بیش‌ازحد این ویژگی که ممکن است منجر به پیچیدگی غیرضروری شود، خودداری کنید. تنها زمانی از آن استفاده کنید که رفتارها به‌صورت منطقی به یک نوع تعلق دارند.&lt;/li&gt;&lt;/ol&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;واژه کلیدی extension در دات‌نت 10 و سی‌شارپ 14 یک ابزار قدرتمند و تحول‌آفرین برای توسعه‌دهندگان است که امکان تعریف بلوک‌های افزونه‌ای منسجم و خوانا را فراهم می‌کند. این ویژگی با ارائه قابلیت‌هایی مانند خصوصیات افزونه‌ای، فیلدهای پشتیبان خصوصی، و بلوک‌های استاتیک، به توسعه‌دهندگان اجازه می‌دهد تا منطق دامنه را به‌صورت متمرکز و کارآمد پیاده‌سازی کنند. کاربردهای عملی آن، از مدیریت سیستم‌های چنداجاره‌ای گرفته تا گسترش مدل‌های خارجی، نشان‌دهنده انعطاف‌پذیری و ارزش آن در پروژه‌های واقعی است. با توجه به اینکه این ویژگی هنوز در مرحله پیش‌نمایش است، توسعه‌دهندگان باید با دقت از آن استفاده کنند و منتظر بهبودهای احتمالی در نسخه‌های بعدی باشند. در نهایت، extension گامی مهم در جهت بهبود معماری نرم‌افزار و تولید کدهای تمیزتر و نگهداری‌پذیرتر در اکوسیستم دات‌نت است.&lt;/div&gt;">
+    <meta property="article:published_time" content="Fri, 18 Apr 2025 05:00:39 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫واژه کلیدی جدید extension در دات‌نت 10: ویژگی‌ها و کاربردهای آن";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-news-20300.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫ولورین: جایگزینی قدرتمند برای MediatR در توسعه نرم‌افزارهای دات‌نت</span>
+   </h6>
+</a><a href='www.dntips.ir-news-20298.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫شناسایی تغییرات فایل‌ها و مدیریت کش در Blazor WebAssembly</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫واژه کلیدی جدید extension در دات‌نت 10: ویژگی‌ها و کاربردهای آن</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۴/۰۱/۲۹ ۰۸:۳۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-news-20299.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div class="ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>مقدمه</strong></div><div class="ql-direction-rtl" dir="rtl" style="text-align: right;">در نسخه پیش‌نمایش سوم دات‌نت 10 (Preview 3) که با زبان برنامه‌نویسی سی‌شارپ 14 (C# 14) همراه است، واژه کلیدی جدید extension معرفی شده است. این ویژگی، امتداد و تکامل متدهای الحاقی (Extension Methods) قدیمی است که از نسخه‌های پیشین سی‌شارپ وجود داشتند. واژه کلیدی extension امکان تعریف بلوک‌های افزونه‌ای (Extension Blocks) را برای هر نوع داده فراهم می‌کند و قابلیت‌هایی مانند افزودن خصوصیات (Properties)، فیلدهای پشتیبان خصوصی (Private Backing Fields)، و حتی بلوک‌های افزونه‌ای استاتیک را به توسعه‌دهندگان می‌دهد. این مقاله به بررسی این ویژگی جدید، نحوه کارکرد آن، و کاربردهای عملی آن در توسعه نرم‌افزارهای دات‌نت می‌پردازد. </div><div class="ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>واژه کلیدی extension چیست؟</strong></div><div class="ql-direction-rtl" dir="rtl" style="text-align: right;">واژه کلیدی extension در سی‌شارپ 14 به توسعه‌دهندگان اجازه می‌دهد تا بلوک‌های افزونه‌ای را برای انواع داده‌ها (چه تعریف‌شده توسط خودشان و چه انواع خارجی) تعریف کنند. برخلاف متدهای الحاقی قدیمی که صرفاً امکان افزودن متدهای استاتیک به انواع را فراهم می‌کردند، این ویژگی جدید قابلیت‌های گسترده‌تری را ارائه می‌دهد. این قابلیت‌ها شامل موارد زیر هستند:</div><ul><li><strong>افزودن خصوصیات افزونه‌ای (Extension Properties):</strong> امکان تعریف خصوصیاتی که به‌صورت منطقی به یک نوع تعلق دارند، بدون نیاز به تغییر ساختار اصلی آن نوع.</li><li><strong>فیلدهای پشتیبان خصوصی (Private Backing Fields):</strong> امکان ذخیره‌سازی داده‌های موقت یا کش‌شده در بلوک افزونه برای بهبود عملکرد.</li><li><strong>بلوک‌های استاتیک افزونه‌ای (Static Extension Blocks):</strong> برای تعریف متدهای استاتیک یا خصوصیات کمکی مرتبط با نوع.</li><li><strong>سازمان‌دهی منطقی‌تر کدها:</strong> گروه‌بندی منطقی رفتارها و خصوصیات مرتبط در یک بلوک واحد.</li></ul><div class="ql-direction-rtl" dir="rtl" style="text-align: right;">این ویژگی به‌ویژه برای توسعه‌دهندگانی که به معماری تمیز (Clean Architecture) و مدل‌سازی دامنه غنی (Rich Domain Modeling) اهمیت می‌دهند، یک ابزار قدرتمند محسوب می‌شود.</div><div class="ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>نحوه استفاده از extension: سینتکس و ساختار</strong></div><div dir="rtl" style="text-align: right;" class="ql-direction-rtl">برای استفاده از واژه کلیدی extension، باید یک کلاس استاتیک تعریف کرد و سپس بلوک‌های افزونه‌ای را درون آن برای نوع هدف مشخص نمود. ساختار کلی سینتکس به‌صورت زیر است:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public static class MyExtensions
+{
+    extension(TargetType instance)
+    {
+        public ReturnType PropertyOrMethod =&gt; ...;
+    }
+
+    extension static
+    {
+        public static ReturnType StaticHelper() =&gt; ...;
+    }
+}</pre><div class="ql-direction-rtl" dir="rtl" style="text-align: right;">در این ساختار:</div><ul><li>TargetType نوع داده‌ای است که می‌خواهیم برای آن افزونه تعریف کنیم (مثلاً HttpContext یا یک DTO خارجی).</li><li>بلوک extension(TargetType instance) برای تعریف خصوصیات و متدهای نمونه‌ای (Instance Members) استفاده می‌شود.</li><li>بلوک extension static برای تعریف متدهای استاتیک یا خصوصیات کمکی مرتبط با نوع به کار می‌رود.</li></ul><div class="ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl" dir="rtl" style="text-align: right;">این سینتکس امکان تعریف رفتارهای منسجم و متمرکز را فراهم می‌کند و از پراکندگی کدها جلوگیری می‌کند.</div><div class="ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>کاربردهای عملی واژه کلیدی extension</strong></div><div class="ql-direction-rtl" dir="rtl" style="text-align: right;">برای درک بهتر این ویژگی، دو نمونه واقعی از کاربردهای آن بررسی می‌شوند که نشان‌دهنده قدرت و انعطاف‌پذیری آن در حل مسائل پیچیده توسعه نرم‌افزار هستند.</div><div class="ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>1. مدیریت منطق چنداجاره‌ای (Multi-Tenant) در برنامه‌های SaaS</strong></div><div dir="rtl" style="text-align: right;" class="ql-direction-rtl">در توسعه برنامه‌های نرم‌افزاری به‌عنوان سرویس (SaaS) که چندین مشتری (Tenant) از یک نمونه نرم‌افزار استفاده می‌کنند، مدیریت اطلاعات مرتبط با هر مشتری چالش‌برانگیز است. فرض کنید نیاز دارید اطلاعاتی مانند شناسه مشتری (TenantId)، شناسه کاربر (UserId)، وضعیت مدیریت مشتری، و هدرهای سفارشی را از یک شیء HttpContext استخراج کنید. در روش‌های سنتی، این منطق در متدهای استاتیک پراکنده پیاده‌سازی می‌شد که خوانایی و نگهداری را دشوار می‌کرد. با استفاده از extension، می‌توان این منطق را به‌صورت متمرکز و خوانا پیاده‌سازی کرد:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public static class MultiTenantHttpContextExtensions
+{
+    extension(HttpContext ctx)
+    {
+        private string? _tenantId;
+        private Guid? _userId;
+
+        public string TenantId =&gt;
+            _tenantId ??=
+                ctx.User.Claims.FirstOrDefault(c =&gt; c.Type == &quot;tenant_id&quot;)?.Value
+                ?? throw new UnauthorizedAccessException(&quot;Tenant ID missing&quot;);
+
+        public Guid UserId =&gt;
+            _userId ??=
+                Guid.TryParse(
+                    ctx.User.Claims.FirstOrDefault(c =&gt; c.Type == &quot;user_id&quot;)?.Value, out var id)
+                ? id
+                : throw new UnauthorizedAccessException(&quot;User ID invalid&quot;);
+
+        public bool IsTenantAdmin =&gt;
+            ctx.User.IsInRole(&quot;Admin&quot;) || ctx.Request.Headers[&quot;X-Tenant-Admin&quot;] == &quot;true&quot;;
+
+        public string? GetHeader(string name) =&gt;
+            ctx.Request.Headers.TryGetValue(name, out var value)
+                ? value.ToString()
+                : null;
+    }
+
+    extension static
+    {
+        public static string DefaultTenantId =&gt; &quot;public&quot;;
+
+        public static bool IsValidTenantId(string? id) =&gt;
+            !string.IsNullOrWhiteSpace(id) &amp;&amp; id.All(char.IsLetterOrDigit);
+    }
+}</pre><div class="ql-direction-rtl" dir="rtl" style="text-align: right;">مزایای این پیاده‌سازی عبارتند از:</div><ul><li><strong>خوانایی بالا:</strong> تمام منطق مرتبط با HttpContext در یک بلوک متمرکز قرار دارد.</li><li><strong>کش‌سازی تنبل (Lazy Caching):</strong> استفاده از فیلدهای خصوصی مانند <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">_tenantId</code> و <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">_userId</code> برای جلوگیری از محاسبات تکراری.</li><li><strong>انسجام دامنه:</strong> منطق مرتبط با مشتری به‌صورت یکپارچه در کنار هم قرار گرفته و نگهداری آن آسان‌تر است.</li></ul><div class="ql-direction-ltr" dir="ltr" style="text-align: left;"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>2. گسترش مدل‌های خارجی (External DTOs)</strong></div><div dir="rtl" style="text-align: right;" class="ql-direction-rtl">یکی دیگر از کاربردهای رایج extension، افزودن منطق دامنه به مدل‌های داده‌ای خارجی (مانند DTOهای تولیدشده توسط کتابخانه‌های شخص ثالث) است. فرض کنید با یک مدل OrderDto کار می‌کنید که امکان تغییر مستقیم آن را ندارید:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public class OrderDto
+{
+    public List&lt;OrderItemDto&gt; Items { get; set; }
+    public string Status { get; set; }
+}</pre><div dir="rtl" style="text-align: right;" class="ql-direction-rtl">با استفاده از extension، می‌توان خصوصیات محاسباتی مانند مجموع مبلغ سفارش یا تعداد کل اقلام را به این مدل اضافه کرد:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public static class OrderExtensions
+{
+    extension(OrderDto order)
+    {
+        public decimal TotalAmount =&gt;
+            order.Items.Sum(i =&gt; i.Quantity * i.PricePerUnit);
+
+        public bool IsComplete =&gt;
+            order.Status == &quot;Completed&quot;;
+
+        public int TotalItems =&gt;
+            order.Items.Sum(i =&gt; i.Quantity);
+    }
+}</pre><div dir="rtl" style="text-align: right;" class="ql-direction-rtl">استفاده از این افزونه‌ها در کد به‌صورت زیر خواهد بود:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">if (order.TotalAmount &gt; 1000 &amp;&amp; order.IsComplete)
+{
+    // انجام عملیات موردنظر
+}</pre><div class="ql-direction-rtl" dir="rtl" style="text-align: right;">این رویکرد امکان افزودن رفتارهای غنی به مدل‌های خارجی را بدون تغییر ساختار اصلی آن‌ها فراهم می‌کند و کد را خواناتر و معنادارتر می‌سازد.</div><div class="ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>چرا extension از متدهای الحاقی سنتی بهتر است؟</strong></div><div class="ql-direction-rtl" dir="rtl" style="text-align: right;">اگرچه متدهای الحاقی سنتی همچنان در دات‌نت 10 پشتیبانی می‌شوند، واژه کلیدی extension مزایای قابل‌توجهی دارد:</div><ul><li><strong>سازمان‌دهی بهتر:</strong> به‌جای پراکندگی متدها در کلاس‌های استاتیک، می‌توان تمام رفتارهای مرتبط را در یک بلوک واحد گروه‌بندی کرد.</li><li><strong>پشتیبانی از خصوصیات و فیلدهای خصوصی:</strong> امکان تعریف خصوصیات و کش‌سازی داده‌ها که در متدهای الحاقی سنتی ممکن نبود.</li><li><strong>انعطاف‌پذیری بیشتر:</strong> پشتیبانی از بلوک‌های استاتیک برای تعریف متدهای کمکی مرتبط.</li></ul><div class="ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl" dir="rtl" style="text-align: right;">این ویژگی به توسعه‌دهندگان اجازه می‌دهد تا کدی با معماری تمیزتر و نگهداری‌پذیرتر تولید کنند.</div><div class="ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>نکات و توصیه‌ها</strong></div><ol><li>وضعیت کنونی: واژه کلیدی extension در حال حاضر در نسخه پیش‌نمایش سوم دات‌نت 10 (Preview 3) و سی‌شارپ 14 در دسترس است. <strong><em>این ویژگی ممکن است در نسخه‌های بعدی با تغییراتی در سینتکس یا ابزارهای پشتیبانی همراه باشد.</em></strong></li><li>سازگاری با کدهای موجود: متدهای الحاقی سنتی همچنان کار می‌کنند و این ویژگی کاملاً افزوده‌ای (Additive) است، بنابراین نیازی به بازنویسی کدهای قدیمی نیست.</li><li>موارد استفاده پیشنهادی: از extension برای سناریوهایی مانند تبدیل DTOها، مدیریت منطق HTTP، افزودن مقادیر محاسباتی به مدل‌ها، و بهبودهای خاص دامنه استفاده کنید.</li><li>احتیاط: از استفاده بیش‌ازحد این ویژگی که ممکن است منجر به پیچیدگی غیرضروری شود، خودداری کنید. تنها زمانی از آن استفاده کنید که رفتارها به‌صورت منطقی به یک نوع تعلق دارند.</li></ol><div class="ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>نتیجه‌گیری</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">واژه کلیدی extension در دات‌نت 10 و سی‌شارپ 14 یک ابزار قدرتمند و تحول‌آفرین برای توسعه‌دهندگان است که امکان تعریف بلوک‌های افزونه‌ای منسجم و خوانا را فراهم می‌کند. این ویژگی با ارائه قابلیت‌هایی مانند خصوصیات افزونه‌ای، فیلدهای پشتیبان خصوصی، و بلوک‌های استاتیک، به توسعه‌دهندگان اجازه می‌دهد تا منطق دامنه را به‌صورت متمرکز و کارآمد پیاده‌سازی کنند. کاربردهای عملی آن، از مدیریت سیستم‌های چنداجاره‌ای گرفته تا گسترش مدل‌های خارجی، نشان‌دهنده انعطاف‌پذیری و ارزش آن در پروژه‌های واقعی است. با توجه به اینکه این ویژگی هنوز در مرحله پیش‌نمایش است، توسعه‌دهندگان باید با دقت از آن استفاده کنند و منتظر بهبودهای احتمالی در نسخه‌های بعدی باشند. در نهایت، extension گامی مهم در جهت بهبود معماری نرم‌افزار و تولید کدهای تمیزتر و نگهداری‌پذیرتر در اکوسیستم دات‌نت است.</div></div><br><br><a href='https://medium.com/@thecodeman/net-10-extension-e469fce63c25'>مشاهده مطلب اصلی</a></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20269.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>ویژگی جدید Extension Members در C# 14.0</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20389.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>بررسی عمیق اعضای الحاقی در C# 14</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20552.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>نگاهی جامع به ویژگی‌های جدید C# 14 و برنامه‌های آینده برای C# 15</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20157.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>نگاهی به طراحی C# 14</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-24278.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>اعضای توسعه‌دهنده C# در C# 14</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20613.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>C# 14: رفع یک ایراد کوچک اما آزاردهنده در نوشتن کتابخانه‌های کمکی زیباتر</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-23502.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>بررسی ویژگی‌های C# 14: اعضای توسعه‌دهنده (Extension Members) در .NET 10</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/learning-paths/details/118'><span class='badge bg-danger rounded-pill me-2'>مسیرراه‌ها</span>بررسی ویژگی‌‌های جدید C# 14 و NET 10.</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3663.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>کش کردن مقادیر Enum در C# 14 با استفاده از Extension Everything – راه‌حل بهینه و thread-safe</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3518.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بررسی ویژگی OverloadResolutionPriority در C# 13 و دات‌نت 9</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

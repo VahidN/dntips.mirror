@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫بررسی تفاوت Task و ValueTask</title>     <meta name="description" content="زمانیکه تصمیم میگیریم کدهای زده شده را بهینه کنیم، اکثرا دنبال
+ راه حل‌های جدید نمیگردیم. این مورد کاملا
+ غریزی است؛ چرا که به‌دنبال کم‌ترین انرژی و بیشترین بازدهی هستیم؛ این طبیعت انسان
+ است. صرفا کدهای قبلی را بازبینی میکنیم و سعی میکنیم  نحوه‌ی نوشتن منطق‌های موجود را بهینه کنیم. در
+ همین راستا درک عملکرد    Task                    و    ValueTask                   ‌ها شاید قدمی مهم در مورد بهینه کردن کد‌ها باشد؛ چرا استفاده درست ...">
+    <meta name="author" content="ارشاد رئوفی">
+    <meta itemprop="name" content="بررسی تفاوت Task و ValueTask">
+    <meta itemprop="description" content="زمانیکه تصمیم میگیریم کدهای زده شده را بهینه کنیم، اکثرا دنبال
+ راه حل‌های جدید نمیگردیم. این مورد کاملا
+ غریزی است؛ چرا که به‌دنبال کم‌ترین انرژی و بیشترین بازدهی هستیم؛ این طبیعت انسان
+ است. صرفا کدهای قبلی را بازبینی میکنیم و سعی میکنیم  نحوه‌ی نوشتن منطق‌های موجود را بهینه کنیم. در
+ همین راستا درک عملکرد    Task                    و    ValueTask                   ‌ها شاید قدمی مهم در مورد بهینه کردن کد‌ها باشد؛ چرا استفاده درست ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="بررسی تفاوت Task و ValueTask">
+    <meta property="og:description" content="زمانیکه تصمیم میگیریم کدهای زده شده را بهینه کنیم، اکثرا دنبال
+ راه حل‌های جدید نمیگردیم. این مورد کاملا
+ غریزی است؛ چرا که به‌دنبال کم‌ترین انرژی و بیشترین بازدهی هستیم؛ این طبیعت انسان
+ است. صرفا کدهای قبلی را بازبینی میکنیم و سعی میکنیم  نحوه‌ی نوشتن منطق‌های موجود را بهینه کنیم. در
+ همین راستا درک عملکرد    Task                    و    ValueTask                   ‌ها شاید قدمی مهم در مورد بهینه کردن کد‌ها باشد؛ چرا استفاده درست ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="بررسی تفاوت Task و ValueTask">
+    <meta name="twitter:description" content="زمانیکه تصمیم میگیریم کدهای زده شده را بهینه کنیم، اکثرا دنبال
+ راه حل‌های جدید نمیگردیم. این مورد کاملا
+ غریزی است؛ چرا که به‌دنبال کم‌ترین انرژی و بیشترین بازدهی هستیم؛ این طبیعت انسان
+ است. صرفا کدهای قبلی را بازبینی میکنیم و سعی میکنیم  نحوه‌ی نوشتن منطق‌های موجود را بهینه کنیم. در
+ همین راستا درک عملکرد    Task                    و    ValueTask                   ‌ها شاید قدمی مهم در مورد بهینه کردن کد‌ها باشد؛ چرا استفاده درست ...">
+    <meta name="twitter:card" content="زمانیکه تصمیم میگیریم کدهای زده شده را بهینه کنیم، اکثرا دنبال
+ راه حل‌های جدید نمیگردیم. این مورد کاملا
+ غریزی است؛ چرا که به‌دنبال کم‌ترین انرژی و بیشترین بازدهی هستیم؛ این طبیعت انسان
+ است. صرفا کدهای قبلی را بازبینی میکنیم و سعی میکنیم  نحوه‌ی نوشتن منطق‌های موجود را بهینه کنیم. در
+ همین راستا درک عملکرد    Task                    و    ValueTask                   ‌ها شاید قدمی مهم در مورد بهینه کردن کد‌ها باشد؛ چرا استفاده درست ...">
+    <meta property="article:published_time" content="Sun, 08 Jan 2023 18:50:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫بررسی تفاوت Task و ValueTask";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-3440.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫بهبود کارآیی عبارات باقاعده در دات نت 7</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-3438.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫امکان مفهوم بخشیدن به رشته‌ها در NET 7.</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫بررسی تفاوت Task و ValueTask</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>ارشاد رئوفی<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۱/۱۰/۱۸ ۱۸:۵۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-3439.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><p style="text-align:justify;direction:rtl;unicode-bidi:
+embed"> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;">زمانیکه تصمیم میگیریم کدهای زده شده را بهینه کنیم، اکثرا دنبال
+راه حل‌های جدید نمیگردیم. این مورد کاملا
+غریزی است؛ چرا که به‌دنبال کم‌ترین انرژی و بیشترین بازدهی هستیم؛ این طبیعت انسان
+است. صرفا کدهای قبلی را بازبینی میکنیم و سعی میکنیم&nbsp; نحوه‌ی نوشتن منطق‌های موجود را بهینه کنیم. در
+همین راستا درک عملکرد </span> <span dir="LTR" style="Cascadia Code&quot;;">Task</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> و </span> <span dir="LTR" style="Cascadia Code&quot;;">ValueTask</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span>‌ها شاید قدمی مهم در مورد بهینه کردن کد‌ها باشد؛ چرا استفاده درست
+و بجای این دو مورد می‌تواند تاثیر زیادی بر روی سرعت و استفاده از مصرف حافظه داشته
+باشد؟ در این مقاله سعی میکنیم تا درک درستی از این دو داشته باشیم.</span> <span dir="LTR" style="Cascadia Code&quot;;"> </span> </p> <p style="text-align:justify;direction:rtl;unicode-bidi:
+embed"> <br> </p> <h4 style="direction: rtl; unicode-bidi: embed;"> <span dir="LTR" style="Cascadia Code&quot;;Times New Roman&quot;;">Task&lt;T&gt; </span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Times New Roman&quot;,serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span>&nbsp;چیست؟</span> </h4> <h2 style="direction: rtl; unicode-bidi: embed;"> <span dir="LTR" style="Cascadia Code&quot;;Times New Roman&quot;;"> </span> </h2> <p style="text-align:justify;direction:rtl;unicode-bidi:
+embed"> <span dir="LTR" style="Cascadia Code&quot;;">Task</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> یک کلاس در فضای نام </span> <span dir="LTR" style="Cascadia Code&quot;;">System.Threading.Tasks</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> است؛ به‌طوریکه
+کمک میکند تا یک قسمت از برنامه به صورت مستقل از </span> <span dir="LTR" style="Cascadia Code&quot;;">Thread</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> اصلی اجرا شود.
+به‌بیان دیگر می‌تواند یک </span> <span dir="LTR" style="Cascadia Code&quot;;">Thread Pool</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> را ایجاد و با
+توجه به روند کار، از یک مرحله‌ی اجرایی به مرحله‌ای دیگر منتقل می‌کند. همچنین هر </span> <span dir="LTR" style="Cascadia Code&quot;;">Task</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> می‌تواند یک
+مقدار برگشتی نیز داشته باشد.</span> </p> <p style="text-align:justify;direction:rtl;unicode-bidi:
+embed"> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;">&nbsp;این درحالی‌است که می‌تواند صرفا یک فرآیند را اجرا کند، بدون اینکه خروجی داشته باشد. به‌عبارتی دیگر
+اگر فرآیندی داشته باشیم که در نهایت یک شناسه را برمیگرداند، از </span> <span dir="LTR" style="Cascadia Code&quot;;">Task&lt;int&gt;</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> و اگر فرآیندی داشته باشیم که صرفا فرآیند همگام سازی داده‌های قدیمی به جدید را انجام میدهد، می‌تواند از نوع </span> <span dir="LTR" style="Cascadia Code&quot;;">Task</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> باشد.</span> </p> <p style="text-align:justify;direction:rtl;unicode-bidi:
+embed"> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;">همانطور که اشاره شد، </span> <span dir="LTR" style="Cascadia Code&quot;;">Task</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> یک کلاس است که
+شامل متد‌ها و فیلد‌های مختلفی می‌باشد. با استفاده از این اعضا می‌توان نحوه‌ی اجرای
+کدها و وضعیت‌های مختلف اجرای آن را مدیریت کرد، تا در نهایت اجرای آن کامل شود.</span> <span dir="LTR" style="Cascadia Code&quot;;"> </span> </p> <p style="text-align:justify;direction:rtl;unicode-bidi:
+embed"> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;">به دلیل اینکه </span> <span dir="LTR" style="Cascadia Code&quot;;">Task</span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;">یک </span> <span dir="LTR" style="Cascadia Code&quot;;">class</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> است
+و </span> <span dir="LTR" style="Cascadia Code&quot;;">class</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span>‌ها از نوع </span> <span dir="LTR" style="Cascadia Code&quot;;">ReferenceType</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> می‌باشند، روی
+حافظه‌ی </span> <span dir="LTR" style="Cascadia Code&quot;;">Heap</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> ذخیره می‌شوند و به‌ازای هر بار فراخوانی متدی که خروجی </span> <span dir="LTR" style="Cascadia Code&quot;;">Task</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> دارد، شیء </span> <span dir="LTR" style="Cascadia Code&quot;;">Task</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> را
+روی </span> <span dir="LTR" style="Cascadia Code&quot;;">Heap</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> ذخیره میکند. این شیء وضعیت اجرای قسمتی از کد ما را که میتواند </span> <span dir="LTR" style="Cascadia Code&quot;;">sync</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> یا </span> <span dir="LTR" style="Cascadia Code&quot;;">async</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> باشد، در خود
+ذخیره میکند تا در نهایت اجرای آن کامل شود.</span> </p> <p style="text-align:justify;direction:rtl;unicode-bidi:
+embed"> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <br> </span> </p> <h4 style="direction: rtl; unicode-bidi: embed;"> <span style="Times New Roman&quot;,serif;Cascadia Code&quot;;Cascadia Code&quot;;">نحوه استفاده از </span> <span dir="LTR" style="Cascadia Code&quot;;Times New Roman&quot;;">Task&lt;T&gt;</span> </h4> <p style="text-align:justify;direction:rtl;unicode-bidi:
+embed"> </p> <p style="text-align:justify;direction:rtl;unicode-bidi:
+embed"> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;">برای درک بهتر، یک تکه کد را با بهره بردن از</span> <span dir="LTR" style="Cascadia Code&quot;;">Task</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> ایجاد میکنیم :</span> </p> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">public static class DummyWeatherProvider
+{
+    public static async Task&lt;Weather&gt; Get(string city)
+    {
+        await Task.Delay(10);
+        var weather = new Weather 
+        { 
+            City = city, 
+            Date = DateTime.Now, 
+            AvgTempratureF = new Random().Next(5, 70) 
+        };
+        
+        return weather;
+    }
+}</pre> </div> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;">همان طور که مشخص است، کلاس موجود یک متد به نام </span> <span dir="LTR" style="Cascadia Code&quot;;">Get</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> دارد تا
+اطلاعات آب و هوای&nbsp; شهر مورد نظر را به
+صورت یک </span> <span dir="LTR" style="Cascadia Code&quot;;">Task </span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span>&nbsp;برگرداند. حال کد زیر را
+جهت بررسی تغییر وضعیت‌های اجرایی این </span> <span dir="LTR" style="Cascadia Code&quot;;">Task</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> ایجاد می‌کنیم
+: </span> <div dir="ltr" style="direction: ltr;" align="left"> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">static async Task CheckTaskStatus()
+{
+   var task = DummyWeatherProvider.Get("Stockholm");
+    LogTaskStatus(task.Status);
+    await task;
+    LogTaskStatus(task.Status);
+}
+
+static void LogTaskStatus(TaskStatus status)
+{
+    Console.WriteLine($"Task Status: {Enum.GetName(typeof(TaskStatus), status)}");
+}</pre> </div> </div> <div> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;">TaskStatus یک enumeration است، به‌طوری‌که بیانگر وضعیت‌های مختلف یک Task در حال اجرا می‌باشد. برای مثال: WaitingForActivation,&nbsp;Running,&nbsp;RanToCompletion. در کد بالا ابتدا متد را فراخوانی می‌کنیم. سپس منتظر می‌مانیم تا متد اجرا شده، تکمیل شود. در اولین لاگ وضعیت، به WaitingForActivation و در دومین لاگ به RanToCompletion تبدیل میشود. حال‌که با Task ها و نحوه‌ی اجرای فرآیند آن آشنا شدیم، در قسمت بعدی به بررسی ValueTask ها می‌پردازیم.&nbsp; <span> </span> <br> </span> </div> <div> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <br> </span> </div> <div> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> </span> </div> <p style="text-align:justify;direction:rtl;unicode-bidi:
+embed"> <span dir="LTR" style="Cascadia Code&quot;;"> </span> </p> <h4 style="direction: rtl; unicode-bidi: embed;"> <span dir="LTR" style="Cascadia Code&quot;;Times New Roman&quot;;">ValueTask&lt;T&gt; </span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Times New Roman&quot;,serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span>&nbsp;چیست؟</span> </h4> <h2 style="direction: rtl; unicode-bidi: embed;"> <span dir="LTR" style="Cascadia Code&quot;;Times New Roman&quot;;"> </span> </h2> <p style="text-align:justify;direction:rtl;unicode-bidi:
+embed"> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;">همانند </span> <span dir="LTR" style="Cascadia Code&quot;;">Task</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> ،</span> <span dir="LTR" style="Cascadia Code&quot;;">ValueTask</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> هم برای مدیریت وضعیت فرآیند استفاده میشود؛ با این تفاوت که </span> <span dir="LTR" style="Cascadia Code&quot;;">ValueTask</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span>‌ها از نوع </span> <span dir="LTR" style="Cascadia Code&quot;;">struct</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> هستند. به‌طوریکه نحوه‌ی ذخیره سازی آن‌ها در حافظه به نسبت </span> <span dir="LTR" style="Cascadia Code&quot;;">class</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span>‌ها کاملا
+متفاوت است. از نقطه نظر سرعت، تشخیص دادن اینکه کدامیک باید استفاده شود، باید با
+توجه به سناریو، بررسی و انتخاب شود؛ چرا که از نظر تخصیص حافظه متفاوت عمل می‌کنند. برای درک بهتر عملکرد </span> <span dir="LTR" style="Cascadia Code&quot;;">ValueTask</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span>‌ها کد زیر را
+بررسی میکنیم : </span> </p> <div dir="ltr" style="direction: ltr;" align="left"> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">public class WeatherService
+{
+    private readonly ConcurrentDictionary&lt;string, Weather&gt; _cache;
+    public WeatherService()
+    {
+        _cache = new();
+    }
+
+    public async Task&lt;Weather&gt; GetWeatherTask(string city)
+    {
+        if (!_cache.ContainsKey(city))
+        {
+            var weather = await DummyWeatherProvider.Get(city);
+            _cache.TryAdd(city, weather);
+        }
+        return _cache[city];
+    }
+
+    public async ValueTask&lt;Weather&gt; GetWeatherValueTask(string city)
+    {
+        if (!_cache.ContainsKey(city))
+        {
+            var weather = await DummyWeatherProvider.Get(city);
+            _cache.TryAdd(city, weather);
+        }
+        return _cache[city];   
+  }</pre> </div> </div> <p style="text-align:justify;direction:rtl;unicode-bidi:
+embed"> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;">کلاس </span> <span dir="LTR" style="Cascadia Code&quot;;">WeatherService</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> شامل یک فیلد </span> <span dir="LTR" style="Cascadia Code&quot;;">private</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> از نوع </span> <span dir="LTR" style="Cascadia Code&quot;;">collection</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> و دو متد
+است. ما از</span> <span dir="LTR"> </span> <span dir="LTR"> </span> <span dir="LTR" style="Cascadia Code&quot;;"> <span dir="LTR"> </span> <span dir="LTR"> </span>_cache&nbsp;</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> جهت نگهداری اطلاعاتی که قبلا دریافت شده، استفاده می‌کنیم و به نوعی
+</span> <span dir="LTR" style="Cascadia Code&quot;;">in-memory cache</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> را پیاده سازی میکنیم. پیاده سازی منطق هر دو متد&nbsp; </span> <span dir="LTR" style="Cascadia Code&quot;;">GetWeatherTask</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> و </span> <span dir="LTR" style="Cascadia Code&quot;;">GetWeatherValueTask&nbsp;</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> کاملا شبیه به هم است؛ به‌طوری‌که اول بررسی میکنیم اطلاعات آب و هوای
+شهر مورد نظر در </span> <span dir="LTR"> </span> <span dir="LTR"> </span> <span dir="LTR" style="Cascadia Code&quot;;"> <span dir="LTR"> </span> <span dir="LTR"> </span>_cache</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> وجود دارد یا خیر؟ اگر وجود داشت، اطلاعات به صورت مستقیم برگشت
+داده می‌شود؛ در غیر این صورت </span> <span dir="LTR" style="Cascadia Code&quot;;">DummyWeatherProvider.Get() </span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span dir="RTL"> <span dir="RTL"> </span>&nbsp;فراخوانی خواهد شد.&nbsp; </span> </p> <p style="text-align:justify;direction:rtl;unicode-bidi:
+embed">در قدم بعدی
+اطلاعات به‌دست آمده را در <span dir="LTR"> </span> <span dir="LTR"> </span> <span dir="LTR" style="Cascadia Code&quot;;"> <span dir="LTR"> </span> <span dir="LTR"> </span>_cache</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span dir="RTL"> <span dir="RTL"> </span>
+ذخیره می‌کنیم. سپس مقدار ذخیره شده را برگشت میدهیم. در واقع تنها تفاوت دو متد ذکر
+شده، نوع خروجی آن می‌باشد؛ یکی از </span> <span dir="LTR" style="Cascadia Code&quot;;">Task</span>و دیگری از <span dir="LTR" style="Cascadia Code&quot;;">ValueTask</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span dir="RTL"> <span dir="RTL"> </span> استفاده می‌کند.</span> </p> <p style="text-align:justify;direction:rtl;unicode-bidi:
+embed"> <span dir="RTL"> </span> </p> <p style="text-align:justify;direction:rtl;unicode-bidi:
+embed">برای مقایسه‌ی مصرف
+حافظه‌ی این دو روی هر دو متد، <span dir="LTR" style="Cascadia Code&quot;;">Benchmark</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span dir="RTL"> <span dir="RTL"> </span>
+میگیریم. برای پیاده سازی نیار به کد‌های زیر داریم :&nbsp; </span> </p> <div dir="ltr" style="direction: ltr;" align="left"> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">[MemoryDiagnoser]
+public class TaskAndValueTaskBenchmark
+{
+    private readonly WeatherService _weatherService;
+    public TaskAndValueTaskBenchmark()
+    {
+        _weatherService = new();
+    }
+    
+    [Benchmark]
+    [Arguments("Denver")]
+    public async Task&lt;Weather&gt; TaskBenchmark(string city)
+    {
+        return await _weatherService.GetWeatherTask(city);
+    }
+
+    [Benchmark]
+    [Arguments("London")]
+    public async ValueTask&lt;Weather&gt; ValueTaskBenchmark(string city)
+    {
+        return await _weatherService.GetWeatherValueTask(city);
+    }
+}</pre> </div> </div> <p style="text-align:justify;direction:rtl;unicode-bidi:
+embed"> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;">نتیجه به دست آمده به شرح زیر است : </span> </p> <p style="text-align:justify;direction:rtl;unicode-bidi:
+embed"> <span dir="RTL"> </span> </p> <div align="right"> <table style="border: none;"> <tbody> <tr> <td style="width: 151.45pt; border-width: 1pt; border-color: windowtext; padding: 0cm 5.4pt;"> <p style="text-align:
+  center;direction:rtl;unicode-bidi:embed" align="center"> <b> <span dir="LTR" style="Cascadia Code&quot;;">Allocated</span> </b> <b> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> </span> </b> </p> </td> <td style="width: 151.45pt; border-top-width: 1pt; border-bottom-width: 1pt; border-left-width: 1pt; border-top-color: windowtext; border-bottom-color: windowtext; border-left-color: windowtext; border-right: none; padding: 0cm 5.4pt;"> <p style="text-align:
+  center;direction:rtl;unicode-bidi:embed" align="center"> <b> <span dir="LTR" style="Cascadia Code&quot;;">Gen0</span> </b> <b> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> </span> </b> </p> </td> <td style="width: 164.6pt; border-top-width: 1pt; border-bottom-width: 1pt; border-left-width: 1pt; border-top-color: windowtext; border-bottom-color: windowtext; border-left-color: windowtext; border-right: none; padding: 0cm 5.4pt;"> <p style="text-align:
+  center;direction:rtl;unicode-bidi:embed" align="center"> <b> <span dir="LTR" style="Cascadia Code&quot;;">Method</span> </b> </p> </td> </tr> <tr> <td style="width: 151.45pt; border-right-width: 1pt; border-bottom-width: 1pt; border-left-width: 1pt; border-right-color: windowtext; border-bottom-color: windowtext; border-left-color: windowtext; border-top: none; padding: 0cm 5.4pt;"> <p style="text-align:
+  center;direction:rtl;unicode-bidi:embed" align="center"> <span dir="LTR" style="Cascadia Code&quot;;">144 B</span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> </span> </p> </td> <td style="width: 151.45pt; border-top: none; border-left-width: 1pt; border-left-color: windowtext; border-bottom-width: 1pt; border-bottom-color: windowtext; border-right: none; padding: 0cm 5.4pt;"> <p style="text-align:
+  center;direction:rtl;unicode-bidi:embed" align="center"> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;">0.0229</span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> </span> </p> </td> <td style="width: 164.6pt; border-top: none; border-left-width: 1pt; border-left-color: windowtext; border-bottom-width: 1pt; border-bottom-color: windowtext; border-right: none; padding: 0cm 5.4pt;"> <p style="text-align:
+  center;direction:rtl;unicode-bidi:embed" align="center"> <span dir="LTR" style="Cascadia Code&quot;;">TaskBenchmark</span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> </span> </p> </td> </tr> <tr> <td style="width: 151.45pt; border-right-width: 1pt; border-bottom-width: 1pt; border-left-width: 1pt; border-right-color: windowtext; border-bottom-color: windowtext; border-left-color: windowtext; border-top: none; padding: 0cm 5.4pt;"> <p style="text-align:
+  center;direction:rtl;unicode-bidi:embed" align="center"> <span dir="LTR" style="Cascadia Code&quot;;">------</span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> </span> </p> </td> <td style="width: 151.45pt; border-top: none; border-left-width: 1pt; border-left-color: windowtext; border-bottom-width: 1pt; border-bottom-color: windowtext; border-right: none; padding: 0cm 5.4pt;"> <p style="text-align:
+  center;direction:rtl;unicode-bidi:embed" align="center"> <span dir="LTR"> </span> <span dir="LTR"> </span> <span dir="LTR" style="Cascadia Code&quot;;"> <span dir="LTR"> </span> <span dir="LTR"> </span>----</span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> </span> </p> </td> <td style="width: 164.6pt; border-top: none; border-left-width: 1pt; border-left-color: windowtext; border-bottom-width: 1pt; border-bottom-color: windowtext; border-right: none; padding: 0cm 5.4pt;"> <p style="text-align:
+  center;direction:rtl;unicode-bidi:embed" align="center"> <span dir="LTR" style="Cascadia Code&quot;;">ValueTaskBenchmark</span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> </span> </p> </td> </tr> </tbody> </table>
+
+
+
+
+ &nbsp; <span style="text-align: justify;">با توجه به نتیجه به‌دست آمده، متدی که خروجی </span> <span dir="LTR" style="text-align: justify;Cascadia Code&quot;;">ValueTask</span> <span dir="RTL" style="text-align: justify;"> </span> <span dir="RTL" style="text-align: justify;"> </span> <span style="text-align: justify;"> <span dir="RTL"> </span> <span dir="RTL"> </span> دارد، حافظه‌ای را تخصیص نداده‌است؛ این دقیقا مزیت مهم </span> <span dir="LTR" style="text-align: justify;Cascadia Code&quot;;">ValueTask</span> <span dir="RTL" style="text-align: justify;"> </span> <span dir="RTL" style="text-align: justify;"> </span> <span style="text-align: justify;"> <span dir="RTL"> </span> <span dir="RTL"> </span> نسبت به </span> <span dir="LTR" style="text-align: justify;Cascadia Code&quot;;">Task </span> <span dir="RTL" style="text-align: justify;"> </span> <span dir="RTL" style="text-align: justify;"> </span> <span style="text-align: justify;"> <span dir="RTL"> </span> <span dir="RTL"> </span>&nbsp;می‌باشد.</span> </div> <div align="right"> <span style="text-align: justify;"> <br> </span> </div> <h4 style="direction: rtl; unicode-bidi: embed;"> <span style="Times New Roman&quot;,serif;Cascadia Code&quot;;Cascadia Code&quot;;">مزیت&nbsp; </span> <span dir="LTR"> </span> <span dir="LTR"> </span> <span dir="LTR" style="Cascadia Code&quot;;Times New Roman&quot;;"> <span dir="LTR"> </span> <span dir="LTR"> </span>ValueTask&lt;T&gt;</span> </h4> <h3 style="direction: rtl; unicode-bidi: embed;"> <span dir="LTR" style="Cascadia Code&quot;;Times New Roman&quot;;"> </span> </h3> <p style="text-align:justify;direction:rtl;unicode-bidi:
+embed"> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;">به‌دلیل اینکه از نوع </span> <span dir="LTR" style="Cascadia Code&quot;;">struct</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> هستند، بر روی حافظه، در قسمت </span> <span dir="LTR" style="font-size:
+12.0pt;Cascadia Code&quot;;">Stack</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> ذخیره می‌شوند
+و به صورت خودکار بعد از اینکه نیازی به آنها نباشد، از حافظه حذف می‌شوند</span> <span dir="LTR" style="Cascadia Code&quot;;"> <span dir="LTR"> </span> <span dir="LTR"> </span>.</span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;">به همین دلیل به شکل قابل توجهی، فشار را از روی </span> <span dir="LTR" style="Cascadia Code&quot;;">GC</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> کاهش می‌دهد</span> <span dir="LTR"> </span> <span dir="LTR"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;">.</span> </p> <p style="text-align:justify;direction:rtl;unicode-bidi:
+embed"> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;">&nbsp;علاوه بر این، در سناریویی که اکثر کدها به صورت
+</span> <span dir="LTR" style="Cascadia Code&quot;;">sync</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> اجرا می‌شوند، در این مواقع استفاده از </span> <span dir="LTR" style="Cascadia Code&quot;;">ValueTask</span>، <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> بهتر از </span> <span dir="LTR" style="Cascadia Code&quot;;">Task</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> می‌باشد</span> <span dir="LTR"> </span> <span dir="LTR"> </span> <span dir="LTR" style="Cascadia Code&quot;;"> <span dir="LTR"> </span> <span dir="LTR"> </span>.</span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> </span> </p> <p style="text-align:justify;direction:rtl;unicode-bidi:
+embed"> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;">این سری متد </span> <code> <span dir="LTR" style="Cascadia Code&quot;;">GetWeatherValueTask</span> </code> <span dir="LTR" style="Cascadia Code&quot;; background-image: initial; background-position: initial; background-size: initial; background-repeat: initial; background-attachment: initial; background-origin: initial; background-clip: initial;">&nbsp;</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Open Sans&quot;, sans-serif; background-image: initial; background-position: initial; background-size: initial; background-repeat: initial; background-attachment: initial; background-origin: initial; background-clip: initial;"> <span dir="RTL"> </span> <span dir="RTL"> </span> </span> <span style=" background-image: initial; background-position: initial; background-size: initial; background-repeat: initial; background-attachment: initial; background-origin: initial; background-clip: initial;">را جهت تشخص اینکه &nbsp;اغلب کدها به صورت </span> <span dir="LTR" style="Cascadia Code&quot;; background-image: initial; background-position: initial; background-size: initial; background-repeat: initial; background-attachment: initial; background-origin: initial; background-clip: initial;">sync</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style=" background-image: initial; background-position: initial; background-size: initial; background-repeat: initial; background-attachment: initial; background-origin: initial; background-clip: initial;"> <span dir="RTL"> </span> <span dir="RTL"> </span> یا </span> <span dir="LTR" style="Cascadia Code&quot;; background-image: initial; background-position: initial; background-size: initial; background-repeat: initial; background-attachment: initial; background-origin: initial; background-clip: initial;">async</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style=" background-image: initial; background-position: initial; background-size: initial; background-repeat: initial; background-attachment: initial; background-origin: initial; background-clip: initial;"> <span dir="RTL"> </span> <span dir="RTL"> </span> اجرا می‌شوند، بررسی می‌کنیم. در
+متد ذکر شده اگر اطلاعات شهر مورد نظر وجود داشته باشد، کار به صورت </span> <span dir="LTR" style="Cascadia Code&quot;; background-image: initial; background-position: initial; background-size: initial; background-repeat: initial; background-attachment: initial; background-origin: initial; background-clip: initial;">sync</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style=" background-image: initial; background-position: initial; background-size: initial; background-repeat: initial; background-attachment: initial; background-origin: initial; background-clip: initial;"> <span dir="RTL"> </span> <span dir="RTL"> </span> اجرا می‌شود و اگر شهر وجود
+نداشته باشد، کار به صورت</span> <span dir="LTR"> </span> <span dir="LTR"> </span> <span dir="LTR" style="Cascadia Code&quot;; background-image: initial; background-position: initial; background-size: initial; background-repeat: initial; background-attachment: initial; background-origin: initial; background-clip: initial;"> <span dir="LTR"> </span> <span dir="LTR"> </span> async</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style=" background-image: initial; background-position: initial; background-size: initial; background-repeat: initial; background-attachment: initial; background-origin: initial; background-clip: initial;"> <span dir="RTL"> </span> <span dir="RTL"> </span> اجرا می‌شود. با بررسی دقیق‌تر متوجه می‌شویم اکثر مواقع در این متد کار به صورت </span> <span dir="LTR" style="Cascadia Code&quot;; background-image: initial; background-position: initial; background-size: initial; background-repeat: initial; background-attachment: initial; background-origin: initial; background-clip: initial;">sync
+</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style=" background-image: initial; background-position: initial; background-size: initial; background-repeat: initial; background-attachment: initial; background-origin: initial; background-clip: initial;"> <span dir="RTL"> </span> <span dir="RTL"> </span>&nbsp;اجرا می‌شود؛ چرا که بعد ازدریافت
+اطلاعات، مجدد آن را دریافت نمیکند، بلکه از حافظه میخواند (همان</span> <span dir="LTR"> </span> <span dir="LTR"> </span> <span dir="LTR" style="Cascadia Code&quot;; background-image: initial; background-position: initial; background-size: initial; background-repeat: initial; background-attachment: initial; background-origin: initial; background-clip: initial;"> <span dir="LTR"> </span> <span dir="LTR"> </span>_cache</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style=" background-image: initial; background-position: initial; background-size: initial; background-repeat: initial; background-attachment: initial; background-origin: initial; background-clip: initial;"> <span dir="RTL"> </span> <span dir="RTL"> </span>)</span> <span dir="LTR"> </span> <span dir="LTR"> </span> <span dir="LTR" style="Cascadia Code&quot;; background-image: initial; background-position: initial; background-size: initial; background-repeat: initial; background-attachment: initial; background-origin: initial; background-clip: initial;"> <span dir="LTR"> </span> <span dir="LTR"> </span> </span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style=" background-image: initial; background-position: initial; background-size: initial; background-repeat: initial; background-attachment: initial; background-origin: initial; background-clip: initial;"> <span dir="RTL"> </span> <span dir="RTL"> </span>. <br> </span> </p> <p style="text-align:justify;direction:rtl;unicode-bidi:
+embed"> <span style=" background-image: initial; background-position: initial; background-size: initial; background-repeat: initial; background-attachment: initial; background-origin: initial; background-clip: initial;"> <br> </span> </p> <h4 style="direction: rtl; unicode-bidi: embed;"> <span style="Times New Roman&quot;, serif; background-image: initial; background-position: initial; background-size: initial; background-repeat: initial; background-attachment: initial; background-origin: initial; background-clip: initial;">محدودیت‌های استفاده از&nbsp;</span> <span dir="LTR"> </span> <span dir="LTR"> </span> <span dir="LTR" style="Cascadia Code&quot;;Times New Roman&quot;;"> <span dir="LTR"> </span> <span dir="LTR"> </span>&nbsp; ValueTask&lt;T&gt;</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Times New Roman&quot;, serif; background-image: initial; background-position: initial; background-size: initial; background-repeat: initial; background-attachment: initial; background-origin: initial; background-clip: initial;"> <span dir="RTL"> </span> <span dir="RTL"> </span>&nbsp; </span> </h4> <p style=" direction: rtl; unicode-bidi: embed;"> <span style="Cascadia Code&quot;;Cascadia Code&quot;;">1.<span style="font-variant-numeric: normal; font-variant-east-asian: normal; font-stretch: normal;Times New Roman&quot;;"> در اینجا</span> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;">تنها یکبار امکان استفاده از</span> <span dir="LTR" style="Cascadia Code&quot;;"> await </span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span>وجود دارد. وقتی یکبار </span> <span dir="LTR" style="Cascadia Code&quot;;">valueTask</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> را </span> <span dir="LTR" style="Cascadia Code&quot;;">await</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> می‌کنیم، بهتر
+است کار دیگری بر روی آن انجام ندهیم؛ چراکه ممکن است از حافظه پاک شده باشد.</span> </p> <p style=" direction: rtl; unicode-bidi: embed;"> <span style="Cascadia Code&quot;;Cascadia Code&quot;;">2.<span style="font-variant-numeric: normal; font-variant-east-asian: normal; font-stretch: normal;Times New Roman&quot;;"> </span> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;">اگر در سناریویی لازم دارید چندین بار </span> <span dir="LTR" style="Cascadia Code&quot;;">await</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> را بر روی </span> <span dir="LTR" style="Cascadia Code&quot;;">valueTask</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> اجرا کنید، لازم است ابتدا آن را به </span> <span dir="LTR" style="Cascadia Code&quot;;">Task</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> تبدیل کنیم. برای
+این کار متد </span> <span dir="LTR" style="Cascadia Code&quot;;">AsTask</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> را فراخوانی میکنیم (بهتر است صرفا یکبار متد </span> <span dir="LTR" style="Cascadia Code&quot;;">AsTask</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> را فراخوانی کنیم).</span> <span dir="LTR" style="Cascadia Code&quot;;"> </span> </p> <p style=" direction: rtl; unicode-bidi: embed;"> <span style="Cascadia Code&quot;;Cascadia Code&quot;;">3.<span style="font-variant-numeric: normal; font-variant-east-asian: normal; font-stretch: normal;Times New Roman&quot;;"> </span> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;">نمیتوانیم به یک </span> <span dir="LTR" style="Cascadia Code&quot;;">ValueTask</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> به صورت هم
+زمان در حالت </span> <span dir="LTR" style="Cascadia Code&quot;;">Multi threads</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> دسترسی داشته
+باشیم.</span> <span dir="LTR" style="Cascadia Code&quot;;"> </span> </p> <p style=" direction: rtl; unicode-bidi: embed;"> <span style="Cascadia Code&quot;;Cascadia Code&quot;;">4.<span style="font-variant-numeric: normal; font-variant-east-asian: normal; font-stretch: normal;Times New Roman&quot;;"> </span> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;">به صورت پیش فرض خروجی عملیات </span> <span dir="LTR" style="Cascadia Code&quot;;">async</span>، <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> نوع </span> <span dir="LTR" style="Cascadia Code&quot;;">Task</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> می‌باشد؛ مگر
+اینکه اغلب مراحل کار به صورت </span> <span dir="LTR" style="Cascadia Code&quot;;">sync</span> <span dir="RTL"> </span> <span dir="RTL"> </span> <span style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> <span dir="RTL"> </span> <span dir="RTL"> </span> اجرا شود، مانند
+مثالی که بالاتر اشاره شد.</span> <span dir="LTR" style="Cascadia Code&quot;;"> </span> </p> <h4 style="direction: rtl; unicode-bidi: embed;"> <br> <span style="Times New Roman&quot;,serif;Calibri Light&quot;;Calibri Light&quot;;"> </span> </h4> <h4 style="direction: rtl; unicode-bidi: embed;"> <span style="Times New Roman&quot;,serif;Calibri Light&quot;;Calibri Light&quot;;">منابع : </span> </h4> <ul> <li> <a href="https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.valuetask-1?view=net-7.0"> https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.valuetask-1?view=net-7.0</a> <a href="https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.valuetask-1?view=net-7.0"> </a> </li> <li> <span style="Cascadia Code&quot;;"> <a href="https://code-maze.com/csharp-task-and-valuetask">https://code-maze.com/csharp-task-and-valuetask</a> &nbsp; </span> <span dir="RTL" style="Arial&quot;,sans-serif;Cascadia Code&quot;;Cascadia Code&quot;;"> </span> </li> </ul></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20253.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>آشنایی با محدودیت‌های استفاده از ValueTask در برنامه‌نویسی .NET</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-17472.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>تفاوت Task و ValueTask</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3364.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>معرفی Async Parallel.ForEach در دات نت 6</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2611.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>C# 7 - Generalized Async Return Types</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3053.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>C# 8.0 - Async Streams</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3666.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Runtime Async در دات‌نت ۱۱: تحولی بنیادین در برنامه‌نویسی غیرهمگام (Async)</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3523.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بررسی قابلیت‌های جریان داده در MediatR با استفاده از IStreamRequestHandler</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1726.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>ایجاد سیستم وضعیت آب و هوا مانند گوگل (بخش اول)</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1001.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>مروری بر کاربردهای Action و Func - قسمت دوم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3053.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>C# 8.0 - Async Streams</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

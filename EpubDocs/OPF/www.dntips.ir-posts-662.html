@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫آشنایی با Refactoring - قسمت 7</title>     <meta name="description" content="یکی دیگر از روش‌های Refactoring ، معرفی کردن یک کلاس بجای پارامترها است. عموما تعریف متدهایی با بیش از 5 پارامتر مزموم است:using System;using System.Collections.Generic;namespace Refactoring.Day7.IntroduceParameterObject.Before{    public class Registration    {        public void Create(string name, DateTime date, DateTime validUntil,                           IEnumerable&amp;lt;string&amp;gt; courses, decimal credits)        {            // do w ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="آشنایی با Refactoring - قسمت 7">
+    <meta itemprop="description" content="یکی دیگر از روش‌های Refactoring ، معرفی کردن یک کلاس بجای پارامترها است. عموما تعریف متدهایی با بیش از 5 پارامتر مزموم است:using System;using System.Collections.Generic;namespace Refactoring.Day7.IntroduceParameterObject.Before{    public class Registration    {        public void Create(string name, DateTime date, DateTime validUntil,                           IEnumerable&amp;lt;string&amp;gt; courses, decimal credits)        {            // do w ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="آشنایی با Refactoring - قسمت 7">
+    <meta property="og:description" content="یکی دیگر از روش‌های Refactoring ، معرفی کردن یک کلاس بجای پارامترها است. عموما تعریف متدهایی با بیش از 5 پارامتر مزموم است:using System;using System.Collections.Generic;namespace Refactoring.Day7.IntroduceParameterObject.Before{    public class Registration    {        public void Create(string name, DateTime date, DateTime validUntil,                           IEnumerable&amp;lt;string&amp;gt; courses, decimal credits)        {            // do w ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="آشنایی با Refactoring - قسمت 7">
+    <meta name="twitter:description" content="یکی دیگر از روش‌های Refactoring ، معرفی کردن یک کلاس بجای پارامترها است. عموما تعریف متدهایی با بیش از 5 پارامتر مزموم است:using System;using System.Collections.Generic;namespace Refactoring.Day7.IntroduceParameterObject.Before{    public class Registration    {        public void Create(string name, DateTime date, DateTime validUntil,                           IEnumerable&amp;lt;string&amp;gt; courses, decimal credits)        {            // do w ...">
+    <meta name="twitter:card" content="یکی دیگر از روش‌های Refactoring ، معرفی کردن یک کلاس بجای پارامترها است. عموما تعریف متدهایی با بیش از 5 پارامتر مزموم است:using System;using System.Collections.Generic;namespace Refactoring.Day7.IntroduceParameterObject.Before{    public class Registration    {        public void Create(string name, DateTime date, DateTime validUntil,                           IEnumerable&amp;lt;string&amp;gt; courses, decimal credits)        {            // do w ...">
+    <meta property="article:published_time" content="Mon, 10 Oct 2011 00:07:00 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫آشنایی با Refactoring - قسمت 7";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-663.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫خلاصه اشتراک‌های روز دو شنبه 18 مهر 1390</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-661.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫خلاصه اشتراک‌های روز یک شنبه 17 مهر 1390</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫آشنایی با Refactoring - قسمت 7</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۰/۰۷/۱۸ ۰۰:۰۷:۰۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-662.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><div dir="rtl" style="text-align: right;" trbidi="on"><br><br>یکی دیگر از روش‌های Refactoring ، <a href="http://refactoring.com/catalog/introduceParameterObject.html">معرفی کردن یک کلاس بجای پارامترها</a> است. عموما تعریف متدهایی با بیش از 5 پارامتر مزموم است:<br><br><div align="left" dir="ltr"><pre language="CSharp" name="code">using System;<br>using System.Collections.Generic;<br><br>namespace Refactoring.Day7.IntroduceParameterObject.Before<br>{<br>    public class Registration<br>    {<br>        public void Create(string name, DateTime date, DateTime validUntil,<br>                           IEnumerable&lt;string&gt; courses, decimal credits)<br>        {<br>            // do work<br>        }<br>    }<br>}<br></pre></div><br>در این حالت بجای تعریف این تعداد بالای پارامترهای مورد نیاز، تمام آن‌ها را تبدیل به یک کلاس کرده و استفاده می‌کنند:<br><br><div align="left" dir="ltr"><pre language="CSharp" name="code">using System;<br>using System.Collections.Generic;<br><br>namespace Refactoring.Day7.IntroduceParameterObject.After<br>{<br>    public class RegistrationContext<br>    {<br>        public string Name {set;get;}<br>        public DateTime Date {set;get;}<br>        public DateTime ValidUntil {set;get;}<br>        public IEnumerable&lt;string&gt; Courses {set;get;}<br>        public decimal Credits { set; get; }<br>    }<br>}<br></pre></div><br><div align="left" dir="ltr"><pre language="CSharp" name="code">namespace Refactoring.Day7.IntroduceParameterObject.After<br>{<br>    public class Registration<br>    {<br>        public void Create(RegistrationContext registrationContext)<br>        {<br>            // do work<br>        }<br>    }<br>}<br></pre></div><br>یکی از مزایای این روش، منعطف شدن معرفی متدها است؛ به این صورت که اگر نیاز به افزودن پارامتر دیگری باشد، تنها کافی است یک خاصیت جدید به کلاس RegistrationContext اضافه شود و امضای متد Create،‌ ثابت باقی خواهد ماند.<br><br>روش دیگر تشخیص نیاز به این نوع Refactoring ، یافتن پارامترهایی هستند که در یک گروه قرار می‌گیرند. برای مثال:<br><br><div align="left" dir="ltr"><pre language="CSharp" name="code">public int GetIndex(int pageSize, int pageNumber, ...) { ...<br></pre></div><br>همانطور که ملاحظه می‌کنید تعدادی از پارامترها در اینجا با کلمه page شروع شده‌اند. بهتر است این‌ پارامترهای مرتبط را به یک کلاس مجزا به نام Page انتقال داد.<br><br><br></div><div class="blogger-post-footer"><img width='1' height='1' src='data:image/jpg;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==' alt=''></div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3502.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>C# 12.0 - Primary Constructors</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-667.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با Refactoring - قسمت 8</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1189.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>MVC Scaffolding #2</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-714.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>تهیه گزارشات Crosstab به کمک LINQ</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3446.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>روش دیگر نوشتن Model binderهای سفارشی در ASP.NET Core 7x با معرفی IParseable</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1011.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مروری بر کاربردهای Action و Func - قسمت چهارم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-650.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با Refactoring - قسمت 1</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1662.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>ایجاد سرویس چندلایه‎ی WCF با Entity Framework در قالب پروژه - 2</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-683.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با Refactoring - قسمت 11</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-831.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>EF Code First #1</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۹۰/۰۷/۱۹ ۱۶:۵۳:۴۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>البته به نظر من در زمانیکه تابع مورد نظر یک گزارش (یا بخش از آن) باشد بهتره که استثنا قائل شد.فقط یک سوال: در حالاتیکه از کنترل هایی مثل ObjectDataSource استفاده بشه و بخواهیم یکی از این توابع (با ورودی جدید) را فراخوانی کنیم باید پیچیدگی زیادی به برنامه اضافه بشه (Serialize , ...). آیا چاره ای وجود دارد؟<br>ممنون</div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۰/۰۷/۱۹ ۱۷:۱۴:۰۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>بحث Refactoring در مورد طراحی کارهای شما معنا پیدا می‌کند؛ وگرنه اگر کتابخانه‌ی بسته دیگری، نیازهای خاص خودش را دیکته می‌کند، بدیهی است دست شما آنچنان باز نخواهد بود.<br>در مورد مطلبی که گفتید، بله می‌شود. در این حالت باید DataObject TypeName مربوط به ObjectDataSource را مشخص کنید: <a href="http://www.codeproject.com/KB/aspnet/ObjectDataSourceInDepth.aspx" rel="nofollow">[^]</a><br>اگر می‌خواهید واقعا این اصول شیءگرایی را رعایت کنید، بهتر است به ASP.NET MVC کوچ کنید. Model binder آن، خودش به صورت خودکار این موارد را پوشش می‌دهد. نگارش بعدی ASP.NET Webforms هم کمی تا قسمتی از این Model binder رو به ارث برده ولی نه آنچنان که یک strongly typed view رو بتونید باهاش 100 درصد مثل MVC تعریف کنید.<br>در کل معماری ASP.NET Webforms مربوط به روزهای اول دات نت است و به نظر هم قرار نیست آنچنان تغییری بکند. به همین جهت MVC رو این وسط معرفی کرده‌اند.</div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۹۰/۰۷/۱۹ ۲۲:۲۷:۰۸</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>ممنون از توضیحات.<br>در مورد جمله &quot;لبته به نظر من در زمانیکه تابع مورد نظر یک گزارش (یا بخش از آن) باشد بهتره که استثنا قائل شد.&quot; منظور من بخش ها و توابعی هستند که ما برای گزارشات استفاده می کنیم. (استخراج تعداد دانشجویان بر اساس بازه تولد، جنسیت، کلمه کلیدی از نام و .. و ...). <br>در این گونه موارد چون این تابع فقط یک بار و یک جا استفاده می شود آیا استفاده از این رویه کمی دست و پاگیر نیست؟</div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۰/۰۷/۱۹ ۲۲:۵۴:۲۸</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>خیر. اگر کمی با الگو‌های MVVM ، MVC و امثال آن کار کنید، تهیه مدل جهت این موارد برای شما عادی خواهد شد. چون مجبورید که این‌ها را با حداقل یک کلاس مدل کنید.</div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۹/۰۶/۱۹ ۱۰:۵۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div> <b>یک نکته‌ی تکمیلی</b> </div> <div>اگر در حین refactoring و استخراج متدها، به متدی با تعداد پارامترهای بالا رسیدید و این متد هم نیازی نبود به کلاس دیگری منتقل شود، می‌توان برای کاهش تعداد پارامترهای آن از قابلیت «<a href="www.dntips.ir-posts-2619.html">C# 7 - Local Functions</a>» هم استفاده کرد. یک متد محلی به پارامترهای تعریف شده‌ی در متد دربرگیرنده‌ی آن دسترسی دارد.<br> </div></div>
+</div></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

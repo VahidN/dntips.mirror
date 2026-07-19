@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫Domain-Driven Design (DDD)؛ بخش پنجم: موجودیت‌ها</title>     <meta name="description" content="  موجودیت‌ها: قلب تپنده دامنه      تا به حال به این فکر کرده‌اید که چه چیزی یک شیء را از دیگری متمایز می‌کند؟ به یک &amp;quot;شخص&amp;quot; فکر کنید. یک شخص با نام، سن و آدرسش تعریف می‌شود. اما اگر دو نفر، نام و سن یکسان داشته باشند، آیا آن‌ها یک نفر هستند؟ قطعا خیر. هر شخص، یک  هویت  منحصربه‌فرد دارد.  در Domain-Driven Design (DDD)، این مفهوم هویت اهمیت زیادی پیدا می‌کند. موجودیت‌ها (Entities) همان اشیائی هستند که در طول زمان یک هویت منحصربه‌فرد  ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="Domain-Driven Design (DDD)؛ بخش پنجم: موجودیت‌ها">
+    <meta itemprop="description" content="  موجودیت‌ها: قلب تپنده دامنه      تا به حال به این فکر کرده‌اید که چه چیزی یک شیء را از دیگری متمایز می‌کند؟ به یک &amp;quot;شخص&amp;quot; فکر کنید. یک شخص با نام، سن و آدرسش تعریف می‌شود. اما اگر دو نفر، نام و سن یکسان داشته باشند، آیا آن‌ها یک نفر هستند؟ قطعا خیر. هر شخص، یک  هویت  منحصربه‌فرد دارد.  در Domain-Driven Design (DDD)، این مفهوم هویت اهمیت زیادی پیدا می‌کند. موجودیت‌ها (Entities) همان اشیائی هستند که در طول زمان یک هویت منحصربه‌فرد  ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="Domain-Driven Design (DDD)؛ بخش پنجم: موجودیت‌ها">
+    <meta property="og:description" content="  موجودیت‌ها: قلب تپنده دامنه      تا به حال به این فکر کرده‌اید که چه چیزی یک شیء را از دیگری متمایز می‌کند؟ به یک &amp;quot;شخص&amp;quot; فکر کنید. یک شخص با نام، سن و آدرسش تعریف می‌شود. اما اگر دو نفر، نام و سن یکسان داشته باشند، آیا آن‌ها یک نفر هستند؟ قطعا خیر. هر شخص، یک  هویت  منحصربه‌فرد دارد.  در Domain-Driven Design (DDD)، این مفهوم هویت اهمیت زیادی پیدا می‌کند. موجودیت‌ها (Entities) همان اشیائی هستند که در طول زمان یک هویت منحصربه‌فرد  ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="Domain-Driven Design (DDD)؛ بخش پنجم: موجودیت‌ها">
+    <meta name="twitter:description" content="  موجودیت‌ها: قلب تپنده دامنه      تا به حال به این فکر کرده‌اید که چه چیزی یک شیء را از دیگری متمایز می‌کند؟ به یک &amp;quot;شخص&amp;quot; فکر کنید. یک شخص با نام، سن و آدرسش تعریف می‌شود. اما اگر دو نفر، نام و سن یکسان داشته باشند، آیا آن‌ها یک نفر هستند؟ قطعا خیر. هر شخص، یک  هویت  منحصربه‌فرد دارد.  در Domain-Driven Design (DDD)، این مفهوم هویت اهمیت زیادی پیدا می‌کند. موجودیت‌ها (Entities) همان اشیائی هستند که در طول زمان یک هویت منحصربه‌فرد  ...">
+    <meta name="twitter:card" content="  موجودیت‌ها: قلب تپنده دامنه      تا به حال به این فکر کرده‌اید که چه چیزی یک شیء را از دیگری متمایز می‌کند؟ به یک &amp;quot;شخص&amp;quot; فکر کنید. یک شخص با نام، سن و آدرسش تعریف می‌شود. اما اگر دو نفر، نام و سن یکسان داشته باشند، آیا آن‌ها یک نفر هستند؟ قطعا خیر. هر شخص، یک  هویت  منحصربه‌فرد دارد.  در Domain-Driven Design (DDD)، این مفهوم هویت اهمیت زیادی پیدا می‌کند. موجودیت‌ها (Entities) همان اشیائی هستند که در طول زمان یک هویت منحصربه‌فرد  ...">
+    <meta property="article:published_time" content="Fri, 22 Aug 2025 04:35:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫Domain-Driven Design (DDD)؛ بخش پنجم: موجودیت‌ها";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-3622.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫Domain-Driven Design (DDD)؛ بخش ششم: Aggregates</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-3620.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫Domain-Driven Design (DDD)؛ بخش چهارم: Bounded Contexts</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫Domain-Driven Design (DDD)؛ بخش پنجم: موجودیت‌ها</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۴/۰۵/۳۱ ۰۸:۰۵</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-3621.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>موجودیت‌ها: قلب تپنده دامنه</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">تا به حال به این فکر کرده‌اید که چه چیزی یک شیء را از دیگری متمایز می‌کند؟ به یک &quot;شخص&quot; فکر کنید. یک شخص با نام، سن و آدرسش تعریف می‌شود. اما اگر دو نفر، نام و سن یکسان داشته باشند، آیا آن‌ها یک نفر هستند؟ قطعا خیر. هر شخص، یک <strong>هویت</strong> منحصربه‌فرد دارد.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در Domain-Driven Design (DDD)، این مفهوم هویت اهمیت زیادی پیدا می‌کند. موجودیت‌ها (Entities) همان اشیائی هستند که در طول زمان یک هویت منحصربه‌فرد دارند و این هویت، آن‌ها را از اشیاء دیگر متمایز می‌کند.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>موجودیت در برابر مدل داده‌ای</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در رویکردهای سنتی، ما اغلب کلاس‌هایی می‌سازیم که صرفاً شبیه به جداول دیتابیس هستند. این کلاس‌ها، فقط شامل ویژگی‌ها (Properties) و getters/setters هستند و هیچ رفتار یا منطق تجاری در خود ندارند. به این کلاس‌ها، <strong>Data Models</strong> می‌گویند.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">اما در DDD، یک <strong>Entity</strong> فراتر از یک مدل داده‌ای است. یک موجودیت، علاوه بر اینکه داده‌ها را نگهداری می‌کند، <strong>مسئول</strong> رفتارهای مربوط به خودش نیز هست.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">بیایید با یک مثال، تفاوت را بررسی کنیم:</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>مدل داده‌ای (Data Model):</strong></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public class Order
+{
+    public int OrderId { get; set; }
+    public decimal TotalAmount { get; set; }
+    public string Status { get; set; }
+}</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در این مدل، کلاس <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Order</code> فقط داده‌ها را نگهداری می‌کند. اگر بخواهید وضعیت سفارش را تغییر دهید، مجبورید این کار را از بیرون کلاس و در یک سرویس جداگانه انجام دهید.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>موجودیت (Entity) در DDD:</strong></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public class Order
+{
+    public int OrderId { get; private set; }
+    public decimal TotalAmount { get; private set; }
+    public OrderStatus Status { get; private set; }
+
+    public Order(int orderId, decimal totalAmount)
+    {
+        this.OrderId = orderId;
+        this.TotalAmount = totalAmount;
+        this.Status = OrderStatus.Pending;
+    }
+
+    public void MarkAsShipped()
+    {
+        if (this.Status != OrderStatus.Pending)
+        {
+            throw new InvalidOperationException(&quot;Cannot ship an order that is not pending.&quot;);
+        }
+        this.Status = OrderStatus.Shipped;
+    }
+}</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در این مدل، کلاس <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Order</code> هم داده‌ها و هم منطق را در خود کپسوله‌سازی کرده است. هویت سفارش ( <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">OrderId</code> ) قابل تغییر نیست و رفتار <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">MarkAsShipped</code> در داخل خود کلاس پیاده‌سازی شده است. این به ما کمک می‌کند تا <strong>قوانین تجاری (Business Rules)</strong> را در خود دامنه حفظ کنیم.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>چرا این تفاوت اهمیت دارد؟</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><ul><li><strong>حفظ قوانین تجاری:</strong> موجودیت‌ها تضمین می‌کنند که قوانین تجاری همواره رعایت می‌شوند.</li><li><strong>کپسوله‌سازی (Encapsulation):</strong> با پنهان کردن جزئیات پیاده‌سازی، کد شما قابل فهم‌تر و نگهداری آن آسان‌تر می‌شود.</li><li><strong>تست‌پذیری:</strong> موجودیت‌ها را می‌توان به صورت جداگانه از لایه‌های دیگر (مثل دیتابیس) تست کرد.</li></ul><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">به این فکر کنید: آیا کلاس‌های شما در پروژه‌تان فقط داده‌ها را نگهداری می‌کنند یا رفتارهای مرتبط با خودشان را نیز انجام می‌دهند؟</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">با DDD، ما کلاس‌هایی می‌سازیم که فراتر از یک ظرف داده‌ای ساده هستند. آن‌ها موجودیت‌های زنده و پویایی هستند که قوانین و رفتارهای دنیای واقعی را مدل‌سازی می‌کنند و همین، هسته اصلی یک نرم‌افزار قدرتمند است.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>Value Objects: اشیاء کوچک، اما قدرتمند 💎</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">تا به حال در پروژه‌ای بوده‌اید که یک رشته ساده، معانی مختلفی داشته باشد؟ مثلاً در یک سیستم، <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">string</code> برای &quot;آدرس&quot; استفاده می‌شود. اما آیا یک آدرس فقط یک رشته است؟ یک آدرس از &quot;خیابان&quot;، &quot;شهر&quot;، &quot;کد پستی&quot; و &quot;کشور&quot; تشکیل شده است. استفاده از یک <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">string</code> ساده، باعث می‌شود که نتوانیم <strong>قوانین تجاری</strong> مربوط به آدرس (مثلاً معتبر بودن کد پستی) را به درستی اجرا کنیم و کد ما پر از اعتبارسنجی‌های تکراری شود. اینجاست که <strong>Value Objects</strong> یا &quot;اشیاء ارزشی&quot; وارد میدان می‌شوند.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>Value Objects در برابر Entities</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">Value Objects، برخلاف <strong>Entities</strong> (موجودیت‌ها)، <strong>هویت منحصربه‌فردی ندارند.</strong></div><ul><li><strong>یک Entity</strong> با هویت خود تعریف می‌شود. دو شخص با نام یکسان، دو نفر متفاوت هستند.</li><li><strong>یک Value Object</strong> با ویژگی‌های خود تعریف می‌شود. دو آدرس که تمام اجزای آن‌ها (خیابان، شهر، کد پستی) یکسان باشد، یک چیز هستند.</li></ul><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">اگر یک Value Object را به یک Entity تشبیه کنیم، می‌توان گفت که یک Entity مثل &quot;شخص&quot; است و Value Object مثل &quot;آدرس&quot; یا &quot;شماره تلفن&quot; او.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>چرا از Value Objects استفاده کنیم؟</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">استفاده از Value Objects مزایای زیادی به همراه دارد:</div><ul><li><strong>کپسوله‌سازی منطق:</strong> منطق مربوط به یک مقدار (مثل اعتبارسنجی یک آدرس ایمیل) در داخل خود Value Object قرار می‌گیرد و از تکرار کد جلوگیری می‌شود.</li><li><strong>تغییرناپذیری (Immutability):</strong> Value Objects باید <strong>تغییرناپذیر</strong> باشند. این یعنی پس از ساخته شدن، نمی‌توان آن‌ها را تغییر داد. اگر نیاز به تغییر باشد، یک نمونه جدید ساخته می‌شود. این ویژگی باعث می‌شود که کد ما امن‌تر و قابل پیش‌بینی‌تر شود، به خصوص در محیط‌های چندرشته‌ای.</li><li><strong>خوانایی کد:</strong> با استفاده از Value Objects، کد شما خواناتر می‌شود. به جای اینکه متدهایی با آرگومان‌های <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">string</code> یا <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">int</code> داشته باشید، می‌توانید از نوع‌های مشخص‌تری مثل <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">EmailAddress</code> یا <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Money</code> استفاده کنید.</li></ul><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">بیایید با یک مثال، این موضوع را روشن‌تر کنیم. به جای اینکه <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">string</code> را برای ایمیل استفاده کنید، می‌توانید یک Value Object بسازید:</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>بدون Value Object:</strong></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public class User
+{
+    public int Id { get; set; }
+    public string Email { get; set; }
+}</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در این مدل، هر بار که بخواهید از ایمیل استفاده کنید، باید اعتبار آن را بررسی کنید.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>با Value Object:</strong></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public class EmailAddress
+{
+    public string Value { get; private set; }
+
+    public EmailAddress(string value)
+    {
+        if (!IsValidEmail(value))
+        {
+            throw new ArgumentException(&quot;Invalid email format.&quot;);
+        }
+        this.Value = value;
+    }
+
+    private bool IsValidEmail(string value)
+    {
+        // Logic to validate email format
+        return true;
+    }
+}
+
+public class User
+{
+    public int Id { get; private set; }
+    public EmailAddress Email { get; private set; }
+}</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در این مدل، تضمین می‌کنیم که هر ایمیلی که در سیستم وجود دارد، معتبر است.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>به این فکر کنید:</strong> در پروژه‌تان، آیا مقادیر مهمی دارید که می‌توانند به Value Object تبدیل شوند؟ مثلاً <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">PhoneNumber</code>، <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Money</code> یا <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">DateRange</code>؟</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">Value Objects، ابزارهایی کوچک اما حیاتی هستند که به ما کمک می‌کنند تا مدل دامنه‌مان را دقیق‌تر، قوی‌تر و پایدارتر بسازیم.</div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3625.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Domain-Driven Design (DDD)؛ بخش نهم: DDD با EF Core</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3622.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Domain-Driven Design (DDD)؛ بخش ششم: Aggregates</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3617.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Domain-Driven Design (DDD)؛ بخش اول: مقدمه و آشنایی با مفاهیم پایه DDD </a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3629.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Domain-Driven Design (DDD)؛ بخش آخر: یک پروژه</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3627.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Domain-Driven Design (DDD)؛ بخش یازدهم: DDD با EF Core؛ قسمت سوم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1130.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>WF:Windows Workflow #۵</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3626.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Domain-Driven Design (DDD)؛ بخش دهم: DDD با EF Core؛ قسمت دوم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3621.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>Domain-Driven Design (DDD)؛ بخش پنجم: موجودیت‌ها</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3621.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>Domain-Driven Design (DDD)؛ بخش پنجم: موجودیت‌ها</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3630.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>هنر استثناهای سفارشی در توسعه نرم‌افزار با NET.: رویکردی بر پایه طراحی دامنه محور (DDD)</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۴۰۴/۰۵/۳۱ ۰۹:۲۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>از Entity تا Value Object در EF Core و DDD</strong></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>1) آغاز ماجرا: کشف دامنه</strong></div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl"><br></div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl">فرض کنید قرار است یک <strong>سامانه‌ی فروش بلیت رویداد</strong> طراحی کنیم؛ رویدادهایی مثل کنسرت، کارگاه یا کنفرانس. ذی‌نفعان چه می‌خواهند؟ «کاربر بلیت بخرد»، «محدودیت ظرفیت رعایت شود»، «قیمت‌ها و تخفیف‌ها درست محاسبه شوند»، «ایمیل تأیید ارسال شود».</div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl">اگر همین الان دست‌به‌کد شویم، احتمالاً سراغ یک جدول/کلاس ساده می‌رویم: <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Orders</code>، <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">OrderItems</code>، <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Events</code>… اما DDD از ما می‌خواهد اول <strong>زبان مشترک</strong> (Ubiquitous Language) بسازیم و مفهوم‌ها را طبقه‌بندی کنیم: کدام‌ها <strong>Entity</strong> هستند و کدام‌ها <strong>Value Object</strong>؟</div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl"><br></div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl">بیایید با یک گفت‌وگوی خیالی شروع کنیم:</div><ul><li>«سفارش بلیت» چیزی است که <strong>هویت</strong> یکتای خودش را دارد و در طول زمان تغییر می‌کند → <strong>Entity</strong>.</li><li>«ایمیل مشتری»، «مبلغ سفارش»، «تعداد بلیت»، «بازه‌ی زمانی رویداد» چیزهایی‌اند که اگر مقدارشان عوض شود، <em>چیز جدیدی</em> محسوب می‌شوند و هویت مستقل ندارند → <strong>Value Object</strong>.</li></ul><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl"><br></div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl">در نتیجه، دو کانون توجه داریم:</div><ul><li><strong>Event</strong> (رویداد) به‌عنوان منبع ظرفیت و برنامه.</li><li><strong>TicketOrder</strong> (سفارش بلیت) به‌عنوان آنچه کاربر ایجاد می‌کند و وضعیت می‌گیرد (Draft/Submitted/Paid/Cancelled).</li></ul><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>2) نسخه‌ی اولیه (کشف خام): یک Entity ساده اما آمیخته با «Primitive Obsession»</strong></div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl">در شروع کار، خیلی طبیعی است که به کدی شبیه زیر برسیم. همه‌چیز نوع‌های ابتدایی دارد و منطق کسب‌وکار تقریباً در همه‌جا پخش است.</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">// EF Core: نسخه‌ی ساده و ابتدایی (before)
+public class TicketOrder
+{
+    public Guid Id { get; set; }
+    public Guid EventId { get; set; }
+    public string CustomerEmail { get; set; } = default!;
+    public string CustomerName { get; set; } = default!;
+    public int Quantity { get; set; }
+    public decimal TotalPrice { get; set; }
+    public string Currency { get; set; } = &quot;USD&quot;;
+    public DateTime CreatedAt { get; set; }
+    public string Status { get; set; } = &quot;Draft&quot;; // Draft, Submitted, Paid, Cancelled
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;">چرا این یک <strong>Entity</strong> است؟</div><ul><li><strong>هویت پایدار</strong> دارد (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Id</code>).</li><li><strong>چرخه‌ی عمر</strong> دارد (از Draft تا Paid/Cancelled).</li><li><strong>قابلیت تغییر</strong> دارد (مثلاً تغییر تعداد قبل از ثبت نهایی).</li></ul><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl"><br></div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl"><strong>اما مشکل کجاست؟</strong></div><ul><li>«وسواس نوع‌های ابتدایی» (Primitive Obsession): <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Email</code>، <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Money</code>، <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Quantity</code> همگی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">string/int/decimal</code> هستند. هیچ <strong>نامعقولی</strong> را پیشگیری نمی‌کنند (مثلاً <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Quantity = -3</code>).</li><li><strong>قوانین حوزه</strong> درون هیچ کپسولی نیستند؛ هرکسی می‌تواند هرجا مقادیر را دست‌کاری کند.</li><li>عدم وضوح معنایی: <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">decimal</code> بودن <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">TotalPrice</code> با <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Currency</code> جداست، احتمال خطا زیاد است.</li></ul><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>3) بازطراحی بر اساس اصول DDD: غنی کردن مدل با Value Objectها</strong></div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl"><strong>هدف:</strong> رفتار و قواعد را نزدیک داده‌ها نگه داریم و معنادهی کنیم.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>3.1) Value Objectها را معرفی کنیم</strong></div><ul><li><strong>Email</strong>: فقط ایمیل معتبر.</li><li><strong>PersonName</strong>: تفکیک نام/نام‌خانوادگی یا قالب کامل، بدون فاصله‌های اضافی.</li><li><strong>Quantity</strong>: عدد صحیح مثبت و محدود به سقف منطقی.</li><li><strong>Money</strong>: مقدار + ارز با قواعد جمع/تفریق/مقایسه.</li><li><strong>EventSchedule</strong>: بازه‌ی زمانی شروع/پایان رویداد با اعتبارسنجی.</li><li><strong>OrderStatus</strong>: یک enum معنایی.</li></ul><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">// پایه‌ی مشترک برای Value Object ها
+public abstract class ValueObject
+{
+    protected static bool EqualOperator(ValueObject left, ValueObject right)
+        =&gt; ReferenceEquals(left, right) || (left is not null &amp;&amp; right is not null &amp;&amp; left.Equals(right));
+
+    protected static bool NotEqualOperator(ValueObject left, ValueObject right) =&gt; !(EqualOperator(left, right));
+
+    protected abstract IEnumerable&lt;object?&gt; GetEqualityComponents();
+
+    public override bool Equals(object? obj)
+        =&gt; obj is ValueObject other &amp;&amp; GetEqualityComponents().SequenceEqual(other.GetEqualityComponents());
+
+    public override int GetHashCode()
+        =&gt; GetEqualityComponents().Aggregate(1, (current, obj) =&gt; HashCode.Combine(current, obj));
+}
+
+public sealed class Email : ValueObject
+{
+    public string Value { get; }
+    private Email(string value) { Value = value; }
+
+    public static Email Create(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) throw new ArgumentException(&quot;Email is required&quot;);
+        // اعتبارسنجی ساده؛ در عمل از regex/کتابخانه‌های معتبر استفاده کنید
+        if (!value.Contains(&#39;@&#39;)) throw new ArgumentException(&quot;Invalid email&quot;);
+        return new Email(value.Trim().ToLowerInvariant());
+    }
+
+    protected override IEnumerable&lt;object?&gt; GetEqualityComponents()
+    { yield return Value; }
+    public override string ToString() =&gt; Value;
+}
+
+public sealed class PersonName : ValueObject
+{
+    public string FullName { get; }
+    private PersonName(string fullName) { FullName = fullName; }
+
+    public static PersonName Create(string fullName)
+    {
+        if (string.IsNullOrWhiteSpace(fullName)) throw new ArgumentException(&quot;Name is required&quot;);
+        return new PersonName(fullName.Trim());
+    }
+
+    protected override IEnumerable&lt;object?&gt; GetEqualityComponents()
+    { yield return FullName; }
+    public override string ToString() =&gt; FullName;
+}
+
+public sealed class Quantity : ValueObject
+{
+    public int Value { get; }
+    private Quantity(int value) { Value = value; }
+
+    public static Quantity Create(int value)
+    {
+        if (value &lt;= 0) throw new ArgumentOutOfRangeException(nameof(value), &quot;Quantity must be positive&quot;);
+        if (value &gt; 20) throw new ArgumentOutOfRangeException(nameof(value), &quot;Max 20 tickets per order&quot;);
+        return new Quantity(value);
+    }
+
+    protected override IEnumerable&lt;object?&gt; GetEqualityComponents()
+    { yield return Value; }
+    public override string ToString() =&gt; Value.ToString();
+}
+
+public sealed class Money : ValueObject
+{
+    public decimal Amount { get; }
+    public string Currency { get; }
+
+    private Money(decimal amount, string currency)
+    {
+        Amount = amount;
+        Currency = currency;
+    }
+
+    public static Money Create(decimal amount, string currency)
+    {
+        if (amount &lt; 0) throw new ArgumentOutOfRangeException(nameof(amount));
+        if (string.IsNullOrWhiteSpace(currency)) throw new ArgumentException(&quot;Currency is required&quot;);
+        return new Money(decimal.Round(amount, 2), currency.ToUpperInvariant());
+    }
+
+    public static Money operator +(Money left, Money right)
+    {
+        if (left.Currency != right.Currency) throw new InvalidOperationException(&quot;Currency mismatch&quot;);
+        return Create(left.Amount + right.Amount, left.Currency);
+    }
+
+    protected override IEnumerable&lt;object?&gt; GetEqualityComponents()
+    { yield return Amount; yield return Currency; }
+    public override string ToString() =&gt; $&quot;{Amount} {Currency}&quot;;
+}
+
+public enum OrderStatus { Draft, Submitted, Paid, Cancelled }</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>3.2) Aggregateها: چه کسی ریشه است؟</strong></div><ul><li><strong>Event</strong> ظرفیت را مدیریت می‌کند؛ نباید بیش از ظرفیت، بلیت فروخته شود.</li><li><strong>TicketOrder</strong> وضعیت سفارش را نگه می‌دارد.</li></ul><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl"><br></div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl">در بسیاری از سامانه‌ها، چک‌کردن ظرفیت در لایه‌ی <strong>Application Service</strong> انجام می‌شود تا از تراکنش سازگار بین دو Aggregate مطمئن شویم (یا با الگوی Reservation/Outbox این سازگاری را تقویت کنیم).</div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>3.3) نسخه‌ی بهبود‌یافته‌ی Entity با Value Objectها</strong></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public class TicketOrder
+{
+    private TicketOrder() { } // برای EF Core
+
+    public Guid Id { get; private set; }
+    public Guid EventId { get; private set; }
+
+    // Value Objects به‌صورت Owned Types در EF Core نگاشت می‌شوند
+    public Email CustomerEmail { get; private set; } = default!;
+    public PersonName CustomerName { get; private set; } = default!;
+    public Quantity Quantity { get; private set; } = default!;
+    public Money TotalPrice { get; private set; } = default!;
+
+    public DateTime CreatedAt { get; private set; }
+    public OrderStatus Status { get; private set; }
+
+    public static TicketOrder CreateDraft(Guid eventId, Email email, PersonName name, Quantity quantity, Money unitPrice)
+    {
+        var order = new TicketOrder
+        {
+            Id = Guid.NewGuid(),
+            EventId = eventId,
+            CustomerEmail = email,
+            CustomerName = name,
+            Quantity = quantity,
+            TotalPrice = Money.Create(unitPrice.Amount * quantity.Value, unitPrice.Currency),
+            CreatedAt = DateTime.UtcNow,
+            Status = OrderStatus.Draft
+        };
+        return order;
+    }
+
+    public void Submit()
+    {
+        if (Status != OrderStatus.Draft)
+            throw new InvalidOperationException(&quot;Only draft orders can be submitted&quot;);
+        Status = OrderStatus.Submitted;
+    }
+
+    public void MarkPaid()
+    {
+        if (Status != OrderStatus.Submitted)
+            throw new InvalidOperationException(&quot;Only submitted orders can be paid&quot;);
+        Status = OrderStatus.Paid;
+    }
+
+    public void Cancel()
+    {
+        if (Status == OrderStatus.Paid)
+            throw new InvalidOperationException(&quot;Paid orders cannot be cancelled&quot;);
+        Status = OrderStatus.Cancelled;
+    }
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>3.4) نگاشت EF Core برای Value Objectها (Owned Types)</strong></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public class OrderingDbContext : DbContext
+{
+    public DbSet&lt;TicketOrder&gt; TicketOrders =&gt; Set&lt;TicketOrder&gt;();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        var order = modelBuilder.Entity&lt;TicketOrder&gt;();
+        order.HasKey(x =&gt; x.Id);
+        order.Property(x =&gt; x.EventId).IsRequired();
+        order.Property(x =&gt; x.CreatedAt).IsRequired();
+        order.Property(x =&gt; x.Status).HasConversion&lt;int&gt;();
+
+        // Email
+        order.OwnsOne(x =&gt; x.CustomerEmail, b =&gt;
+        {
+            b.Property(p =&gt; p.Value).HasColumnName(&quot;CustomerEmail&quot;).HasMaxLength(256);
+        });
+
+        // PersonName
+        order.OwnsOne(x =&gt; x.CustomerName, b =&gt;
+        {
+            b.Property(p =&gt; p.FullName).HasColumnName(&quot;CustomerName&quot;).HasMaxLength(128);
+        });
+
+        // Quantity
+        order.OwnsOne(x =&gt; x.Quantity, b =&gt;
+        {
+            b.Property(p =&gt; p.Value).HasColumnName(&quot;Quantity&quot;);
+        });
+
+        // Money
+        order.OwnsOne(x =&gt; x.TotalPrice, b =&gt;
+        {
+            b.Property(p =&gt; p.Amount).HasColumnName(&quot;TotalPrice&quot;);
+            b.Property(p =&gt; p.Currency).HasColumnName(&quot;Currency&quot;).HasMaxLength(3);
+        });
+    }
+}</pre><blockquote class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>نکته:</strong> اگر از شناسه‌های قوی‌تایپ (Strongly-Typed Id) مثل <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">OrderId</code> یا <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">EventId</code> استفاده کنید، در EF Core با <strong>ValueConverter</strong> آن‌ها را به/از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Guid</code> نگاشت کنید.</blockquote><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public readonly record struct OrderId(Guid Value)
+{
+    public static OrderId New() =&gt; new(Guid.NewGuid());
+}
+
+// نگاشت
+order.Property(x =&gt; x.Id)
+     .HasConversion(
+        id =&gt; id.Value,
+        value =&gt; new OrderId(value)
+     );</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>4) چرا این بازطراحی «بهتر» است؟</strong></div><ul><li><strong>بیان‌گراتر</strong>: وقتی می‌بینیم <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Quantity.Create(…)</code> یا <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Money.Create(…)</code> فراخوانی شده، معنای دامنه را می‌خوانیم، نه فقط نوع داده را.</li><li><strong>ایمنی بیشتر</strong>: امکان <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Quantity = -3</code> یا اختلاف ارز عملاً از بین می‌رود.</li><li><strong>کپسوله‌سازی قواعد</strong>: اعتبارسنجی‌ها و رفتارها نزدیک داده‌ها هستند؛ از تکرار منطق در لایه‌های مختلف جلوگیری می‌شود.</li><li><strong>تست‌پذیری</strong>: Value Objectها کوچک و مستقل‌اند؛ تست واحد آن‌ها ساده است.</li><li><strong>پیشگیری از «رشته‌های جادویی»</strong>: به‌جای <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Status = &quot;Paid&quot;</code> از enum معنادار استفاده می‌کنیم.</li></ul><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>5) یک قدم فراتر: تعامل Aggregateها و ظرفیت رویداد</strong></div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl">برای رعایت ظرفیت، معمولاً <strong>Event</strong> به‌صورت Aggregate Root نگهداری می‌شود:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public class Event
+{
+    private Event() { }
+
+    public Guid Id { get; private set; }
+    public string Title { get; private set; } = default!;
+    public int Capacity { get; private set; }
+    public int Sold { get; private set; }
+
+    public bool CanReserve(Quantity q) =&gt; Sold + q.Value &lt;= Capacity;
+
+    public void Reserve(Quantity q)
+    {
+        if (!CanReserve(q)) throw new InvalidOperationException(&quot;Capacity exceeded&quot;);
+        Sold += q.Value;
+    }
+}</pre><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl">در لایه‌ی سرویس کاربردی (Application Service)، قبل از ایجاد سفارش، از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Event</code> می‌پرسیم آیا رزرو ممکن است؛ اگر بله، رزرو می‌کنیم و سپس <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">TicketOrder</code> می‌سازیم. اگر نیاز به سازگاری قوی داریم، الگوهای <strong>Outbox</strong> یا <strong>Saga/Process Manager</strong> کمک می‌کنند.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>6) تست واحد (چند نمونه‌ی کوتاه)</strong></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">[Fact]
+public void Quantity_cannot_be_negative()
+{
+    Assert.Throws&lt;ArgumentOutOfRangeException&gt;(() =&gt; Quantity.Create(-1));
+}
+
+[Fact]
+public void Money_cannot_add_with_different_currencies()
+{
+    var a = Money.Create(10, &quot;USD&quot;);
+    var b = Money.Create(5, &quot;EUR&quot;);
+    Assert.Throws&lt;InvalidOperationException&gt;(() =&gt; { var _ = a + b; });
+}
+
+[Fact]
+public void Draft_order_can_be_submitted_then_paid()
+{
+    var order = TicketOrder.CreateDraft(Guid.NewGuid(), Email.Create(&quot;a@b.com&quot;), PersonName.Create(&quot;Ali&quot;), Quantity.Create(2), Money.Create(100, &quot;USD&quot;));
+    order.Submit();
+    order.MarkPaid();
+    Assert.Equal(OrderStatus.Paid, order.Status);
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>7) الگوی مهاجرت (Refactor گام‌به‌گام)</strong></div><ul><li><strong>نام‌گذاری شفاف</strong>: از همین امروز <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">OrderStatus</code> را جایگزین <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">string Status</code> کنید.</li><li><strong>VOهای کم‌ریسک</strong>: ابتدا <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Quantity</code> و <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Email</code> را بسازید؛ کم‌ترین وابستگی را دارند.</li><li><strong>VO مالی</strong>: <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Money</code> را اضافه کنید و در همه‌ی مسیرهای قیمت‌گذاری استفاده کنید.</li><li><strong>تثبیت نگاشت EF Core</strong>: Owned Types را برای VOها تعریف کنید؛ مهاجرت پایگاه داده را بنویسید.</li><li><strong>جداکردن قوانین</strong>: هر قانون تکراری را به نزدیک‌ترین موجودیت/VO منتقل کنید.</li><li><strong>پوشش تست</strong>: برای هربار تغییر، تست‌های واحد را اضافه/به‌روزرسانی کنید.</li></ul><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>8) جمع‌بندی: از «داده» به «مدل»</strong></div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl">آنچه شروع شد با یک کلاس ساده‌ی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">TicketOrder</code>، با چند گام به <strong>مدلی غنی</strong> تبدیل شد که:</div><ul><li>قواعد را بیان می‌کند،</li><li>خطاهای رایج را از ابتدا حذف می‌کند،</li><li>و خوانایی و نگهداشت را به‌طور محسوس افزایش می‌دهد.</li></ul><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl"><br></div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl">اگر در مسیر طراحی، مرتب به خودتان بگویید «این عدد/رشته دقیقاً <em>چی</em> را در دامنه نشان می‌دهد؟»، در حال حرکت از <strong>Entityهای فقیر</strong> به <strong>مدل‌های غنی</strong> هستید؛ جایی که DDD و EF Core بهترین هم‌افزایی را پیدا می‌کنند.</div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>پیوست A) نکته‌های EF Core برای Value Objectها</strong></div><ul><li><strong>Owned Types</strong> ساده‌ترین راه نگاشت VOها هستند؛ ستون‌ها معمولاً کنار جدول Entity قرار می‌گیرند.</li><li>برای <strong>Strongly-Typed Id</strong>ها از <strong>ValueConverter</strong> استفاده کنید.</li><li>اگر VO پیچیده/چند-به-یک است (مثلاً <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Address</code> با جدول جدا)، می‌توانید آن را به Entity تبدیل کنید؛ معیار، <strong>هویت مستقل</strong> و <strong>چرخه‌ی عمر</strong> است.</li></ul><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>پیوست B) پرسش‌هایی برای ادامه‌ی کاوش</strong></div><ul><li>آیا <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">DiscountCode</code> در سیستم شما VO است یا Entity؟ چرا؟</li><li>کدام VOها باید <strong>غیرقابل‌تغییر</strong> (Immutable) باشند؟ همه؟</li><li>در صورت نیاز به چند ارز، کجا باید تبدیل نرخ ارز انجام شود؟</li></ul><blockquote class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl">و اکنون نوبت شماست: یکی از Entityهای سیستم خود را بردارید و همین چرخه‌ی کشف → نقد → بازطراحی را روی آن تمرین کنید.</blockquote><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div></div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۴۰۴/۰۵/۳۱ ۰۹:۳۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>از ایده تا کد: سفری برای ساختن یک مدل دامنه معنادار با DDD و EF Core</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">تا به حال برایتان پیش آمده که به یک قطعه کد نگاه کنید و احساس کنید که با شما حرف نمی‌زند؟ کدی که کار می‌کند، اما داستان واقعی کسب‌وکار را روایت نمی‌کند. امروز می‌خواهیم با هم سفری را آغاز کنیم. سفری از یک تحلیل ساده و خام به یک مدل دامنه (Domain Model) غنی، گویا و قدرتمند. </div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۱) آغاز ماجرا: کشف دامنه</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">تصور کنید از ما خواسته شده تا سیستمی برای مدیریت یک <strong>باشگاه ورزشی</strong> طراحی کنیم. اولین قدم، صحبت با کارشناسان دامنه (Domain Experts) است؛ یعنی مدیر باشگاه، مربیان و مسئول پذیرش. در میان گفتگوها، یک مفهوم کلیدی بارها و بارها تکرار می‌شود: <strong>«عضو» (Member)</strong>.</div><ul><li>&quot;هر <strong>عضو</strong> یک کد عضویت منحصر به فرد دارد.&quot;</li><li>&quot;ما باید نام، نام خانوادگی و کد ملی <strong>عضو</strong> را ثبت کنیم.&quot;</li><li>&quot;آدرس و شماره موبایل <strong>عضو</strong> برای اطلاع‌رسانی‌ها ضروری است.&quot;</li><li>&quot;اگر <strong>عضو</strong> آدرسش را عوض کند، او همچنان همان <strong>عضو</strong> قبلی است، فقط اطلاعاتش به‌روز می‌شود.&quot;</li></ul><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">این گفتگوی ساده، سرنخ‌های ارزشمندی به ما می‌دهد. جمله‌ی آخر یک چراغ بزرگ در ذهن ما روشن می‌کند. مفهومی که در سیستم ما یک <strong>شناسه (Identity)</strong> منحصر به فرد و یک <strong>چرخه حیات (Lifecycle)</strong> دارد، حتی اگر تمام ویژگی‌هایش تغییر کند، یک <strong>موجودیت (Entity)</strong> است.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">یک «عضو» با کد عضویت <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">101</code>، حتی اگر نام، آدرس یا شماره تلفنش تغییر کند، همچنان همان عضو شماره <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">101</code> است. هویت او به ویژگی‌هایش وابسته نیست، بلکه به آن شناسه یکتا گره خورده است. پس با اطمینان، <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Member</code> را به عنوان اولین Entity سیستم خود کشف و انتخاب می‌کنیم.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۲) نسخه‌ی اولیه: یک Entity ساده اما آمیخته با «Primitive Obsession»</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">خب، حالا که Entity خود را شناختیم، وقت کدنویسی است. با هیجان، اولین نسخه از کلاس <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Member</code> را می‌نویسیم:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public class Member
+{
+    public int Id { get; private set; } // شناسه یکتا
+    public string FirstName { get; private set; }
+    public string LastName { get; private set; }
+    public string NationalCode { get; private set; }
+    public string MobileNumber { get; private set; }
+    public string Address_Street { get; private set; }
+    public string Address_City { get; private set; }
+    public string Address_PostalCode { get; private set; }
+
+    // سازنده و متدها...
+}</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">این کد به نظر درست می‌آید، نه؟ کار می‌کند و می‌توانیم آن را با EF Core به راحتی در دیتابیس ذخیره کنیم. اما بیایید کمی عمیق‌تر به آن نگاه کنیم. یک حس ناخوشایند وجود دارد؛ انگار چیزی سر جایش نیست. این حس، ناشی از یک بوی بد کد (Code Smell) معروف به نام <strong>«وسواس انواع اولیه» (Primitive Obsession)</strong> است. ما مفاهیم غنی دامنه را به ساده‌ترین انواع داده ممکن (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">string</code>, <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">int</code>, <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">bool</code>) تقلیل داده‌ایم. این کار چه مشکلاتی ایجاد می‌کند؟</div><ul><li><strong>فقدان معنای ذاتی:</strong> آیا <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">MobileNumber</code> صرفاً یک <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">string</code> است؟ آیا هر رشته‌ای می‌تواند یک شماره موبایل معتبر باشد؟ قطعاً نه! اما مدل ما این اجازه را می‌دهد. <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">string</code> هیچ‌کدام از قوانین کسب‌وکار (مثلاً شروع با &quot;09&quot; و داشتن ۱۱ رقم) را در خود ندارد.</li><li><strong>پراکندگی منطق اعتبارسنجی:</strong> منطق بررسی صحت کد ملی یا فرمت شماره موبایل کجاست؟ احتمالاً در لایه‌های بالاتر، مانند سرویس‌ها یا حتی کنترلرها پخش می‌شود. این یعنی تکرار کد و افزایش احتمال خطا.</li><li><strong>مفاهیم پنهان:</strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Address_Street</code>, <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Address_City</code> و <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Address_PostalCode</code> به وضوح به هم مرتبط هستند. آن‌ها با هم یک مفهوم واحد به نام «آدرس» را تشکیل می‌دهند. اما در مدل ما، سه <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">string</code> پراکنده و بی‌ربط هستند و این ارتباط فقط در ذهن ما وجود دارد، نه در کد!</li></ul><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">مدل فعلی ما یک <strong>مدل کم‌خون (Anemic Domain Model)</strong> است. فقط داده را نگه می‌دارد و هیچ رفتار و منطق هوشمندانه‌ای ندارد. وقت آن است که به آن جان ببخشیم!</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۳) بازطراحی بر اساس اصول DDD: غنی کردن مدل با Value Objectها</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">اینجاست که یکی از قدرتمندترین ابزارهای DDD به کمک ما می‌آید: <strong>اشیاء مقدار (Value Objects)</strong>.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>یک Value Object چیست؟</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">یک شیء است که یک مفهوم را در دامنه توصیف می‌کند، اما شناسه منحصر به فرد ندارد. هویت آن توسط ترکیب مقادیر ویژگی‌هایش تعیین می‌شود. دو Value Object با مقادیر یکسان، کاملاً معادل و قابل جایگزینی هستند. مهم‌ترین ویژگی آن‌ها تغییرناپذیری (Immutability) است؛ یعنی پس از ساخته شدن، نمی‌توان مقادیرشان را تغییر داد.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">بیایید مفاهیم پنهان در مدل قبلی را شناسایی و به Value Object تبدیل کنیم.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>الف) استخراج </strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Address</code></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">آدرس یک کاندیدای عالی است. یک آدرس هویت مستقلی ندارد؛ بلکه با خیابان، شهر و کد پستی‌اش تعریف می‌شود.</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public class Address
+{
+    public string Street { get; private set; }
+    public string City { get; private set; }
+    public string PostalCode { get; private set; }
+
+    // سازنده خصوصی برای EF Core
+    private Address() { } 
+
+    public Address(string street, string city, string postalCode)
+    {
+        // اعتبارسنجی‌ها همین‌جا، در قلب مدل دامنه اتفاق می‌افتد
+        if (string.IsNullOrWhiteSpace(street))
+            throw new ArgumentNullException(nameof(street));
+        if (string.IsNullOrWhiteSpace(city))
+            throw new ArgumentNullException(nameof(city));
+        
+        // و سایر قوانین...
+        Street = street;
+        City = city;
+        PostalCode = postalCode;
+    }
+}</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">حالا منطق مربوط به آدرس در یک مکان متمرکز شده است.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>ب) خلق </strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">MobileNumber</code><strong> و </strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">NationalCode</code></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">این‌ها هم فقط رشته نیستند، بلکه مفاهیمی با قوانین خاص خودشان هستند.</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public class MobileNumber
+{
+    public string Value { get; private set; }
+
+    private MobileNumber() { }
+
+    public MobileNumber(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value) || !IsValid(value)) // IsValid یک متد داخلی برای چک کردن فرمت است
+            throw new ArgumentException(&quot;Invalid mobile number format.&quot;);
+            
+        Value = value;
+    }
+
+    private static bool IsValid(string number)
+    {
+        // منطق بررسی فرمت شماره موبایل
+        return number.StartsWith(&quot;09&quot;) &amp;&amp; number.Length == 11 &amp;&amp; number.All(char.IsDigit);
+    }
+    
+    // ... می‌توان متدهای دیگری هم برای برابری و ... اضافه کرد
+}
+
+// کلاس NationalCode نیز به روشی مشابه پیاده‌سازی می‌شود</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">با این کار، ساخت یک شماره موبایل نامعتبر در سیستم ما <strong>غیرممکن</strong> می‌شود. این قدرت یک مدل دامنه غنی است! </div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>نسخه نهایی</strong><strong>Entity </strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Member</code></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">حالا بیایید ببینیم کلاس <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Member</code> ما چقدر تمیزتر، گویاتر و هوشمندتر شده است:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public class Member
+{
+    public int Id { get; private set; }
+    public string FirstName { get; private set; } // برای سادگی، این‌ها را primitive نگه داشتیم، اما می‌توانستند FullName VO باشند
+    public string LastName { get; private set; }
+    
+    public NationalCode NationalCode { get; private set; } // به جای string
+    public MobileNumber MobileNumber { get; private set; } // به جای string
+    public Address Address { get; private set; }          // به جای سه string پراکنده
+
+    private Member() { } // برای EF Core
+
+    public Member(string firstName, string lastName, NationalCode nationalCode, MobileNumber mobileNumber, Address address)
+    {
+        // ... اعتبارسنجی‌های مربوط به خود Member
+        FirstName = firstName;
+        LastName = lastName;
+        NationalCode = nationalCode;
+        MobileNumber = mobileNumber;
+        Address = address;
+    }
+
+    public void ChangeAddress(Address newAddress)
+    {
+        // متدی گویا که رفتار کسب‌وکار را بیان می‌کند
+        Address = newAddress ?? throw new ArgumentNullException(nameof(newAddress));
+    }
+}</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">این مدل جدید داستان کسب‌وکار را بسیار بهتر روایت می‌کند: «یک عضو، یک کد ملی، یک شماره موبایل و یک آدرس دارد.»</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>پیاده‌سازی در EF Core</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">شاید بپرسید EF Core چگونه این کلاس‌های سفارشی را در دیتابیس ذخیره می‌کند؟ به سادگی!</div><ul><li>برای Value Object‌های پیچیده مانند <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Address</code>، از قابلیت <strong>Owned Entity Types</strong> استفاده می‌کنیم.</li><li>برای Value Object‌های ساده مانند <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">MobileNumber</code>، از <strong>Value Converters</strong> بهره می‌گیریم.</li></ul><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">// در فایل DbContext
+protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+    var memberBuilder = modelBuilder.Entity&lt;Member&gt;();
+
+    // 1. نگاشت Address به عنوان یک Owned Type
+    // EF Core فیلدهای Street, City, PostalCode را به عنوان ستون‌هایی در جدول Members ذخیره می‌کند.
+    memberBuilder.OwnsOne(m =&gt; m.Address, addressBuilder =&gt; 
+    {
+        addressBuilder.Property(a =&gt; a.Street).HasColumnName(&quot;Address_Street&quot;);
+        addressBuilder.Property(a =&gt; a.City).HasColumnName(&quot;Address_City&quot;);
+        addressBuilder.Property(a =&gt; a.PostalCode).HasColumnName(&quot;Address_PostalCode&quot;);
+    });
+    
+    // 2. نگاشت MobileNumber با استفاده از Value Converter
+    // به EF Core می‌گوییم که چطور MobileNumber را به string و برعکس تبدیل کند.
+    memberBuilder.Property(m =&gt; m.MobileNumber)
+        .HasConversion(
+            v =&gt; v.Value, // از MobileNumber به string
+            v =&gt; new MobileNumber(v) // از string به MobileNumber
+        );
+
+    // نگاشت NationalCode نیز به همین صورت خواهد بود...
+}</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>نتیجه‌گیری: فراتر از داده</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در این سفر کوتاه، دیدیم که چگونه با تغییر دیدگاه و استفاده از اصول DDD، یک کلاس ساده و «کم‌خون» را به یک مدل دامنه غنی و هوشمند تبدیل کردیم. این کار فقط یک بازآرایی کد نبود؛ یک <strong>تغییر بنیادین در تفکر</strong> بود.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>مدل جدید ما:</strong></div><ul><li><strong>گویاتر است:</strong> کد، زبان مشترک کسب‌وکار (Ubiquitous Language) را بازتاب می‌دهد.</li><li><strong>امن‌تر است:</strong> با کپسوله کردن قوانین، از ایجاد داده‌های نامعتبر جلوگیری می‌کند.</li><li><strong>قابل نگهداری‌تر است:</strong> منطق در جای درست خود قرار گرفته و از تکرار جلوگیری می‌شود.</li></ul><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">طراحی دامنه محور یک مقصد نیست، بلکه یک سفر مداوم برای درک عمیق‌تر کسب‌وکار و بازتاب آن در کدی تمیز، معنادار و پایدار است.</div></div>
+</div></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

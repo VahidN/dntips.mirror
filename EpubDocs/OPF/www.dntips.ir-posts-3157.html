@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫React 16x - قسمت 33 - React Hooks - بخش 4 - useContext Hook</title>     <meta name="description" content="در  سری بررسی اعتبارسنجی و احراز هویت کاربران در React ، برای انتقال داده‌های کاربر وارد شده‌ی به سیستم، از روش انتقال props، از بالاترین کامپوننت موجود در component tree، به پایین‌ترین کامپوننت آن، به این نحو فرضی استفاده کردیم: 
+ 
+ 
+ ابتدا شیء user، در بالاترین سطح، دریافت شده و به صفحه‌ای خاص از طریق ویژگی‌های props ارسال می‌شود:     &amp;lt;Page user={user}  /&amp;gt;   
+ سپس این کامپوننت Page، کامپوننت PageLayout را رندر می‌کند که آن نیز  ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="React 16x - قسمت 33 - React Hooks - بخش 4 - useContext Hook">
+    <meta itemprop="description" content="در  سری بررسی اعتبارسنجی و احراز هویت کاربران در React ، برای انتقال داده‌های کاربر وارد شده‌ی به سیستم، از روش انتقال props، از بالاترین کامپوننت موجود در component tree، به پایین‌ترین کامپوننت آن، به این نحو فرضی استفاده کردیم: 
+ 
+ 
+ ابتدا شیء user، در بالاترین سطح، دریافت شده و به صفحه‌ای خاص از طریق ویژگی‌های props ارسال می‌شود:     &amp;lt;Page user={user}  /&amp;gt;   
+ سپس این کامپوننت Page، کامپوننت PageLayout را رندر می‌کند که آن نیز  ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="React 16x - قسمت 33 - React Hooks - بخش 4 - useContext Hook">
+    <meta property="og:description" content="در  سری بررسی اعتبارسنجی و احراز هویت کاربران در React ، برای انتقال داده‌های کاربر وارد شده‌ی به سیستم، از روش انتقال props، از بالاترین کامپوننت موجود در component tree، به پایین‌ترین کامپوننت آن، به این نحو فرضی استفاده کردیم: 
+ 
+ 
+ ابتدا شیء user، در بالاترین سطح، دریافت شده و به صفحه‌ای خاص از طریق ویژگی‌های props ارسال می‌شود:     &amp;lt;Page user={user}  /&amp;gt;   
+ سپس این کامپوننت Page، کامپوننت PageLayout را رندر می‌کند که آن نیز  ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="React 16x - قسمت 33 - React Hooks - بخش 4 - useContext Hook">
+    <meta name="twitter:description" content="در  سری بررسی اعتبارسنجی و احراز هویت کاربران در React ، برای انتقال داده‌های کاربر وارد شده‌ی به سیستم، از روش انتقال props، از بالاترین کامپوننت موجود در component tree، به پایین‌ترین کامپوننت آن، به این نحو فرضی استفاده کردیم: 
+ 
+ 
+ ابتدا شیء user، در بالاترین سطح، دریافت شده و به صفحه‌ای خاص از طریق ویژگی‌های props ارسال می‌شود:     &amp;lt;Page user={user}  /&amp;gt;   
+ سپس این کامپوننت Page، کامپوننت PageLayout را رندر می‌کند که آن نیز  ...">
+    <meta name="twitter:card" content="در  سری بررسی اعتبارسنجی و احراز هویت کاربران در React ، برای انتقال داده‌های کاربر وارد شده‌ی به سیستم، از روش انتقال props، از بالاترین کامپوننت موجود در component tree، به پایین‌ترین کامپوننت آن، به این نحو فرضی استفاده کردیم: 
+ 
+ 
+ ابتدا شیء user، در بالاترین سطح، دریافت شده و به صفحه‌ای خاص از طریق ویژگی‌های props ارسال می‌شود:     &amp;lt;Page user={user}  /&amp;gt;   
+ سپس این کامپوننت Page، کامپوننت PageLayout را رندر می‌کند که آن نیز  ...">
+    <meta property="article:published_time" content="Wed, 25 Dec 2019 12:15:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫React 16x - قسمت 33 - React Hooks - بخش 4 - useContext Hook";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-3158.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫React 16x - قسمت 34 - توزیع برنامه</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-3156.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫React 16x - قسمت 32 - React Hooks - بخش 3 - نکات ویژه‌ی برقراری ارتباط با سرور</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫React 16x - قسمت 33 - React Hooks - بخش 4 - useContext Hook</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۸/۱۰/۰۴ ۱۲:۱۵</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-3157.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'>در <a href="https://www.dntips.ir/learningpaths/details/91">سری بررسی اعتبارسنجی و احراز هویت کاربران در React</a>، برای انتقال داده‌های کاربر وارد شده‌ی به سیستم، از روش انتقال props، از بالاترین کامپوننت موجود در component tree، به پایین‌ترین کامپوننت آن، به این نحو فرضی استفاده کردیم:<br>
+
+
+ابتدا شیء user، در بالاترین سطح، دریافت شده و به صفحه‌ای خاص از طریق ویژگی‌های props ارسال می‌شود:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="XML" name="code">&lt;Page user={user}  /&gt;</pre> </div>
+سپس این کامپوننت Page، کامپوننت PageLayout را رندر می‌کند که آن نیز باید به اطلاعات کاربر دسترسی داشته باشد. بنابراین شیء user را مجددا به این کامپوننت از طریق props ارسال می‌کنیم:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="XML" name="code">&lt;PageLayout user={user} /&gt;</pre> </div>
+بعد همین کامپوننت PageLayout، کامپوننت NavBar را رندر می‌کند که آن نیز باید بداند کاربر وارد شده‌ی به سیستم کیست؟ به همین جهت یکبار دیگر از طریق props، اطلاعات کاربر را به کامپوننت بعدی موجود در درخت کامپوننت‌ها انتقال می‌دهیم: <br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="XML" name="code">&lt;NavigationBar user={user}  /&gt;</pre> </div>
+و همینطور الی آخر. به این روش props drilling گفته می‌شود و ... الگوی مذمومی است. در دنیای واقعی، اطلاعات کاربر و یا خصوصا تنظیمات برنامه مانند آدرس REST API endpoints استفاده شده‌ی در آن، باید بین بسیاری از کامپوننت‌ها به اشتراک گذاشته شود و عموما سطوح به اشتراک گذاری آن، بسیار عمیق‌تر است از سطوحی که در این مثال ساده عنوان شدند. از زمان ارائه‌ی React 16.3.0، راه حل بهتری برای مدیریت اینگونه مسایل با ارائه‌ی React Context ارائه شده‌است که آن‌را در ادامه در دو حالت کامپوننت‌های کلاسی و همچنین تابعی، بررسی خواهیم کرد.<br> <br> <br> <b>ایجاد شیء Context در برنامه‌های React</b> <br> <br>
+
+
+React Context، راه حلی است جهت به اشتراک گذاری داده‌ها، در بین انواع و اقسام کامپوننت‌های یک برنامه، بدون اینکه نیازی باشد این اطلاعات را توسط props، از یک سطح، به سطحی دیگر، به صورت دستی انتقال داد. برای ایجاد یک نمونه‌ی از آن، ابتدا پوشه‌ی جدید src\contexts را افزوده و سپس فایل src\contexts\userContext.js را درون آن، با محتوای زیر ایجاد می‌کنیم:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="JScript" name="code">import React from "react";
+
+export const UserContext = React.createContext({ user: {} });
+
+export const UserProvider = UserContext.Provider;
+export const UserConsumer = UserContext.Consumer;</pre> </div>
+متد React.createContext، یک شیء Context را بازگشت می‌دهد. این شیء، دو کامپوننت مهم Provider و Consumer را به همراه دارد که امکان اشتراک به داده‌های مرتبط با آن‌را میسر می‌کنند. زمانیکه React کامپوننتی را رندر می‌کند که مشترک یک شیء Context است، این کامپوننت، امکان خواندن اطلاعات شیء Context را از نزدیک‌ترین کامپوننتی در درخت کامپوننت‌ها که یک Provider را برای آن ارائه داده‌است، خواهد داشت.<br> <br> <br> <b>تامین یک شیء Context در برنامه، در یک کامپوننت کلاسی و یا تابعی</b> <br> <br>
+
+
+تا اینجا یک شیء Context را به همراه اجزای export شده‌ی Provider و Consumer آن ایجاد کردیم. اکنون نوبت به پیاده سازی قسمت Provider آن است:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="JScript" name="code">import "../../App.css";
+
+import React, { Component } from "react";
+
+import { UserProvider } from "../../contexts/userContext";
+import Main from "./Main";
+
+class App extends Component {
+  state = {
+    user: { name: "User 1" }
+  };
+
+  componentDidMount() {
+    // get user from the server or local storage and then set the currently logged in user to the this.state
+  }
+
+  render() {
+    return (
+      &lt;&gt;
+        &lt;h1&gt;App Class&lt;/h1&gt;
+        &lt;UserProvider value={this.state.user}&gt;
+          &lt;Main /&gt;
+        &lt;/UserProvider&gt;
+      &lt;/&gt;
+    );
+  }
+}
+
+export default App;</pre> </div>
+در این کامپوننت کلاسی (و یا تابعی، نحوه‌ی تعریف UserProvider در هر دو یکی است)، خاصیت user، به state کامپوننت اضافه شده‌است. سپس برای مثال می‌توان این خاصیت را در رویداد componentDidMount از سرور و یا محل ذخیره سازی دیگری دریافت و آنگاه state را بر این اساس به روز رسانی کرد.<br>
+
+
+در ادامه قصد داریم اطلاعات این شیء user موجود در state را با تمام کامپوننت‌هایی که در درخت رندر کامپوننت جاری قرار می‌گیرند و با کامپوننت Main شروع می‌شوند، به اشتراک بگذاریم. این به اشتراک گذاری با import شیء UserProvider از ماژول contexts/userContext به نحوی که مشاهده می‌کنید، انجام می‌شود. شیء UserProvider، کار محصور سازی کامپوننت Main را انجام می‌دهد. سپس این Provider می‌تواند مقداری را توسط ویژگی value خود دریافت کند که برای مثال در اینجا شیء user است. اکنون این value تا n سطح بعدی که از کامپوننت Main مشتق می‌شوند نیز در دسترس خواهد بود.<br> <br> <b>یک نکته:</b> متد React.createContext به همراه یک آرگومان defaultValue اختیاری است که در اختیار Consumerهای آن قرار داده می‌شود؛ اگر Provider متناظر با آن‌، در درخت کامپوننت‌های برنامه، یافت نشود. یعنی تعریف Provider الزامی نیست. اگر نیاز است مقدار ثابتی را بین چندین کامپوننت به اشتراک بگذارید، فقط کافی است آن‌ها را توسط React.createContext مقدار دهی اولیه کرده و ... استفاده کنید:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="JScript" name="code">export const DefaultRouteContext = React.createContext({ path: '/welcome' });</pre> </div> <br> <br> <b>خواندن شیء Context در کامپوننتی دیگر</b> <br> <br>
+
+
+اکنون که یک تامین کننده‌ی Context را ایجاد کردیم، برای خواندن اطلاعات آن در درخت کامپوننت‌های محصور شده‌ی توسط UserProvider، می‌توان به صورت زیر عمل کرد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="JScript" name="code">import React from "react";
+
+import { UserConsumer } from "../../contexts/userContext";
+
+export default function Main(props) {
+  return (
+    &lt;&gt;
+      &lt;UserConsumer&gt;
+        {value =&gt; &lt;div&gt;User name: {value.name}.&lt;/div&gt;}
+      &lt;/UserConsumer&gt;
+    &lt;/&gt;
+  );
+}</pre> </div>
+ابتدا UserConsumer را از ماژول contexts/userContext دریافت می‌کنیم. سپس برای دسترسی به خاصیت name شیء ارائه شده‌ی توسط UserProvider، باید قسمتی از متد رندر کامپوننت را توسط شیء UserConsumer، محصور کرد و سپس value آن‌را به نحوی که مشاهده می‌کنید، خواند. Consumer، یک تابع را به عنوان فرزند دریافت می‌کند. این تابع مقدار شیء تامین شده‌ی توسط Context را دریافت کرده (همان value={this.state.user} نزدیک‌ترین کامپوننتی که به همراه یک Provider است) و سپس یک المان React را بازگشت می‌دهد که در این محل رندر خواهد شد.<br> <br>
+
+
+خروجی برنامه پس از این تغییرات به صورت زیر است:<br> <br> <p style="display:block; margin-left: auto; margin-right: auto;"> <img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/png;base64,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"> </p> <br> <br> <b>ساده سازی دسترسی به UserConsumer توسط useContext Hook</b> <br> <br>
+
+
+نحوه‌ی تعریف یک Provider و محصور سازی فرزندانی که باید از آن ارث‌بری کنند، در بین کامپوننت‌های کلاسی و تابعی، یکی است. اما در کامپوننت‌های تابعی حداقل می‌توان نحوه‌ی دسترسی به UserConsumer را به نحو زیر توسط useContext Hook ساده کرد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="JScript" name="code">import React, { useContext } from "react";
+
+import { UserContext } from "../../contexts/userContext";
+
+export default function Main() {
+  const value = useContext(UserContext);
+  return (
+    &lt;&gt;
+      &lt;div&gt;User name: {value.name}.&lt;/div&gt;
+    &lt;/&gt;
+  );
+}</pre> </div>
+متد useContext ابتدا شیء UserContext مهیا شده‌ی توسط ماژول contexts/userContext را دریافت می‌کند. سپس خروجی آن، همان value تنظیم شده‌ی توسط نزدیک‌ترین Provider آن در component tree است. این روش، بار ذهنی کمتری را نسبت به حالت قبلی استفاده‌ی از UserConsumer و کار با یک تابع درون آن‌را به همراه دارد؛ ساده‌تر خوانده می‌شود، ساده‌تر استفاده می‌شود. فقط باید دقت داشت که این متد، کل شیء Context را دریافت می‌کند و نه فقط شیء UserConsumer آن‌را.<br> <br>
+
+
+مزیت دیگر این روش، ساده سازی کار با چندین شیء Context است. برای مثال اگر دو شیء Context را تعریف کرده باشید، خواندن دو مقدار از آن‌ها، پیشتر چنین شکل تو در تویی را توسط دو Consumer پیدا می‌کرد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="JScript" name="code">function HeaderBar() {
+  return (
+    &lt;CurrentUser.Consumer&gt;
+      {user =&gt;
+        &lt;Notifications.Consumer&gt;
+          {notifications =&gt;
+            &lt;header&gt;
+              Welcome back, {user.name}!
+              You have {notifications.length} notifications.
+            &lt;/header&gt;
+          }
+      }
+    &lt;/CurrentUser.Consumer&gt;
+  );
+}</pre> </div>
+اما اکنون با استفاده از useContext، نوشتن و خواندن آن به سادگی چند سطر زیر است که بسیار منطقی‌تر و عادی‌تر به نظر می‌رسد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="JScript" name="code">function HeaderBar() {
+  const user = useContext(CurrentUser);
+  const notifications = useContext(Notifications);
+return (
+    &lt;header&gt;
+      Welcome back, {user.name}!
+      You have {notifications.length} notifications.
+    &lt;/header&gt;
+  );
+}</pre> </div> <br> <br> <b>ارسال اطلاعات به کامپوننت Context Provider، از طریق کامپوننت‌های فرزند</b> <br> <br>
+
+
+تا اینجا با استفاده از React Context، اطلاعات یک Provider را با فرزندان آن به اشتراک گذاشتیم؛ عکس این عمل نیز میسر است. برای اینکار، همانند تمام کامپوننت‌های دیگری که برای ارسال اطلاعات به فراخوان خود از طریق رخ‌دادها عمل می‌کنند، می‌توان یک متد رویدادگردان را در کامپوننت والد، به استفاده کنند‌ه‌ی از Context ارسال کرد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="JScript" name="code">import "../../App.css";
+
+import React, { Component } from "react";
+
+import { UserProvider } from "../../contexts/userContext";
+import Main from "./Main2";
+
+class App extends Component {
+  state = {
+    user: { name: "User 1" }
+  };
+
+  componentDidMount() {
+    // get user from the server or local storage and then set the currently logged in user to the this.state
+  }
+
+  logout = () =&gt; {
+    console.log("logout");
+    this.setState({ user: {} });
+  };
+
+  render() {
+    const contextValue = {
+      user: this.state.user,
+      logoutUser: this.logout
+    };
+    return (
+      &lt;&gt;
+        &lt;h1&gt;App Class&lt;/h1&gt;
+        &lt;UserProvider value={contextValue}&gt;
+          &lt;Main /&gt;
+        &lt;/UserProvider&gt;
+      &lt;/&gt;
+    );
+  }
+}
+
+export default App;</pre> </div>
+در اینجا ابتدا به خاصیت logout، متدی را نسبت داده‌ایم که با فراخوانی آن، اطلاعات شیء user موجود در state کامپوننت جاری را پاک می‌کند. سپس این خاصیت را به صورت یک خاصیت جدید، به شیءای که به ویژگی value شیء UserProvider انتساب داده شده، اضافه می‌کنیم.<br>
+
+
+اکنون تمام استفاده کننده‌های از این UserProvider می‌توانند با فراخوانی متد منتسب به logout، سبب پاک شدن اطلاعات کاربر موجود در state کامپوننت App، به روز رسانی state و در نتیجه‌ی آن، رندر مجدد کامپوننت و ارائه‌ی یک UserProvider جدید، با اطلاعاتی جدید به فرزندان آن شوند:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="JScript" name="code">import React, { useContext } from "react";
+
+import { UserContext } from "../../contexts/userContext";
+
+export default function Main() {
+  const { user, logoutUser } = useContext(UserContext);
+  return (
+    &lt;&gt;
+      &lt;div&gt;User name: {user.name}.&lt;/div&gt;
+      &lt;button type="button" className="btn btn-primary" onClick={logoutUser}&gt;
+        Logout user
+      &lt;/button&gt;
+    &lt;/&gt;
+  );
+}</pre> </div>
+در این کامپوننت مصرف کننده‌ی Context، اینبار، مقدار دریافتی، یک شیء با چندین خاصیت است. بنابراین می‌توان با استفاده از Object Destructuring، خواص آن‌را استخراج و استفاده کرد. برای مثال با انتساب onClick={logoutUser} به دکمه‌ی خروج، این کامپوننت می‌تواند اطلاعات state و سپس Context ارائه شده‌ی در کامپوننت App را تغییر دهد.<br> <br>
+
+
+روش انجام اینکار بدون استفاده از useContext را نیز در ادامه مشاهده می‌کنید که در ابتدا نیاز به تعریف تابعی را دارد که همان خواص استخراجی را دریافت می‌کند. سپس باید بر اساس آن‌ها، المان‌های مدنظر نمایش نام کاربر و دکمه‌ی خروج او را بازگشت داد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="JScript" name="code">import React from "react";
+
+import { UserConsumer } from "../../contexts/userContext";
+
+export default function Main(props) {
+  return (
+    &lt;&gt;
+      &lt;UserConsumer&gt;
+        {({ user, logoutUser }) =&gt; (
+          &lt;&gt;
+            &lt;div&gt;User name: {user.name}.&lt;/div&gt;
+            &lt;button
+              type="button"
+              className="btn btn-primary"
+              onClick={logoutUser}
+            &gt;
+              Logout user
+            &lt;/button&gt;
+          &lt;/&gt;
+        )}
+      &lt;/UserConsumer&gt;
+    &lt;/&gt;
+  );
+}</pre> </div> <br> <br>
+
+
+کدهای کامل این قسمت را از اینجا می‌توانید دریافت کنید: <a href="https://www.dntips.ir/file/userfile?name=sample-30-part-04.zip">sample-30-part-04.zip</a></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3210.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>پیاده سازی پروژه‌های React با TypeScript - قسمت هفتم - تعیین نوع هوک useContext</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3169.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مدیریت پیشرفته‌ی حالت در React با Redux و Mobx - قسمت دهم - MobX Hooks و اعمال Async در Mobx</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3161.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مدیریت پیشرفته‌ی حالت در React با Redux و Mobx - قسمت سوم - روش اتصال Redux به برنامه‌های React</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3170.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>ساخت یک مثال Todo با MobX و React</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3163.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مدیریت پیشرفته‌ی حالت در React با Redux و Mobx - قسمت پنجم - Redux Hooks</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3166.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مدیریت پیشرفته‌ی حالت در React با Redux و Mobx - قسمت هفتم - بررسی مفاهیم Mobx</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3168.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مدیریت پیشرفته‌ی حالت در React با Redux و Mobx - قسمت نهم - مثالی از کتابخانه‌ی mobx-react</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3122.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>React 16x - قسمت 7 - ترکیب کامپوننت‌ها - بخش 1 - ارسال داده‌ها، مدیریت رخ‌دادها</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3146.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>React 16x - قسمت 27 - احراز هویت و اعتبارسنجی کاربران - بخش 2 - استخراج و نمایش اطلاعات JWT و خروج از سیستم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3124.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>React 16x - قسمت 8 - ترکیب کامپوننت‌ها - بخش 2 - مدیریت state</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهران مجیدی</strong>  در  <span dir='ltr'>۱۳۹۸/۱۰/۰۸ ۸:۳۸</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>آیا&nbsp; <span style="box-sizing: border-box; color: rgb(51, 51, 51);">useContext Hook یک state manager مثل redux می‌باشد؟ </span></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۸/۱۰/۰۸ ۹:۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div>- بله. ()React-Redux connect دقیقا در پشت صحنه از همین Context API استفاده می‌کند. تفاوت این دو مانند مقایسه‌ی صرفا داشتن یک API ابتدایی (Context API) و داشتن یک کتابخانه‌ی غنی بنا شده‌ی بر اساس یک API هست (React-Redux)<span> <span>.<br> </span> </span> </div> <div>+ یک هوک دیگر به نام useReducer Hook<span> هم به لیست هوک‌های استاندارد React اضافه شده که که در حقیقت زیرساخت useState است و کارش فراهم آوردن مدیریت حالت پیشرفته‌ای مخصوص یک کامپوننت است. البته جایگزین Redux که سراسری عمل می‌کند نیست.<br> </span> </div> <div>برای مطالعه‌ی بیشتر: <a href="https://daveceddia.com/context-api-vs-redux/">Redux vs. The React Context API</a>&nbsp; <span> </span> <br> <span> </span> </div></div>
+</div></li></ul></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

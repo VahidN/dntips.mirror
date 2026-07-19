@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫Blazor 5x - قسمت 19 - کار با فرم‌ها - بخش 7 - نکات ویژه‌ی کار با EF-Core در برنامه‌های Blazor Server</title>     <meta name="description" content="تا  قسمت قبل ، روشی را که برای کار با EF-Core درنظر گرفتیم، روش متداول کار با آن، در برنامه‌های ASP.NET Core Web API بود؛ یعنی این روش با برنامه‌های مبتنی بر Blazor WASM که از دو قسمت مجزای Web API سمت سرور و Web Assembly سمت کلاینت تشکیل شده‌اند، به خوبی جواب می‌دهد؛ اما ... با Blazor Server یکپارچه که تمام قسمت‌های مدیریتی آن سمت سرور رخ می‌دهند، خیر! در این مطلب، دلایل این موضوع را به همراه ارائه راه‌حلی، بررسی خواهیم کرد.       
+ 
+ ط ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="Blazor 5x - قسمت 19 - کار با فرم‌ها - بخش 7 - نکات ویژه‌ی کار با EF-Core در برنامه‌های Blazor Server">
+    <meta itemprop="description" content="تا  قسمت قبل ، روشی را که برای کار با EF-Core درنظر گرفتیم، روش متداول کار با آن، در برنامه‌های ASP.NET Core Web API بود؛ یعنی این روش با برنامه‌های مبتنی بر Blazor WASM که از دو قسمت مجزای Web API سمت سرور و Web Assembly سمت کلاینت تشکیل شده‌اند، به خوبی جواب می‌دهد؛ اما ... با Blazor Server یکپارچه که تمام قسمت‌های مدیریتی آن سمت سرور رخ می‌دهند، خیر! در این مطلب، دلایل این موضوع را به همراه ارائه راه‌حلی، بررسی خواهیم کرد.       
+ 
+ ط ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="Blazor 5x - قسمت 19 - کار با فرم‌ها - بخش 7 - نکات ویژه‌ی کار با EF-Core در برنامه‌های Blazor Server">
+    <meta property="og:description" content="تا  قسمت قبل ، روشی را که برای کار با EF-Core درنظر گرفتیم، روش متداول کار با آن، در برنامه‌های ASP.NET Core Web API بود؛ یعنی این روش با برنامه‌های مبتنی بر Blazor WASM که از دو قسمت مجزای Web API سمت سرور و Web Assembly سمت کلاینت تشکیل شده‌اند، به خوبی جواب می‌دهد؛ اما ... با Blazor Server یکپارچه که تمام قسمت‌های مدیریتی آن سمت سرور رخ می‌دهند، خیر! در این مطلب، دلایل این موضوع را به همراه ارائه راه‌حلی، بررسی خواهیم کرد.       
+ 
+ ط ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="Blazor 5x - قسمت 19 - کار با فرم‌ها - بخش 7 - نکات ویژه‌ی کار با EF-Core در برنامه‌های Blazor Server">
+    <meta name="twitter:description" content="تا  قسمت قبل ، روشی را که برای کار با EF-Core درنظر گرفتیم، روش متداول کار با آن، در برنامه‌های ASP.NET Core Web API بود؛ یعنی این روش با برنامه‌های مبتنی بر Blazor WASM که از دو قسمت مجزای Web API سمت سرور و Web Assembly سمت کلاینت تشکیل شده‌اند، به خوبی جواب می‌دهد؛ اما ... با Blazor Server یکپارچه که تمام قسمت‌های مدیریتی آن سمت سرور رخ می‌دهند، خیر! در این مطلب، دلایل این موضوع را به همراه ارائه راه‌حلی، بررسی خواهیم کرد.       
+ 
+ ط ...">
+    <meta name="twitter:card" content="تا  قسمت قبل ، روشی را که برای کار با EF-Core درنظر گرفتیم، روش متداول کار با آن، در برنامه‌های ASP.NET Core Web API بود؛ یعنی این روش با برنامه‌های مبتنی بر Blazor WASM که از دو قسمت مجزای Web API سمت سرور و Web Assembly سمت کلاینت تشکیل شده‌اند، به خوبی جواب می‌دهد؛ اما ... با Blazor Server یکپارچه که تمام قسمت‌های مدیریتی آن سمت سرور رخ می‌دهند، خیر! در این مطلب، دلایل این موضوع را به همراه ارائه راه‌حلی، بررسی خواهیم کرد.       
+ 
+ ط ...">
+    <meta property="article:published_time" content="Mon, 15 Mar 2021 20:00:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫Blazor 5x - قسمت 19 - کار با فرم‌ها - بخش 7 - نکات ویژه‌ی کار با EF-Core در برنامه‌های Blazor Server";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-3311.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫Blazor 5x - قسمت 20 - کار با فرم‌ها - بخش 8 - استفاده از یک کامپوننت ثالث HTML Editor</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-3309.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫آشنایی با Feature Toggle - بخش دوم</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫Blazor 5x - قسمت 19 - کار با فرم‌ها - بخش 7 - نکات ویژه‌ی کار با EF-Core در برنامه‌های Blazor Server</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۹/۱۲/۲۵ ۲۰:۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-3310.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'>تا <a href="www.dntips.ir-posts-3308.html">قسمت قبل</a>، روشی را که برای کار با EF-Core درنظر گرفتیم، روش متداول کار با آن، در برنامه‌های ASP.NET Core Web API بود؛ یعنی این روش با برنامه‌های مبتنی بر Blazor WASM که از دو قسمت مجزای Web API سمت سرور و Web Assembly سمت کلاینت تشکیل شده‌اند، به خوبی جواب می‌دهد؛ اما ... با Blazor Server یکپارچه که تمام قسمت‌های مدیریتی آن سمت سرور رخ می‌دهند، خیر! در این مطلب، دلایل این موضوع را به همراه ارائه راه‌حلی، بررسی خواهیم کرد.<br> <br> <br> <b>
+
+طول عمر سرویس‌ها، در برنامه‌های Blazor Server متفاوت هستند</b> <br> <br>
+
+
+
+هنگامیکه با یک ASP.NET Core Web API متداول کار می‌کنیم، درخواست‌های HTTP رسیده، از میان‌افزارهای موجود رد شده و پردازش می‌شوند. اما هنگامیکه با Blazor Server کار می‌کنیم، به علت وجود یک اتصال دائم SignalR که عموما از نوع Web socket است، دیگر درخواست HTTP وجود ندارد. تمام رفت و برگشت‌های برنامه به سرور و پاسخ‌های دریافتی، از طریق Web socket منتقل می‌شوند و نه درخواست‌ها و پاسخ‌های متداول HTTP. <br>
+
+
+
+این روش پردازشی، اولین تاثیری را که بر روی رفتار یک برنامه می‌گذارد، تغییر طول عمر سرویس‌های آن است. برای مثال در برنامه‌های Web API، طول عمر درخواست‌ها، از نوع Scoped هستند و با شروع پردازش یک درخواست، سرویس‌های مورد نیاز وهله سازی شده و در پایان درخواست، رها می‌شوند. <br>
+
+
+
+این مساله در حین کار با EF-Core نیز بسیار مهم است؛ از این جهت که در برنامه‌های Web API نیز EF-Core و DbContext آن، به صورت سرویس‌هایی با طول عمر Scoped تعریف می‌شوند. برای مثال زمانیکه یک چنین تعریفی را در برنامه داریم:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">services.AddDbContext&lt;ApplicationDbContext&gt;(options =&gt; options.UseSqlServer(connectionString));</pre> </div>
+
+امضای واقعی متد AddDbContext مورد استفاده‌ی فوق، به صورت زیر است:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">public static IServiceCollection AddDbContext&lt;TContext&gt;(
+    [NotNullAttribute] this IServiceCollection serviceCollection, 
+    [CanBeNullAttribute] Action&lt;DbContextOptionsBuilder&gt; optionsAction = null, 
+    ServiceLifetime contextLifetime = ServiceLifetime.Scoped, 
+    ServiceLifetime optionsLifetime = ServiceLifetime.Scoped) where TContext : DbContext;</pre> </div>
+
+همانطور که مشاهده می‌کنید، طول عمرهای پیش‌فرض تعریف شده‌ی در اینجا، از نوع Scoped هستند. یعنی زمانیکه سرویس‌های ApplicationDbContext را از طریق سیستم تزریق وابستگی‌های برنامه دریافت می‌کنیم، در ابتدای یک درخواست Web API، به صورت خودکار وهله سازی شده و در پایان درخواست رها می‌شوند. به این ترتیب به ازای هر درخواست رسیده، وهله‌ی متفاوتی از DbContex را دریافت می‌کنیم که با وهله‌ی استفاده شده‌ی در درخواست قبلی، یکی نیست. <br>
+
+
+
+اما زمانیکه مانند یک برنامه‌ی مبتنی بر Blazor Server، دیگر HTTP Requests متداولی را نداریم، چطور؟ در این حالت زمانیکه یک اتصال SignalR برقرار شد، وهله‌ای از DbContext که در اختیار برنامه‌ی Blazor Server قرار می‌گیرد، تا زمانیکه کاربر این اتصال را به نحوی قطع نکرده (مانند بستن کامل مرورگر و یا ریفرش صفحه)، ثابت باقی خواهد ماند. یعنی به ازای هر اتصال SignalR، طول عمر ServiceLifetime.Scoped پیش‌فرض تعریف شده، همانند یک وهله‌ی با طول عمر Singleton عمل می‌کند. در این حالت تمام صفحات و کامپوننت‌های یک برنامه‌ی Blazor Server، از یک تک وهله‌ی مشخص DbContext که در ابتدای کار دریافت کرده‌اند، کار می‌کنند و از آنجائیکه DbContext به صورت thread-safe کار نمی‌کند، این تک وهله مشکلات زیادی را ایجاد خواهد کرد که یک نمونه از آن‌را در عمل، در پایان <a href="www.dntips.ir-posts-3308.html">قسمت قبل</a>  مشاهده کردید:<br>
+
+
+
+«اگر برنامه را اجرا کرده و سعی در حذف یک ردیف کنیم، به خطای زیر می‌رسیم و یا حتی اگر کاربر شروع کند به کلیک کردن سریع در قسمت‌های مختلف برنامه، باز هم این خطا مشاهده می‌شود:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code"> An exception occurred while iterating over the results of a query for context type 'BlazorServer.DataAccess.ApplicationDbContext'.
+System.InvalidOperationException: A second operation was started on this context before a previous operation completed.
+This is usually caused by different threads concurrently using the same instance of DbContext.
+For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.</pre> </div>
+
+عنوان می‌کند که متد OnConfirmDeleteRoomClicked، بر روی ترد دیگری نسبت به ترد اولیه‌ای که DbContext بر روی آن ایجاد شده، در حال اجرا است و چون DbContext برای یک چنین سناریوهایی، thread-safe نیست، اجازه‌ی استفاده‌ی از آن‌را نمی‌دهد.»<br>
+
+
+
+هر درخواست Web API نیز بر روی یک ترد جداگانه اجرا می‌شود؛ اما چون ابتدا و انتهای درخواست‌ها مشخص است، طول عمر Scoped، در ابتدای درخواست شروع شده و در پایان آن رها سازی می‌شود. به همین جهت استثنائی را که در اینجا مشاهده می‌کنید، در برنامه‌های Web API شاید هیچگاه مشاهده نشود.<br> <br> <br> <b>معرفی DbContextFactory در EF Core 5x</b> <br> <br>
+
+
+
+همواره باید طول عمر DbContext را تا جای ممکن، کوتاه نگه داشت. مشکل فعلی ما، Singleton رفتار کردن DbContext‌ها (داشتن طول عمر طولانی) در برنامه‌های Blazor Server هستند. یک چنین رفتاری را شاید در برنامه‌های دسکتاپ هم پیشتر مشاهده کرده باشید. برای مثال در برنامه‌های دسکتاپ WPF، تا زمانیکه یک فرم باز است، Context ایجاد شده‌ی در آن هم برقرار است و Dispose نمی‌شود. در یک چنین حالت‌هایی، عموما Context را در زمان نیاز، ایجاد کرده و پس از پایان آن کار کوتاه، Context را رها می‌کنند. به همین جهت نیاز به DbContext Factory ای وجود دارد که بتواند یک چنین پیاده سازی‌هایی را میسر کند و خوشبختانه از زمان EF Core 5x، یک چنین امکانی خصوصا برای برنامه‌های Blazor Server تحت عنوان DbContextFactory <a href="https://devblogs.microsoft.com/dotnet/announcing-entity-framework-core-ef-core-5-0-preview-7/">ارائه شده‌است</a>  که به عنوان راه حل استاندارد دسترسی به DbContext در اینگونه برنامه‌ها مورد استفاده قرار می‌گیرد.<br>
+
+
+
+برای کار با DbContextFactory، اینبار در فایل BlazorServer.App\Startup.cs، بجای استفاده از services.AddDbContext، از متد AddDbContextFactory استفاده می‌شود:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">public void ConfigureServices(IServiceCollection services)
+{
+    var connectionString = Configuration.GetConnectionString("DefaultConnection");
+    //services.AddDbContext&lt;ApplicationDbContext&gt;(options =&gt; options.UseSqlServer(connectionString));
+    services.AddDbContextFactory&lt;ApplicationDbContext&gt;(options =&gt; options.UseSqlServer(connectionString));</pre> </div>
+
+سپس باید دقت داشت که روش استفاده‌ی از آن، نسبت به کار مستقیم با ApplicationDbContext، کاملا متفاوت است. هدف از DbContextFactory، ساخت دستی Context در زمان نیاز و سپس Dispose صریح آن است. بنابراین طول عمر Context دریافت شده‌ی توسط آن باید توسط برنامه نویس مدیریت شود و به صورت خودکار توسط IoC Container برنامه مدیریت نخواهد شد. در این حالت دو روش استفاده‌ی از آن در کامپوننت‌های برنامه‌های Blazor Server، پیشنهاد می‌شود.<br> <br> <br> <b>روش اول کار با DbContextFactory در کامپوننت‌های Blazor Server : وهله سازی از نو، به ازای هر متد</b> <br> <br>
+
+
+
+در این روش پس از ثبت AddDbContextFactory در فایل Startup برنامه مانند مثال فوق، ابتدا سرویس IDbContextFactory که به ApplicationDbContext اشاره می‌کند به ابتدای کامپوننت تزریق می‌شود:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">@inject IDbContextFactory&lt;ApplicationDbContext&gt; DbFactory</pre> </div>
+
+سپس در هر جائی که نیاز به وهله‌ای از ApplicationDbContext است، آن‌را به صورت دستی وهله سازی کرده و همانجا هم Dispose می‌کنیم:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">private async Task DeleteImageAsync()
+{
+    using var context = DbFactory.CreateDbContext();
+
+    var image = await context.HotelRoomImages.FindAsync(1);
+
+   // ...
+}</pre> </div>
+
+در اینجا یکی متدهای یک کامپوننت فرضی را مشاهده می‌کند که از DbFactory تزریق شده استفاده کرد و سپس با استفاده از متد ()CreateDbContext، وهله‌ی جدیدی از ApplicationDbContext را ایجاد می‌کند. همچنین در همان سطر، وجود عبارت using نیز مشاهده می‌شود. یعنی در پایان کار این متد، context ایجاد شده حتما Dispose شده و طول عمر کوتاهی خواهد داشت.<br> <br> <br> <b>روش دوم کار با DbContextFactory در کامپوننت‌های Blazor Server : یکبار وهله سازی Context به ازای هر کامپوننت</b> <br> <br>
+
+
+
+در این روش می‌توان طول عمر Context را معادل طول عمر کامپوننت تعریف کرد که مزیت استفاده‌ی از Change tracking موجود در EF-Core را به همراه خواهد داشت. در این حالت کامپوننت‌های Blazor Server، شبیه به فرم‌های برنامه‌های دسکتاپ عمل می‌کنند:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">@implements IDisposable
+@inject IDbContextFactory&lt;ApplicationDbContext&gt; DbFactory
+
+
+@code
+{
+   private ApplicationDbContext Context;
+
+   protected override async Task OnInitializedAsync()
+   {
+       Context = DbFactory.CreateDbContext();
+       await base.OnInitializedAsync();
+   }
+
+   private async Task DeleteImageAsync()
+   {
+       var image = await Context.HotelRoomImages.FindAsync(1);
+       // ...
+   }
+
+   public void Dispose()
+   {
+     Context.Dispose();
+   }
+}</pre> </div>
+
+- در اینجا همانند روش اول، کار با تزریق IDbContextFactory شروع می‌شود<br>
+
+
+
+-&nbsp; اما بجای اینکه به ازای هر متد، کار فراخوانی DbFactory.CreateDbContext صورت گیرد، یکبار در آغاز کار کامپوننت و در روال رویدادگردان OnInitializedAsync، کار وهله سازی Context کامپوننت انجام شده و از این تک Context در تمام متدهای کامپوننت استفاده خواهد شد. <br>
+
+
+
+- در این حالت کار Dispose خودکار این Context به متد Dispose نهایی کل کامپوننت واگذار شده‌است. برای اینکه این متد فراخوانی شود، نیاز است در ابتدای تعاریف کامپوننت، از دایرکتیو implements IDisposable@ استفاده کرد.<br> <br> <br> <b>سؤال: اگر سرویسی از ApplicationDbContext تزریق شده‌ی در سازنده‌ی خود استفاده می‌کند، چکار باید کرد؟</b> <br> <br>
+
+
+
+برای نمونه سرویس‌های از پیش تعریف شده‌ی ASP.NET Core Identity، در سازنده‌ی خود از ApplicationDbContext استفاده می‌کنند و نه از IDbContextFactory. در این حالت برای تامین ApplicationDbContext‌های تزریق شده، فقط کافی است از روش زیر استفاده کنیم:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">services.AddScoped&lt;ApplicationDbContext&gt;(serviceProvider =&gt;
+     serviceProvider.GetRequiredService&lt;IDbContextFactory&lt;ApplicationDbContext&gt;&gt;().CreateDbContext());</pre> </div>
+
+در این حالت به ازای هر Scope تعریف شده‌ی در برنامه، جهت دسترسی به ApplicationDbContext از طریق سیستم تزریق وابستگی‌ها، کار فراخوانی DbFactory.CreateDbContext به صورت خودکار انجام خواهد شد.<br> <br> <br> <b>سؤال: روش پیاده سازی سرویس‌های یک برنامه Blazor Server به چه صورتی باید تغییر کند؟</b> <br> <br>
+
+
+
+تا اینجا روش‌هایی که برای استفاده از IDbContextFactory معرفی شدند (که <a href="https://docs.microsoft.com/en-us/aspnet/core/blazor/blazor-server-ef-core?view=aspnetcore-5.0">روش‌های رسمی و توصیه شده‌ی</a>  اینکار نیز هستند)، فرض را بر این گذاشته‌اند که ما قرار است تمام منطق تجاری کار با بانک اطلاعاتی را داخل همان متدهای کامپوننت‌ها انجام دهیم (این روش برنامه نویسی، بسیار مورد علاقه‌ی مایکروسافت است و در تمام مثال‌های رسمی آن به صورت ضمنی توصیه می‌شود!). اما اگر همانند مثالی که تاکنون در این سری بررسی کردیم، نخواهیم اینکار را انجام دهیم و علاقمند باشیم تا این منطق تجاری را به سرویس‌های مجزایی، با مسئولیت‌های مشخصی انتقال دهیم، روش استفاده‌ی از IDbContextFactory چگونه خواهد بود؟<br>
+
+
+
+در این حالت از ترکیب روش دوم مطرح شده‌ی استفاده از IDbContextFactory که به همراه مزیت دسترسی کامل به Change Tracking توکار EF-Core و پیاده سازی الگوی واحد کار است و وهله سازی خودکار ApplicationDbContext که معرفی شد، استفاده خواهیم کرد؛ به این صورت:<br> <b>
+
+الف)</b> تمام سرویس‌های EF-Core یک برنامه‌ی Blazor Server باید اینترفیس IDisposable را پیاده سازی کنند.<br>
+
+
+
+این مورد برای سرویس‌های پروژه‌های Web API، ضروری نیست؛ چون طول عمر Context آن‌ها توسط خود IoC Container مدیریت می‌شود؛ اما در برنامه‌های Blazor Server، مطابق توضیحاتی که ارائه شد، خودمان باید این طول عمر را مدیریت کنیم. <br>
+
+
+
+بنابراین به پروژه‌ی سرویس‌های برنامه مراجعه کرده و هر سرویسی که ApplicationDbContext تزریق شده‌ای را در سازنده‌ی خود می‌پذیرد، یافته و تعریف اینترفیس آن‌را به صورت زیر تغییر می‌دهیم:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">public interface IHotelRoomService : IDisposable
+{
+   // ...
+}
+
+public interface IHotelRoomImageService : IDisposable
+{
+   // ...
+}</pre> </div>
+
+سپس باید اینترفیس‌های IDisposable را پیاده سازی کرد که روش مورد پذیرش code analyzer‌ها در این زمینه، رعایت الگوی زیر، دقیقا به همین شکل است و باید از دو متد تشکیل شود:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">    public class HotelRoomService : IHotelRoomService
+    {
+        private bool _isDisposed;
+
+        // ...
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_isDisposed)
+            {
+                try
+                {
+                    if (disposing)
+                    {
+                        _dbContext.Dispose();
+                    }
+                }
+                finally
+                {
+                    _isDisposed = true;
+                }
+            }
+        }
+    }</pre> </div>
+
+این الگو را به همین شکل برای سرویس HotelRoomImageService نیز پیاده سازی می‌کنیم.<br> <br> <br> <b>ب)</b> Dispose دستی تمام سرویس‌ها، در کامپوننت‌های مرتبط<br>
+
+
+
+در ادامه تمام کامپوننت‌هایی را که از سرویس‌های فوق استفاده می‌کنند یافته و ابتدا دایرکتیو implements IDisposable@ را به ابتدای آن‌ها اضافه می‌کنیم. سپس متد Dispose آن‌ها را جهت فراخوانی متد Dispose سرویس‌های فوق، تکمیل خواهیم کرد:<br>
+
+
+
+بنابراین ابتدا به فایل BlazorServer\BlazorServer.App\Pages\HotelRoom\HotelRoomUpsert.razor مراجعه کرده و تغییرات زیر را اعمال می‌کنیم:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">@page "/hotel-room/create"
+@page "/hotel-room/edit/{Id:int}"
+
+@implements IDisposable
+// ...
+
+
+@code
+{
+    // ...
+
+    public void Dispose()
+    {
+        HotelRoomImageService.Dispose();
+        HotelRoomService.Dispose();
+    }
+}</pre> </div>
+
+و همچنین به کامپوننت BlazorServer\BlazorServer.App\Pages\HotelRoom\HotelRoomList.razor مراجعه کرده و آن‌را به صورت زیر جهت Dispose دستی سرویس‌ها، تکمیل می‌کنیم:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">@page "/hotel-room"
+
+@implements IDisposable
+// ...
+
+
+@code
+{
+    // ...
+
+    public void Dispose()
+    {
+        HotelRoomService.Dispose();
+    }
+}</pre> </div> <br> <br> <b>مشکل! اینبار خطای dispose شدن context را دریافت می‌کنیم!</b> <br> <br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">System.ObjectDisposedException: Cannot access a disposed context instance.
+A common cause of this error is disposing a context instance that was resolved from dependency injection and then
+later trying to use the same context instance elsewhere in your application. This may occur if you are calling 'Dispose'
+on the context instance, or wrapping it in a using statement. If you are using dependency injection, you should let the
+dependency injection container take care of disposing context instances.
+Object name: 'ApplicationDbContext'.</pre> </div>
+
+هم برنامه‌های Blazor WASM و هم برنامه‌های Blazor Server از مفهوم طول عمرهای تنظیم شده‌ی سرویس‌ها پشتیبانی نمی‌کنند! در هر دوی این‌ها اگر سرویسی را با طول عمر Scoped تنظیم کردیم، رفتار آن همانند سرویس‌های Singleton خواهد بود. تنها زمانی رفتارهای Scoped و یا Transient پشتیبانی می‌شوند که درخواست HTTP ای رخ داده باشد که این مورد خارج است از طول عمر یک برنامه‌ی Blazor WASM و همچنین اتصال SignalR برنامه‌های Blazor Server. فقط قسمت‌هایی از برنامه‌ی Blazor Server که با مدل قبلی Razor pages طراحی شده‌اند، چون سبب شروع یک درخواست HTTP معمولی می‌شوند، همانند برنامه‌های متداول ASP.NET Core رفتار می‌کنند و در این حالت طول عمرهای غیر Singleton مفهوم پیدا می‌کنند.<br> <br>
+
+
+
+مشکلی که در اینجا رخ داده این است که سرویس‌هایی را داریم با طول عمر به ظاهر Scoped که یکی از وابستگی‌های آن‌ها را به صورت دستی Dispose کرده‌ایم. چون طول عمر Scoped در اینجا وجود ندارد و طول عمرها در اصل Singleton هستند، هربار که سرویس مدنظر مجددا درخواست شود، همان وهله‌ی ابتدایی که اکنون یکی از وابستگی‌های آن Dispose شده، در اختیار برنامه قرار می‌گیرد.<br>
+
+
+
+پس از این تغییرات، اولین باری که برنامه را اجرا می‌کنیم، لیست اتاق‌ها به خوبی نمایش داده می‌شوند و مشکلی نیست. بعد در همین حال و در همین صفحه، اگر بر روی دکمه‌ی افزودن یک اتاق جدید کلیک کنیم، اتفاقی که رخ می‌دهد، فراخوانی متد Dispose کامپوننت لیست اتاق‌ها است (بر روی آن یک break-point قرار دهید). بنابراین متد Dispose یک کامپوننت، با هدایت به یک مسیر دیگر، به صورت خودکار فراخوانی می‌شود. در این حالت Context برنامه Dispose شده و در کامپوننت ثبت یک اتاق جدید دیگر، در دسترس نخواهد بود؛ چون IHotelRoomService مورد استفاده مجددا وهله سازی نمی‌شود و از همان وهله‌ای که بار اول ایجاد شده، استفاده خواهد شد.<br>
+
+
+
+&nbsp;<br>
+
+
+
+بنابراین سؤال اینجا است که چگونه می‌توان سیستم تزریق وابستگی‌ها را وادار کرد تا تمام سرویس‌های تزریق شده‌ی به سازنده‌ها‌ی سرویس‌های HotelRoomService و&nbsp; HotelRoomImageService را مجددا وهله سازی کند و سعی نکند از همان وهله‌های قبلی استفاده کند؟<br> <br>
+
+
+
+پاسخ: یک روش این است که IHotelRoomImageService را خودمان به ازای هر کامپوننت به صورت دستی در روال رویدادگردان OnInitializedAsync وهله سازی کرده و DbFactory.CreateDbContext جدیدی را مستقیما به سازنده‌ی آن ارسال کنیم. در این حالت مطمئن خواهیم شد که این وهله، جای دیگری به اشتراک گذاشته نمی‌شود:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">@code
+{
+   private IHotelRoomImageService HotelRoomImageService;
+
+   protected override async Task OnInitializedAsync()
+   {
+       HotelRoomImageService =  new HotelRoomImageService(DbFactory.CreateDbContext(), mapper);
+       await base.OnInitializedAsync();
+   }
+
+   private async Task DeleteImageAsync()
+   {
+       await HotelRoomImageService.DeleteAsync(1);
+       // ...
+   }
+
+   public void Dispose()
+   {
+     HotelRoomImageService.Dispose();
+   }
+}</pre> </div>
+
+هرچند این روش کار می‌کند، اما در زمان استفاده از IoC Container‌ها قرار نیست کار انجام new‌ها را خودمان به صورت دستی انجام دهیم و بهتر است مدیریت این مساله به آن‌ها واگذار شود.<br> <br> <br> <b>وادار کردن Blazor Server به وهله سازی مجدد سرویس‌های کامپوننت‌ها</b> <br> <br>
+
+
+
+بنابراین مشکل ما Singleton رفتار کردن سرویس‌ها، در برنامه‌های Blazor است. برای مثال در برنامه‌های Blazor Server، تا زمانیکه اتصال SignalR برنامه برقرار است (مرورگر بسته نشده، برگه‌ی جاری بسته نشده و یا کاربر صفحه را ریفرش نکرده)، هیچ سرویسی دوباره وهله سازی نمی‌شود.<br>
+
+
+
+برای رفع این مشکل، امکان Scoped رفتار کردن سرویس‌های یک کامپوننت نیز در نظر گرفته شده‌اند. برای نمونه کدهای کامپوننت HotelRoomList.razor را به صورت زیر تغییر می‌دهیم:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">@page "/hotel-room"
+
+@*@implements IDisposable*@
+@*@inject IHotelRoomService HotelRoomService*@
+@inherits OwningComponentBase&lt;IHotelRoomService&gt;</pre> </div>
+
+با استفاده از <a href="https://docs.microsoft.com/en-us/aspnet/core/blazor/fundamentals/dependency-injection?view=aspnetcore-5.0&amp;pivots=webassembly#utility-base-component-classes-to-manage-a-di-scope">دایرکتیو جدید</a> inherits OwningComponentBase@ می‌توان میدان دید یک سرویس را به طول عمر کامپوننت جاری محدود کرد. هربار که این کامپوننت نمایش داده می‌شود، وهله سازی شده و هربار که به کامپوننت دیگری هدایت می‌شویم، به صورت خودکار سرویس مورد استفاده را Dispose می‌کند. بنابراین در اینجا دیگر نیازی به ذکر دایرکتیو implements IDisposable@ نیست.<br> <br> <b>
+
+چند نکته:</b> <br>
+
+
+
+- فقط یکبار به ازای هر کامپوننت می‌توان از دایرکتیو inherits استفاده کرد.<br>
+
+
+
+- زمانیکه طول عمر سرویسی را توسط OwningComponentBase مدیریت می‌کنیم، در حقیقت یک کلاس پایه را برای آن کامپوننت درنظر گرفته‌ایم که به همراه یک خاصیت عمومی ویژه، به نام Service و از نوع سرویس مدنظر ما است. در این حالت یا می‌توان از خاصیت Service به صورت مستقیم استفاده کرد و یا می‌توان به صورت زیر، همان کدهای قبلی را داشت و هربار که نیازی به HotelRoomService بود، آن‌را به خاصیت عمومی Service هدایت کرد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">@code
+{
+   private IHotelRoomService HotelRoomService =&gt; Service;</pre> </div>
+
+- اگر نیاز به بیش از یک سرویس وجود داشت، چون نمی‌توان بیش از یک inherits را تعریف کرد، می‌توان از نمونه‌ی غیرجنریک OwningComponentBase استفاده کرد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">@page "/preferences"
+@using Microsoft.Extensions.DependencyInjection
+@inherits OwningComponentBase
+
+
+@code {
+    private IHotelRoomService HotelRoomService { get; set; }
+    private IHotelRoomImageService HotelRoomImageService { get; set; }
+
+    protected override void OnInitialized()
+    {
+        HotelRoomService = ScopedServices.GetRequiredService&lt;IHotelRoomService&gt;();
+        HotelRoomImageService = ScopedServices.GetRequiredService&lt;IHotelRoomImageService&gt;();
+    }
+}</pre> </div>
+
+در این حالت کلاس پایه‌ی OwningComponentBase، به همراه خاصیت جدید ScopedServices است که با فراخوانی متد GetRequiredService در روال رویدادگردان OnInitialized بر روی آن، سبب وهله سازی Scoped سرویس مدنظر خواهد شد. نمونه‌ی جنریک آن، تمام این موارد را در پشت صحنه انجام می‌دهد و کار کردن با آن ساده‌تر و خلاصه‌تر است.<br> <br> <br> <b>خلاصه‌ی بحث جاری در مورد روش مدیریت DbContext برنامه‌های Blazor Server:</b> <br> <br>
+
+
+
+- بجای services.AddDbContext متداول، باید از AddDbContextFactory استفاده کرد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">services.AddDbContextFactory&lt;ApplicationDbContext&gt;(options =&gt; options.UseSqlServer(connectionString));
+services.AddScoped&lt;ApplicationDbContext&gt;(serviceProvider =&gt;
+        serviceProvider.GetRequiredService&lt;IDbContextFactory&lt;ApplicationDbContext&gt;&gt;().CreateDbContext());</pre> </div>
+
+- تمام سرویس‌هایی که از ApplicationDbContext استفاده می‌کنند، باید به همراه پیاده سازی Dispose آن نیز باشند؛ چون Scope یک سرویس، معادل طول عمر اتصال SignalR برنامه است و مدام وهله سازی نمی‌شود. در این حالت باید وهله سازی و Dispose آن‌را دستی مدیریت کرد.<br>
+
+
+
+- کامپوننت‌های برنامه، سرویس‌هایی را که باید Scoped عمل کنند، دیگر نباید از طریق تزریق مستقیم آن‌ها دریافت کنند؛ چون در این حالت همواره به همان وهله‌ای که در ابتدای کار ایجاد شده، می‌رسیم:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">@inject IHotelRoomService HotelRoomService</pre> </div>
+
+این دریافت باید با استفاده از کلاس پایه OwningComponentBase صورت گیرد:<br> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">@inherits OwningComponentBase&lt;IHotelRoomService&gt;</pre> </div>
+
+تا عملیات فراخوانی خودکار ScopedServices.GetRequiredService (دریافت وهله‌ی جدید Scoped) و همچنین Dispose خودکار آن‌ها را به ازای هر کامپوننت مجزا، مدیریت کند.<br> <br> <br> <b>
+
+کدهای کامل این مطلب را از اینجا می‌توانید دریافت کنید: <a href="https://www.dntips.ir/file/userfile?name=Blazor-5x-Part-19.zip">Blazor-5x-Part-19.zip</a> </b></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3510.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مدیریت طول عمر DbContext در برنامه‌های Blazor SSR</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3495.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بررسی تغییرات Blazor 8x - قسمت دهم - مدیریت حالت کاربران در روش‌های مختلف رندر</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2509.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>شروع به کار با EF Core 1.0 - قسمت 14 - لایه بندی و تزریق وابستگی‌ها</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2970.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مهارت‌های تزریق وابستگی‌ها در برنامه‌های NET Core. - قسمت سوم - رهاسازی منابع سرویس‌های IDisposable</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2971.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مهارت‌های تزریق وابستگی‌ها در برنامه‌های NET Core. - قسمت چهارم - پرهیز از الگوی Service Locator در برنامه‌های وب</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3316.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Blazor 5x - قسمت 24 - تهیه API مخصوص Blazor WASM - بخش 1 - ایجاد تنظیمات ابتدایی</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2972.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مهارت‌های تزریق وابستگی‌ها در برنامه‌های NET Core. - قسمت پنجم - استفاده از الگوی Service Locator در مکان‌های ویژه‌ی برنامه‌های وب</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3310.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>Blazor 5x - قسمت 19 - کار با فرم‌ها - بخش 7 - نکات ویژه‌ی کار با EF-Core در برنامه‌های Blazor Server</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3310.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>Blazor 5x - قسمت 19 - کار با فرم‌ها - بخش 7 - نکات ویژه‌ی کار با EF-Core در برنامه‌های Blazor Server</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2509.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>شروع به کار با EF Core 1.0 - قسمت 14 - لایه بندی و تزریق وابستگی‌ها</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>علی یگانه مقدم</strong>  در  <span dir='ltr'>۱۴۰۱/۰۳/۰۱ ۱۶:۴۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>در Blazor دیگر الگوی واحد کاری مطرح نیست؟ چرا که در کدهای داخل سرویس هم عملیات savechange در درون اتفاق می‌افتد. با توجه به تغییراتی که در dispose کردن سرویس‌ها داده میشود آیا این سرویس‌ها را میشود با یک پروژه نوع Api به اشتراک گذارد؟</div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۴۰۱/۰۳/۰۱ ۱۷:۴۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div>- Context در EF، همان پیاده سازی الگوی واحد کار است. <br> </div> <div>- این تغییرات (برای Blazor Server فقط) انجام شده تا رفتاری مشابه Web API را پیدا کند که در پایان هر درخواست، سرویس‌های IDisposable را به صورت خودکار Dispose می‌کند. بنابراین با هم سازگار هستند و دقیقا از همین سرویس‌ها، در قست Blazor WASM این سری هم بدون مشکل استفاده شده‌است.<br> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>علی یگانه مقدم</strong>  در  <span dir='ltr'>۱۴۰۱/۰۳/۰۲ ۱۲:۱۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>منظور من استفاده از IunitOfWork بود که در این حالت در تمامی سرویس‌ها در سازنده تزریق میشد و سپس از طریق سازنده dbset‌ها به صورت گلوبال از طریق متد &lt;Set&lt;T مقدادرهی میشدند و در این حالت متد dispose به uow دسترسی ندارد جهت dispose کردن آن و تنها set‌ها هستند.<div>یک چنین چیزی:</div> <div> <div align="left" dir="ltr" style="direction: ltr;"> <pre language="CSharp" name="code">  private readonly DbSet&lt;SmsLog&gt; _smsLogs;
+        private readonly DbSet&lt;SmsProvider&gt; _smsProviders;
+
+        public MessageService(IUnitOfWork uow)
+        {
+            _smsLogs = uow.Set&lt;SmsLog&gt;();
+            _smsProviders = uow.Set&lt;SmsProvider&gt;();
+        }
+        public async Task NewSmsLogAsync(SmsLog log)
+        {
+            await _smsLogs.AddAsync(log);
+        }</pre> </div> <br> <div>&nbsp;سپس بحث اعمال savechanges باید روی متد نهایی مثل اکشن صورت میگرفت که در صورت استفاده از چندین متد در یک یا چند سرویس همه با هم همزمان برای ذخیره سازی و دریافت نتیجه به سمت دیتابیس ارسال گردند. مثل ارسال اطلاعات جدید هتل و تصاویر آن. نه تک تک جدا ذخیره شوند. همه با هم یا هیچ کدام</div> </div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۴۰۱/۰۳/۰۲ ۱۲:۵۳</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div>- <a href="https://github.com/VahidN/DNTIdentity/blob/master/src/ASPNETCoreIdentitySample.DataLayer/Context/IUnitOfWork.cs#L9">IUnitOfWork از نوع IDisposable هست</a> و سرویسی که به همراه آن ثبت می‌شود، مدیریت Dispose آن خودکار است <span>: </span> <br> </div> <div> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">public interface IUnitOfWork : IDisposable</pre> </div>
+
+
+
+
+
+- مشکلی برای قرار دادن SaveChanges در یک متد وجود ندارد. حتی می‌شود اعمال مختلف آن اکشن متد را در قالب یک متد یک سرویس، کپسوله کرد.<br> </div></div>
+</div></li></ul></li></ul></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>علی یگانه مقدم</strong>  در  <span dir='ltr'>۱۴۰۱/۰۵/۰۳ ۱۵:۳۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>جهت ثبت و دریافت داده‌ها من از MediateR استفاده کردم.<div>در مرحله اول context را مطابق الوی گفته شده ایجاد کردم:</div> <div> <div align="left" dir="ltr" style="direction: ltr;"> <pre language="CSharp" name="code">services.AddDbContextFactory&lt;ApplicationDbContext&gt;(options =&gt; options.UseSqlServer(connectionString));
+services.AddScoped&lt;IunitOfWork&gt;(serviceProvider =&gt;
+        serviceProvider.GetRequiredService&lt;IDbContextFactory&lt;ApplicationDbContext&gt;&gt;().CreateDbContext());</pre> </div>
+
+
+سپس با توجه به اینکه سرویس‌ها و IunitOfwork هم داخل هندلرها تعریف می‌شوند تنها اینترفیس Idisposable به&nbsp; IunitOfwork&nbsp;<span>&nbsp; نسبت داده شده است:</span> </div> <div> <div align="left" dir="ltr" style="direction: ltr;"> <pre language="CSharp" name="code">public interface IUnitOfWork : IDisposable</pre> </div> <div>و سپس&nbsp;</div> <div> <div align="left" dir="ltr" style="direction: ltr;"> <pre language="CSharp" name="code">@inherits  OwningComponentBase&lt;IMediator&gt;</pre> </div> <br> </div>
+تا به حال مشکلی در اجرا دیده نشد تا اینکه در حالت OnParameterAsync که دو مرتبه پشت سر هم اجرا میشود با خطاهای زیر روبرو شد:</div> <div> <div align="left" dir="ltr" style="direction: ltr;"> <pre language="CSharp" name="code"> A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext.
+ For more information on how to avoid threading issues with DbContext
+
+ System.ObjectDisposedException: Cannot access a disposed object.
+      Object name: 'IServiceProvider'.</pre> </div>
+در صورتی که اگر با یک فلگ کنترل شود که در مرتبه‌های بعدی اجرا نشود مشکلی نیست.</div> <div>در این حالت چند سوال مطرح میباشد:</div> <div>1- آیا استفاده از MediateR به این شکل صحیح است؟ و اینکه استفاده از OwningComponentBase برای آن تاثیری دارد یا خیر اینکه مستقیم هم Inject شود کفایت میکند.</div> <div>2- به جهت اینکه Onparameter دوبار صدا زده میشود. نحوه واکشی دیتا در این حالت چگونه است؟</div></div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۴۰۱/۱۰/۲۵ ۱۰:۱۹</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div> <b>خلاصه‌ی بحث جاری به روشی دیگر (مدیریت صحیح طول عمر DbContext در برنامه‌های Blazor Server)</b> </div> <div> <br> </div> <div>یک روش دیگر مدیریت طول عمر Context در برنامه‌های Blazor Server که تمام نکات این بحث را به نحو ساده‌ای پوشش می‌دهد، به صورت زیر است:</div> <div>الف) حتما بجای AddDbContext از AddDbContextFactory که در مطلب فوق توضیح داده شد، استفاده کنید تا بتوان هرجائیکه نیاز است یک Context جدید را به صورت دستی ایجاد کرد، تا از به اشتراک گذاری آن و مشکلات مرتبط با طول عمر اینگونه Contextها، مصون ماند:  </div> <div> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">// Do NOT do this anymore
+//services.AddDbContext(o =&gt; o.UseSQlite("filename.db"));
+
+// But instead do this:
+services.AddDbContextFactory(o =&gt; o.UseSQlite("filename.db"));</pre> </div>
+
+
+
+
+
+ ب) سپس بجای انواع و اقسام روش‌های مدیریت طول عمر Scoped و سپس Dispose کردن‌ها، آن‌ها را در سرویس‌های برنامه به نحو زیر پیاده سازی و ساده کنید:  </div> <div> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">public class MyService
+{
+   private readonly IDbContextFactorey _contextFactory;
+
+   public MyService(IDbContextFactory contextFactory)
+   {
+      _contextFactory = contextFactory;
+   }
+
+   // create a new context for each operation / unit of work
+   public async Task DoSomethingAsync()
+   {
+      using (var ctx = _contextFactory.CreateDbContext())
+      {
+         // this using clause contains your unit of work
+      }
+   }
+}</pre> </div>
+
+
+
+
+
+
+
+
+
+
+
+در این حالت با استفاده از IDbContextFactory تزریقی، هر جائیکه که نیاز هست، یک Context جدید و همچنین Scoped، ایجاد و همانجا هم در پایان کار، تخریب و Dispose می‌شود و نیازی به پیاده سازی سرویس‌های IDisposable ندارد. این روشی است که در مثال‌های خود مایکروسافت هم <a href="https://github.com/dotnet/aspnetcore/blob/main/src/ProjectTemplates/Web.ProjectTemplates/content/BlazorServerWeb-CSharp/Areas/Identity/RevalidatingIdentityAuthenticationStateProvider.cs#L31">مشاهده می‌شود</a>. سپس کار کردن با سرویس فوق، نیازی به نکات مرتبط با inherits OwningComponentBase ندارد و کاملا به همراه injectهای عادی و متداول است. همچنین هم مطمئن هستیم، Context ای که در هر متد استفاده می‌شود، کاملا جدید و غیر اشتراکی است و در پایان کار همان متد، حتما Dispose می‌شود.<br> </div></div>
+</div></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫Closure در JavaScript</title>     <meta name="description" content="در قسمت قبلی درباره علت نیاز به الگوهای طراحی در JavaScript و Function Spaghetti code صحبت شد. در این قسمت Closure در JavaScript مورد بررسی قرار می‌گیرد. 
+
+
+
+
+
+
+
+در JavaScript می‌توان توابع تو در تو نوشت (nested functions) ، زمانی که یک تابع درون تابع دیگر تعریف می‌شود تابع درونی به تمام متغیر‌ها و توابع تابع بیرونی (Parent) دسترسی دارد.
+
+
+
+
+
+
+
+
+
+Douglas Crockford برای تعریف Closure می‌گوید : 
+
+
+
+
+
+
+
+
+
+
+
+
+
+ ...">
+    <meta name="author" content="شاهین کیاست">
+    <meta itemprop="name" content="Closure در JavaScript">
+    <meta itemprop="description" content="در قسمت قبلی درباره علت نیاز به الگوهای طراحی در JavaScript و Function Spaghetti code صحبت شد. در این قسمت Closure در JavaScript مورد بررسی قرار می‌گیرد. 
+
+
+
+
+
+
+
+در JavaScript می‌توان توابع تو در تو نوشت (nested functions) ، زمانی که یک تابع درون تابع دیگر تعریف می‌شود تابع درونی به تمام متغیر‌ها و توابع تابع بیرونی (Parent) دسترسی دارد.
+
+
+
+
+
+
+
+
+
+Douglas Crockford برای تعریف Closure می‌گوید : 
+
+
+
+
+
+
+
+
+
+
+
+
+
+ ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="Closure در JavaScript">
+    <meta property="og:description" content="در قسمت قبلی درباره علت نیاز به الگوهای طراحی در JavaScript و Function Spaghetti code صحبت شد. در این قسمت Closure در JavaScript مورد بررسی قرار می‌گیرد. 
+
+
+
+
+
+
+
+در JavaScript می‌توان توابع تو در تو نوشت (nested functions) ، زمانی که یک تابع درون تابع دیگر تعریف می‌شود تابع درونی به تمام متغیر‌ها و توابع تابع بیرونی (Parent) دسترسی دارد.
+
+
+
+
+
+
+
+
+
+Douglas Crockford برای تعریف Closure می‌گوید : 
+
+
+
+
+
+
+
+
+
+
+
+
+
+ ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="Closure در JavaScript">
+    <meta name="twitter:description" content="در قسمت قبلی درباره علت نیاز به الگوهای طراحی در JavaScript و Function Spaghetti code صحبت شد. در این قسمت Closure در JavaScript مورد بررسی قرار می‌گیرد. 
+
+
+
+
+
+
+
+در JavaScript می‌توان توابع تو در تو نوشت (nested functions) ، زمانی که یک تابع درون تابع دیگر تعریف می‌شود تابع درونی به تمام متغیر‌ها و توابع تابع بیرونی (Parent) دسترسی دارد.
+
+
+
+
+
+
+
+
+
+Douglas Crockford برای تعریف Closure می‌گوید : 
+
+
+
+
+
+
+
+
+
+
+
+
+
+ ...">
+    <meta name="twitter:card" content="در قسمت قبلی درباره علت نیاز به الگوهای طراحی در JavaScript و Function Spaghetti code صحبت شد. در این قسمت Closure در JavaScript مورد بررسی قرار می‌گیرد. 
+
+
+
+
+
+
+
+در JavaScript می‌توان توابع تو در تو نوشت (nested functions) ، زمانی که یک تابع درون تابع دیگر تعریف می‌شود تابع درونی به تمام متغیر‌ها و توابع تابع بیرونی (Parent) دسترسی دارد.
+
+
+
+
+
+
+
+
+
+Douglas Crockford برای تعریف Closure می‌گوید : 
+
+
+
+
+
+
+
+
+
+
+
+
+
+ ...">
+    <meta property="article:published_time" content="Sun, 24 Jun 2012 07:18:12 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫Closure در JavaScript";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-878.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫نحوه تنظیم زمانبندی (Scheduling) برای Crawler در شیرپوینت</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-876.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫Ribbon Customization  - تحوه کار باRibbon ها در شیرپوینت در قالب 10 پست وبلاگ</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫Closure در JavaScript</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>شاهین کیاست<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۱/۰۴/۰۴ ۷:۱۸</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-877.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><div dir="rtl">در&nbsp;<a href="www.dntips.ir-posts-861.html" rel="nofollow">قسمت قبلی</a>&nbsp;درباره علت نیاز به الگوهای طراحی در JavaScript و Function&nbsp;Spaghetti&nbsp;code صحبت شد. در این قسمت Closure در JavaScript مورد بررسی قرار می‌گیرد.&nbsp;</div>
+
+
+
+
+
+
+
+<div dir="rtl">در JavaScript می‌توان توابع تو در تو نوشت (<a href="http://www.tutorialspoint.com/javascript/javascript_nested_functions.htm" rel="nofollow">nested functions</a>) ، زمانی که یک تابع درون تابع دیگر تعریف می‌شود تابع درونی به تمام متغیر‌ها و توابع تابع بیرونی (Parent) دسترسی دارد.<br>
+
+</div>
+
+
+
+
+
+
+
+<div dir="rtl"><a href="http://www.crockford.com/" rel="nofollow">Douglas Crockford</a>&nbsp;برای تعریف Closure می‌گوید :&nbsp;<br>
+
+
+
+</div>
+
+
+
+
+
+
+
+<div dir="rtl"><br>
+
+
+
+
+
+
+
+</div>
+
+<div style="text-align: left;">an inner function always has access to the vars and parameters of its outer function, even after the outer&nbsp;
+
+
+
+
+
+function has returned</div>
+
+<div dir="rtl" style="text-align: left;"><br>
+
+
+
+
+
+</div>
+
+
+
+
+
+<div dir="rtl" style="text-align: right;">یک تابع درونی (nested) همیشه به متغیر‌ها و پارامتر‌ها تابع بیرونی دسترسی دارد ، حتی اگر تابع بیرونی مقدار برگردانده باشد.&nbsp;</div>
+
+
+
+
+
+
+
+<div dir="rtl" style="text-align: right;"><br>
+
+
+
+</div>
+
+
+
+<div dir="rtl" style="text-align: right;">تابع زیر را در نظر بگیرید :&nbsp;
+
+</div>
+
+
+
+<div dir="rtl" style="text-align: right;"><div align="left" dir="ltr">
+
+
+
+<pre language="JScript" name="code">// The getDate() function returns a nested function which refers the 'date' variable defined
+// by outer function getDate()
+function getDate() {
+   var date = new Date();    // This variable stays around even after function returns
+
+   // nested function
+   return function () {
+      return date.getMilliseconds();
+   }
+}
+
+</pre>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+<div dir="rtl">&nbsp;&nbsp;اکنون اگر به صورت زیر تابع getDate فراخوانی شود مشاهده می‌شود که تابع درونی (با کامنت nested function مشخص شده است.) به شیء date دسترسی دارد.</div>
+
+
+
+<div dir="rtl"><div align="left" dir="ltr">
+
+
+
+<pre language="JScript" name="code">// Once getDate() is executed the variable date should be out of scope and it is, but since
+// the inner function
+// referenes date, this value is available to the inner function.
+var dt = getDate();
+
+alert(dt());
+alert(dt());
+</pre>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+<div dir="rtl">خروجی هر 2 alert یک مقدار خواهد بود.&nbsp;</div>
+
+
+
+<div dir="rtl">اگر از فردی که به تازگی رو به JavaScript آورده است خواسته شود تابعی بنویسد که میلی ثانیه‌ی زمان جاری را برگداند احتمالا همچین کدی تحویل می‌دهد :&nbsp;</div>
+
+
+
+<div dir="rtl"><div align="left" dir="ltr">
+
+
+
+<pre language="JScript" name="code">        function myNonClosure() {
+            var date = new Date();
+            return date.getMilliseconds();
+        }</pre>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+<div dir="rtl">در کد بالا پس از اجرای myNonClosure متغیر date از بین خواهد رفت ، این مسئله در دنیای JavaScript طبیعی هست.</div>
+
+
+
+<div dir="rtl">این مثال را در نظر بگیرید : &nbsp;</div>
+
+
+
+<div dir="rtl"><div align="left" dir="ltr">
+
+
+
+<pre language="JScript" name="code">var MyDate = function () {
+    var date = new Date();
+    var getMilliSeconds = function () {
+        return date.getMilliseconds();
+    }
+}
+
+var dt = new MyDate();
+
+alert(dt.getMilliSeconds());  // This will throw error as getMilliSeconds is not accessible.
+</pre>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+<div dir="rtl">در صورت اجرای مثال بالا خطایی با این مضمون دریافت خواهد شد که&nbsp;<span style="text-align: -webkit-left; ">getMilliSeconds دستیابی پذیر نیست. (کپسوله شده) &nbsp;برای اینکه آن را دستیابی پذیر کنیم کد را به این صورت تغییر می‌دهیم :</span></div>
+
+
+
+<div dir="rtl"><div align="left" dir="ltr">
+
+
+
+<pre language="JScript" name="code">// This is closure 
+var MyDate = function () {
+    var date = new Date();   // variable stays around even after function returns
+    var getMilliSeconds = function () {
+        return date.getMilliseconds();
+    };
+    return {
+        getMs : getMilliSeconds
+    }
+}
+</pre>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+<div dir="rtl"><span style="text-align: -webkit-left; "><div dir="rtl" style="text-align: right;">آنچه در تابع بالا انجام شده کپسوله سازی همه‌ی منطق کار (منطق کار در اینجا برگرداندن میلی ثانیه زمان جاری می‌باشد) در یک فضای نام به نام MyDate می‌باشد. همچنین فقط متد‌های عمومی در اختیار استفاده کننده این تابع قرار داده شده است. برای استفاده می‌توان بدین صورت عمل کرد :&nbsp;</div>
+
+
+
+<div dir="rtl" style="text-align: right;"><div align="left" dir="ltr">
+
+
+
+<pre language="JScript" name="code">var dt = new MyDate();
+alert(dt.getMs());  // This should work.
+</pre>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+<div dir="rtl" style="text-align: right;">در کد بالا برای توابع و متغیر‌های درونی یک container ایجاد کردیم که باعث جلوگیری از تداخل در نام متغیر‌ها با دیگر کد‌ها خواهد شد . (برای مشاهده‌ی تداخل‌ها به&nbsp;<a href="www.dntips.ir-posts-861.html" rel="nofollow">قسمت قبلی</a>&nbsp;&nbsp;توجه کنید.)</div>
+
+
+
+<div dir="rtl" style="text-align: right;">اگر بخواهیم Closure را تشبیه کنیم ، Closure شبیه به کلاس‌ها در C# یا Java هست.&nbsp;</div>
+
+
+
+<div dir="rtl" style="text-align: right;">Closure یک حوزه (scope) برای متغیر‌ها و توابع درونی خودش ایجاد می‌کند.</div>
+
+
+
+<div dir="rtl" style="text-align: right;">jQuery بهترین مثال کاربردی برای Closure می‌باشد :&nbsp;</div>
+
+
+<div dir="rtl" style="text-align: right;"><div align="left" dir="ltr">
+
+
+<pre language="JScript" name="code">(function($) {
+
+    // $() is available here
+
+})(jQuery);
+</pre>
+
+
+</div>
+
+
+</div>
+
+
+
+<div dir="rtl" style="text-align: right;">در ادامه این مفاهیم بیشتر توضیح داده می‌شودند ، اکنون می‌خواهیم مشکلی که در قسمت قبلی مطرح کردیم به کمک Closure حل کنیم :&nbsp;<br>
+
+
+
+</div>
+
+
+
+<div dir="rtl" style="text-align: right;">&nbsp;در آن مثال گفته شد که اگر :&nbsp;</div>
+
+
+
+<div dir="rtl" style="text-align: right;"><div align="left" dir="ltr">
+
+
+
+<pre language="JScript" name="code">// file1.js
+function saveState(obj) {
+&nbsp;&nbsp;&nbsp;&nbsp;// write code here to saveState of some object
+&nbsp;&nbsp;&nbsp;&nbsp;alert('file1 saveState');
+}
+// file2.js (remote team or some third party scripts)
+function saveState(obj, obj2) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// further code...
+&nbsp;&nbsp;&nbsp;&nbsp;alert('file2 saveState");
+}</pre>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+<div dir="rtl" style="text-align: right;">اگر تابعی به نام saveState در 2 فایل مختلف داشته باشیم و این 2 فایل را بدین صورت در برنامه آدرس دهیم :&nbsp;</div>
+
+
+
+<div dir="rtl" style="text-align: right;"><div align="left" dir="ltr">
+
+
+
+<pre language="XML" name="code">&lt;script src="file1.js" type="text/javascript"&gt;&lt;/script&gt;
+&lt;script src="file2.js" type="text/javascript"&gt;&lt;/script&gt;</pre>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+<div dir="rtl" style="text-align: right;">تابع saveState در فایل دوم تابع saveState فایل اول را override می‌کند. یک از توابع بالا را به صورت زیر باز نویسی می‌کنیم و منطق کار را کپسوله می‌کنیم :&nbsp;</div>
+
+
+
+<div dir="rtl" style="text-align: right;"><div align="left" dir="ltr">
+
+
+
+<pre language="JScript" name="code">function App() {
+    var save = function (o) {
+        // write code to save state here..
+        // you have acces to 'o' here...
+        alert(o);
+    };
+
+    return {
+        saveState: save
+    };
+}
+</pre>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+<div dir="rtl" style="text-align: right;">بدون نگرانی تداخل saveState با بقیه saveState‌ها در هر پلاگین یا فایل دیگری می‌توان از&nbsp;saveState می‌توان اینگونه استفاده کرد :&nbsp;</div>
+
+
+
+<div dir="rtl" style="text-align: right;"><div align="left" dir="ltr">
+
+
+
+<pre language="JScript" name="code">var app = new App();
+
+app.saveState({ name: "rajesh"});
+</pre>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+<div dir="rtl" style="text-align: right;">برای اطلاعات بیشتر در مورد Closure ها&nbsp;<a href="http://stackoverflow.com/questions/111102/how-do-javascript-closures-work" rel="nofollow">این لینک</a>&nbsp;&nbsp;را بررسی کنید.</div>
+
+
+
+</span></div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-861.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>چرا به الگوهای طراحی JavaScript نیاز داریم ؟</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1618.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با مفاهیم شیء گرایی در جاوا اسکریپت #2</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2524.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>برنامه نویسی پیشرفته JavaScript - قسمت 4 - عناصر داخلی و ویژگی‌های تابع</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1589.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>ارتباط بین Controller و Directive در AngularJs</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2525.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>برنامه نویسی پیشرفته JavaScript - قسمت 5 - معرفی برخی عملگرها</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1466.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آموزش TypeScript #3</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2151.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>CoffeeScript #10</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2523.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>برنامه نویسی پیشرفته JavaScript - قسمت 3 - انواع ارجاعی و نحوه‌ی ایجاد اشیاء</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1970.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>نوشتن افزونه برای مرورگرها: قسمت دوم : کروم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2521.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>برنامه نویسی پیشرفته JavaScript - قسمت 1 - توابع</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>محمد باقر اهتمام</strong>  در  <span dir='ltr'>۱۳۹۱/۰۴/۰۴ ۲۰:۳۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>ممنون عالی بود . اما این بحث واقعا جای کار داره . من که منتظر مقالات بیشتری در مورد Closure هستم . <br></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>شاهین کیاست</strong>  در  <span dir='ltr'>۱۳۹۱/۰۴/۰۴ ۲۱:۳۱</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>خواهش می‌کنم. در ادامه درباره الگوهای Prototype و Module مطلب می‌نویسم و سعی &nbsp;می کنم با یک مثال بحث را بیشتر باز کنم.<br></div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۹۱/۰۴/۰۴ ۲۳:۴۸</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>نکته بسیار خوب و کاربردی در جاوا اسکریپت بود. ممون<br></div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۹۲/۱۱/۱۹ ۱۵:۵۵</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>واقعا مرسی ... عالی بود ...</div>
+</div></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

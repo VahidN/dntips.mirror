@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫جایگزین کردن StructureMap با سیستم توکار تزریق وابستگی‌ها در ASP.NET Core 1.0</title>     <meta name="description" content="مدل برنامه زیر را در نظر بگیرید:        public class Service
+     {
+         public int ServiceId { get; set; }
+         public string ServiceName { get; set; }
+     }     اینترفیس ICoreService عمل بازیابی اطلاعات کلاس بالا را بر عهده دارد:        public interface ICoreService
+     {
+         Service LoadDefaultService();
+     }         نتیجه تزریق وابستگی ICoreService برای کنترلر Home در یک پروژه ASP.NET Core 1.0/Asp.Net Mvc 6 چنی ...">
+    <meta name="author" content="احمد نواصری">
+    <meta itemprop="name" content="جایگزین کردن StructureMap با سیستم توکار تزریق وابستگی‌ها در ASP.NET Core 1.0">
+    <meta itemprop="description" content="مدل برنامه زیر را در نظر بگیرید:        public class Service
+     {
+         public int ServiceId { get; set; }
+         public string ServiceName { get; set; }
+     }     اینترفیس ICoreService عمل بازیابی اطلاعات کلاس بالا را بر عهده دارد:        public interface ICoreService
+     {
+         Service LoadDefaultService();
+     }         نتیجه تزریق وابستگی ICoreService برای کنترلر Home در یک پروژه ASP.NET Core 1.0/Asp.Net Mvc 6 چنی ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="جایگزین کردن StructureMap با سیستم توکار تزریق وابستگی‌ها در ASP.NET Core 1.0">
+    <meta property="og:description" content="مدل برنامه زیر را در نظر بگیرید:        public class Service
+     {
+         public int ServiceId { get; set; }
+         public string ServiceName { get; set; }
+     }     اینترفیس ICoreService عمل بازیابی اطلاعات کلاس بالا را بر عهده دارد:        public interface ICoreService
+     {
+         Service LoadDefaultService();
+     }         نتیجه تزریق وابستگی ICoreService برای کنترلر Home در یک پروژه ASP.NET Core 1.0/Asp.Net Mvc 6 چنی ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="جایگزین کردن StructureMap با سیستم توکار تزریق وابستگی‌ها در ASP.NET Core 1.0">
+    <meta name="twitter:description" content="مدل برنامه زیر را در نظر بگیرید:        public class Service
+     {
+         public int ServiceId { get; set; }
+         public string ServiceName { get; set; }
+     }     اینترفیس ICoreService عمل بازیابی اطلاعات کلاس بالا را بر عهده دارد:        public interface ICoreService
+     {
+         Service LoadDefaultService();
+     }         نتیجه تزریق وابستگی ICoreService برای کنترلر Home در یک پروژه ASP.NET Core 1.0/Asp.Net Mvc 6 چنی ...">
+    <meta name="twitter:card" content="مدل برنامه زیر را در نظر بگیرید:        public class Service
+     {
+         public int ServiceId { get; set; }
+         public string ServiceName { get; set; }
+     }     اینترفیس ICoreService عمل بازیابی اطلاعات کلاس بالا را بر عهده دارد:        public interface ICoreService
+     {
+         Service LoadDefaultService();
+     }         نتیجه تزریق وابستگی ICoreService برای کنترلر Home در یک پروژه ASP.NET Core 1.0/Asp.Net Mvc 6 چنی ...">
+    <meta property="article:published_time" content="Sat, 25 Jun 2016 19:50:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫جایگزین کردن StructureMap با سیستم توکار تزریق وابستگی‌ها در ASP.NET Core 1.0";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-2439.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫پیاده سازی JSON Web Token با ASP.NET Web API 2.x</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-2437.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫نصب dotnet core framework روی اوبونتو 16.04</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫جایگزین کردن StructureMap با سیستم توکار تزریق وابستگی‌ها در ASP.NET Core 1.0</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>احمد نواصری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۵/۰۴/۰۵ ۱۹:۵۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-2438.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><div>مدل برنامه زیر را در نظر بگیرید:</div> <div style="text-align: left;"> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code"> public class Service
+    {
+        public int ServiceId { get; set; }
+        public string ServiceName { get; set; }
+    }</pre> </div> <div style="text-align: right;">اینترفیس ICoreService عمل بازیابی اطلاعات کلاس بالا را بر عهده دارد:</div> <div style="text-align: left;"> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code"> public interface ICoreService
+    {
+        Service LoadDefaultService();
+    }</pre> </div> </div> </div> <div>نتیجه تزریق وابستگی ICoreService برای کنترلر Home در یک پروژه ASP.NET Core 1.0/Asp.Net Mvc 6 چنین استثنایی بود:</div> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">An unhandled exception occurred while processing the request
+  InvalidOperationException: Unable to resolve service for type 'WebApplication1.Models.ICoreService' while attempting to activate 'WebApplication1.Controllers.HomeController'
+Microsoft.Extensions.Internal.ActivatorUtilities.GetService(IServiceProvider sp, Type type, Type requiredBy, Boolean isDefaultParameterRequired)</pre> </div> <span style=" color: rgb(34, 34, 34);">&nbsp;</span> <div style="text-align: justify;"> <b>یعنی زمانیکه Activator میخواست کنترلر Home را فعالسازی کند، نتوانسته وابستگی ICoreService&nbsp;را برای کنترلر فراهم کند. این استثناء در Microsoft.Extensions.Internal.ActivatorUtilities.GetService اتفاق افتاده‌است.</b> </div> <div style="text-align: justify;"> <br>
+در نسخه‌های قدیمی MVC (منظور نسخه‌های قبل از 6)، برای تزریق وابستگی‌ها از یک Controller Factory یا Dependency Resolver سفارشی استفاده می‌شد. اما در نسخه جدید MVC دیگری خبری از روشهای قدیمی نیست. چونکه یک سیستم تزریق وابستگی توکار، همراه با MVC یکپارچه شده‌است که عملیات تزریق وابستگی‌ها را انجام می‌دهد. سیستم تزریق وابستگی پیش فرض، تنها از 4 حالت عملیاتی پشتیبانی می‌کند:</div> <div style="text-align: justify;"> <b>1- Instance : در همه حال ، تنها یک نمونه خاص ارائه شده و شما مسئول وهله سازی آن هستید.</b> </div> <div style="text-align: justify;"> <b>2- Transient : در هر بار (مثلا در هر درخواست) یک نمونه جدید ساخته میشود.</b> </div> <div style="text-align: justify;"> <b>3- Singleton</b> </div> <div style="text-align: justify;"> <b>4- Scoped : تنها یک نمونه در Scope فعلی ساخته می‌شود.</b> </div> <div style="text-align: justify;"> <br>
+&nbsp;تیم Asp.Net برای فراهم آوردن امکان تزریق وابستگی‌ها، تصمیم به انتزاعی کردن ویژگی‌های مشترک محبوبترین Ioc Containerها و اجازه دادن به میان افزارها، جهت ارتباط با این اینترفیس‌ها برای دستیابی به تزریق وابستگی بود. <br> </div> <div style="text-align: justify;">حال بیایم نگاهی به این اینترفیس‌ها بیندازیم.</div> <div style="text-align: justify;">اگر به استثنای فوق نگاهی بیندازیم، می‌بینیم که متد GetService یک پارامتر از نوع IServiceProvider را میگیرد. پس اولین اینترفیس&nbsp;<a href="https://msdn.microsoft.com/en-us/library/system.iserviceprovider(v=vs.110).aspx">IServiceProvider&nbsp;</a>می باشد. همانطور که از اسمش پیداست، کارش فرآهم&nbsp;آوردن سرویس می‌باشد. این اینترفیس فقط یک متد دارد، متد GetService. متد GetService مانند Container.GetInstance در StructureMap می‌باشد. تمام میان افزارها به 2 روش می‌توانند به نمونه‌ای از IServiceProvider دسترسی داشته باشند:</div> <div style="text-align: justify;">1- Application-Level : از طریق HttpContext.ApplicationServices برای میان افزار قابل دسترسی خواهد بود.</div> <div style="text-align: justify;">2- Request-Level : از طریق HttpContext.RequestServices. این Service Scope Provider توسط میان افزار در شروع هر Request Pipeline، برای هر درخواست ایجاد و در پایان درخواست توسط همان میان افزار نابود می‌گردد.</div> <div style="text-align: justify;">اینترفیس بعدی IServiceScope می‌باشد. همان طور که قبلا گفتیم RequestServices یک Scope Container را برای هر درخواست ساخته و در پایان همان درخواست، آن را نابود میکند. اما این کار چگونه مدیریت می‌شود؟ پاسخ، اینترفیس&nbsp;<a href="https://docs.asp.net/projects/api/en/latest/autoapi/Microsoft/Extensions/DependencyInjection/IServiceScope/">IServiceScope&nbsp;</a>می باشد. این اینترفیس مانند یک Wrapper حول Scope Container عمل میکند و در پایان هر درخواست آن را نابود می‌کند. حال سوال اینجاست که چه کسی مسئول ساخت IServiceScope می‌باشد؟ پاسخ اینترفیس&nbsp;<a href="https://docs.asp.net/projects/api/en/latest/autoapi/Microsoft/Extensions/DependencyInjection/IServiceScopeFactory/">IServiceScopeFactory&nbsp;</a>می‌باشد. این اینترفیس توسط متد CreateScope اقدام به ساخت یک نمونه از اینترفیس IserviceScope می‌نماید.</div> <div style="text-align: justify;">مورد بعدی ServiceLifeTime می‌باشد. یک Enum که حاوی سه مقدار زیر می‌باشد:</div> <div style="text-align: left;"> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">namespace Microsoft.Extensions.DependencyInjection
+{
+    //
+    // Summary:
+    //     Specifies the lifetime of a service in an Microsoft.Extensions.DependencyInjection.IServiceCollection.
+    public enum ServiceLifetime
+    {
+        //
+        // Summary:
+        //     Specifies that a single instance of the service will be created.
+        Singleton = 0,
+        //
+        // Summary:
+        //     Specifies that a new instance of the service will be created for each scope.
+        //
+        // Remarks:
+        //     In ASP.NET Core applications a scope is created around each server request.
+        Scoped = 1,
+        //
+        // Summary:
+        //     Specifies that a new instance of the service will be created every time it is
+        //     requested.
+        Transient = 2
+    }
+}</pre> </div> <div style="text-align: justify;">آخرین مورد کلاس&nbsp;<a href="https://docs.asp.net/projects/api/en/latest/autoapi/Microsoft/Extensions/DependencyInjection/ServiceDescriptor/index.html?highlight=servicedescriptor">ServiceDescriptor&nbsp;</a>می‌باشد. &nbsp;این کلاس اطلاعاتی را که Container برای رجیستر کردن سرویس به آنها نیاز دارد، در خود نگهداری می‌کند. این جمله را در نظر بگیرید : " هی Container، وقتی میخواهی این <b>سرویس </b>را رجیستر کنی، <b>اطمینان حاصل کن که Singleton</b> باشد و <b>یک نمونه از نوع X </b>را پیاده سازی کند." تمامی اطلاعات جمله قبل در ServiceDescriptor نگهداری می‌شود. </div> <div style="text-align: justify;">خوب! حال بیایم تا سرویس خود را رجیستر کنیم. در کلاس StartUp پروژه در متد ConfigurationServices خط زیر را اضافه می‌کنیم:</div> <div style="text-align: left;"> <div dir="ltr" style="direction: ltr;" align="left"> <pre language="CSharp" name="code">public void ConfigureServices(IServiceCollection services)
+        {                        
+            ServiceDescriptor descriptor = new ServiceDescriptor(typeof(ICoreService),typeof(CoreServise),ServiceLifetime.Transient);
+            services.Add(descriptor);
+            services.AddMvc();          
+        }</pre> </div> <div style="text-align: right;">حال اگر برنامه را اجرا کنیم مشکل برطرف شده است.</div> <div style="text-align: center;"> <p style="margin-left: auto; margin-right: auto;"> <img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/jpg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAIBAQIBAQICAgICAgICAwUDAwMDAwYEBAMFBwYHBwcGBwcICQsJCAgKCAcHCg0KCgsMDAwMBwkODw0MDgsMDAz/2wBDAQICAgMDAwYDAwYMCAcIDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAz/wAARCAC8AcsDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD9/KKKKACiiigAoor5s+Ln7QvxZ8bftN678L/hDafDnTLvwhpFlq2r6t4y+13Cz/azKIora1tnjdgBE26VpAoJChSQaAPpOivGfgL+0F4qbwP4wk+M2gaX4B1PwBcmLUdXhnlXw9qtt5KzC+tJ51Q+VhirqxJjdGBJ4NX/AIK/tu/DD9oTxPNovhbxK9zq8Vsb5LK+0y80ye7tgQDcW6XUUZuIckfvIt6cjnkUAer0V4T4c/4KW/BTxdJH/ZvjCa8gkuoLH7XHoeo/Y47ia5W1jhe48jykk850Qozhl3qWABBrsPjx+0PovwjtLzSTrGm2Pi648P6nrmlwX1rdT23lWUatLPP5CMywo0kW7GGbdhAzcUAejUV4trX7cHgb4SfCvwNq3jvxNp8ereMtLhvbS10PTL+/l1ImFHlltrOOJ7swDdnc0eVBG/BrV1f9tz4V6L8G9J8fSeMtOm8L69L9n0y4tYpbqfUZ8kGCG2iRp5JgVbMSxl12tlRg0AeqUVxfwP8A2hvB37R3hm41bwbrcWr21lcG0vI2gltbqwnABMU9vMqTQyYIO2RFOCDjBrtKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACviv9tT4o/Aab463Oi/tGeDW8HDRooZfCHjwvewLqMTpmWOLUbNI5LSWOTIMLS/MCrDO7FfalFAH5leL9P8YfHX9jL4x2fw/wBf+J/jT4T6Vrehal4V1LVIprnXdQs7e5iuNUhspLuIzXcSKn7lpkk3MGUGRQBXffATUPht8dP2m/h/qPhr45/HH4z6x4WjvNSSOaHS/wCyvDqyWzQumpPHp9tJEzh9qwb/ADN6glAFJH3vRQB8b/sf/A+1+Pf/AASMh8GcWj+ILLVUgnjAVre6+33Dwzj/AGllVHz6rXD/AAe8b6p+1Z8Avjl8Y9esbnT7qz8Cz+A7S1uEKm3ns7SV9UZQf7187x57i1FfoBRQB8C/BX4paD+yn8Y/A3jr4k6gug+DfFPwd0DRtE168gf7BYXduZJbm1knAKxPMssDqGK7/KIGSMVyvx68UQeMfiL8J/i7MPGvwF+Ev2vxJZvr3h6wt4riOW6kgNtq95HPYyrbQ3iwy5kki3DzIy0gDHP6SUUAfKf/AATu0fwfrvxJ+I/jPwh47+KvxNh1lbDT7nxP4ljsV0nVWt1k2/YGtra3M3liTY8uwoflVWO04+rKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKrvpdtI5ZraAsTkkxjJNWKKAK39kWn/Prb/wDfof4Uf2Raf8+tv/36H+FWaKAK39kWn/Prb/8Afof4Uf2Raf8APrb/APfof4VZooArf2Raf8+tv/36H+FH9kWn/Prb/wDfof4VZooArf2Raf8APrb/APfof4Uf2Raf8+tv/wB+h/hVmigCt/ZFp/z62/8A36H+FH9kWn/Prb/9+h/hVmigCt/ZFp/z62//AH6H+FH9kWn/AD62/wD36H+FWaKAK39kWn/Prb/9+h/hR/ZFp/z62/8A36H+FWaKAK39kWn/AD62/wD36H+FH9kWn/Prb/8Afof4VZooArf2Raf8+tv/AN+h/hR/ZFp/z62//fof4VZooArf2Raf8+tv/wB+h/hR/ZFp/wA+tv8A9+h/hVmigCt/ZFp/z62//fof4Uf2Raf8+tv/AN+h/hVmigCt/ZFp/wA+tv8A9+h/hR/ZFp/z62//AH6H+FWaKAK39kWn/Prb/wDfof4Uf2Raf8+tv/36H+FWaKAK39kWn/Prb/8Afof4Uf2Raf8APrb/APfof4VZooArf2Raf8+tv/36H+FH9kWn/Prb/wDfof4VZooArf2Raf8APrb/APfof4Uf2Raf8+tv/wB+h/hVmigCt/ZFp/z62/8A36H+FH9kWn/Prb/9+h/hVmigCt/ZFp/z62//AH6H+FH9kWn/AD62/wD36H+FWaKAK39kWn/Prb/9+h/hR/ZFp/z62/8A36H+FWaKAK39kWn/AD62/wD36H+FH9kWn/Prb/8Afof4VZooArf2Raf8+tv/AN+h/hR/ZFp/z62//fof4VZooArf2Raf8+tv/wB+h/hR/ZFp/wA+tv8A9+h/hVmigCt/ZFp/z62//fof4Uf2Raf8+tv/AN+h/hVmigCt/ZFp/wA+tv8A9+h/hR/ZFp/z62//AH6H+FWaKAK39kWn/Prb/wDfof4Uf2Raf8+tv/36H+FWaKAK39kWn/Prb/8Afof4Uf2Raf8APrb/APfof4VZooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAoor4x/4LA/tT+Pv2Z9E8BN4c8XXPwu8Ia1fXEXiTx5B4SHif8AsDYim3je1PyhJXLKXIJG0YGeoB9nUV+f3iD/AILEz/s/fs3fCyXVLj4dfGDx945t7u4j1DSPFtp4Y0C7tbWXY1w91qAjSGchkBttufMEijAWux8Yf8FdLnV/BPwY1L4XfCrUfiXqXxnh1IWGlR+ILbTpbC4slBlieVleBlDbwZA4XCZXfuAoA+0KK+UvC3/BTSXxFo3h3T38Bm0+IOsfEWb4e3fho6zv/s54N0s14ZxB80a2qrOB5a53qu4fermY/wDgprfeCPB/jFrbwt4m8f8AjGX4p3/gDwr4dbU7GF9SniQSBVnS1gS3t1QO2ZhM64+aV88AH2nRXxv8Wv8AgrNefAb9mnT/ABR42+EmueDviBqfiB/DFv4T17W7XTLOW7WMytKurz7bU2flgkXA+Ut8uM1j6f8A8FOL39of4U/CLxL4MeLwvd6v8U7PwZ4q02K9sdbhVTFK80MV3F5kMsbDy2WaEgkdCORQB9wUV+eP7TX/AAVf+ImrWWpN8OPh14g0fwPpnxA03wcnxFa8sLi3u7hdUht72A2MqmRIWUyxLOob5iPuHkfodQAUUVl+NL/VtM8K30+hafa6rrEcRNnaXV2bSCeTsHlCOUX1IRjgHCk8UAalFeN/sN/Erxf8Uvg/qt745vNNvfENh4p1rSpX0+38m1RLa/mhjSNT8xVUQAM2WbGTya9koAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKK8a/aj/4KDfBz9i3VdGsfib4607wte+IMmxt5Le4uZZVB2l2WGNzHHnje+1c554r1nw/4gsfFmhWeqaZd2+oadqMCXNrdW8gkiuInAZXRhwVIIII9aALleIftg/sveOPj3Noep/D34x+JPhH4h0RZ4Gkt7CLWNK1KCYKHW50+dhDK42jZIeUy2Ote30jvsQk54GeBk/lQB8A+NP8AggvoWrfCDwbpmj+PLe28a+FrvUby41/XPBemeILDVH1CVZrrdpdypt4/nRfL2cxjIBOa9t8Ef8E77XwJ4v8Agbqlp4jso0+DcOqLJb2nhqy0yHWpL6EI7rFZiGC1CtlsJE27PJzlj774K8Y2nj7w3BqtjDqsFtclgialplzptyNrFTuguY45U5BxuQZGCMgg1q0AfPWhf8E99E0L/goJqnx5TWblpdQ0r7MmgeRi2gv2RIZdQD78GR7eKOIjYOFJ3HOBw3in/glK2s+DfEKaZ8SNS8O+MZ/iPd/Enw34istJjZ/D13OnlmFoJJGS5j2F1bcUDbugxz9A/FP9p7wJ8E/iH4M8K+KvEMGja78QbqSy8P280EpXUJowpZPMVDGh+ZceYy7iQBk8Vo+Gfjj4X8Y/FbxL4I03VPtHijwfDa3Gr2X2aZPsiXKs0B8xlEb7gjfcZiMc4oA+Xviv/wAEkr748fs5Wfhzxx8X9e8Z/EHT/ELeJ7fxVr2iWupWEN00RhMK6POWtFtPLJ/0cYXf8+c1vfDn/gmDH4D+Enw68Ot4s0Z9Q8FeNrbxpfX2l+CNN0G31eWGN4/JW0sFhiiBVh+8bzX+XksMY+r6KAPhrx3/AMEc9d1/xHqtjovxz8Q6F8MtQ8ZQeOYvBbaBbXNvBqC3qXcwNzvWZondWKxgqqMwY79uD9y0UUAFFFUfEvibTvBnh691bV7600zS9Oha4u7u6lWKG2iUZZ3diAqgDJJNAHKfAL4Mf8KN8L6xpv8AaX9qf2t4h1TXfM+z+R5X227kufKxubOzzNu7I3YzgZxXc15z8O/2r/BHxR8XpoOm32r22qzxvNaQ6voGoaQNTjTBd7R7uCJbpACCWgLgAg5wQa9GoAKKKKACivL/ABT+2P8AD3wZ4qutJ1DVtSjOnzfZ77UYtC1CfR9NlGMx3OoxwNZwMMjKyzKRkZxXp6OJFBBBBGQR3oAWiiqPiLxFB4X037Vcx30kXmxw7bSymvJN0jqiny4lZ9oLAs2NqLlmIUEgAvUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQB+aH/BYnx34a+Dv7Sun+Jl+IXi34P8AjW58KNpUGo33gv8A4SXwn44tGldjpMkaiRlnDfeLxhdkgxnOR8k/t0eIPH3jLxB8ILzx/ovgj4W6Re/D7TD4W07V7LxRY6ZoOrF5RL/ZkGhoxiu1HksI51YKpjUA4NfvLRQB+ao/ZU0v9q7/AIKH/DXRfjEJ/FF7o/wTsNTvfIuL2xgvtQjv1xPJGwhlYByW8udByfnTIwHfsEeCPEnjT9pyy+Hnie1vP7H/AGP7DU9Is7idcx6lc3rsmnzKTnJj0wD6GSv0oooA/FjSm8HD9kP9mj/heY8SH9nIx+Jhrx037d9lXVvt7/YTd/Yv32zb52zHG78ag/4KK3s9x+zj+z4bRvESfAZbLVAkvxg/toRNOJ1Fg13/AGF/pefJ3G18z/ln9/5q/a6igD8i/F37NGq/tT+C/wBjfwF4+8TtqmqalpvidrDxBYDUreS2aK3WXT7lPt0UN2Wi2wkGZAWCA5YHced8JftG6xpf/DWF/wDHDwLqesaro1p4U8KeL7Ow1K8sI7hY3lt5NSaWzxOtq0eJ2VPvK23o1fstRQB+HPh7SfD+nfsQftN+E/CFzf2nw/bxR4RvfDtslvqWnJFaXVxBm4todQlkukR2UkSM3zlNwAGAOr/aY/Yt8FfDWH9rrSNGk8XWmk/Cjw9pHjHwvZ/8JRqLxabrM8DvLf8AzTEyzMYxzIWAycAdv2booA/CP9qa9+I3iP8A4KCefq/iTwzoHjW7bRZfh9qmvR+LpdUFsbS3dv7MXSoprN43l80SieNiWaTIxzX7raeZTYQeeVM/lr5hUEKWxzjPOM1NRQAV5B+3F4b1DxF8BWextLvUYtH1vSdY1CxtYDPNfWVrfwT3MaRjJkJijchACW24AJOK9fooA8H1T9rL4dfGzX9J0jwDd6F8SfFcTXE9tJpRgv8A/hEphaygXF2+T9jYk+SFbbKxlKhSA+PB/wBnYeCv+Em+En/CD+R/wtjy5v8Ahaf2bb/a+z+zpvtH9t/x7/tvk+V5/wA2f9V8ma+8KKAPzftvhrZeGP2DfgNqNongbwz4a8VvbXPxC1rxF4ffVNLvlFhMLd9WSO5tmmtxLsTdNN5aYiDDYAK+pf8Agnv4etPD3wq1ldI8aeGPGfh641h5dLfwxoE+kaBp0XlRAwaeslzcrJb7wzhoZmiDO6qF2lR73RQB8JfFXxj4d+H0nju18I/FNPCOu6nfalPdfCDxzpVjqUHia5d3Mq2tn8t7JHenLKYJpYz52fLzuSuI+J2iXPjb40eM/wDhPPGfwt+GHjJ7q1/4RC11vwXd6v4p021aytin9gzw6lAzbZvNVo7W3Y+YriQOGAr9JKKAPj/Qf2Z9B/aC+KX7SkWqWNlc+JzeW2laXrctsv2vSWl0KxO+3ZsmHMux2Ckbii7s7Rjy69+I17+1J8D9f+Kmq2dxZXFpr3hHwVDbzIV8i4s9Zsn1MrkdDeyPET0P2RTX6I0UAfFvwjf4a2viO/fxAdH/AOGmhruri3DNJ/wkbE3FyLMMIv350zyDDt3/AOihNpPIzXFfsEeGbW8+KfgLUf8AhZHwyT4hRQO/jHQ9C8D3lr4svpjbOs0Ou3J1OcjZKQwluYFBdEERUOFP6D0UAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAVXfTY5HJLT5JzxO4H5ZqxRQBW/suP+9cf+BEn+NH9lx/3rj/AMCJP8as0UAVv7Lj/vXH/gRJ/jR/Zcf964/8CJP8as0UAVv7Lj/vXH/gRJ/jR/Zcf964/wDAiT/GrNFAFb+y4/71x/4ESf40f2XH/euP/AiT/GrNFAFb+y4/71x/4ESf40f2XH/euP8AwIk/xqzRQBW/suP+9cf+BEn+NH9lx/3rj/wIk/xqzRQBW/suP+9cf+BEn+NH9lx/3rj/AMCJP8as0UAVv7Lj/vXH/gRJ/jR/Zcf964/8CJP8as0UAVv7Lj/vXH/gRJ/jR/Zcf964/wDAiT/GrNFAFb+y4/71x/4ESf40f2XH/euP/AiT/GrNFAFb+y4/71x/4ESf40f2XH/euP8AwIk/xqzRQBW/suP+9cf+BEn+NH9lx/3rj/wIk/xqzRQBW/suP+9cf+BEn+NH9lx/3rj/AMCJP8as0UAVv7Lj/vXH/gRJ/jR/Zcf964/8CJP8as0UAVv7Lj/vXH/gRJ/jR/Zcf964/wDAiT/GrNFAFb+y4/71x/4ESf40f2XH/euP/AiT/GrNFAFb+y4/71x/4ESf40f2XH/euP8AwIk/xqzRQBW/suP+9cf+BEn+NH9lx/3rj/wIk/xqzRQBW/suP+9cf+BEn+NH9lx/3rj/AMCJP8as0UAVv7Lj/vXH/gRJ/jR/Zcf964/8CJP8as0UAVv7Lj/vXH/gRJ/jR/Zcf964/wDAiT/GrNFAFb+y4/71x/4ESf40f2XH/euP/AiT/GrNFAFb+y4/71x/4ESf40f2XH/euP8AwIk/xqzRQBW/suP+9cf+BEn+NH9lx/3rj/wIk/xqzRQBW/suP+9cf+BEn+NH9lx/3rj/AMCJP8as0UAVv7Lj/vXH/gRJ/jR/Zcf964/8CJP8as0UAFFFFABRRRQAUUV8wfGH9rX4h3/je40/4baHBeWOmT3Ec8n9gNrl1dRW0vk3U/k/2hYiKJJg0SbHuJ5Wjk2W5CgsAfT9FcJ8GfizqHxE8Oaumq6N/ZniXw5dNY6hYQyl4pJPKSaJ4XkVDskikjYb1UqWKtypNeceHfjz8SfA3xM8KWHxDt/CEdv43sb6+TRtItZhqPhcWsAmYXFwbiWK8QZEbSxxwASOgAcNkAH0FRXzv8I/2lPHWrat8OdZ8UweGV8J/F8MNFsrCwuIdR0B2tJLyBLqd53jud8MThikUGx8ABwcjT+H/wC1br/iH9ofx/4d1/wjJ4V8NeEfDdtrtlLdzJJqOoI895HJM6RuyRRkWwKIT5mDltpOwAHutFfOn7K37T3ij49+LbKa48T/AAgnttQsF1K98H6dcv8A8JL4VglQPbm4cXEqzswZA6mC2C7jhn24b6LoAKK8++MXxS1T4aePvh5BFb2Uug+KNafRdTlkRjNbO9tLJbMjBgoBliEZ3K2fMXGO/mul/to6lYXnxavdbsNMh0Dwrp95q3heSBZBNqltZPLbXQlyxDMLqIbdgUbJ4uM80AfRdFeEWv7Z7eEvD0J8SeFvEWpSeH7K2/4TXXdDs4f7G8NXbwRzSo6TXIuXVBIrN5Ec/lqQXIwayJv28Z/CXxb+J2l654R16+8JeAtRs45fEOj2cTWmlWc1hb3BmuzJcLJLh5ZM/ZYpCkYVnUA7iAfR1FfP37Vn7XGtfBXxtolv4c0/StV0bSbRPEPjSe4V3fT9Ge4jtw8JRwFly8s2XDKY7OUYyQy9J8Tf2v7D4e/E+58I2Pg7xz4w1ay0aDxBdf2Fa2skNvYyySx+aXmuIgxUwsfLXMjgjy0kwwUA9dorxDXP27dATxFbab4b8K+OPHT3Ph208WedoNnbtDHptw0qrMWuJ4fmHlEmIAytkbEchgvNeNv26v7P8cXf9lT6fN4Sl0HwxrOm38emSXdxcHVtVks8MhuIBs2LHg5DRlmYrJjyyAfSlFeVeGv2rrLxh45OnaZ4P8dX/h/+0J9JHim2sIZtJN3AzpLFtSY3QVXjdDMbcQ7lx5nIzmab+2Yl540sNEu/hx8StDl8QW93P4euNUtLG3j15reIytEifajNbyFASFvI7fvnGDQB7RRXzH8Hf2+Jda+Hfw+1/wAd2E3gxfEXhbVvEepQ3FjDKqxWRtt0ySwXkvloRPlYzHI755MRXD9ev7cuiaToXiK78R+EvG/g+40HQLnxTDYavbWn2nWNNgGZJ7YQ3EiZGUBilaOVTIm5FzmgD22ivKfhb+1hYfEzxPeaPJ4T8Z+G9Sj0ga/p8Gr21sr63YFtvnW6wzyEHcVUxzCKUF1ygzVH9lX9obxN8dPFXxJsvEvhVPB7eENbt9PsrCS4S4vBBLY29yGuWjZohKTMcrGxVRgbmIJoA9kooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAr5h+L/wCyd8RdM8cXGofDXXbazsNTuLiSeM64dEu7WO5l865g846ffrNC8xaVNsdvPEzybLgBgF+nqKAOA+DPwq1X4W+EtXlvtSg17xXrtw1/eXD+ZFbNMIUhhhXcZJBEkcUabmLO2Gc5ZiK8n/Zs+C/xZ0Txlq2pfE3wz8OtR1fxXBLba14m07xpe3l3Bb4YxWlnZSaVDHDbKSAEE+cku7SOST9L0UAfO/wi/Zr8d6Rq3w50bxTceGG8J/CDcdFvbC+uJtR191tZLOB7qB4UjttkMrlgks+98EFAMHtLr4BXesftH+MfFF7NZnw/4o8HWfhryY5HF0skU968rEbdoUpcoFIYnIbIGAT6pRQB83/C79lnxhofib4X6dqlp4F0jwt8HVdNKvtEuJm1DXFNo9qqS27W8cdpGVfzHVJp97ov3cV7D4/+CWjfErxNpGraje+Lre60RxJbJpXivVNJtpCHD/v7e1uIobgZUcTI4IyuMEg9fRQBwH7Tvww1b4ufBjVNK8PXFhZ+JoJINR0S4vSwtoL62mSeAyFVZhH5kahtqk7ScCvMPiV+xJqPin4cfCvQtO1Swifwm8Fj4jmuN/8AxN9OZoZr2NMA5eWe3ib5sDBfJ5r6OooA+SPH3/BPCC++Ofi/Xofhd8AfHtv441NNVfWvGuki51Xw/J5MUTokX2WT7ZFmLeqG5tipdhuIwRtfEL9l/wCJeu6l8WfD+lyeBF8FfFyeKG4u5rq5h1DQrX+zreynMVusDRTuwifYhliCfKxZ87B9O0UAfNdt/wAE7NF+ImveN9V+IN/4nuLnxRL/AGbb22g+NdZ0uzj0aCEQWttNFaz28czbTLI/mI43TuoZl6+b/B3wh8YvhZ+0Ne+DrB/A/iHWdI+G+k6XdXmqandQI9umoapFa3YdLZ2kmEIUyQFUVnJAmUDc325RQB8Z+APhp42+BP7SU/gL4dp4X1iLQvhboOl3E3iC8nstu271FFuk8mGbeQd5MJ2BtwHmpjJ0dX/4J065pOn22laDq2jyaZp3h7wjolvLeySxzStpGrte3EjqsbBQ8bfIAT8/B2j5q+u6KAPCfhn8JPij8Ikl8HaJL4ITwT/aV9fwa9cXV1Jq8EN1PNcG3FiIVh3o8u1ZzckEKCYSa81+DP7C/jjwt8Zfhv4o1ux+H8V54LN5BrGtxaxqGra34nWezeH7S01zAph/eFWNrvkQbyRL8gVvsCigD5CH7AXi/wAbeAPCPhvxDf8AhvTLbwv4S13wmbvTbua7kmF09mbO7EckEYDD7MzSRFiFOAryAkjofiV+zJ8Tv2hfD/iaXxbJ4H0XVv8AhB9W8I6Jb6TqFzd2t1NfLGHvLmSS2jeEZgiAhRJdgLnzH4r6cooA8q0D4HatpX7QvhzxZJcacdO0jwU/hyaNZH89rg3EEoZRs2mPETclgckfL6Xvg58INS+Hvxa+KevXs9jLZ+ONatdRsEgdjJFHFp1tasJQVADb4WI2lhtI5ByB6PRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQB//Z"> </p> <p style="text-align: justify; margin-left: auto; margin-right: auto;">ساخت یک Service Descriptor و اضافه کردن آن به سرویسها، فلسفه وجودی میان افزارها را زیر سوال می‌برد. پس بجای ایجاد یک Service Descriptor، از متدهای الحاقی تدارک دیده شده استفاده میکنیم. مثلا بجای دو خط کد بالا می‌توان از کد زیر استفاده نمود:</p> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">services.AddTransient&lt;ICoreService,CoreServise&gt;();</pre> </div> <p style="text-align: right; margin-left: auto; margin-right: auto;"> حال که یک دید کلی از نحوه کار مکانیزم تزریق وابستگی بدست آوردیم، میخواهیم این مکانیزم را با StructureMap جایگزین کنیم. بدین منظور ابتدا پکیج StructureMap را نصب میکنم. </p> <p style="text-align: right; margin-left: auto; margin-right: auto;">در مرحله اول باید کلاسهایی را تدارک ببینیم که اینترفیس‌های بالا را پیاده سازی نمایند. یعنی کلاسهای ما باید بتوانند همان کاری را انجام دهند که مکانیزم پیش فرض MVC انجام می‌دهد.&nbsp;</p> <p style="text-align: right; margin-left: auto; margin-right: auto;">اولین مورد، کلاس StructureMapServiceProvider می‌باشد.</p> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">internal class StructureMapServiceProvider : IServiceProvider
+    {
+        private readonly IContainer _container;
+
+        public StructureMapServiceProvider(IContainer container, bool scoped = false)
+        {            
+            _container = container;
+        }
+
+        public object GetService(Type type)
+        {
+            try
+            {
+                return _container.GetInstance(type);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+    }</pre> </div> <p style="text-align: justify; margin-left: auto; margin-right: auto;">مورد دوم کلاس StructureMapServiceScope می‌باشد:</p> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">internal class StructureMapServiceScope : IServiceScope
+    {
+        private readonly IContainer _container;
+        private readonly IContainer _childContainer;
+        private IServiceProvider _provider;
+
+        public StructureMapServiceScope(IContainer container)
+        {
+            _container = container;
+            _childContainer = _container.GetNestedContainer();
+            _provider = new StructureMapServiceProvider(_childContainer, true);
+        }
+
+        public IServiceProvider ServiceProvider =&gt; _provider;
+
+        public void Dispose()
+        {
+            _provider = null;
+            if (_childContainer != null)
+                _childContainer.Dispose();
+        }
+    }</pre> </div> <p style="text-align: right; margin-left: auto; margin-right: auto;">مورد سوم StructureMapServiceScopeFactory می‌باشد:</p> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">internal class StructureMapServiceScopeFactory : IServiceScopeFactory
+    {
+        private IContainer _container;
+
+        public StructureMapServiceScopeFactory(IContainer container)
+        {
+            _container = container;
+        }
+
+        public IServiceScope CreateScope()
+        {
+            return new StructureMapServiceScope(_container);
+        }
+    }</pre> </div> <p style="text-align: justify; margin-left: auto; margin-right: auto;">مورد بعدی کلاس StructureMapPopulator می‌باشد. وظیفه این کلاس جمع آوری اطلاعات مربوط به سرویس‌ها می‌باشد.</p> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">internal class StructureMapPopulator
+    {
+        private IContainer _container;
+
+        public StructureMapPopulator(IContainer container)
+        {
+            _container = container;
+        }
+
+        public void Populate(IEnumerable&lt;ServiceDescriptor&gt; descriptors)
+        {
+            _container.Configure(c =&gt;
+            {
+                c.For&lt;IServiceProvider&gt;().Use(new StructureMapServiceProvider(_container));
+                c.For&lt;IServiceScopeFactory&gt;().Use&lt;StructureMapServiceScopeFactory&gt;();
+
+                foreach (var descriptor in descriptors)
+                {
+                    switch (descriptor.Lifetime)
+                    {
+                        case ServiceLifetime.Singleton:
+                            Use(c.For(descriptor.ServiceType).Singleton(), descriptor);
+                            break;
+                        case ServiceLifetime.Transient:
+                            Use(c.For(descriptor.ServiceType), descriptor);
+                            break;
+                        case ServiceLifetime.Scoped:
+                            Use(c.For(descriptor.ServiceType), descriptor);
+                            break;
+                    }
+                }
+            });
+        }
+
+        private static void Use(GenericFamilyExpression expression, ServiceDescriptor descriptor)
+        {
+            if (descriptor.ImplementationFactory != null)
+            {
+                expression.Use(Guid.NewGuid().ToString(), context =&gt; { return descriptor.ImplementationFactory(context.GetInstance&lt;IServiceProvider&gt;()); });
+            }
+            else if (descriptor.ImplementationInstance != null)
+            {
+                expression.Use(descriptor.ImplementationInstance);
+            }
+            else if (descriptor.ImplementationType != null)
+            {
+                expression.Use(descriptor.ImplementationType);
+            }
+            else
+            {
+                throw new InvalidOperationException("IServiceDescriptor is invalid");
+            }
+        }
+    }</pre> </div> <p style="text-align: right; margin-left: auto; margin-right: auto;">و در آخر کلاس StructureMapRegistration می‌باشد:</p> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">public static class StructureMapRegistration
+    {
+        public static void Populate(this IContainer container, IEnumerable&lt;ServiceDescriptor&gt; descriptors)
+        {
+            var populator = new StructureMapPopulator(container);
+            populator.Populate(descriptors);
+        }
+    }</pre> </div> <p style="text-align: right; margin-left: auto; margin-right: auto;">نهایتاً باید متد ConfigurationServices در کلاس StartUp را اندکی تغییر دهیم. </p> <div dir="ltr" style="direction:ltr;text-align:left;" align="left"> <pre language="CSharp" name="code">public IServiceProvider ConfigureServices(IServiceCollection services)
+        {
+            services.AddMvc();
+           
+            var container = new Container();
+            container.Configure(configure =&gt;
+            {
+                configure.For&lt;ICoreService&gt;().Use&lt;CoreServise&gt;();
+            });
+
+            container.Populate(services);
+
+            return container.GetInstance&lt;IServiceProvider&gt;();
+        }</pre> </div> <p style="text-align: right; margin-left: auto; margin-right: auto;">در کد بالا، متد ConfigurationServices به جای آنکه Void برگرداند، نمونه‌ای از اینترفیس IServiceProvider را برمی‌گرداند. حال اگر برنامه را اجرا کنیم، وابستگی‌ها توسط StructureMap تزریق شده و برنامه بدون هیچ مشکلی اجرا می‌شود.</p> </div> </div> </div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/courses/topic/4/aa8cc6a8-0947-48e4-a954-8ab895732a86#comment-750'><span class='badge bg-light text-dark bg-gradient rounded-pill me-2'>بازخوردهای دوره</span>آشنایی با AOP Interceptors</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/courses/topic/5/a727a21b-5cec-4dbd-95f0-91d87e2218e5#comment-574'><span class='badge bg-light text-dark bg-gradient rounded-pill me-2'>بازخوردهای دوره</span>تزریق وابستگی‌ها در فیلترهای ASP.NET MVC</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/courses/topic/5/a727a21b-5cec-4dbd-95f0-91d87e2218e5#comment-685'><span class='badge bg-light text-dark bg-gradient rounded-pill me-2'>بازخوردهای دوره</span>تزریق وابستگی‌ها در فیلترهای ASP.NET MVC</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/courses/topic/5/0e4b9958-38fc-4aaa-8569-6086e4887bcd#comment-366'><span class='badge bg-light text-dark bg-gradient rounded-pill me-2'>بازخوردهای دوره</span>استفاده از StructureMap به عنوان یک IoC Container</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2969.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مهارت‌های تزریق وابستگی‌ها در برنامه‌های NET Core. - قسمت دوم - الگوی Service Locator</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/courses/topic/3/def985bd-b7b5-448a-904f-e47e003e9957'><span class='badge bg-warning rounded-pill me-2'>مطالب دوره‌ها</span>تزریق خودکار وابستگی‌ها در SignalR</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/courses/topic/5/3697d84b-8c79-4722-875f-a35920fe88ba'><span class='badge bg-warning rounded-pill me-2'>مطالب دوره‌ها</span>تزریق خودکار وابستگی‌ها در ASP.NET Web API به همراه رها سازی خودکار منابع IDisposable</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/courses/topic/5/a727a21b-5cec-4dbd-95f0-91d87e2218e5'><span class='badge bg-warning rounded-pill me-2'>مطالب دوره‌ها</span>تزریق وابستگی‌ها در فیلترهای ASP.NET MVC</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/courses/topic/5/9ffb5aa9-7b98-4827-ae46-fc070904c948'><span class='badge bg-warning rounded-pill me-2'>مطالب دوره‌ها</span>اصول طراحی یک سیستم افزونه پذیر به کمک StructureMap</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-842.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>EF Code First #12</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۷/۰۱/۳۰ ۲۳:۵۵</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><b>یک نکته‌ی تکمیلی</b> <br>
+
+
+شاید جذاب‌ترین قسمت کار با استراکچرمپ، قسمت scan آن باشد که می‌تواند اتصالات را به صورت خودکار از اسمبلی‌های مختلفی تشخیص داده و قسمت تعاریف مقدماتی تزریق وابستگی‌های سیستم را کاهش دهد.کتابخانه‌ی <strong> <a data-pjax="#js-repo-pjax-container" href="https://github.com/khellang/Scrutor">Scrutor</a> </strong>،
+
+
+
+
+
+    <span>دقیقا شبیه به همین قابلیت را آن‌هم به صورت افزونه‌ای برای سیستم تزریق وابستگی‌های استاندارد NET Core. فراهم می‌کند.<br> </span></div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>امیر نوروزیان</strong>  در  <span dir='ltr'>۱۳۹۷/۰۲/۱۰ ۱۶:۳۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>با سلام؛ آیا امکان دارد StructureMap  را در یک کلاس دیگر بکار برد و در ConfigureServices&nbsp; بصورت&nbsp; services اضافه کرد و متد ConfigurationServices مقدار&nbsp; Void را برگرداند؟ زیرا در تمامی مقاله‌های مطالعه شده همین روش بکار رفته. با تشکر<span> </span></div>
+</div></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫آشنایی با ساختار IIS قسمت سوم</title>     <meta name="description" content="همانطور که  در مطلب قبلی   گفتم، در این مطلب قرار است به WAS بپردازیم؛ در دنباله متن قبلی گفتیم که دومین وظیفه WWW Service این است: موقعی‌که یک درخواست جدید در صف درخواست‌ها وارد شد، به اطلاع WAS برساند.       
+ WAS یا Windows Process Activation Service     در نسخه 7 به بعد، WAS مدیریت پیکربندی application pool و پروسه‌های کارگر را به جای WWW Service به عهده گرفته است. این مورد شما را قادر می‌سازد تا همان پیکربندی که برای Http در نظر گ ...">
+    <meta name="author" content="علی یگانه مقدم">
+    <meta itemprop="name" content="آشنایی با ساختار IIS قسمت سوم">
+    <meta itemprop="description" content="همانطور که  در مطلب قبلی   گفتم، در این مطلب قرار است به WAS بپردازیم؛ در دنباله متن قبلی گفتیم که دومین وظیفه WWW Service این است: موقعی‌که یک درخواست جدید در صف درخواست‌ها وارد شد، به اطلاع WAS برساند.       
+ WAS یا Windows Process Activation Service     در نسخه 7 به بعد، WAS مدیریت پیکربندی application pool و پروسه‌های کارگر را به جای WWW Service به عهده گرفته است. این مورد شما را قادر می‌سازد تا همان پیکربندی که برای Http در نظر گ ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="آشنایی با ساختار IIS قسمت سوم">
+    <meta property="og:description" content="همانطور که  در مطلب قبلی   گفتم، در این مطلب قرار است به WAS بپردازیم؛ در دنباله متن قبلی گفتیم که دومین وظیفه WWW Service این است: موقعی‌که یک درخواست جدید در صف درخواست‌ها وارد شد، به اطلاع WAS برساند.       
+ WAS یا Windows Process Activation Service     در نسخه 7 به بعد، WAS مدیریت پیکربندی application pool و پروسه‌های کارگر را به جای WWW Service به عهده گرفته است. این مورد شما را قادر می‌سازد تا همان پیکربندی که برای Http در نظر گ ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="آشنایی با ساختار IIS قسمت سوم">
+    <meta name="twitter:description" content="همانطور که  در مطلب قبلی   گفتم، در این مطلب قرار است به WAS بپردازیم؛ در دنباله متن قبلی گفتیم که دومین وظیفه WWW Service این است: موقعی‌که یک درخواست جدید در صف درخواست‌ها وارد شد، به اطلاع WAS برساند.       
+ WAS یا Windows Process Activation Service     در نسخه 7 به بعد، WAS مدیریت پیکربندی application pool و پروسه‌های کارگر را به جای WWW Service به عهده گرفته است. این مورد شما را قادر می‌سازد تا همان پیکربندی که برای Http در نظر گ ...">
+    <meta name="twitter:card" content="همانطور که  در مطلب قبلی   گفتم، در این مطلب قرار است به WAS بپردازیم؛ در دنباله متن قبلی گفتیم که دومین وظیفه WWW Service این است: موقعی‌که یک درخواست جدید در صف درخواست‌ها وارد شد، به اطلاع WAS برساند.       
+ WAS یا Windows Process Activation Service     در نسخه 7 به بعد، WAS مدیریت پیکربندی application pool و پروسه‌های کارگر را به جای WWW Service به عهده گرفته است. این مورد شما را قادر می‌سازد تا همان پیکربندی که برای Http در نظر گ ...">
+    <meta property="article:published_time" content="Wed, 24 Dec 2014 01:45:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫آشنایی با ساختار IIS قسمت سوم";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-1946.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫آشنایی با ساختار IIS قسمت چهارم</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-1944.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫آشنایی با ساختار IIS قسمت دوم</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫آشنایی با ساختار IIS قسمت سوم</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>علی یگانه مقدم<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۳/۱۰/۰۳ ۱:۴۵</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-1945.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><div style="text-align: justify;"> <div>همانطور که <a href="www.dntips.ir-posts-1944.html">در مطلب قبلی</a>  گفتم، در این مطلب قرار است به WAS بپردازیم؛ در دنباله متن قبلی گفتیم که دومین وظیفه WWW Service این است: موقعی‌که یک درخواست جدید در صف درخواست‌ها وارد شد، به اطلاع WAS برساند.</div> <div> <b> <br>
+WAS یا Windows Process Activation Service</b> </div> <div>در نسخه 7 به بعد، WAS مدیریت پیکربندی application pool و پروسه‌های کارگر را به جای WWW Service به عهده گرفته است. این مورد شما را قادر می‌سازد تا همان پیکربندی که برای Http در نظر گرفته‌اید، بر روی درخواست هایی که Http نیستند هم اعمال کنید. همچنین موقعی که سایت شما نیازی به درخواست‌های Http ندارد می‌توانید WAS را بدون WWW Service راه اندازی کنید. به عنوان یک مثال فرض کنید شما یک وب سرویس WCF را از طریق WCF Listener Adapter مدیریت می‌کنید و احتیاجی به درخواست‌های نوع Http listener ندارید و http.sys کاری برای انجام ندارد پس نیازی هم به راه اندازی www service نیست.</div> <div> <b> <br>
+پیکربندی مدیریتی در WAS</b> </div> <div>در زمان شروع کار IIS، سرویس WAS اطلاعاتی را از فایل&nbsp;ApplicationHost.config&nbsp;می‌خواند و آن‌ها را به دست listener adapter‌های مربوطه می‌رساند و lsitener adapter‌ها ارتباط بین WAS و listener‌های مختلف را در IIS، برقرار می‌کنند. آداپتورها اطلاعات لازم را از WAS می‌گیرند و به listener‌های مربوطه انتقال می‌دهند تا listener‌ها بر اساس آن تنظیمات یا پیکربرندی‌ها، به درخواست‌ها گوش فرا دهند.</div> <div>در مورد WCF ، ابتدا WAS تنظیمات را برای آداپتور WCF که NetTcpActivator نام دارد ارسال کرده و این آداپتور بر اساس آن &nbsp;listener مربوطه را پیکربندی کرده تا به درخواست هایی که از طریق پروتوکل net.tcp می‌رسد گوش فرا دهد.</div> <div>لیست زیر تعدادی از اطلاعاتی را که از فایل پیکربندی می‌خواند و ارسال می‌کند را بیان کرده است:</div> <div> <ul> <li>Global configuration information&nbsp;</li> <li>Protocol configuration information for both HTTP and non-HTTP protocols <br> </li> <li>Application pool configuration, such as the process account information&nbsp;<br> </li> <li>Site configuration, such as bindings and applications&nbsp;<br> </li> <li>Application configuration, such as the enabled protocols and the application pools to which the applications belong&nbsp;</li> </ul> <div>نکته پایانی اینکه اگر فایل&nbsp;ApplicationHost.config &nbsp;تغییری کند، WAS یک اعلان دریافت کرده و اطلاعات آداپتورها را به روز می‌کند.</div> <div> <b> <br>
+مدیریت پروسه‌ها Process Managment</b> </div> <div>گفتیم که مدیریت پول و پروسه‌های کارگر جزء وظایف این سرویس به شمار می‌رود. موقعی که یک protocol listener درخواستی را دریافت می‌کند، WAS چک می‌کند که آیا یک پروسه کارگر در حال اجراست یا خیر. اگر application pool پروسه‌ای داشته باشد که در حال سرویس دهی به درخواست هاست، آداپتور درخواست را به پروسه کارگر ارسال می‌کند. در صورتی که پروسه‌ای در application pool در حال اجرا نباشد، WAS یک پروسه جدید را آغاز می‌کند و آداپتور درخواست را به آن پاس می‌کند.</div> </div> <blockquote style="margin: 0px 0px 0px 40px; border: none; padding: 0px;">نکته: از آنجایی که WAS هم پروسه‌های http و هم non-http را مدیریت می‌کند، پس میتوانید از یک applicatio pool برای چندین protocol استفاده کنید. به عنوان مثال شما یکی سرویس XML دارید که می‌توانید از آن برای سرویس دهی به پروتوکل‌های Http و net.tcp بهره بگیرید.</blockquote> <div> <div> <hr> <b>ماژول‌ها در IIS</b> </div> <div>قبلا مقاله ای در مورد module‌ها با نام "<a href="www.dntips.ir-posts-1935.html">کمی در مورد httpmoduleها</a>" قرار داده بودیم که بهتر است برای آشنایی بیشتر، به آن رجوع کنید. به غیر از وب کانفیگ که برای معرفی ماژول‌ها استفاده می‌کردیم ، میتوانید به صورت گرافیکی و دستی هم این کار را انجام بدهید. ابتدا یک پروژه class library ایجاد کرده و ماژول خود را بنویسید و سپس آن را به یک dll تبدیل کنید و dll را در شاخه bin که این شاخه در ریشه وب سایتتان قرار دارد کپی کنید. سپس در IIS قسمت module گزینه Add را انتخاب کنید و در قسمت اول نامی برای آن و در قسمت بعدی دقیقا همان قوانین type که در وب کانفیگ مشخص می‌کردید را مشخص کنید: Namespace.ClassName</div> <div>گزینه invoke only for requests to asp.net and manage handlers را هم تیک بزنید. کار تمام است.</div> <div> <br> <b>ماژول‌های کد ماشین یا &nbsp;native</b> </div> <div>این ماژول‌ها به صورت پیش فرض به سیستم اضافه شده‌اند و در صورتی که میخواهید جایگزینی به منظور خصوصی سازی انجام دهید آن‌ها را پاک کنید و ماژول جدید را اضافه کنید.</div> <div> <b> <br>
+جدول ماژول‌های HTTP</b> </div> <div> <table> <tbody> <tr> <td>نام ماژول<br> </td> <td>توضیحات<br> </td> <td>نام فایل منبع<br> </td> </tr> <tr> <td style="text-align: left;">CustomErrorModule</td> <td>&nbsp;موقعی که هنگام response، کد خطایی تولید می‌گردد، پیام خطا را پیکربندی و سپس ارسال می‌کند.</td> <td style="text-align: left;">&nbsp;Inetsrv\Custerr.dll&nbsp;</td> </tr> <tr> <td style="text-align: left;">&nbsp;HttpRedirectionModule&nbsp;</td> <td>&nbsp;تنظمیات redirection برای درخواست‌های http را در دسترس قرار می‌دهد.</td> <td style="text-align: left;">&nbsp;Inetsrv\Redirect.dll&nbsp;</td> </tr> <tr> <td style="text-align: left;">&nbsp;ProtocolSupportModule&nbsp;</td> <td>&nbsp;انجام عملیات مربوط به پروتوکل‌ها بر عهده این ماژول است؛ مثل تنظیم کردن قسمت هدر برای response.</td> <td style="text-align: left;">&nbsp;Inetsrv\Protsup.dll&nbsp;</td> </tr> <tr> <td style="text-align: left;">&nbsp;RequestFilteringModule&nbsp;</td> <td>&nbsp;این ماژول از IIS 7.5 به بعد اضافه شد. درخواست‌ها را فیلتر می‌کند تا پروتوکل و رفتار محتوا را کنترل کند.</td> <td style="text-align: left;">&nbsp;Inetsrv\modrqflt.dll&nbsp;</td> </tr> <tr> <td style="text-align: left;">&nbsp;WebDAVModule&nbsp;</td> <td>&nbsp;این ماژول از IIS 7.5 به بعد اضافه شد. امنیت بیشتر در هنگام انتشار محتوا روی HTTP SSL</td> <td style="text-align: left;">&nbsp;Inetsrv\WebDAV.dll&nbsp;</td> </tr> </tbody> </table> <b> <br>
+ماژول‌های امنیتی</b> </div> <div> <table> <tbody> <tr> <td>نام ماژول&nbsp;</td> <td>توضیحات </td> <td>&nbsp;نام فایل منبع&nbsp; </td> </tr> <tr> <td style="text-align: left;">&nbsp;AnonymousAuthenticationModule&nbsp; </td> <td>موقعی که هیچ کدام از عملیات authentication &nbsp;با موفقیت روبرو نشود، عملیات &nbsp;Anonymous authentication&nbsp;انجام می‌شود. </td> <td style="text-align: left;">&nbsp;Inetsrv\Authanon.dll&nbsp; </td> </tr> <tr> <td style="text-align: left;">&nbsp;BasicAuthenticationModule&nbsp; </td> <td>&nbsp;عمل ساده و اساسی&nbsp;authentication&nbsp; را انجام می‌دهد. </td> <td style="text-align: left;">&nbsp;Inetsrv\Authbas.dll&nbsp; </td> </tr> <tr> <td style="text-align: left;">&nbsp;CertificateMappingAuthenticationModule&nbsp; </td> <td>&nbsp;انجام عمل&nbsp;Certificate Mapping authentication&nbsp; در Active Directory </td> <td style="text-align: left;">&nbsp;Inetsrv\Authcert.dll<br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&nbsp; </td> </tr> <tr> <td style="text-align: left;">&nbsp;DigestAuthenticationModule&nbsp; </td> <td>&nbsp;<span style="color: rgb(31, 40, 52); text-align: left;">Digest authentication&nbsp; </span> </td> <td style="text-align: left;">&nbsp;Inetsrv\Authmd5.dll&nbsp; </td> </tr> <tr> <td style="text-align: left;">&nbsp;IISCertificateMappingAuthenticationModule&nbsp; </td> <td>همان&nbsp;Certificate Mapping authentication&nbsp; ولی اینبار با IIS&nbsp;Certificate . </td> <td style="text-align: left;">&nbsp;Inetsrv\Authmap.dll&nbsp; </td> </tr> <tr> <td style="text-align: left;">&nbsp;RequestFilteringModule&nbsp; </td> <td>&nbsp;عملیات اسکن URL از قبیل نام صفحات و دایرکتوری‌ها ، توع verb و یا کاراکترهای مشکوک و خطرآفرین</td> <td style="text-align: left;">&nbsp;Inetsrv\Modrqflt.dll&nbsp; </td> </tr> <tr> <td style="text-align: left;">&nbsp;UrlAuthorizationModule&nbsp; </td> <td>&nbsp;عمل URL authorization&nbsp; </td> <td style="text-align: left;">&nbsp;Inetsrv\Urlauthz.dll&nbsp; </td> </tr> <tr> <td style="text-align: left;">&nbsp;WindowsAuthenticationModule&nbsp; </td> <td>&nbsp;عمل&nbsp;NTLM integrated authentication&nbsp; </td> <td style="text-align: left;">&nbsp;Inetsrv\Authsspi.dll&nbsp; </td> </tr> <tr> <td style="text-align: left;">&nbsp;IpRestrictionModule&nbsp; </td> <td>&nbsp;محدود کردن IP‌های نسخه 4 لیست شده در IP Security در قسمت پیکربندی</td> <td style="text-align: left;">&nbsp;<span style="color: rgb(31, 40, 52);">Inetsrv\iprestr.dll&nbsp;<br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ &nbsp; <br> </span> </td> </tr> </tbody> </table> <b> <br>
+ماژول‌های محتوا</b> </div> <div> <table> <tbody> <tr> <td style="text-align: left;">&nbsp;نام ماژول&nbsp; </td> <td>توضیحات </td> <td> نام فایل منبع  </td> </tr> <tr> <td style="text-align: left;">&nbsp;CgiModule&nbsp; </td> <td>&nbsp;ایجاد پردازش‌های (Common Gateway Interface (CGI&nbsp;به منظور ایجاد خروجی response </td> <td style="text-align: left;">&nbsp;Inetsrv\Cgi.dll&nbsp; </td> </tr> <tr> <td style="text-align: left;">&nbsp;DefaultDocumentModule&nbsp; </td> <td>&nbsp;تلاش برای ساخت یک سند پیش فرض برای درخواست هایی که دایرکتوری والد ارسال می‌شود</td> <td style="text-align: left;">&nbsp;Inetsrv\Defdoc.dll&nbsp; </td> </tr> <tr> <td style="text-align: left;">&nbsp;DirectoryListingModule&nbsp; </td> <td>&nbsp;لیست کردن محتوای یک دایرکتوری</td> <td style="text-align: left;">&nbsp;Inetsrv\dirlist.dll&nbsp; </td> </tr> <tr> <td style="text-align: left;">&nbsp;IsapiModule&nbsp; </td> <td>&nbsp;میزبانی فایل های&nbsp;ISAPI  </td> <td style="text-align: left;">Inetsrv\Isapi.dll </td> </tr> <tr> <td style="text-align: left;">&nbsp;IsapiFilterModule&nbsp; </td> <td>&nbsp;پشتیبانی از فیلتر های&nbsp;ISAPI  </td> <td style="text-align: left;">&nbsp;Inetsrv\Filter.dll&nbsp; </td> </tr> <tr> <td style="text-align: left;">&nbsp;ServerSideIncludeModule&nbsp; </td> <td>&nbsp;پردازش کدهای include شده سمت سرور</td> <td style="text-align: left;">&nbsp;Inetsrv\Iis_ssi.dll&nbsp; </td> </tr> <tr> <td style="text-align: left;">&nbsp;StaticFileModule&nbsp; </td> <td>&nbsp;ارائه فایل‌های ایستا</td> <td style="text-align: left;">&nbsp;Inetsrv\Static.dll&nbsp; </td> </tr> <tr> <td style="text-align: left;">&nbsp;FastCgiModule&nbsp; </td> <td>&nbsp;پشتبانی از CGI</td> <td style="text-align: left;">&nbsp;Inetsrv\iisfcgi.dll&nbsp; </td> </tr> </tbody> </table> <b> <br>
+ماژول‌های فشرده سازی
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</b> </div> <div> <table> <tbody> <tr> <td style="text-align: left;">&nbsp;DynamicCompressionModule&nbsp; </td> <td>فشرده سازی پاسخ response با gzip&nbsp;</td> <td> <span style="color: rgb(31, 40, 52); text-align: left;">Inetsrv\Compdyn.dll&nbsp; </span>&nbsp;</td> </tr> <tr> <td style="text-align: left;">&nbsp;StaticCompressionModule&nbsp; </td> <td>&nbsp;فشرده سازی محتوای ایستا</td> <td style="text-align: left;">&nbsp;<span style="color: rgb(31, 40, 52); text-align: left;">Inetsrv\Compstat.dll&nbsp; </span> </td> </tr> </tbody> </table> <b> <br>
+ماژول‌های کش کردن
+
+
+
+
+
+
+
+</b> </div> <div> <table> <tbody> <tr> <td style="text-align: left;">&nbsp;FileCacheModule&nbsp; </td> <td>تهیه کش در مد کاربری برای فایل‌ها.</td> <td> <span style="color: rgb(31, 40, 52); text-align: left;"> &nbsp; </span>&nbsp;Inetsrv\Cachfile.dll&nbsp; </td> </tr> <tr> <td style="text-align: left;">&nbsp;HTTPCacheModule&nbsp; </td> <td>&nbsp;تهیه کش مد کاربری و مد کرنل برای http.sys</td> <td style="text-align: left;">&nbsp;<span style="color: rgb(31, 40, 52); text-align: left;">Inetsrv\Cachhttp.dll&nbsp; </span> </td> </tr> <tr> <td>&nbsp;TokenCacheModule&nbsp; </td> <td>&nbsp;تهیه کش مد کاربری بر اساس جفت نام کاربری و یک token که توسط &nbsp;Windows user principals&nbsp;تولید شده است.&nbsp; </td> <td style="text-align: left;">&nbsp;Inetsrv\Cachtokn.dll&nbsp; </td> </tr> <tr> <td style="text-align: left;">&nbsp;UriCacheModule&nbsp; </td> <td>&nbsp;تهیه یک کش مد کاربری از اطلاعات URL</td> <td style="text-align: left;">&nbsp;Inetsrv\Cachuri.dll&nbsp; </td> </tr> </tbody> </table> </div> <div> <b> <br>
+ماژول‌های عیب یابی و لاگ کردن</b> </div> <div> <table> <tbody> <tr> <td style="text-align: left;">&nbsp;CustomLoggingModule&nbsp; </td> <td>بارگزاری ماژول‌های خصوصی سازی شده جهت لاگ کردن&nbsp;</td> <td style="text-align: left;">Inetsrv\Logcust.dll </td> </tr> <tr> <td style="text-align: left;">&nbsp;FailedRequestsTracingModule&nbsp; </td> <td>&nbsp;برای ردیابی درخواست‌های ناموفق</td> <td style="text-align: left;">&nbsp;Inetsrv\Iisfreb.dll&nbsp; </td> </tr> <tr> <td style="text-align: left;">&nbsp;HttpLoggingModule&nbsp; </td> <td>&nbsp;دریافت اطلاعات &nbsp;و پردازش وضعیت http.sys برای لاگ کردن</td> <td style="text-align: left;">&nbsp;Inetsrv\Loghttp.dll&nbsp; </td> </tr> <tr> <td style="text-align: left;">&nbsp;RequestMonitorModule&nbsp; </td> <td>&nbsp;ردیابی درخواست هایی که در حال حاضر در پروسه‌های کارگر در حال اجرا هستند و گزارش اطلاعاتی در مورد وضعیت اجرا و کنترل رابط برنامه نویسی کاربردی.</td> <td style="text-align: left;">&nbsp;Inetsrv\Iisreqs.dll&nbsp; </td> </tr> <tr> <td style="text-align: left;">&nbsp;TracingModule&nbsp; </td> <td>&nbsp;گزارش رخدادهای&nbsp;Microsoft Event Tracing for Windows&nbsp;یا به اختصار ETW </td> <td style="text-align: left;">&nbsp;Inetsrv\Iisetw.dll&nbsp; </td> </tr> </tbody> </table> <b> <br>
+ماژول‌های مدیریتی و نظارتی بر کل ماژول‌ها </b> </div> <div> <table> <tbody> <tr> <td style="text-align: left;">&nbsp;ManagedEngine&nbsp; </td> <td>&nbsp;مدیرتی بر ماژول‌های غیر native که در پایین قرار دارند.</td> <td style="text-align: left;">Microsoft.NET\Framework\v2.0.50727\webengine.dll </td> </tr> <tr> <td style="text-align: left;">&nbsp;ConfigurationValidationModule&nbsp; </td> <td>اعتبارسنجی خطاها، مثل موقعی که برنامه در حالت integrated اجرا شده و ماژول‌ها یا هندلرها در system.web تعریف شده‌اند.</td> <td style="text-align: left;">Inetsrv\validcfg.dll&nbsp; <br> </td> </tr> </tbody> </table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+از IIS6 به بعد در حالت integrated و ماقبل، در حالت کلاسیک می‌باشند.&nbsp;اگر&nbsp;<a href="www.dntips.ir-posts-1935.html">مقاله ماژول ها&nbsp;</a>را خوانده باشید می‌دانید که تعریف آن‌ها در وب کانفیگ در بین این دو نسخه متفاوت هست و&nbsp;رویداد سطر آخر در جدول بالا این موقعیت را چک می‌کند و اگر به خاطر داشته باشید با اضافه کردن یک خط اعتبارسنجی آن را قطع می‌کردیم. در مورد هندلرها هم به همین صورت می‌باشد. </div> <div>به علاوه ماژول‌های native بالا، IIS این امکان را فراهم می‌آورند تا از ماژول‌های کد مدیریت شده (یعنی CLR) برای توسعه توابع و کارکرد IIS بهره مند شوید:</div> <div> <table> <tbody> <tr> <td>&nbsp;ماژول</td> <td>توضیحات&nbsp;</td> <td>&nbsp;منبع</td> </tr> <tr> <td style="text-align: left;">&nbsp;AnonymousIdentification&nbsp; </td> <td>&nbsp;مدیریت منابع تعیین هویت برای کاربران ناشناس مانند asp.net profile</td> <td style="text-align: left;">System.Web.Security.AnonymousIdentificationModule&nbsp;&nbsp;</td> </tr> <tr> <td style="text-align: left;">&nbsp;DefaultAuthentication&nbsp; </td> <td>&nbsp;اطمینان از وجود شی Authentication در context مربوطه</td> <td style="text-align: left;">&nbsp;System.Web.Security.DefaultAuthenticationModule&nbsp; </td> </tr> <tr> <td style="text-align: left;">&nbsp;FileAuthorization&nbsp; </td> <td>&nbsp;تایید هویت کاربر برای دسترسی به فایل درخواست</td> <td style="text-align: left;">&nbsp;System.Web.Security.FileAuthorizationModule&nbsp; </td> </tr> <tr> <td style="text-align: left;">&nbsp;FormsAuthentication&nbsp; </td> <td>&nbsp;با این قسمت که باید کاملا آشنا باشید؛ برای تایید هویت کاربر</td> <td style="text-align: left;">&nbsp;System.Web.Security.FormsAuthenticationModule&nbsp; </td> </tr> <tr> <td style="text-align: left;">OutputCache</td> <td>&nbsp;مدیریت کش</td> <td style="text-align: left;">&nbsp;System.Web.Caching.OutputCacheModule&nbsp; </td> </tr> <tr> <td style="text-align: left;">&nbsp;Profile&nbsp; </td> <td>&nbsp;مدیریت پروفایل کاربران که تنظیماتش را در یک منبع داده‌ای چون دیتابیس ذخیره و بازیابی می‌کند.</td> <td style="text-align: left;">&nbsp;System.Web.Profile.ProfileModule&nbsp; </td> </tr> <tr> <td style="text-align: left;">&nbsp;RoleManager&nbsp; </td> <td>&nbsp;مدیریت نقش و سمت کاربران</td> <td style="text-align: left;">&nbsp;System.Web.Security.RoleManagerModule&nbsp; </td> </tr> <tr> <td style="text-align: left;">&nbsp;Session&nbsp; </td> <td>&nbsp;مدیریت session ها</td> <td style="text-align: left;">&nbsp;System.Web.SessionState.SessionStateModule&nbsp; </td> </tr> <tr> <td style="text-align: left;">&nbsp;UrlAuthorization&nbsp; </td> <td>&nbsp;آیا کاربر جاری حق دسترسی به URL درخواست را دارد؟</td> <td style="text-align: left;">&nbsp;System.Web.Security.UrlAuthorizationModule&nbsp; </td> </tr> <tr> <td style="text-align: left;">&nbsp;UrlMappingsModule&nbsp; </td> <td>&nbsp;تبدیل یک Url واقعی به یک Url کاربرپسند</td> <td style="text-align: left;">&nbsp;System.Web.UrlMappingsModule&nbsp; </td> </tr> <tr> <td style="text-align: left;">&nbsp;WindowsAuthentication&nbsp; </td> <td>شناسایی و تایید و هویت یک کاربر بر اساس لاگین او به ویندوز&nbsp;</td> <td style="text-align: left;">&nbsp;System.Web.Security.WindowsAuthenticationModule&nbsp; </td> </tr> </tbody> </table> </div> </div> </div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/learning-paths/details/19'><span class='badge bg-danger rounded-pill me-2'>مسیرراه‌ها</span>آشنایی با ساختار IIS</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1944.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با ساختار IIS قسمت دوم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1946.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با ساختار IIS قسمت چهارم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1947.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با ساختار IIS قسمت پنجم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1950.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با ساختار IIS قسمت ششم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1953.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با ساختار IIS قسمت هشتم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1952.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با ساختار IIS قسمت هفتم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1941.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با ساختار IIS قسمت اول</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2829.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بررسی خطاهای ممکن در حین راه اندازی اولیه برنامه‌های ASP.NET Core در IIS</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1999.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با ساختار IIS قسمت سیزدهم</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

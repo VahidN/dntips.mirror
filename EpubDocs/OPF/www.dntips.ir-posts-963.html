@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫روشی جهت یافتن فیلدهای استفاده شده درون Stored Procedure ، Function و View</title>     <meta name="description" content="گاهی اوقات بدلیل تغییرات در جداول و غیرو...، ممکن است لازم شود، از استفاده قرار گرفتن فیلدهای جداول درون Function ها،Stored Procedure‌ها و یا View‌ها ، مطلع شوید. در این زمان شما می‌توانید از روش زیر استفاده نماید.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+قبل از هر چیز در ابتدا Script زیر را اجرا نمایید.که شامل یک جدول به نام FindField ، یک Stored Procedure به نام PROCEDURE_FindField و یک Function به نام FUNCTION_FindField می‌باشد.
+
+
+
+
+
+
+
+
+ ...">
+    <meta name="author" content="فرهاد فرهمندخواه">
+    <meta itemprop="name" content="روشی جهت یافتن فیلدهای استفاده شده درون Stored Procedure ، Function و View">
+    <meta itemprop="description" content="گاهی اوقات بدلیل تغییرات در جداول و غیرو...، ممکن است لازم شود، از استفاده قرار گرفتن فیلدهای جداول درون Function ها،Stored Procedure‌ها و یا View‌ها ، مطلع شوید. در این زمان شما می‌توانید از روش زیر استفاده نماید.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+قبل از هر چیز در ابتدا Script زیر را اجرا نمایید.که شامل یک جدول به نام FindField ، یک Stored Procedure به نام PROCEDURE_FindField و یک Function به نام FUNCTION_FindField می‌باشد.
+
+
+
+
+
+
+
+
+ ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="روشی جهت یافتن فیلدهای استفاده شده درون Stored Procedure ، Function و View">
+    <meta property="og:description" content="گاهی اوقات بدلیل تغییرات در جداول و غیرو...، ممکن است لازم شود، از استفاده قرار گرفتن فیلدهای جداول درون Function ها،Stored Procedure‌ها و یا View‌ها ، مطلع شوید. در این زمان شما می‌توانید از روش زیر استفاده نماید.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+قبل از هر چیز در ابتدا Script زیر را اجرا نمایید.که شامل یک جدول به نام FindField ، یک Stored Procedure به نام PROCEDURE_FindField و یک Function به نام FUNCTION_FindField می‌باشد.
+
+
+
+
+
+
+
+
+ ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="روشی جهت یافتن فیلدهای استفاده شده درون Stored Procedure ، Function و View">
+    <meta name="twitter:description" content="گاهی اوقات بدلیل تغییرات در جداول و غیرو...، ممکن است لازم شود، از استفاده قرار گرفتن فیلدهای جداول درون Function ها،Stored Procedure‌ها و یا View‌ها ، مطلع شوید. در این زمان شما می‌توانید از روش زیر استفاده نماید.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+قبل از هر چیز در ابتدا Script زیر را اجرا نمایید.که شامل یک جدول به نام FindField ، یک Stored Procedure به نام PROCEDURE_FindField و یک Function به نام FUNCTION_FindField می‌باشد.
+
+
+
+
+
+
+
+
+ ...">
+    <meta name="twitter:card" content="گاهی اوقات بدلیل تغییرات در جداول و غیرو...، ممکن است لازم شود، از استفاده قرار گرفتن فیلدهای جداول درون Function ها،Stored Procedure‌ها و یا View‌ها ، مطلع شوید. در این زمان شما می‌توانید از روش زیر استفاده نماید.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+قبل از هر چیز در ابتدا Script زیر را اجرا نمایید.که شامل یک جدول به نام FindField ، یک Stored Procedure به نام PROCEDURE_FindField و یک Function به نام FUNCTION_FindField می‌باشد.
+
+
+
+
+
+
+
+
+ ...">
+    <meta property="article:published_time" content="Wed, 25 Jul 2012 12:26:16 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫روشی جهت یافتن فیلدهای استفاده شده درون Stored Procedure ، Function و View";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
+<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+<td><span class='badge bg-secondary rounded-pill'>۱۷۹۱۸</span></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-964.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫نکاتی در مورد ELMAH</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-962.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫Google OpenID Authentication در ASP.NET با استفاده از DotNetOpenAuth</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫روشی جهت یافتن فیلدهای استفاده شده درون Stored Procedure ، Function و View</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>فرهاد فرهمندخواه<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۱/۰۵/۰۴ ۱۲:۲۶</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-963.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><div align="justify">گاهی اوقات بدلیل تغییرات در جداول و غیرو...، ممکن است لازم شود، از استفاده قرار گرفتن فیلدهای جداول درون Function ها،Stored Procedure‌ها و یا View‌ها ، مطلع شوید. در این زمان شما می‌توانید از روش زیر استفاده نماید.<br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+قبل از هر چیز در ابتدا Script زیر را اجرا نمایید.که شامل یک جدول به نام FindField ، یک Stored Procedure به نام PROCEDURE_FindField و یک Function به نام FUNCTION_FindField می‌باشد.<br>
+
+
+
+
+
+
+
+
+
+<div dir="ltr" align="left">
+
+
+
+
+
+
+
+
+
+<pre language="CSharp" name="code">Create Table FindField
+(ID int,
+Firstname varchar(255),
+Lastname varchar(255))
+Go
+CREATE PROCEDURE PROCEDURE_FindField
+AS
+    SELECT Firstname FROM FindField;
+GO
+CREATE FUNCTION FUNCTION_FindField (@id int)
+RETURNS int
+WITH EXECUTE AS CALLER
+AS
+begin 
+declare @id1 int;
+   set @id1= (Select Max(Firstname) from dbo.FindField) ;
+   RETURN (@id1);
+END;</pre>
+
+
+
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+در ادامه Script زیر را اجرا نمایید:<br>
+
+
+
+
+
+
+
+
+
+<div dir="ltr" align="left">
+
+
+
+
+
+
+
+
+
+<pre language="Sql" name="code">SELECT OBJECT_NAME(object_id) as 'Procedure/Function/View Name',
+definition
+FROM sys.sql_modules
+WHERE definition LIKE '%' + 'Firstname' + '%'</pre>
+
+
+
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+خروجی بصورت زیر خواهد بود:<br>
+
+
+
+
+
+
+
+
+
+<span style="Times New Roman&quot;;Times New Roman&quot;;"> </span><span style="Times New Roman&quot;;Times New Roman&quot;;"> <br>
+
+
+
+
+
+</span><p><img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgkAAABhCAMAAABrhMLUAAAAAXNSR0IArs4c6QAAAfVQTFRFAAAAAAAAAAAtAAAwAAA6AABRAABUAABmAC4tADAwADo6AC5xADB2ADpmADqQAFSPAFSWAGa2MAAAOgAAMAAtMAAwOgA6MABRMABUOgBmOTk5MC4tMC5RMC5xMzNmMDB2OjqQMzPMMFRRMFSPM2YzM2ZmMHVxOmZmMHWPMHWsMHa0Oma2M2bMOpCQOpDbVQAAVAAAVQAtVQBRVABUVS4AVS5xQEBAX19fVZSsVZTIVJbSZgAAZgA6ZgBmdy4AdjAAZjoAdy4tdjAwdy5RZjqQd1QAdlQAd1QtZmZmZmaZZpkzd5RxdpZ2ZpmZZpCQZpnMZpn+d7OPd7Osd7PIdrTSZrbbZrb+ZswzkDoAkDo6kDpml1QAllQAl1QtkGYAl3Utl5RRgICAlpaWmZmZmZnMmZn+l7NxlrR2kLaQl9CPl9CsltK0l9DImczMltLSmcz+kNv+tmYAtnUttHYwtmY6tpRRtrNxtLR2srKyoKCkttCPttuQttCstNK0ttDItNLSpsrwtv62tv7btv7+25A61JRR0pZU1LNx0rR21NCP0tKW29uQ1NCs0tK01NDIwMDAy8vL19fXzMzM3d3d0tLSzMz+2/622/7bzOz+2/7+/mYz/mZm/plm/pmZ/rZm/tuQ/v62/v7b/v7+6urq8fHx+Pj44+Pje3BTTAAAAAF0Uk5TAEDm2GYAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAAZdEVYdFNvZnR3YXJlAE1pY3Jvc29mdCBPZmZpY2V/7TVxAAAPEUlEQVR4Xu1djWMURxXPAYFqKilBSwsGUjVW2kpakCgg1EpbtfjVBhEbWw2e1GpS4KqQo5RGyXEJSS+hBJvSmo8l9O/0fczszuzu7e3s7W1uwwztJTc782bmvd+892b3d5eOkdqIVgZ97/Wr9l1ba2DQqSX919ExMmjLxtFAYiA4gARbrAZAAx0dNVusBkADFgkWBqwBiwSLBIsEiwFVA+gTnDSKVWvONQBIcFJZwmAqUqyQddNAR0c6QKiNpOFYFBnrppGHdeD0kJCyU0hZ3MNq3/jrVpDwG1GeoxJfBLccYdPNzY1jKZt2D7QfSclXNT2Rh0WAioQLFy789beiJEVCkRz8/V81rT+BrKblWAExNRDwCewRnntK9K/2FKAcCUir9l7X64TlAAlri4sTv4g5fP1mFglNq9BMgIIE3M7z8P+c4zwo7pVIQIsHzI5Vl3UsuEi4/cn8RNEiwcwMbdDahwRAgTPuPFgr7laRMH1w1D/VukgYGy+Wy2UdCdWe7lpt9kSXz41ELt/6hIzRoSChfHt+Dst4cbysIwF8AkSJTUO1UqGwHx0E4OCbPyh0Xcf3YsJedAAwTcxPjI3dcZdS3YN9eiwSMjau0XAqEjgyOMW1tcWy6xMwT+gcnX1pCMx/9eBoddd5RgJGB/AV1V3CXUgkfHn//t2JCRSz14VCtfdnQ7XKt/yphfUJRqZqceNgdHgwDimfhwQw3+yJI5Q4bnrjBLgA4RMQCbP43ucT7qBXGXP+90Vx3oVCtfdf+2tvnVI9C7mX2jBloyi8S/E6JNFGhxZb3i9eQcK5T+bmIMqPFyHQ/0XLEyrd7tYf7lR8Aggb7vT5BDpFjsH/d/r3emnn5d6rhy/3XvM8y7vSnVR7r50AMKjXSKJFwjoiAV36g7W18uLdiXPa2WH64N/RWrvOf31o9qXXIX2sdFF0qOL7IZ6xmyesLd5fHHO++Nx5rdjvpp3XTv65G0KK51nYnZA3wEOIds36hIxBQMOpPgHPDZgjQJzXkQDhYXpAZozo1x8BHFwd6BwNyxjX7i8u4oF07c6YAqfSniNgbZlUkCcZ7nz3Bcw+BBK0a9YnZA4GFQlwasDIUC6eO+ciIfaEXJ8AQLhbdD6/9+VrKhIgvIg4wJ7llOdeRHTwvA55GRsdYqs+nYYqEnbvpX/4326ZJ8QeRUHC3d+X4Ybz7Tn99hSmmrpn2Y/uhXNFeFWuWSTEVnt6DdN+FlmcL46NjZWde/fmv+MiofF0K3DrSS/WJzTWWqotUkdC/w/7+/vLzsQYBBqZJ0TPGJwB5iAWCaka1lhY2kjgCZT3cjGejtfB+oQmlJeka2uQkGQm1iekoLUmRKSIhJTpa1ZcthpIDQlNoNF2bQcNMBLsBwOtBgQSNs6Hhe1KEmpAIiE6Jg1mG7KSj5abiSZfYuo9hc5cJESFqhFo3A6hrOEccjPRhivJrgHqDItFQnY6b8+RLBLa0y7ZzyoREoi5FGS8y9mHUKCByHryPPZyuU3RSwXaAsp3iTFqa2BDhNKslTZKdHAnMxwx4+z13n4jJkMCcUqu11tN6KUKUWBDCtJkA1cq+0uImVIY55EosRHD42nYS2hkQ+RaimGIChEtoP0M1fIZJUZCCOM9yifMnnQN4VtTmElEa5cIpXWp9r6CNLe6QAxHgtbBwiAIrMRIIIJ7J3h8oB3hU0QipMKjRJWIxg3o+WKFKbAuD/YV7IH9fnSCeGvQrROwQtXUmlnUfGXTUKVzFKA3Ddwm8WEbEEY02Cqw7L9HBFsxEC1R+gSPI/v6QAGYl5dpAOwTHLPlm67NB0iGBIj4m4aQvQgEo1I3vk6/8AaZDolHyG4kSiLTGxEBsMkJI5IH20PkVeqHVGf6tdRdpWpuXYPwUIKIwuxXeK2ACckRIAjcX2EMmIdsJv2EQAJOrNLFEiggXKYBmHvpG7PN7dT66SVDgrSIZLqTgYimCnb1KIm0oYl0AJtc9wmyFVW7HEaRf2BrNr9kuA4NH3nr1LepnjhPQJBmihNHfLeZUJhAgpienJg3DMNCmWpUqGm9EdpihBSRQFRUDxu8DZmfSptciw5RSKDWEB7IWwj2a+W7h68e/hOdV1AOpJJXJQ2WkSCJsGp0EJORE7NIiIJcc0jQogNRUZEGX+qCD0lxjMAGgAaxyWHnYaIpo0cwOrBP4K1fK+3B3IJ4rrtGpwfg8zH8mQq07/SANwYhQTTTfQJNr4svwcczfEgQESn6HNQW2zWTSTSHBAwJcKTjjJGpqFDzSC9+UBIZ8HRp0xCfMzjKu1fQyWO/6QFMHkgQ72GEEVkc7htwIxBLIZ9JjiSnRB/G9KKDaKYjQUyGJGhBCJj5+pg2OlCWbe82Z7Lp2nwQi4Q2N1Bm07NIyEzVbT5QAAmRpB0IJfkg9eRmom2kTl+e0IDo4iQkwmTeLTcTzVwz9QfUM8ZGLqxQy8u/Riux1/0a8CEhkhQ1WFvISUnnS6hTZ4i1s0ChMslZivz2Zvg8UiEnSCi0s87bc26GSMgJEBasTzCGmyESrE8w1nBeOtRBQigRBaKD8AlT+Hzv6AL9gJ8LNwuFzafh2vtqtWi0cOvQewv4Ilu7vVAYvXlGcTVT+z7S6uA9NqPX+MXnEyZhkDPO8k6crvfTWdpy0XEuYWVhh7zocDO1VaGA7RxNiGjkrBy/4eBLQHZaYmBgkn1AQdRy32daHbzHZvRKhRZG/c7EBmIoEoBGKL9BS00wvTwBDYMmQ/vAy82t7y1MfeP0wvuPfrRw6/mjwmz44+MXj3pIEK01q0oRrpEVsVSXDAl6njC5/TNn5dgZUhVqUars0s9Jv2RNT4/4m2wFP5e23XCWH7/oqEK4+erZMx4S/LKpRQpipIkVO6tiydABJNDCVn580Vl+EpYWryT0CWBU3OVo21uH/vFT9Ac3H/uYfrobWBrZ9QncmnvJEtjsEgl6g6Z8wuofcIcIheH+FUhYffPfL+M2CkGCbLVy/D/UeWmHJkTIAkGuT0CZimxukYIYfbOzUVU0hyGBF6ZiJwYYDJEg8gTdJ1x5Atz/wtQT7wgTKz4BLa8hIdTQU/uu7HtVhptHXVcDUWLzaREtwNuYFM0nSJX4fcLys2zeSJ8wQ7tq+ckPBHyEMPoBHTUkaBbSfUJiMZ5PmOl7W0at7ezXOEpsuSiiBXg+gRRa2OpZNaI0xIIhEpQ8ARIDCuhbxSa/dchFglINfkLLEzCO8GUWhW+2vrPvSg9kHfs+hFhyE5DAdR+Ci0GMiFoTIOhnBxcJGG/R14ufk2ecSVQWI0FU8m8QZ0UFd1457iKB21E16FvLExTZqYkR8X7bB30zOyF56fsUQtISIAGmAXWfgsWX+2ZkrTC3WNjqWU5w4hVDJCg+QYQByASm4vsEzBvC8oQrlHjwq/QJVxAxm38pa42QUNcnYGwXyABFFQq4j0J8gtiJ0JojbSyfoMj2fLpIKBKLUX0CevwZLf2YQVxu+ZusZZu7C4Oo5vqJhnAwRIL0CRwHyKYyP6ibJ1D6IA1887H4SGCAJUKCdnbQQvzSDomE5WdpV0chwc0P6uYJJEBGBU+2joRmxDRAAuNUR4K7MLG0hiCgBoZICPoEzASizw4Lf8RzpkBAaMYorY1xAM4fItXEd5h8iNrkPkFL+72sjiIDvtT3CXgp+uzgXIJzmkRAIGOUZmxCjB8JGB3gGCPyBHyH/krUss3FwiZ3ZOwT0OGH3U94Rt5PgKNkoQAZHxkYgwndhRD3EITVZVzoKXzFO5zeet7NGKHWCAnh9xMotoPDp/sK34dDFrr9G0qeQKd2NSdEh78Ucj/hgLyfQK4YXDDnDVJ2imL8SMAM4aviJIxnl2Nuxgi1BAQ8PdLC4E4JZC7Bwoku4V8p9h5jPN+58VsZIsFoY0Y2hg2vHCHSk8uSNsZzB9jwfNrJohgiwT53yMIo6zJGAAlRfCrLT1gXG2UzqB8J0Wwqy0/IxirrMYofCY1IXZa81khDub3O8PM4S1FwHMxNIpabia7H7g8f0zBjbJ+JR8/EIsHYUhYJxirboB0sEjaoYY2XFY4E+OaawF9fob/JJOQzd8p9IguMHrrdyvwuSQeDCnGjFik/HnHCnIxlvCr5OEV2NGevJVpchmoh3eOyXH6an5ii3U0OkusCOg1FQqmbPqbuLwoSxEN7yeHjG++C3+U90pEPb5Z3yjvzOL4kWbhzUTheVBcgYzWLBHP2mlgDERTjL05yGTJQC1AQVs/CIyZ8VfSlknLguZiq4iDVSVdr3ehAX4Onl7pI6HubOBSCJOYigSvoQR01EJSaAKuqERnLHAi6T0jAXlOQYLA4HxIMerr4V9YapRbc8JcEJemfCjdPdidWxJvebWpJsQro3huvHhKMfAI+Hudn5FzEY17J2AKCDzVQkYBVcclYzSJB3SgqBzCCvaYiIf7i/EiI39NzlfHUws/BmV01+Wv+DUkpQq2/O4vv8IG5DOcBwm286IDffRLyF+H1PGGbyuG7BMThIBJkDIFJYwOJBCZexSdjpYaE+Oy1ZIsjSlkmagEKwtIBfKIOvwASBKWNkEAcN7IF8RS4SG6ex9GLi4QwIKgZo54nwGPyl2cifQI18PuEmGSsBEDQo4PqE2Kz1xSqauzF+X1C69RCSEDH8PhFJKoISpvHXgogQZDyjaNDKBACSFCZW5NPR+YJcK54Og4SwshYTSMhEXstyeJYz0l6qtEhZIME1IJI2AEPrb/2E2LXxkKCS60KV2hongBfiRp299yfMarMrZVj2yPODkj9hwbCU3HM4tnHIGM1jYRk7DWFlhZ3cWLHJejpR0IjtYA7YGoSuX6PvCbVSj7Bnydo5Lp40QG/CDfka9cDSFCZW3hS42O7QgyU9xMoaoUioTEZKwkQ6txPMGKvJVicQEKCnn4kNFILxq5lyAgEEkRzb4P999i2G4Gzg0euC+Ov2XuMiZC27p3gfgKz2bUPTGrTUu8nxJhvlkjIkIyVpydQidTi56MGTd24hd4nSyTEAGZaTfKEhLTW3KQcQ/Zak6Nl1t0iwVjVhuw1Y/nr1MEiwVjxpuy13HKz7MQbaEBAJ95fDjXGme2QOw1YJOTOZC2asEVCixSbO7EWCbkzWYsmbJHQIsXmTqxFQu5M1qIJWyS0SLG5E9thi9UAa+D/u5fAsjBiAoAAAAAASUVORK5CYII="></p>
+
+
+
+
+
+<p>همانطور که در شکل مشاهده می‌نمایید، فیلد Firstnameدر Function و Stored Procedure مورد استفاده واقع شده است.</p>
+
+
+
+<p>جهت کسب اطلاعات بیشتر به آدرس زیر مراجعه نمایید:</p>
+
+
+
+<p><a href="http://msdn.microsoft.com/en-us/library/ms1750">http://msdn.microsoft.com/en-us/library/ms175081.aspx </a> 
+
+
+
+</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3268.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>کار با دیتاتایپ JSON در MySQL - قسمت چهارم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2164.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>اتصال Node.js به SQL Server با استفاده از Edge.js</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-140.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>تعیین اعتبار کردن یک عبارت SQL - قسمت دوم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1072.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>اجرای Stored Procedure با چند نوع مقدار برگشتی توسط EF CodeFirst</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3285.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>ایجاد و نگهداری Stored Procedure و View با استفاده از Migration</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1478.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با SQL Server Common Table Expressions - CTE</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1891.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>پیاده سازی عملیات صفحه بندی (paging) در sql server</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1125.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>رمزگذاری رویه‌های ذخیره شده در SQL Server</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1125.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>رمزگذاری رویه‌های ذخیره شده در SQL Server</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-963.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>روشی جهت یافتن فیلدهای استفاده شده درون Stored Procedure ، Function و View</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۱/۰۵/۰۴ ۱۲:۵۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>ضمن تشکر. ابزار (افزونه) رایگانی هم برای انجام اینکار وجود دارد:<br>
+<div align="center"><a href="http://www.red-gate.com/products/sql-development/sql-search/"> SQL Search</a> <span>&nbsp;</span></div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مهمان</strong>  در  <span dir='ltr'>۱۳۹۱/۰۵/۰۴ ۲۰:۲۴</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>مرسی از افزونه ای که معرفی نمودید،</div>
+</div></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>فرهاد یزدان پناه</strong>  در  <span dir='ltr'>۱۳۹۱/۰۵/۰۴ ۱۳:۱۹</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>با تشکر از مطلب جالبتون.<div>به نظر من یک کار دیگه. استفاده از&nbsp;WITH SCHEMABINDING&nbsp;در زمان ایجاد اشیای وابسته است.</div></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۳۹۱/۰۵/۰۴ ۱۳:۵۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>این <a href="http://ask.sqlservercentral.com/questions/2582/what-is-schemabinding.html">روش خوبی</a>  است ولی فقط برای viewها و توابع کاربرد دارد و نه برای SPها.<br>
+<br></div>
+</div><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>فرهاد یزدان پناه</strong>  در  <span dir='ltr'>۱۳۹۱/۰۵/۰۴ ۱۴:۸</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>بله همینطوره.<div>به نظر من &nbsp;ایجاد اشیایی همانند Function و Stored Proc با وجود ORMهای امروزی، تا حدودی مناسب نیست (خارج از مواردی که مسائل Performance مطرح است).</div>
+<div>ایجاد و بازسازی این اشیا در صورت وجود در هنگام Seed پایگاه داده (چه ایجاد و &nbsp;چه تغییر) می‌تواند بسیاری از مشکلات موجود را حل کند.<br>
+</div></div>
+</div></li></ul></li></ul></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مرتضی</strong>  در  <span dir='ltr'>۱۳۹۱/۰۵/۰۴ ۱۹:۵۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>سلام<div>با این کوئری که شما گفتید اگر View, Function , Stored Procedure رمز شده باشند</div>
+
+
+
+<div>دیگه نمی‌تونه جواب بده</div>
+
+
+
+<div>ولی با این کوئری امکانش هست</div>
+
+<div><div align="left" dir="ltr">
+
+<pre language="Sql" name="code">SELECT TABLE_NAME,
+       column_Name
+FROM   INFORMATION_SCHEMA.COLUMNS
+WHERE  column_Name LIKE '%' + 'Name' + '%' </pre>
+
+</div>
+
+</div></div>
+</div></li><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>مرتضی</strong>  در  <span dir='ltr'>۱۳۹۱/۰۵/۰۴ ۲۰:۲</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>اون افزونه رایگانی که مهندس نصیری معرفی کردن<div>از هر دو استفاده می‌کنه</div>
+<div>یعنی هم متن درون view &nbsp;و Function , Procedure رو جستجو می‌کنه</div>
+<div>که اگر رمز شده باشند دیگه نتیجه ای نداره</div>
+<div>و هم عناوین ستون‌های اون شئ رو جستجو میکنه&nbsp;</div></div>
+</div></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+<script src="SyntaxHighlighter.js" type="text/javascript"></script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>
