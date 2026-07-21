@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫توسعه‌ی بومی ویژگی‌های زبان: افزودن اعضای استاتیک سفارشی به کلاس‌های موجود در C# 14</title>     <meta name="description" content=" زبان سی‌شارپ (#C) همواره با ارائه ویژگی‌های جدید در مسیر بهبود خوانایی کد، افزایش ظرافت نحو (Syntactic Sugar) و ارتقای تجربه توسعه‌دهنده (Developer Experience) گام برداشته است. یکی از چالش‌های دیرینه در طراحی APIها، عدم امکان افزودن اعضای استاتیک (از جمله خواص استاتیک یا Static Properties) به کلاس‌های موجود بدون دستکاری سورس‌کد اصلی آن‌ها بود. در این مقاله، با بررسی یک سناریوی واقعی در مقایسه رشته‌ها (Natural Sort)، راهکارهای گذشته را نقد ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="توسعه‌ی بومی ویژگی‌های زبان: افزودن اعضای استاتیک سفارشی به کلاس‌های موجود در C# 14">
+    <meta itemprop="description" content=" زبان سی‌شارپ (#C) همواره با ارائه ویژگی‌های جدید در مسیر بهبود خوانایی کد، افزایش ظرافت نحو (Syntactic Sugar) و ارتقای تجربه توسعه‌دهنده (Developer Experience) گام برداشته است. یکی از چالش‌های دیرینه در طراحی APIها، عدم امکان افزودن اعضای استاتیک (از جمله خواص استاتیک یا Static Properties) به کلاس‌های موجود بدون دستکاری سورس‌کد اصلی آن‌ها بود. در این مقاله، با بررسی یک سناریوی واقعی در مقایسه رشته‌ها (Natural Sort)، راهکارهای گذشته را نقد ...">
+    <meta name="robots" content="index, follow">
+    <meta name="llms.txt" content="llms.txt">
+    <meta name="llms-full.txt" content="llms-full.txt">
+    <meta property="og:title" content="توسعه‌ی بومی ویژگی‌های زبان: افزودن اعضای استاتیک سفارشی به کلاس‌های موجود در C# 14">
+    <meta property="og:description" content=" زبان سی‌شارپ (#C) همواره با ارائه ویژگی‌های جدید در مسیر بهبود خوانایی کد، افزایش ظرافت نحو (Syntactic Sugar) و ارتقای تجربه توسعه‌دهنده (Developer Experience) گام برداشته است. یکی از چالش‌های دیرینه در طراحی APIها، عدم امکان افزودن اعضای استاتیک (از جمله خواص استاتیک یا Static Properties) به کلاس‌های موجود بدون دستکاری سورس‌کد اصلی آن‌ها بود. در این مقاله، با بررسی یک سناریوی واقعی در مقایسه رشته‌ها (Natural Sort)، راهکارهای گذشته را نقد ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="توسعه‌ی بومی ویژگی‌های زبان: افزودن اعضای استاتیک سفارشی به کلاس‌های موجود در C# 14">
+    <meta name="twitter:description" content=" زبان سی‌شارپ (#C) همواره با ارائه ویژگی‌های جدید در مسیر بهبود خوانایی کد، افزایش ظرافت نحو (Syntactic Sugar) و ارتقای تجربه توسعه‌دهنده (Developer Experience) گام برداشته است. یکی از چالش‌های دیرینه در طراحی APIها، عدم امکان افزودن اعضای استاتیک (از جمله خواص استاتیک یا Static Properties) به کلاس‌های موجود بدون دستکاری سورس‌کد اصلی آن‌ها بود. در این مقاله، با بررسی یک سناریوی واقعی در مقایسه رشته‌ها (Natural Sort)، راهکارهای گذشته را نقد ...">
+    <meta name="twitter:card" content=" زبان سی‌شارپ (#C) همواره با ارائه ویژگی‌های جدید در مسیر بهبود خوانایی کد، افزایش ظرافت نحو (Syntactic Sugar) و ارتقای تجربه توسعه‌دهنده (Developer Experience) گام برداشته است. یکی از چالش‌های دیرینه در طراحی APIها، عدم امکان افزودن اعضای استاتیک (از جمله خواص استاتیک یا Static Properties) به کلاس‌های موجود بدون دستکاری سورس‌کد اصلی آن‌ها بود. در این مقاله، با بررسی یک سناریوی واقعی در مقایسه رشته‌ها (Natural Sort)، راهکارهای گذشته را نقد ...">
+    <meta property="article:published_time" content="Mon, 20 Jul 2026 04:50:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫توسعه‌ی بومی ویژگی‌های زبان: افزودن اعضای استاتیک سفارشی به کلاس‌های موجود در C# 14";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <table class='table mt-4 shadow-sm rounded table-hover mx-auto w-100 caption-bottom'>
+<caption><div class='row mt-1'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+</tr>
+</tbody>
+</table>
+
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-3722.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫میان‌بر در خط‌لوله پردازش: آشنایی با ویژگی [ShortCircuit] در ASP.NET Core 11</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-3720.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫مدیریت هوشمندانه خطوط جدید در regular expressions دات‌نت ۱۱</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫توسعه‌ی بومی ویژگی‌های زبان: افزودن اعضای استاتیک سفارشی به کلاس‌های موجود در C# 14</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۵/۰۴/۲۹ ۰۸:۲۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-3721.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">زبان سی‌شارپ (#C) همواره با ارائه ویژگی‌های جدید در مسیر بهبود خوانایی کد، افزایش ظرافت نحو (Syntactic Sugar) و ارتقای تجربه توسعه‌دهنده (Developer Experience) گام برداشته است. یکی از چالش‌های دیرینه در طراحی APIها، عدم امکان افزودن اعضای استاتیک (از جمله خواص استاتیک یا Static Properties) به کلاس‌های موجود بدون دستکاری سورس‌کد اصلی آن‌ها بود. در این مقاله، با بررسی یک سناریوی واقعی در مقایسه رشته‌ها (Natural Sort)، راهکارهای گذشته را نقد کرده و نحوه استفاده از بلاک‌های توسعه‌ی جدید (Extension Blocks) در <strong>C# 14</strong> را برای گسترش طبیعی‌تر انواع داده در دات‌نت شرح می‌دهیم.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>۱. مقدمه و طرح مسئله</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">در بسیاری از پروژه‌های نرم‌افزاری، نیاز به مقایسه سفارشی رشته‌ها احساس می‌شود. به عنوان مثال، در الگوریتم‌های مرتب‌سازی فایل‌ها، رفتار استاندارد مرتب‌سازی لغوی (Lexicographical Sorting) ممکن است نام رشته‌ها را به صورت زیر مرتب کند:</div><div class="ql-align-left ql-direction-ltr" dir="ltr" style="text-align: left;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">&quot;file1.txt&quot; -&gt; &quot;file10.txt&quot; -&gt; &quot;file2.txt&quot;</code></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">این رفتار از نظر کاربر نهایی منطقی نیست. در مقایسه طبیعی یا <strong><a href="www.dntips.ir-news-20130.html">Natural Sort Order</a></strong>، انتظار داریم عدد درج‌شده در نام فایل‌ها به عنوان یک مقدار عددی تحلیل شود تا ترکیب به صورت هوشمندانه مرتب گردد:</div><div class="ql-align-left ql-direction-ltr" dir="ltr" style="text-align: left;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">&quot;file1.txt&quot; -&gt; &quot;file2.txt&quot; -&gt; &quot;file10.txt&quot;</code></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">کلاس پایه <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">StringComparer</code> در فریم‌ورک دات‌نت اعضای استاتیکی نظیر <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">StringComparer.Ordinal</code> یا <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">StringComparer.OrdinalIgnoreCase</code> را برای سناریوهای رایج ارائه می‌دهد. اگر بخواهیم الگوریتم <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">NaturalSortComparer</code> اختصاصی خود را بسازیم، پیاده‌سازی پایه آن در C# به شکل زیر خواهد بود:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public class NaturalSortComparer : StringComparer
+{
+    public override int Compare(string? x, string? y)
+    {
+        // پیاده‌سازی منطق مقایسه طبیعی (Natural Sort)
+        return LogicalStringComparer.Compare(x, y); 
+    }
+
+    public override bool Equals(string? x, string? y) =&gt; string.Equals(x, y);
+
+    public override int GetHashCode(string obj) =&gt; obj?.GetHashCode() ?? 0;
+}</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">چالش اصلی زمانی آغاز می‌شود که می‌خواهیم این کلاس را به گونه‌ای یکپارچه کنیم که توسعه‌دهنده احساس کند <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">NaturalSort</code> بخشی از خود خانواده <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">StringComparer</code> است.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>۲. بررسی راهکارهای پیش از C# 14 (رویکرد سنتّی)</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">پیش از معرفی C# 14، مکانیزم توسعه انواع داده محدود به متدهای توسعه (Extension Methods) بود. برای افزودن این قابلیت به دات‌نت، توسعه‌دهندگان معمولاً از دو الگوی پیاده‌سازی استفاده می‌کردند:</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>۲.۱. استفاده از متدهای توسعه نمونه (Instance Extension Methods)</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">در این روش، یک متد توسعه بر روی نمونه‌ای از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">StringComparer</code> تعریف می‌شد:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public static class StringComparerExtensions
+{
+    public static StringComparer NaturalSort(this StringComparer comparer) 
+        =&gt; new NaturalSortComparer();
+}</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>نقاط ضعف این روش:</strong></div><ul><li><strong>عدم هماهنگی نحو (Syntactic Inconsistency):</strong> نحوه فراخوانی به صورت <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">StringComparer.Ordinal.NaturalSort()</code> خواهد بود. ساخت نمونه از یک مقایسه‌گر قبلی جهت فراخوانی مقایسه‌گر جدید غیرضروری و عجیب به نظر می‌رسد.</li><li><strong>تخصیص حافظه اضافه (Allocation Penalty):</strong> اجرای متد روی یک نمونه موجود، خوانایی کد را کاهش داده و نمونه‌سازی‌های بی‌پایه‌ودلیل ایجاد می‌کند.</li></ul><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>۲.۲. استفاده از کلاس استاتیک مجزا یا الگوی Singleton</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">راهکار جایگزین، تعریف یک کلاس مجزا و فراخوانی شیء به صورت Singleton بود:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public static class NaturalSort
+{
+    public static StringComparer Instance { get; } = new NaturalSortComparer();
+}
+
+// نحوه استفاده:
+var files = Directory.GetFiles(path)
+                     .OrderBy(f =&gt; f, NaturalSort.Instance);</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">اگرچه این رویکرد مشکل نحو ناخوشایند متد توسعه را حل می‌کند، اما نقیصه بزرگ دیگری دارد: <strong>عدم کشف‌پذیری (Discoverability)</strong>. توسعه‌دهنده هنگام تایپ <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">.StringComparer</code> با پیشنهادهای هوشمند کد (IntelliSense) برای این الگوریتم مواجه نمی‌شود و باید از وجود کلاس جداگانه <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">NaturalSort</code> آگاه باشد.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>۳. تحول در C# 14: معرفی بلاک‌های توسعه و اعضای استاتیک (Extension Members)</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">در سی‌شارپ ۱۴، مفهوم متدهای توسعه تکامل یافته و به <strong>بلاک‌های توسعه (Extension Blocks)</strong> تبدیل شده است. این ویژگی به ما اجازه می‌دهد نه تنها متدها، بلکه خواص استاتیک (Static Properties)، متدهای استاتیک و سایر اعضا را نیز به کلاس‌های موجود اضافه کنیم.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>۳.۱. پیاده‌سازی با نحو جدید C# 14</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">با استفاده از نحو جدید، می‌توانیم خاصیت استاتیک <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">NaturalSort</code> را مستقیماً به خانواده <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">StringComparer</code> تزریق کنیم:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public static class StringComparerExtensions
+{
+    extension(StringComparer)
+    {
+        public static StringComparer NaturalSort =&gt; new NaturalSortComparer();
+    }
+}</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>۳.۲. نحوه استفاده در کد اصلی پروژه</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">اکنون فراخوانی کد کاملاً طبیعی، خوانا و همگام با اعضای بومی دات‌نت صورت می‌گیرد:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">// استفاده کاملاً بومی و حرفه‌ای
+var files = Directory.GetFiles(path)
+                     .OrderBy(f =&gt; f, StringComparer.NaturalSort);</pre><blockquote class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>نکته تکمیلی و بهینه‌سازی کارایی (Zero-Allocation Pattern):</strong></blockquote><blockquote class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">در کد اولیه، هر بار فراخوانی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">StringComparer.NaturalSort</code> یک نمونه جدید از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">NaturalSortComparer</code> می‌سازد. برای جلوگیری از تخصیص حافظه مداوم و فشار بر روی Garbage Collector، بهتر است نمونه استاتیک را یک‌بار ساخته و Re-use کنیم:</blockquote><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public static class StringComparerExtensions
+{
+    private static readonly StringComparer _cachedNaturalSort = new NaturalSortComparer();
+
+    extension(StringComparer)
+    {
+        // بازگرداندن نمونه کش‌شده جهت ارتقای نرخ تخصیص حافظه
+        public static StringComparer NaturalSort =&gt; _cachedNaturalSort;
+    }
+}</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>۴. مقایسه تحلیلی رویکردها</strong></div><table class="table table-striped table-hover table-bordered table-condensed" dir="rtl"><tbody><tr><td data-row="1" class="ql-align-center ql-direction-ltr text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>معیار ارزیابی</strong></td><td data-row="1" class="ql-align-center ql-direction-ltr text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>متد توسعه سنتّی</strong></td><td data-row="1" class="text-center align-middle ql-align-right ql-direction-rtl" style="text-align: center; vertical-align: middle;"><strong>کلاس مجزا / Singleton</strong></td><td data-row="1" class="ql-align-center ql-direction-ltr text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>C# 14 Extension Block</strong></td></tr><tr><td data-row="2" class="text-center align-middle ql-align-right ql-direction-rtl" style="text-align: center; vertical-align: middle;"><strong>کشف‌پذیری (IntelliSense)</strong></td><td data-row="2" class="ql-align-center ql-direction-ltr text-center align-middle" style="text-align: center; vertical-align: middle;">ضعیف</td><td data-row="2" class="ql-align-center ql-direction-ltr text-center align-middle" style="text-align: center; vertical-align: middle;">بسیار ضعیف</td><td data-row="2" class="ql-align-center ql-direction-ltr text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>عالی (طبیعی)</strong></td></tr><tr><td data-row="3" class="ql-align-center ql-direction-ltr text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>تمیزی و روان بودن نحو</strong></td><td data-row="3" class="ql-align-center ql-direction-ltr text-center align-middle" style="text-align: center; vertical-align: middle;">متوسط</td><td data-row="3" class="ql-align-center ql-direction-ltr text-center align-middle" style="text-align: center; vertical-align: middle;">خوب</td><td data-row="3" class="text-center align-middle ql-align-right ql-direction-rtl" style="text-align: center; vertical-align: middle;"><strong>فوق‌العاده (Fluent)</strong></td></tr><tr><td data-row="4" class="text-center align-middle ql-align-right ql-direction-rtl" style="text-align: center; vertical-align: middle;"><strong>مدیریت حافظه (Allocation)</strong></td><td data-row="4" class="ql-align-center ql-direction-ltr text-center align-middle" style="text-align: center; vertical-align: middle;">ایجاد شیء اضافه</td><td data-row="4" class="ql-align-center ql-direction-ltr text-center align-middle" style="text-align: center; vertical-align: middle;">یک‌بار تخصیص</td><td data-row="4" class="ql-align-center ql-direction-ltr text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>قابل بهینه‌سازی کامل</strong></td></tr></tbody></table><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>۵. نتیجه‌گیری</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">معرفی اعضای استاتیک در Extension Blockهای <strong>C# 14</strong> گامی بزرگ در راستای یکپارچه‌سازی و یکدست‌سازی APIها در زبان سی‌شارپ است. این ویژگی به توسعه‌دهندگان اجازه می‌دهد کدهای تمیزتر، یکدست‌تر و با قابل کشف بودن (Discoverability) بالا بنویسند بدون آنکه به نحوه طراحی ابتدایی کلاس اصلی محدود باشند. با بکارگیری خواص استاتیک توسعه‌یافته در کنار الگوهای مدیریت حافظه مانند کشینگ، پروژه‌های دات‌نت از نظر قابلیت نگهداری (Maintainability) و خوانایی به سطح جدیدی ارتقا می‌یابند.</div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20130.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>مرتب‌سازی عددی در نگارش‌های پیش از دات‌نت 10</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20389.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>بررسی عمیق اعضای الحاقی در C# 14</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20552.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>نگاهی جامع به ویژگی‌های جدید C# 14 و برنامه‌های آینده برای C# 15</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20299.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>واژه کلیدی جدید extension در دات‌نت 10: ویژگی‌ها و کاربردهای آن</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-24278.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>اعضای توسعه‌دهنده C# در C# 14</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-23502.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>بررسی ویژگی‌های C# 14: اعضای توسعه‌دهنده (Extension Members) در .NET 10</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20613.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>C# 14: رفع یک ایراد کوچک اما آزاردهنده در نوشتن کتابخانه‌های کمکی زیباتر</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20631.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>اعضای گسترش‌دهنده در C# 14: ارتقاء کتابخانه‌های پُلی‌فیل (Polyfill)</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/learning-paths/details/118'><span class='badge bg-danger rounded-pill me-2'>مسیرراه‌ها</span>بررسی ویژگی‌‌های جدید C# 14 و NET 10.</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3663.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>کش کردن مقادیر Enum در C# 14 با استفاده از Extension Everything – راه‌حل بهینه و thread-safe</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

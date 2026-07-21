@@ -1,259 +1,0 @@
-<!DOCTYPE html>
-<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
-<head>
-    <title>‫‫بدست آوردن برگهای یک درخت توسط Recursive CTE</title>     <meta name="description" content="امروز در یک تالار سوالی مطرح شد با این عنوان &quot;چگونه می‌توانم گره‌های برگ یک شاخه را بدست بیاورم&quot;. خب راه حلی که فورا به ذهنم رسید استفاده از یک query بازگشتی (recursive) بود.به  ساختار سلسله مراتبی زیر توجه بفرمایید:گره هایی که با رنگ سبز علامت گذاری شده اند را گره‌های برگ می‌نامیم چون که آن گره‌ها بدون زیر شاخه هستند.فرض کنید از ما خواسته شده است با داشتن گره A تمام برگهای این شاخه را بدست بیاوریم. دو مرحله را باید طی کنیم ابتدا تمام ...">
-    <meta name="author" content="محمد سلیم آبادی">
-    <meta itemprop="name" content="بدست آوردن برگهای یک درخت توسط Recursive CTE">
-    <meta itemprop="description" content="امروز در یک تالار سوالی مطرح شد با این عنوان &quot;چگونه می‌توانم گره‌های برگ یک شاخه را بدست بیاورم&quot;. خب راه حلی که فورا به ذهنم رسید استفاده از یک query بازگشتی (recursive) بود.به  ساختار سلسله مراتبی زیر توجه بفرمایید:گره هایی که با رنگ سبز علامت گذاری شده اند را گره‌های برگ می‌نامیم چون که آن گره‌ها بدون زیر شاخه هستند.فرض کنید از ما خواسته شده است با داشتن گره A تمام برگهای این شاخه را بدست بیاوریم. دو مرحله را باید طی کنیم ابتدا تمام ...">
-    <meta name="robots" content="index, follow">
-    <meta name="llms.txt" content="llms.txt">
-    <meta name="llms-full.txt" content="llms-full.txt">
-    <meta property="og:title" content="بدست آوردن برگهای یک درخت توسط Recursive CTE">
-    <meta property="og:description" content="امروز در یک تالار سوالی مطرح شد با این عنوان &quot;چگونه می‌توانم گره‌های برگ یک شاخه را بدست بیاورم&quot;. خب راه حلی که فورا به ذهنم رسید استفاده از یک query بازگشتی (recursive) بود.به  ساختار سلسله مراتبی زیر توجه بفرمایید:گره هایی که با رنگ سبز علامت گذاری شده اند را گره‌های برگ می‌نامیم چون که آن گره‌ها بدون زیر شاخه هستند.فرض کنید از ما خواسته شده است با داشتن گره A تمام برگهای این شاخه را بدست بیاوریم. دو مرحله را باید طی کنیم ابتدا تمام ...">
-    <meta property="og:type" content="article">
-    <meta name="twitter:title" content="بدست آوردن برگهای یک درخت توسط Recursive CTE">
-    <meta name="twitter:description" content="امروز در یک تالار سوالی مطرح شد با این عنوان &quot;چگونه می‌توانم گره‌های برگ یک شاخه را بدست بیاورم&quot;. خب راه حلی که فورا به ذهنم رسید استفاده از یک query بازگشتی (recursive) بود.به  ساختار سلسله مراتبی زیر توجه بفرمایید:گره هایی که با رنگ سبز علامت گذاری شده اند را گره‌های برگ می‌نامیم چون که آن گره‌ها بدون زیر شاخه هستند.فرض کنید از ما خواسته شده است با داشتن گره A تمام برگهای این شاخه را بدست بیاوریم. دو مرحله را باید طی کنیم ابتدا تمام ...">
-    <meta name="twitter:card" content="امروز در یک تالار سوالی مطرح شد با این عنوان &quot;چگونه می‌توانم گره‌های برگ یک شاخه را بدست بیاورم&quot;. خب راه حلی که فورا به ذهنم رسید استفاده از یک query بازگشتی (recursive) بود.به  ساختار سلسله مراتبی زیر توجه بفرمایید:گره هایی که با رنگ سبز علامت گذاری شده اند را گره‌های برگ می‌نامیم چون که آن گره‌ها بدون زیر شاخه هستند.فرض کنید از ما خواسته شده است با داشتن گره A تمام برگهای این شاخه را بدست بیاوریم. دو مرحله را باید طی کنیم ابتدا تمام ...">
-    <meta property="article:published_time" content="Mon, 04 Feb 2013 17:35:01 GMT">
-    <meta property="article:section" content="article">
-    <meta property="article:tag" content="article">
-	
-    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
-	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
-    <link href="vs.min.css" rel="stylesheet" type="text/css">
-    <script src="highlight.min.js" type="text/javascript"></script>	
-    <link href="styles.css" rel="stylesheet" type="text/css">	
-    <style>
-      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
-        size: A4 portrait;
-
-        @top-center {
-            font-family: 'Samim', 'JetBrainsMono', Tahoma;
-            font-size: 14px;
-            font-weight: bold;
-            border-color: #e6e5e1;
-            border-bottom: solid #e6e5e1 0.1px;
-            width: 98%;
-            content: "‫‫بدست آوردن برگهای یک درخت توسط Recursive CTE";
-            margin-top: 5pt;
-            margin-bottom: 5pt;
-        }
-
-        @bottom-center {
-            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
-            font-size: 14px;
-            color: gray;
-            content: counter(page) "/" counter(pages);
-            border-color: #e6e5e1;
-            border-top: solid #e6e5e1 0.1px;
-            width: 98%;
-            margin-top: 5pt;
-            margin-bottom: 5pt;
-        }
-     }
-    </style>    
-	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
-</head>
-<body dir='rtl'>
-<div class='container-fluid min-vh-100 d-flex flex-column'>
-    <div class='row flex-grow-1'>
-        <div class='col-md-2'>
-         <table class='table shadow-sm rounded table-hover mx-auto w-auto caption-top'>
-<caption><div class='row mt-3'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
-<tbody class="table-group-divider">
-<tr>
-<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۳۷۰۲</span></td>
-</tr>
-<tr>
-<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۲۷۶</span></td>
-</tr>
-<tr>
-<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۱۰۲۸</span></td>
-</tr>
-<tr>
-<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۱۱۹</span></td>
-</tr>
-<tr>
-<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۱۴</span></td>
-</tr>
-<tr>
-<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
-<td><span class='badge bg-secondary rounded-pill'>۱۷۹۲۱</span></td>
-</tr>
-</tbody>
-</table>
-
-
-        </div>
-        <div class='col-md-10'>
-            <div class='mt-4 mb-3 container-fluid'>
-              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-1208.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
-   <h6 class='mt-3'>
-       <span aria-hidden='true'>&rarr;</span>
-       <span dir='rtl'>‫پیاده سازی پروژه نقاشی (Paint) به صورت شی گرا 2#</span>
-   </h6>
-</a><a href='www.dntips.ir-posts-1206.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
-    <h6 class='mt-3'>
-        <span dir='rtl'>‫آشنایی و بررسی ابزار MiniProfiler</span>
-        <span aria-hidden='true'>&larr;</span>
-    </h6>
-</a></nav>
-<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
-<div><div class='main'>
- 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫بدست آوردن برگهای یک درخت توسط Recursive CTE</h1><br>
-	<span class='titles' lang='fa'>نویسنده: </span>محمد سلیم آبادی<br>
-	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۳۹۱/۱۱/۱۶ ۱۷:۳۵</span><br>
-	<span class='titles' lang='fa'>آدرس: </span>
-	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-1207.html' target='_blank'>www.dntips.ir</a>
-</div></div>
-<div class='postBody'>امروز در یک تالار سوالی مطرح شد با این عنوان "چگونه می‌توانم گره‌های برگ یک شاخه را بدست بیاورم". خب راه حلی که فورا به ذهنم رسید استفاده از یک query بازگشتی (recursive) بود.<br>به&nbsp; ساختار سلسله مراتبی زیر توجه بفرمایید:<br><p><img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/png;base64,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"></p><p>گره هایی که با رنگ سبز علامت گذاری شده اند را گره‌های برگ می‌نامیم چون که آن گره‌ها بدون زیر شاخه هستند.<br>فرض کنید از ما خواسته شده است با داشتن گره A تمام برگهای این شاخه را بدست بیاوریم. <br>دو مرحله را باید طی کنیم ابتدا تمام گره هایی که زیر شاخه گره A هستند را باید بدست آورد سپس توسط یک گزاره گره‌های برگ را فیلتر کنیم.</p><p>در واقع گره هایی برگ هستند که پدر هیچ گره‌ی دیگری نباشند.&nbsp;</p><div dir="ltr" align="left"><pre language="Sql" name="code">declare @t table
-(id char(1) primary key,
-parent char(1));
-
-insert @t values 
-('A',null),                                   --Level 1
-('B', 'A'), ('C', 'A'),                       --Level 2
-('D', 'B'), ('E', 'B'),('R','B'), ('F', 'C'), --Level 3
-('G', 'D'),  --Level 4
-('H', 'G'), ('I', 'G');                       --Level 5</pre></div><br><div dir="ltr" align="left"><pre language="Sql" name="code">;with cte as
-(
-select id, rnk=0 from @t
-where parent = 'A'
- 
-union all
- 
-select t.id, rnk+1
-from cte join @t t
-on cte.id = t.parent
-)
-select *
-  from cte
- where not exists
-       (select *
-          from @t
-         where parent = cte.id);</pre></div><br><br>و حالا به درخت زیر توجه بفرمایید:<br><p><img style="display: block; margin-left: auto; margin-right: auto; cursor: default;" src="data:image/png;base64,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"></p>هدف پیدا کردن برگ هایی از شاخه مورد نظر است که در پایین‌ترین سطح قرار گرفته باشند. برای این منظور از همان query بازگشتی استفاده کرده و با کمک تابع dense_ranke گره‌های مورد نظر را بدست میاوریم.<br><div dir="ltr" align="left"><pre language="Sql" name="code">;with cte as
-(
-select id, rnk=0 from @t
-where parent = 'A'
-
-union all
-
-select t.id, rnk+1
-from cte join @t t
-on cte.id = t.parent
-)
-select *
-from
-(
-   select *, dense_rank() over(order by rnk desc) rk
-     from cte
-)t
-where rk = 1</pre></div><br><br></div><div class='card mt-3 mb-2 shadow-sm'>
-<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
-<strong>مطالب مشابه</strong>
-</div>
-<ul class='list-group'>
-<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1185.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>تجزیه یک رشته به کلمات تشکیل دهنده آن توسط Recursive CTE</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1478.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با SQL Server Common Table Expressions - CTE</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2014.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>درخت‌ها و گراف‌ها قسمت اول</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1849.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>SQL Antipattern #2</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1196.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>حذف کاراکتر های ناخواسته توسط Recursive CTE قسمت دوم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1187.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>حذف نمودن کاراکتر های ناخواسته توسط Recursive CTE قسمت اول</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2022.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>درخت‌ها و گراف‌ها قسمت سوم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1207.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>بدست آوردن برگهای یک درخت توسط Recursive CTE</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1194.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>گذری بر مفاهیم relationship</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3234.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>کوئری نویسی در EF Core - قسمت هشتم - کوئری‌های بازگشتی</a></ul>
-</div>
-
-<div style="page-break-inside:avoid;page-break-before:always;"></div>
-<div class='postBody mt5'>
-<h3>نظرات</h3>
-<div id='userComments'><ul><li><div class='postBody'>
-  <div class='replyInfo'>
-       <strong>بهمن خلفی</strong>  در  <span dir='ltr'>۱۳۹۱/۱۱/۱۷ ۱۴:۴۱</span>
-  </div>
-  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>ممنون از مطلب مفیدتون <br>اما یک سوال : چگونه میتوان به نتیجه زیر دست پیدا کرد <br><blockquote><div align="left">a , ab , ac , abd , abe , abr , abdg , abdgh , ....<br></div></blockquote></div>
-</div><ul><li><div class='postBody'>
-  <div class='replyInfo'>
-       <strong>محمد سلیم آبادی</strong>  در  <span dir='ltr'>۱۳۹۱/۱۱/۱۷ ۱۵:۳۰</span>
-  </div>
-  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>من دقیقا متوجه نشدم نتیجه مورد نظر شما چیست.<br>آیا نتیجه مورد نظر شما به صورت الحاق یافته (concatenated)&nbsp; هست یا نه؟<br>در هر صورت باید یکی از دو query زیر نتیجه مورد نظر شما را تولید کند.<br><div dir="ltr" align="left"><pre language="Sql" name="code">declare @t table
-(id char(1) primary key,
-parent char(1));
- 
-insert @t values
-('A',null),                                   --Level 1
-('B', 'A'), ('C', 'A'),                       --Level 2
-('D', 'B'), ('E', 'B'),('R','B'), ('F', 'C'), --Level 3
-('G', 'D'),                                   --Level 4
-('H', 'G'), ('I', 'G');                       --Level 5
-
-;with cte as
-(
-select id, rnk=0, 
-       concats = cast(id as varchar(10))
-from @t
-where parent is null
- 
-union all
- 
-select t.id, rnk+1,
-       cast(cte.concats + t.id as varchar(10))
-from cte join @t t
-on cte.id = t.parent
-)
-select * from cte
-/*
-id   rnk         concats
----- ----------- ----------
-A    0           A
-B    1           AB
-C    1           AC
-F    2           ACF
-D    2           ABD
-E    2           ABE
-R    2           ABR
-G    3           ABDG
-H    4           ABDGH
-I    4           ABDGI
-*/
-;with cte as
-(
-select id, rnk=0, 
-       concats = cast(id as varchar(10))
-from @t
-where parent is null
- 
-union all
- 
-select t.id, rnk+1,
-       cast(cte.concats + t.id as varchar(10))
-from cte join @t t
-on cte.id = t.parent
-)
-select stuff(d.list,1,1,'') as concats
-from (select ','+concats
-      from cte
-  for xml path(''))d(list)
-/*
-concats
-----------------------------------------
-A,AB,AC,ACF,ABD,ABE,ABR,ABDG,ABDGH,ABDGI
-*/</pre></div><br>موفق باشید<br></div>
-</div></li></ul></li></ul></div>
-</div>
-
-
-
-<!-- to load custom fonts for printing -->
-<div class="useSamimFD">&nbsp;</div>
-
-<script src="SyntaxHighlighter.js" type="text/javascript"></script>
-
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- to load custom fonts for printing -->
-<div class="useSamimFD">&nbsp;</div>
-</body>
-</html>
