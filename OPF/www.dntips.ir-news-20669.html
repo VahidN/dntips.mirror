@@ -116,8 +116,6 @@ LEFT JOIN Books AS b ON a.Id = b.AuthorId;&lt;/pre&gt;&lt;div dir=&quot;rtl&quot
     }
 ).ToListAsync();&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;این سینتکس هم حالا به طور کارآمد به LEFT JOIN ترجمه می‌شود. چرا بهتر است؟&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;خوانایی&lt;/strong&gt;: مستقیماً شبیه SQL است و هدف را واضح بیان می‌کند.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;سادگی&lt;/strong&gt;: بدون نیاز به GroupJoin پیچیده؛ تازه‌کاران سریع‌تر یاد می‌گیرند.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;عملکرد&lt;/strong&gt;: ترجمه بهینه‌تر SQL در سناریوهای پیچیده، و رفع باگ‌های قدیمی DefaultIfEmpty (مثل حفظ اطلاعات والد در کوئری‌های تو در تو).&lt;/li&gt;&lt;li&gt;&lt;strong&gt;نکته اضافی برای غنی‌سازی&lt;/strong&gt;: اگر با RIGHT JOIN کار می‌کنید (که همه رکوردهای سمت راست را حفظ می‌کند)، از RightJoin استفاده کنید. همچنین، این ویژگی‌ها با Azure SQL و SQL Server کاملاً یکپارچه هستند و می‌توانند در کوئری‌های پیچیده‌تر مانند joins چندگانه مفید باشند. اگر کوئری شما شامل nullable properties است، همیشه چک کنید که null-handling درست باشد تا از NullReferenceException جلوگیری شود.&lt;/li&gt;&lt;/ul&gt;">
     <meta name="robots" content="index, follow">
-    <meta name="llms.txt" content="llms.txt">
-    <meta name="llms-full.txt" content="llms-full.txt">
     <meta property="og:title" content="EF Core 10: جوین‌ها را دوباره زیبا می‌کند؛ خداحافظ DefaultIfEmpty!">
     <meta property="og:description" content="&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;اگر با Entity Framework Core کار کرده باشید، حتماً با چالش بیان اتصالات خارجی مانند LEFT JOIN یا RIGHT JOIN در LINQ مواجه شده‌اید. برای سال‌ها، متد &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;DefaultIfEmpty()&lt;/code&gt; راه‌حل اصلی بوده، اما اغلب احساس می‌شد که این روش، پیچیده، غیرشهودی و خوانایی کمی دارد. خوشبختانه، با انتشار EF Core 10 در کنار .NET 10، تیم توسعه‌دهندگان مایکروسافت سینتکس طبیعی‌تر و بیان‌گرتری برای این اتصالات معرفی کرده‌اند. این بهبود، کوئری‌های LINQ را به ساختار SQL نزدیک‌تر می‌کند و نوشتن کد را لذت‌بخش‌تر می‌سازد. &lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;توضیح مسئله&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;اتصالات خارجی (Outer Joins) در بانک‌های اطلاعاتی، مانند LEFT JOIN، اجازه می‌دهند رکوردهایی را که در یک سمت جدول وجود دارند اما با سمت دیگر تطبیقی ندارند، حفظ کنیم. مثلاً، می‌خواهیم همه نویسندگان را لیست کنیم، حتی اگر کتابی ننوشته باشند. در EF Core نسخه‌های قبل از 10، بیان این عملیات در LINQ نیاز به ترکیبی پیچیده داشت که خوانایی کد را کاهش می‌داد. مشکلات اصلی عبارت بودند از:&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;خوانایی پایین&lt;/strong&gt;: کوئری به راحتی مقصود یک LEFT JOIN را نشان نمی‌داد و برای توسعه‌دهندگان آشنا با SQL، گیج‌کننده بود.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;پیچیدگی&lt;/strong&gt;: استفاده از GroupJoin و SelectMany برای شبیه‌سازی اتصال خارجی، برای تازه‌کاران ترسناک بود.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;عدم شهود&lt;/strong&gt;: این روش بیشتر یک &amp;quot;ترفند&amp;quot; بود تا بیان مستقیم هدف. علاوه بر این، در سناریوهای پیچیده، ممکن بود به تولید SQL غیربهینه منجر شود یا حتی باگ‌هایی مانند از دست رفتن اطلاعات والد در کوئری‌های تو در تو ایجاد کند (که در EF Core 10 برطرف شده).&lt;/li&gt;&lt;/ul&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;این مسائل نه تنها زمان توسعه را افزایش می‌داد، بلکه نگهداری کد را هم سخت‌تر می‌کرد. حالا بیایید ببینیم چطور قبلاً این کار را انجام می‌دادیم.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;راه‌حل قدیمی: استفاده از DefaultIfEmpty!&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-align-right ql-direction-rtl&quot;&gt;قبل از EF Core 10، برای ایجاد یک LEFT JOIN، باید از GroupJoin برای گروه‌بندی و سپس SelectMany با DefaultIfEmpty برای صاف کردن نتایج و ایجاد ورودی‌های null استفاده می‌کردیم. فرض کنید مدل‌های ساده زیر را داریم:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class Author
 {
@@ -335,8 +333,11 @@ LEFT JOIN Books AS b ON a.Id = b.AuthorId;&lt;/pre&gt;&lt;div dir=&quot;rtl&quot
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
         <div class='col-md-2'>
-         <table class='table mt-4 shadow-sm rounded table-hover mx-auto w-100 caption-bottom'>
-<caption><div class='row mt-1'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+         <div class='card mt-4 shadow-sm'>
+<div class='card-header text-center h5'>
+<a target='_blank' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a>
+</div>
+<table class='table shadow-sm mb-0 rounded table-hover mx-auto w-100 caption-bottom'>
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
@@ -356,9 +357,13 @@ LEFT JOIN Books AS b ON a.Id = b.AuthorId;&lt;/pre&gt;&lt;div dir=&quot;rtl&quot
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
 </tr>
+<tr>
+<td><a href='www.dntips.ir-questions-toc-page-1.html'>پرسش‌ها</a></td>
+</tr>
 </tbody>
 </table>
 
+</div>
 
         </div>
         <div class='col-md-10'>

@@ -132,8 +132,6 @@ public class CreateOrderHandler : RequestHandler&amp;lt;CreateOrderCommand&amp;g
 var dispatcher = new CommandDispatcher();
 dispatcher.Dispatch(new CreateOrderCommand { Order = order });&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این کد نشان می‌دهد که Brighter چگونه می‌تواند دستورات را مشابه MediatR مدیریت کند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;انتخاب جایگزین مناسب برای MediatR به نیازهای خاص پروژه شما بستگی دارد. اگر به دنبال سادگی و عملکرد بالا هستید، تزریق مستقیم وابستگی‌ها گزینه‌ای عالی است. برای پروژه‌های توزیع‌شده و پیچیده‌تر، MassTransit و CAP ابزارهای قدرتمندی هستند که هر کدام نقاط قوت خود را دارند: MassTransit برای سناریوهای پیشرفته‌تر و CAP برای راهکارهای سبک‌تر. در نهایت، Brighter می‌تواند گزینه‌ای میانی باشد که تعادلی بین سادگی MediatR و قابلیت‌های اضافی ارائه می‌دهد.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;توصیه می‌شود پیش از انتخاب، نیازمندی‌های پروژه (مانند مقیاس‌پذیری، پیچیدگی و نیاز به معماری توزیع‌شده) را به دقت بررسی کنید و با آزمایش هر ابزار در یک پروژه نمونه، بهترین گزینه را انتخاب کنید. این رویکرد به شما کمک می‌کند تا ضمن حفظ کیفیت کد، بهره‌وری تیم توسعه را نیز افزایش دهید.&lt;/div&gt;">
     <meta name="robots" content="index, follow">
-    <meta name="llms.txt" content="llms.txt">
-    <meta name="llms-full.txt" content="llms-full.txt">
     <meta property="og:title" content="روش‌های جایگزین کردن MediatR در پروژه‌های NET.">
     <meta property="og:description" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در دنیای توسعه نرم‌افزار با استفاده از فریم‌ورک Microsoft .NET، ابزارها و کتابخانه‌هایی مانند MediatR به دلیل سادگی و انعطاف‌پذیری در مدیریت درخواست‌ها (Requests) و پاسخ‌ها (Responses) در الگوی CQRS (Command Query Responsibility Segregation) و معماری مبتنی بر واسطه (Mediator Pattern) بسیار محبوب شده‌اند. با این حال، در برخی پروژه‌ها ممکن است نیاز به جایگزینی MediatR با روش‌ها یا ابزارهای دیگر احساس شود؛ چه به دلیل پیچیدگی‌های غیرضروری، نیاز به عملکرد بهتر، یا تمایل به استفاده از راهکارهای توزیع‌شده (Distributed Systems). در این مقاله، به بررسی گزینه‌های جایگزین برای MediatR در پروژه‌های .NET می‌پردازیم و با تحلیل مزایا و معایب هر روش، راهنمایی جامعی برای توسعه‌دهندگان ارائه می‌دهیم. هدف این است که شما بتوانید با توجه به نیازهای پروژه خود، بهترین تصمیم را بگیرید.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;1. تزریق مستقیم وابستگی‌ها (Direct Dependency Injection)&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یکی از ساده‌ترین روش‌های جایگزین برای MediatR، استفاده از تزریق مستقیم وابستگی‌ها (Dependency Injection) است که به صورت پیش‌فرض در فریم‌ورک .NET Core ارائه می‌شود. در این روش، به‌جای استفاده از یک واسطه مرکزی مانند MediatR برای ارسال و مدیریت درخواست‌ها، سرویس‌ها و وابستگی‌ها مستقیماً در کلاس‌هایی که به آن‌ها نیاز دارند تزریق می‌شوند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مزایا:&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;کاهش پیچیدگی:&lt;/strong&gt; حذف لایه واسطه باعث می‌شود کد خواناتر و قابل‌فهم‌تر شود.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;عملکرد بهتر:&lt;/strong&gt; عدم نیاز به پردازش درخواست‌ها از طریق یک واسطه، زمان اجرا را کاهش می‌دهد.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;کنترل بیشتر:&lt;/strong&gt; توسعه‌دهندگان می‌توانند به صورت مستقیم با سرویس‌ها تعامل داشته باشند.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;معایب:&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;افزایش وابستگی‌ها:&lt;/strong&gt; در پروژه‌های بزرگ، تعداد وابستگی‌های تزریق‌شده ممکن است مدیریت کد را دشوار کند.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;عدم جداسازی مسئولیت‌ها:&lt;/strong&gt; برخلاف MediatR که به طور ذاتی از الگوی CQRS پشتیبانی می‌کند، در این روش باید این جداسازی به صورت دستی پیاده‌سازی شود.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;مثال کد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class OrderController : ControllerBase
 {
@@ -375,8 +373,11 @@ dispatcher.Dispatch(new CreateOrderCommand { Order = order });&lt;/pre&gt;&lt;di
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
         <div class='col-md-2'>
-         <table class='table mt-4 shadow-sm rounded table-hover mx-auto w-100 caption-bottom'>
-<caption><div class='row mt-1'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+         <div class='card mt-4 shadow-sm'>
+<div class='card-header text-center h5'>
+<a target='_blank' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a>
+</div>
+<table class='table shadow-sm mb-0 rounded table-hover mx-auto w-100 caption-bottom'>
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
@@ -396,9 +397,13 @@ dispatcher.Dispatch(new CreateOrderCommand { Order = order });&lt;/pre&gt;&lt;di
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
 </tr>
+<tr>
+<td><a href='www.dntips.ir-questions-toc-page-1.html'>پرسش‌ها</a></td>
+</tr>
 </tbody>
 </table>
 
+</div>
 
         </div>
         <div class='col-md-10'>

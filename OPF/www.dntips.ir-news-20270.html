@@ -50,8 +50,6 @@ WHERE c.Country = &amp;#39;Iran&amp;#39;;&lt;/pre&gt;&lt;div class=&quot;ql-dire
     .Include(o =&amp;gt; o.OrderItems)
     .AsSplitQuery();&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;این روش باعث می‌شود کوئری به چندین کوئری کوچک‌تر تقسیم شود که در برخی موارد می‌تواند عملکرد را بهبود بخشد.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بهینه‌سازی کوئری‌های EF Core و SQL نیازمند درک دقیق ترتیب عملیات و تأثیر آن بر عملکرد است. فیلتر کردن داده‌ها قبل از انجام Join یا بارگذاری اطلاعات مرتبط، یک روش کلیدی برای کاهش بار محاسباتی و افزایش سرعت است. توسعه‌دهندگان باید با استفاده از ابزارهایی مانند Execution Plan، ایندکس‌های مناسب، و آزمایش با داده‌های واقعی، کوئری‌های خود را بهینه کنند. با رعایت این اصول، می‌توان برنامه‌هایی سریع‌تر و مقیاس‌پذیرتر ساخت که تجربه کاربری بهتری ارائه می‌دهند. در نهایت، هرچند موتورهای پایگاه داده مدرن قابلیت‌های بهینه‌سازی پیشرفته‌ای دارند، تسلط بر نوشتن کوئری‌های کارآمد همچنان یک مزیت رقابتی برای توسعه‌دهندگان .NET است.&lt;/div&gt;">
     <meta name="robots" content="index, follow">
-    <meta name="llms.txt" content="llms.txt">
-    <meta name="llms-full.txt" content="llms-full.txt">
     <meta property="og:title" content="بهینه‌سازی عملکرد کوئری‌ها در EF Core و SQL با فیلتر به‌هنگام اطلاعات">
     <meta property="og:description" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;بهینه‌سازی عملکرد کوئری‌های پایگاه داده یکی از مهم‌ترین عوامل در ایجاد برنامه‌های مقیاس‌پذیر و کارآمد است. توسعه‌دهندگان Microsoft .NET، به‌ویژه هنگام کار با Entity Framework Core (EF Core) یا SQL خام، اغلب با چالش‌هایی در مدیریت داده‌های حجیم مواجه می‌شوند. یکی از تکنیک‌های کلیدی برای بهبود عملکرد، اعمال فیلترهای مناسب قبل از اجرای عملیات سنگین مانند Join یا بارگذاری داده‌های مرتبط است. این مقاله به بررسی اهمیت ترتیب عملیات فیلتر و Join در کوئری‌های EF Core و SQL می‌پردازد و راهکارهایی برای بهینه‌سازی ارائه می‌دهد. &lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;اهمیت ترتیب عملیات در EF Core&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;هنگام نوشتن کوئری‌ها در EF Core، ترتیب عملیات در LINQ (زبان پرس‌وجوی یکپارچه) تأثیر مستقیمی بر عملکرد دارد. به‌طور خاص، فیلتر کردن داده‌ها قبل از بارگذاری اطلاعات مرتبط (مانند استفاده از متد Include) می‌تواند از پردازش غیرضروری داده‌های اضافی جلوگیری کند.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;برای مثال، فرض کنید می‌خواهیم سفارش‌هایی را که وضعیت &amp;quot;Completed&amp;quot; دارند به همراه اقلام مرتبطشان (OrderItems) از پایگاه داده بازیابی کنیم. دو روش زیر را مقایسه می‌کنیم:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;// روش بهینه
 var query = _context.Orders
@@ -170,8 +168,11 @@ WHERE c.Country = &amp;#39;Iran&amp;#39;;&lt;/pre&gt;&lt;div class=&quot;ql-dire
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
         <div class='col-md-2'>
-         <table class='table mt-4 shadow-sm rounded table-hover mx-auto w-100 caption-bottom'>
-<caption><div class='row mt-1'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+         <div class='card mt-4 shadow-sm'>
+<div class='card-header text-center h5'>
+<a target='_blank' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a>
+</div>
+<table class='table shadow-sm mb-0 rounded table-hover mx-auto w-100 caption-bottom'>
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
@@ -191,9 +192,13 @@ WHERE c.Country = &amp;#39;Iran&amp;#39;;&lt;/pre&gt;&lt;div class=&quot;ql-dire
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
 </tr>
+<tr>
+<td><a href='www.dntips.ir-questions-toc-page-1.html'>پرسش‌ها</a></td>
+</tr>
 </tbody>
 </table>
 
+</div>
 
         </div>
         <div class='col-md-10'>

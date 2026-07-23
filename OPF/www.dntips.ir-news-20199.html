@@ -52,8 +52,6 @@ public bool IsValidEmail(string input)
     return Regex.IsMatch(input, pattern);
 }&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;این رویکرد، بار پردازشی را از SQL Server به برنامه منتقل کرده و عملکرد کلی سیستم را بهبود می‌بخشد.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;شناسایی و مدیریت اطلاعات حساس در پایگاه داده‌ها نیازمند ترکیبی از ابزارهای SQL Server و بهترین روش‌های توسعه در دات‌نت است. استفاده از کوئری‌های ساده با LIKE می‌تواند نقطه شروع باشد، اما برای دقت و عملکرد بهتر، ابزارهایی مانند REGEX، ایندکس‌ها و جداول موقت ضروری هستند. توسعه‌دهندگان باید ابتدا از ورود داده‌های ناسازگار در لایه برنامه جلوگیری کنند و سپس با کوئری‌های بهینه، مشکلات موجود را شناسایی و رفع کنند. این فرآیند نه‌تنها امنیت داده‌ها را افزایش می‌دهد، بلکه عملکرد سیستم را نیز بهبود می‌بخشد. &lt;/span&gt;&lt;/div&gt;">
     <meta name="robots" content="index, follow">
-    <meta name="llms.txt" content="llms.txt">
-    <meta name="llms-full.txt" content="llms-full.txt">
     <meta property="og:title" content="تمرین کوئری نویسی: یافتن آدرس‌های ایمیل">
     <meta property="og:description" content="&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;در دنیای توسعه نرم‌افزار، به‌ویژه در اکوسیستم دات‌نت مایکروسافت (Microsoft .NET Framework)، مدیریت داده‌ها یکی از مهم‌ترین وظایف توسعه‌دهندگان است. اطلاعات حساسی مانند آدرس‌های ایمیل، شماره‌های تلفن یا سایر داده‌های شناسایی شخصی (Personally Identifiable Information - PII) اغلب به‌طور ناخواسته در ستون‌هایی از پایگاه داده ذخیره می‌شوند که برای این منظور طراحی نشده‌اند. این موضوع می‌تواند چالش‌های امنیتی و عملکردی را به همراه داشته باشد. در این مقاله، با استفاده از ابزارها و تکنیک‌های SQL Server، روشی برای شناسایی این‌گونه داده‌ها و بهبود فرآیندهای توسعه بررسی می‌شود. هدف این است که توسعه‌دهندگان دات‌نت بتوانند با دیدی عمیق‌تر به بهینه‌سازی کوئری‌ها (Queries) و مدیریت پایگاه داده بپردازند. این مطلب بر اساس تحلیل یک تمرین واقعی در حوزه برنامه‌نویسی پایگاه داده شکل گرفته و با مثال‌های عملی همراه است.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;اهمیت شناسایی اطلاعات حساس&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;داده‌های حساس مانند آدرس‌های ایمیل، اگر در ستون‌های نامناسب مانند ستون Location در یک جدول کاربران ذخیره شوند، می‌توانند مشکلات متعددی ایجاد کنند. از منظر امنیتی، این داده‌ها ممکن است به‌راحتی در دسترس افراد غیرمجاز قرار گیرند. از نظر عملکردی نیز، جستجو برای یافتن چنین اطلاعاتی بدون ساختار مشخص، کوئری‌های پیچیده و کندی را به دنبال دارد. توسعه‌دهندگان دات‌نت که با SQL Server کار می‌کنند، باید بتوانند این موارد را به‌سرعت شناسایی کرده و راه‌حل‌هایی برای اصلاح آن‌ها ارائه دهند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;یکی از سناریوهای رایج این است که کاربران به‌جای وارد کردن اطلاعات در فیلدهای مشخص‌شده (مانند EmailAddress)، آن‌ها را در ستون‌های متنی آزاد مانند Location وارد کنند. برای مثال، ممکن است به‌جای &amp;quot;Tehran, Iran&amp;quot;، چیزی مانند &amp;quot;user@example.com&amp;quot; در این ستون ثبت شود. این ناسازگاری نیازمند کوئری‌هایی است که بتوانند الگوهای ایمیل را تشخیص دهند.&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong style=&quot;background-color: transparent; color: black;&quot;&gt;رویکرد اولیه: جستجوی ساده با LIKE&lt;/strong&gt;&lt;/div&gt;&lt;div style=&quot;text-align: right;&quot; dir=&quot;rtl&quot; class=&quot;ql-direction-rtl&quot;&gt;&lt;span style=&quot;background-color: transparent; color: black;&quot;&gt;برای شروع، می‌توان از یک کوئری ساده با عملگر LIKE در SQL Server استفاده کرد تا ستون‌هایی که ممکن است حاوی آدرس ایمیل باشند، شناسایی شوند. مثال زیر یک جستجوی اولیه را نشان می‌دهد:&lt;/span&gt;&lt;/div&gt;&lt;pre data-language=&quot;sql&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;SELECT TOP 100 DisplayName, Location
 FROM dbo.Users
@@ -175,8 +173,11 @@ public bool IsValidEmail(string input)
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
         <div class='col-md-2'>
-         <table class='table mt-4 shadow-sm rounded table-hover mx-auto w-100 caption-bottom'>
-<caption><div class='row mt-1'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+         <div class='card mt-4 shadow-sm'>
+<div class='card-header text-center h5'>
+<a target='_blank' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a>
+</div>
+<table class='table shadow-sm mb-0 rounded table-hover mx-auto w-100 caption-bottom'>
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
@@ -196,9 +197,13 @@ public bool IsValidEmail(string input)
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
 </tr>
+<tr>
+<td><a href='www.dntips.ir-questions-toc-page-1.html'>پرسش‌ها</a></td>
+</tr>
 </tbody>
 </table>
 
+</div>
 
         </div>
         <div class='col-md-10'>

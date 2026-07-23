@@ -6,8 +6,6 @@
     <meta itemprop="name" content="درک فرق بین StateHasChanged و InvokeAsync(StateHasChanged) در Blazor">
     <meta itemprop="description" content="&lt;p&gt;چون نخ پردازشی رویدادهای Blazor نظیر Oninitialize و OnAfterRender و ... یکی است بنابراین استفاده از StateHasChanged نتیجه مطلوب را به همراه خواهد داشت اما در رابطه با متدهای خارجی (External method) مانند تایمرها باید از await InvokeAsynck(StateHasChanged) استفاده نمود.&lt;/p&gt; &lt;p&gt;StateHasChanged که برای&amp;nbsp; رندر مجدد کامپوننت‌ها در Blazor Server استفاده می‌شود، اجازه نمی‌دهد چندین نخ به طور همزمان به فرآیند رندر دسترسی داشته باشند.&lt;span&gt;&amp;nbsp;در صورتی که StateHasChanged توسط یک نخ ثانویه فراخوانی شود آنگاه استثنایی شبیه زیر رخ خواهد داد:&lt;/span&gt; &lt;/p&gt; &lt;pre language=CSharp&gt;System.InvalidOperationException: The current thread is not associated with the Dispatcher.&lt;span&gt;&amp;nbsp;&lt;/span&gt; &lt;/pre&gt; &lt;div&gt; &lt;div&gt;در اپلیکیشن‌های مبتنی بر Blazor Server تنها یک dispatcher به ازای هر اتصال وجود دارد (هر تب مرورگر یک اتصال). هر زمانی که از InvokeAsync استفاده می‌کنیم، درحقیقت کار را با این dispatcher جلو می‌بریم. (دقیقا همانند Dispatcher.Invoke در WPF یا Control.Invoke در ویندوز فرم اپلیکیشن ها). بنابراین زمانی که نیاز است در نخ دیگری StateHasChanged را فراخوانی کنیم لازم است که اینکار را توسط InvokeAsync انجام دهیم. در حقیقت InvokeAsync کارها را به صورت سریالی در یک صف مرتب می‌کند و به صورت قدم به قدم آنها را اجرا می‌کند تا از بروز استثنا جلوگیری می‌کند.&lt;/div&gt; &lt;/div&gt; &lt;div&gt; &lt;div&gt;در کل زمانی که مشغول کار با رویدادهای UI triggered هستید (نظیر متدهای کلیک برروی یک دکمه، متدهای نویگیشن و ....) نیاز نیست نگران ایمن‌سازی نخ‌ها باشید زیرا Blazor خودش اینکار را انجام می‌دهد و مطمئن می‌شود که در واحد زمان فقط یک نخ کدهای یک کامپوننت را اجرا خواهد کرد. اما زمانی که مشغول کار با رویدادهای non-UI triggerd هستید (نظیر تایمرها) اگر از StateHasChanged بدون InvokeAsync استفاده کنید سبب ایجاد Thread&amp;nbsp;&lt;a href=&quot;https://fa.wikipedia.org/wiki/%D9%88%D8%B6%D8%B9%DB%8C%D8%AA_%D8%B1%D9%82%D8%A7%D8%A8%D8%AA%DB%8C&quot;&gt;Race Condition&lt;/a&gt;&amp;nbsp;خواهید شد.&lt;span&gt;&amp;nbsp;&lt;/span&gt; &lt;/div&gt; &lt;/div&gt;">
     <meta name="robots" content="index, follow">
-    <meta name="llms.txt" content="llms.txt">
-    <meta name="llms-full.txt" content="llms-full.txt">
     <meta property="og:title" content="درک فرق بین StateHasChanged و InvokeAsync(StateHasChanged) در Blazor">
     <meta property="og:description" content="&lt;p&gt;چون نخ پردازشی رویدادهای Blazor نظیر Oninitialize و OnAfterRender و ... یکی است بنابراین استفاده از StateHasChanged نتیجه مطلوب را به همراه خواهد داشت اما در رابطه با متدهای خارجی (External method) مانند تایمرها باید از await InvokeAsynck(StateHasChanged) استفاده نمود.&lt;/p&gt; &lt;p&gt;StateHasChanged که برای&amp;nbsp; رندر مجدد کامپوننت‌ها در Blazor Server استفاده می‌شود، اجازه نمی‌دهد چندین نخ به طور همزمان به فرآیند رندر دسترسی داشته باشند.&lt;span&gt;&amp;nbsp;در صورتی که StateHasChanged توسط یک نخ ثانویه فراخوانی شود آنگاه استثنایی شبیه زیر رخ خواهد داد:&lt;/span&gt; &lt;/p&gt; &lt;pre language=CSharp&gt;System.InvalidOperationException: The current thread is not associated with the Dispatcher.&lt;span&gt;&amp;nbsp;&lt;/span&gt; &lt;/pre&gt; &lt;div&gt; &lt;div&gt;در اپلیکیشن‌های مبتنی بر Blazor Server تنها یک dispatcher به ازای هر اتصال وجود دارد (هر تب مرورگر یک اتصال). هر زمانی که از InvokeAsync استفاده می‌کنیم، درحقیقت کار را با این dispatcher جلو می‌بریم. (دقیقا همانند Dispatcher.Invoke در WPF یا Control.Invoke در ویندوز فرم اپلیکیشن ها). بنابراین زمانی که نیاز است در نخ دیگری StateHasChanged را فراخوانی کنیم لازم است که اینکار را توسط InvokeAsync انجام دهیم. در حقیقت InvokeAsync کارها را به صورت سریالی در یک صف مرتب می‌کند و به صورت قدم به قدم آنها را اجرا می‌کند تا از بروز استثنا جلوگیری می‌کند.&lt;/div&gt; &lt;/div&gt; &lt;div&gt; &lt;div&gt;در کل زمانی که مشغول کار با رویدادهای UI triggered هستید (نظیر متدهای کلیک برروی یک دکمه، متدهای نویگیشن و ....) نیاز نیست نگران ایمن‌سازی نخ‌ها باشید زیرا Blazor خودش اینکار را انجام می‌دهد و مطمئن می‌شود که در واحد زمان فقط یک نخ کدهای یک کامپوننت را اجرا خواهد کرد. اما زمانی که مشغول کار با رویدادهای non-UI triggerd هستید (نظیر تایمرها) اگر از StateHasChanged بدون InvokeAsync استفاده کنید سبب ایجاد Thread&amp;nbsp;&lt;a href=&quot;https://fa.wikipedia.org/wiki/%D9%88%D8%B6%D8%B9%DB%8C%D8%AA_%D8%B1%D9%82%D8%A7%D8%A8%D8%AA%DB%8C&quot;&gt;Race Condition&lt;/a&gt;&amp;nbsp;خواهید شد.&lt;span&gt;&amp;nbsp;&lt;/span&gt; &lt;/div&gt; &lt;/div&gt;">
     <meta property="og:type" content="article">
@@ -60,8 +58,11 @@
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
         <div class='col-md-2'>
-         <table class='table mt-4 shadow-sm rounded table-hover mx-auto w-100 caption-bottom'>
-<caption><div class='row mt-1'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+         <div class='card mt-4 shadow-sm'>
+<div class='card-header text-center h5'>
+<a target='_blank' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a>
+</div>
+<table class='table shadow-sm mb-0 rounded table-hover mx-auto w-100 caption-bottom'>
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
@@ -81,9 +82,13 @@
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
 </tr>
+<tr>
+<td><a href='www.dntips.ir-questions-toc-page-1.html'>پرسش‌ها</a></td>
+</tr>
 </tbody>
 </table>
 
+</div>
 
         </div>
         <div class='col-md-10'>

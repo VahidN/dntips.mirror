@@ -36,8 +36,6 @@ void vector_add(float* a, float* b, float* result, int n) {
     }
 }&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;این کد ساده و خوانا است و نشان می‌دهد چقدر LoongArch به ARM نزدیک است. اگر توسعه‌دهنده هستید، پیشنهاد می‌کنم runtime dispatching اضافه کنید (مثل CPUID در x86) برای سوئیچ خودکار بین LSX و LASX – GCC از &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;__builtin_cpu_supports(&amp;quot;lasx&amp;quot;)&lt;/code&gt; پشتیبانی می‌کند، اما تست‌های بیشتری لازم است. همچنین، در مقایسه با AMD EPYC (بر اساس بررسی Chips and Cheese)، Loongson بین Zen 1 و Zen 2 قرار می‌گیرد – یعنی برای سرورهای میان‌رده یا حتی گیمینگ (مثل PS5 بر پایه Zen 2) مناسب است، اما برای کارهای سنگین AI، AVX-512 Intel هنوز برتری دارد.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در نهایت، Loongson 3A6000 یک موفقیت مهندسی واقعی است – IPC رقابتی، پشتیبانی SIMD قوی، و عملکردی که در وظایف واقعی مثل تجزیه داده یا پردازش متن، با پردازنده‌های قدیمی‌تر Intel هم‌پا می‌شود. با وجود چالش‌هایی مثل فرکانس پایین‌تر و اکوسیستم نرم‌افزاری ناقص، این پردازنده نشان می‌دهد چین در حال ساختن جایگزین‌های بومی قدرتمند است. برای ما توسعه‌دهندگان، این یعنی فرصت‌هایی برای بهینه‌سازی: از پورت کتابخانه‌ها با intrinsics LSX/LASX گرفته تا توسعه ابزارهای تشخیص runtime. مهندسان Loongson حق دارند افتخار کنند.&lt;/div&gt;">
     <meta name="robots" content="index, follow">
-    <meta name="llms.txt" content="llms.txt">
-    <meta name="llms-full.txt" content="llms-full.txt">
     <meta property="og:title" content="چقدر پردازنده‌های چینی خوب هستند؟ بنچمارک Loongson 3A6000">
     <meta property="og:description" content="&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;در دنیای امروز، جایی که وابستگی به معماری‌های x86 و ARM غالب است، پردازنده‌های بومی چینی مثل Loongson 3A6000 می‌توانند یک انقلاب کوچک باشند. این پردازنده، که بر پایه معماری اختصاصی LoongArch ساخته شده، تلاشی جدی از سوی شرکت Loongson برای کاهش وابستگی چین به فناوری‌های خارجی است. اخیراً، با دسترسی به یک سیستم مجهز به این پردازنده از طریق جامعه هواداران Loongson، فرصتی دست داد تا عملکرد آن را در بنچمارک‌های واقعی بسنجم.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;Loongson 3A6000 با فرکانس پایه ۲.۵ گیگاهرتز، از دو نسل گسترش SIMD (دستورات برداری موازی) پشتیبانی می‌کند: LSX (۱۲۸ بیتی، مشابه SSE در x86 یا NEON در ARM) و LASX (۲۵۶ بیتی، مشابه AVX/AVX2 در x86). اما چالش اصلی؟ اکوسیستم نرم‌افزاری محدود. بر روی لینوکس (مثل Debian) اجرا می‌شود، اما ابزارهایی مثل neovim یا Visual Studio Code هنوز باینری‌های آماده‌ی آن‌را ندارند، و حتی اتصال SSH به سیستم‌های LoongArch گاهی دردسرساز است. با این حال، کامپایلرهایی مثل GCC و LLVM از LoongArch پشتیبانی می‌کنند. در این مقاله، نتایج بنچمارک‌های من را با یک پردازنده Intel Xeon Gold 6338 (از نسل Ice Lake با فرکانس ۳.۱۹ گیگاهرتز) مقایسه می‌کنم. توجه کنید که این مقایسه کاملاً عادلانه نیست – کدهای ما بیشتر برای x86 بهینه شده‌اند – اما نگاهی واقعی به پتانسیل Loongson می‌دهد. &lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;توضیحات و بنچمارک‌ها&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;برای ارزیابی عملکرد، دو نوع بنچمارک انتخاب کردم: تجزیه اعداد (number parsing) و تبدیل کدگذاری رشته‌ها (string transcoding). این‌ها وظایفی هستند که در توسعه نرم‌افزارهای پرسرعت، مثل پردازش داده‌های بزرگ یا سرورها، بسیار رایج‌اند. هر دو بنچمارک از کتابخانه‌های منبع‌باز استفاده می‌کنند و با GCC ۱۵ کامپایل شده‌اند. برای اجرای آن‌ها، sudo لازم است تا شمارنده‌های عملکرد (perf counters) فعال شوند – چیزی که توسعه‌دهندگان سیستم حتماً با آن آشنا هستند.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;بنچمارک تجزیه اعداد&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;این بنچمارک بر پایه کتابخانه &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;simple_fastfloat_benchmark&lt;/code&gt; است (از GitHub: lemire/simple_fastfloat_benchmark). هدف، اندازه‌گیری سرعت تبدیل رشته‌های عددی به float است – مثلاً در پردازش JSON یا CSV. دو پیاده‌سازی تست شد: &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;fast_float&lt;/code&gt; (سریع و ساده) و تجزیه‌گر Abseil گوگل.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;برای راه‌اندازی:&lt;/strong&gt;&lt;/div&gt;&lt;pre data-language=&quot;bash&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;git clone https://github.com/lemire/simple_fastfloat_benchmark.git
 cd simple_fastfloat_benchmark
@@ -135,8 +133,11 @@ void vector_add(float* a, float* b, float* result, int n) {
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
         <div class='col-md-2'>
-         <table class='table mt-4 shadow-sm rounded table-hover mx-auto w-100 caption-bottom'>
-<caption><div class='row mt-1'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+         <div class='card mt-4 shadow-sm'>
+<div class='card-header text-center h5'>
+<a target='_blank' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a>
+</div>
+<table class='table shadow-sm mb-0 rounded table-hover mx-auto w-100 caption-bottom'>
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
@@ -156,9 +157,13 @@ void vector_add(float* a, float* b, float* result, int n) {
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
 </tr>
+<tr>
+<td><a href='www.dntips.ir-questions-toc-page-1.html'>پرسش‌ها</a></td>
+</tr>
 </tbody>
 </table>
 
+</div>
 
         </div>
         <div class='col-md-10'>

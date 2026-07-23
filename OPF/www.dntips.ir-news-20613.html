@@ -54,8 +54,6 @@
   @Html.Sitecore.Field(&amp;quot;Title&amp;quot;)
 &amp;lt;/h1&amp;gt;&lt;/pre&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;به نظر من، این تغییر کوچک، تفاوت بزرگی ایجاد می‌کند. &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Html.Sitecore&lt;/code&gt; حالا مثل یک پروپرتی واقعی رفتار می‌کند – بدون هیچ زوائد نحوی. این ویژگی نه تنها در Sitecore، بلکه در هر جایی که از Razor یا HtmlHelper استفاده می‌شود (مانند پروژه‌های ASP.NET Core)، کاربرد دارد.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;محدودیت‌ها و آینده&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;البته کدهای قدیمی (مانند DXP در Sitecore) همچنان به متدهای اکستنشن وابسته هستند و نمی‌توانید آن‌ها را بدون بازنویسی مهاجرت دهید. اما برای پروژه‌های جدید، به ویژه در رویکردهای &lt;strong&gt;headless&lt;/strong&gt; (مانند Sitecore Headless)، این قابلیت می‌تواند استاندارد جدیدی بسازد. تصور کنید کتابخانه‌های کمکی که به طور طبیعی‌تر با APIهای مایکروسافت ادغام می‌شوند – این دقیقاً چیزی است که C# 14 وعده می‌دهد.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در نهایت، C# 14 نشان می‌دهد که حتی تغییرات کوچک می‌توانند تأثیر بزرگی بر تجربه توسعه داشته باشند. اگر شما هم از آن دسته توسعه‌دهندگانی هستید که به جزئیات زیبایی‌شناختی کد اهمیت می‌دهید، این ویژگی را در پیش‌نمایش‌های .NET 10 امتحان کنید. شاید زمان آن رسیده که کتابخانه‌های کمکی‌تان را “شکل‌دارتر” کنید!&lt;/div&gt;">
     <meta name="robots" content="index, follow">
-    <meta name="llms.txt" content="llms.txt">
-    <meta name="llms-full.txt" content="llms-full.txt">
     <meta property="og:title" content="C# 14: رفع یک ایراد کوچک اما آزاردهنده در نوشتن کتابخانه‌های کمکی زیباتر">
     <meta property="og:description" content="&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;در دنیای برنامه‌نویسی دات‌نت، همیشه جزئیات کوچکی وجود دارند که ممکن است به نظر پیش‌پاافتاده بیایند، اما برای توسعه‌دهندگان حرفه‌ای، مثل خاری در چشم عمل می‌کنند. یکی از این جزئیات، نحوه گسترش اشیاء موجود با استفاده از &lt;strong&gt;متدهای اکستنشن (Extension Methods)&lt;/strong&gt; در زبان #C بوده است. خوشبختانه، نسخه 14 زبان #C – که همراه با پیش‌نمایش‌های .NET 10 عرضه شده – ابزاری جدید و انعطاف‌پذیرتر به نام &lt;strong&gt;پروپرتی‌های اکستنشن (Extension Properties)&lt;/strong&gt; معرفی کرده است. این ویژگی نه تنها کد را تمیزتر و خواناتر می‌کند، بلکه به توسعه‌دهندگان اجازه می‌دهد کتابخانه‌های کمکی (Helper Libraries) را به شکلی طبیعی‌تر و زیباتر بنویسند. در این مقاله، به بررسی این مسئله آزاردهنده قدیمی و راه‌حل نوین C# 14 می‌پردازیم.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مسئله چیست؟&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;در اکوسیستم .NET، مایکروسافت ابزارها و کلاس‌هایی را فراهم کرده که توسعه‌دهندگان می‌توانند آن‌ها را گسترش دهند. یکی از رایج‌ترین مثال‌ها، شیء &lt;strong&gt;HtmlHelper&lt;/strong&gt; در ASP.NET است که مجموعه‌ای از متدهای مفید برای برنامه‌نویسی وب ارائه می‌دهد. اما محصولات و ابزارهای ثالث، مانند &lt;strong&gt;Sitecore&lt;/strong&gt; (یک سیستم مدیریت محتوای محبوب)، ویژگی‌های اضافی را با استفاده از متدهای اکستنشن به این شیء اضافه می‌کنند.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;برای مثال، در کد Razor (زبان قالب‌نویسی ASP.NET)، نمایش یک فیلد Sitecore در یک رندرینگ (Rendering) چیزی شبیه به این است:&lt;/div&gt;&lt;pre data-language=&quot;xml&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;lt;h1&amp;gt;
   @Html.Sitecore().Field(&amp;quot;Title&amp;quot;)
@@ -180,8 +178,11 @@
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
         <div class='col-md-2'>
-         <table class='table mt-4 shadow-sm rounded table-hover mx-auto w-100 caption-bottom'>
-<caption><div class='row mt-1'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+         <div class='card mt-4 shadow-sm'>
+<div class='card-header text-center h5'>
+<a target='_blank' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a>
+</div>
+<table class='table shadow-sm mb-0 rounded table-hover mx-auto w-100 caption-bottom'>
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
@@ -201,9 +202,13 @@
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
 </tr>
+<tr>
+<td><a href='www.dntips.ir-questions-toc-page-1.html'>پرسش‌ها</a></td>
+</tr>
 </tbody>
 </table>
 
+</div>
 
         </div>
         <div class='col-md-10'>

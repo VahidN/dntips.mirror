@@ -108,8 +108,6 @@ protected override void OnModelCreating(ModelBuilder modelBuilder)
         .HasValueGenerator&amp;lt;GuidV7Generator&amp;gt;();
 }&lt;/pre&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;این روش با بهره‌گیری از امکانات جدید .NET 9، کارایی و سادگی را به ارمغان می‌آورد.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;نکات عملی برای توسعه‌دهندگان&lt;/strong&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;انتخاب روش تولید:&lt;/strong&gt; اگر پروژه شما به درج‌های مکرر و حجم بالای داده حساس است، از GUIDهای ترتیبی استفاده کنید.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;آزمایش عملکرد:&lt;/strong&gt; پیش از پیاده‌سازی نهایی، تاثیر روش انتخابی بر ایندکس‌ها و عملکرد پایگاه داده را آزمایش کنید.&lt;/li&gt;&lt;li&gt;&lt;strong&gt;مدیریت اندازه داده:&lt;/strong&gt; در جداول مرتبط (Related Tables)، استفاده از GUID به عنوان کلید خارجی (Foreign Key) حجم داده را افزایش می‌دهد؛ این موضوع را در طراحی در نظر بگیرید.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;استفاده از GUIDها در EF Core ابزاری قدرتمند برای مدیریت شناسه‌ها در برنامه‌های دات‌نت است که با مزایایی مانند منحصربه‌فرد بودن و انعطاف‌پذیری همراه است. با این حال، انتخاب روش تولید مناسب و بهینه‌سازی عملکرد آن، نیازمند درک دقیق نیازهای پروژه و پیکربندی صحیح است. از تولید تصادفی در حافظه گرفته تا استفاده از قابلیت‌های پایگاه داده یا الگوریتم‌های سفارشی مانند Guid.Comb و نسخه 7 GUID، توسعه‌دهندگان گزینه‌های متنوعی در اختیار دارند.&lt;/div&gt;">
     <meta name="robots" content="index, follow">
-    <meta name="llms.txt" content="llms.txt">
-    <meta name="llms-full.txt" content="llms-full.txt">
     <meta property="og:title" content="استفاده از GUIDها در EF Core">
     <meta property="og:description" content="&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در دنیای توسعه نرم‌افزار، مدیریت داده‌ها و شناسایی منحصربه‌فرد رکوردها از اهمیت ویژه‌ای برخوردار است. در چارچوب دات‌نت مایکروسافت (Microsoft .NET Framework)، توسعه‌دهندگان اغلب با انتخاب نوع داده مناسب برای کلیدهای اصلی (Primary Keys) مواجه می‌شوند. یکی از گزینه‌های محبوب، استفاده از GUID (شناسه منحصربه‌فرد جهانی، Globally Unique Identifier) است که به دلیل ویژگی‌های خاص خود، مانند منحصربه‌فرد بودن در مقیاس جهانی، در بسیاری از سناریوها مورد توجه قرار می‌گیرد. در این مقاله، به بررسی استفاده از GUIDها در Entity Framework Core (EF Core)، ابزار قدرتمند نگاشت شیء-رابطه‌ای (Object-Relational Mapping) مایکروسافت، می‌پردازیم.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;GUID چیست و چرا اهمیت دارد؟&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;GUID یک شناسه 128 بیتی است که به صورت تصادفی یا با الگوریتم‌های خاص تولید می‌شود و احتمال برخورد (Collision) آن در مقیاس جهانی بسیار ناچیز است. این ویژگی، GUID را برای سیستم‌های توزیع‌شده (Distributed Systems)، برنامه‌های چندکاربره و سناریوهایی که نیاز به تولید شناسه بدون وابستگی به پایگاه داده دارند، ایده‌آل می‌کند. در مقایسه با کلیدهای عددی (مانند int با قابلیت افزایش خودکار)، GUIDها نیازی به هماهنگی با سرور پایگاه داده برای تولید مقدار ندارند و این امر می‌تواند در برخی موارد عملکرد را بهبود بخشد.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در EF Core، استفاده از GUID به عنوان کلید اصلی، انعطاف‌پذیری بالایی ارائه می‌دهد، اما نیازمند پیکربندی صحیح است تا از مشکلات احتمالی مانند کاهش عملکرد به دلیل تکه‌تکه شدن ایندکس (Index Fragmentation) جلوگیری شود. در ادامه، به روش‌های مختلف استفاده از GUID در EF Core و نکات کلیدی آن می‌پردازیم.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;روش‌های تولید GUID در EF Core&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;EF Core از چندین روش برای تولید مقادیر GUID پشتیبانی می‌کند که هر یک بسته به نیاز پروژه قابل استفاده هستند:&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;تولید توسط EF Core در حافظه:&lt;/strong&gt; به طور پیش‌فرض، اگر یک ویژگی (Property) از نوع Guid در مدل تعریف شود و به عنوان کلید اصلی مشخص گردد، EF Core به صورت خودکار یک مقدار GUID تصادفی در سمت کلاینت (Client-Side) تولید می‌کند. برای مثال:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;public class MyEntity
 {
@@ -315,8 +313,11 @@ protected override void OnModelCreating(ModelBuilder modelBuilder)
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
         <div class='col-md-2'>
-         <table class='table mt-4 shadow-sm rounded table-hover mx-auto w-100 caption-bottom'>
-<caption><div class='row mt-1'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+         <div class='card mt-4 shadow-sm'>
+<div class='card-header text-center h5'>
+<a target='_blank' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a>
+</div>
+<table class='table shadow-sm mb-0 rounded table-hover mx-auto w-100 caption-bottom'>
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
@@ -336,9 +337,13 @@ protected override void OnModelCreating(ModelBuilder modelBuilder)
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
 </tr>
+<tr>
+<td><a href='www.dntips.ir-questions-toc-page-1.html'>پرسش‌ها</a></td>
+</tr>
 </tbody>
 </table>
 
+</div>
 
         </div>
         <div class='col-md-10'>

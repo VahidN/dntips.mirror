@@ -6,8 +6,6 @@
     <meta itemprop="name" content="رفع اشکال باگ زمان‌بندی در Blazor: درک تله‌ی Capture Closure">
     <meta itemprop="description" content="نویسنده با یک اشکال عجیب در سیستم رزرو اتاق کنفرانس خود در Blazor مواجه شد، جایی که تمام دکمه‌های زمان‌بندی به جای زمان واقعی، مقدار 24:00 را در کنسول نمایش می‌دادند. پس از بررسی‌های فراوان، متوجه شد که علت این مشکل، Capture Closure است. در این حالت، لامبداها متغیرها را به جای مقادیرشان Capture می‌کنند. هنگامی که حلقه به پایان می‌رسد، متغیر hour مقدار 24 را دارد و تمام هندلرها به این مقدار اشاره می‌کنند. نویسنده با استفاده از foreach و Enumerable.Range مشکل را حل کرد. راه حل‌های جایگزین شامل ایجاد کپی محلی از متغیر، استفاده از متد با پارامتر و استفاده از @key برای اجبار به رندر مجدد است. این مشکل به دلیل ماهیت Blazor، که از لامبداها برای هندلرها استفاده می‌کند و اجرای غیرهمزمان دارد، بیشتر رخ می‌دهد. این مقاله همچنین به اهمیت درک Capture Closure در زبان‌های برنامه‌نویسی مختلف و ارائه نکات اشکال‌زدایی اشاره می‌کند.">
     <meta name="robots" content="index, follow">
-    <meta name="llms.txt" content="llms.txt">
-    <meta name="llms-full.txt" content="llms-full.txt">
     <meta property="og:title" content="رفع اشکال باگ زمان‌بندی در Blazor: درک تله‌ی Capture Closure">
     <meta property="og:description" content="نویسنده با یک اشکال عجیب در سیستم رزرو اتاق کنفرانس خود در Blazor مواجه شد، جایی که تمام دکمه‌های زمان‌بندی به جای زمان واقعی، مقدار 24:00 را در کنسول نمایش می‌دادند. پس از بررسی‌های فراوان، متوجه شد که علت این مشکل، Capture Closure است. در این حالت، لامبداها متغیرها را به جای مقادیرشان Capture می‌کنند. هنگامی که حلقه به پایان می‌رسد، متغیر hour مقدار 24 را دارد و تمام هندلرها به این مقدار اشاره می‌کنند. نویسنده با استفاده از foreach و Enumerable.Range مشکل را حل کرد. راه حل‌های جایگزین شامل ایجاد کپی محلی از متغیر، استفاده از متد با پارامتر و استفاده از @key برای اجبار به رندر مجدد است. این مشکل به دلیل ماهیت Blazor، که از لامبداها برای هندلرها استفاده می‌کند و اجرای غیرهمزمان دارد، بیشتر رخ می‌دهد. این مقاله همچنین به اهمیت درک Capture Closure در زبان‌های برنامه‌نویسی مختلف و ارائه نکات اشکال‌زدایی اشاره می‌کند.">
     <meta property="og:type" content="article">
@@ -60,8 +58,11 @@
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
         <div class='col-md-2'>
-         <table class='table mt-4 shadow-sm rounded table-hover mx-auto w-100 caption-bottom'>
-<caption><div class='row mt-1'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+         <div class='card mt-4 shadow-sm'>
+<div class='card-header text-center h5'>
+<a target='_blank' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a>
+</div>
+<table class='table shadow-sm mb-0 rounded table-hover mx-auto w-100 caption-bottom'>
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
@@ -81,9 +82,13 @@
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
 </tr>
+<tr>
+<td><a href='www.dntips.ir-questions-toc-page-1.html'>پرسش‌ها</a></td>
+</tr>
 </tbody>
 </table>
 
+</div>
 
         </div>
         <div class='col-md-10'>
@@ -112,7 +117,7 @@
 <strong>مطالب مشابه</strong>
 </div>
 <ul class='list-group'>
-<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-7899.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>کتابخانه pageres</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20530.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>تحلیل گریز و بهینه‌سازی تخصیص حافظه دلیگیت‌ها در NET 10.</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-9354.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>درک آسان Closure در جاوااسکریپت</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20815.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>اعداد پایتون که هر برنامه‌نویس باید بداند</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/learning-paths/details/105'><span class='badge bg-danger rounded-pill me-2'>مسیرراه‌ها</span>Blazor 5x</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2486.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بررسی مفهوم Captured Variable در زبان سی شارپ</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3633.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>تخصیص شی روی استک در دات نت 10 (Object Stack Allocation)</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1618.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با مفاهیم شیء گرایی در جاوا اسکریپت #2</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3295.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>Blazor 5x - قسمت هفتم - مبانی Blazor - بخش 4 - انتقال اطلاعات از کامپوننت‌های فرزند به کامپوننت والد</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-877.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>Closure در JavaScript</a></ul>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-7899.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>کتابخانه pageres</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20530.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>تحلیل گریز و بهینه‌سازی تخصیص حافظه دلیگیت‌ها در NET 10.</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-9354.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>درک آسان Closure در جاوااسکریپت</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20815.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>اعداد پایتون که هر برنامه‌نویس باید بداند</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-learning-paths-toc-page-1.html'><span class='badge bg-danger rounded-pill me-2'>مسیرراه‌ها</span>Blazor 5x</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2486.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بررسی مفهوم Captured Variable در زبان سی شارپ</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3633.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>تخصیص شی روی استک در دات نت 10 (Object Stack Allocation)</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1618.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با مفاهیم شیء گرایی در جاوا اسکریپت #2</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3295.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>Blazor 5x - قسمت هفتم - مبانی Blazor - بخش 4 - انتقال اطلاعات از کامپوننت‌های فرزند به کامپوننت والد</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-877.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>Closure در JavaScript</a></ul>
 </div>
 
 

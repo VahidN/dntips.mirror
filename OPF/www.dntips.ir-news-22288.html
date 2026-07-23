@@ -6,8 +6,6 @@
     <meta itemprop="name" content="رفع مشکل نامعتبرسازی کش توزیع‌شده با Redis و HybridCache">
     <meta itemprop="description" content="سیستم‌های توزیع‌شده مقیاس‌پذیری خوبی ارائه می‌دهند، اما مشکلات جدیدی را نیز به همراه دارند. یکی از سخت‌ترین مشکلات، نامعتبرسازی کش است. کتابخانه HybridCache در .NET 9 برای ساده‌سازی کش معرفی شد که سرعت کش حافظه (L1) را با پایداری کش توزیع‌شده (L2) مانند Redis ترکیب می‌کند. با این حال، HybridCache به‌طور خودکار کش L1 محلی را در تمام گره‌ها همگام‌سازی نمی‌کند. اگر داده‌ها در Node A به‌روز شوند، Node B تا زمانی که ورودی منقضی شود، به ارائه داده‌های قدیمی از کش حافظه داخلی خود ادامه می‌دهد. این مقاله به بررسی مشکل کش توزیع‌شده، محدودیت‌های HybridCache، استفاده از Redis Pub/Sub به عنوان بک‌پلان و پیاده‌سازی نامعتبرسازی کش بی‌درنگ می‌پردازد. کاهش مدت زمان کش L1 یک راه حل رایج است، اما این کار باعث افزایش تأخیر و از دست دادن کارایی می‌شود.">
     <meta name="robots" content="index, follow">
-    <meta name="llms.txt" content="llms.txt">
-    <meta name="llms-full.txt" content="llms-full.txt">
     <meta property="og:title" content="رفع مشکل نامعتبرسازی کش توزیع‌شده با Redis و HybridCache">
     <meta property="og:description" content="سیستم‌های توزیع‌شده مقیاس‌پذیری خوبی ارائه می‌دهند، اما مشکلات جدیدی را نیز به همراه دارند. یکی از سخت‌ترین مشکلات، نامعتبرسازی کش است. کتابخانه HybridCache در .NET 9 برای ساده‌سازی کش معرفی شد که سرعت کش حافظه (L1) را با پایداری کش توزیع‌شده (L2) مانند Redis ترکیب می‌کند. با این حال، HybridCache به‌طور خودکار کش L1 محلی را در تمام گره‌ها همگام‌سازی نمی‌کند. اگر داده‌ها در Node A به‌روز شوند، Node B تا زمانی که ورودی منقضی شود، به ارائه داده‌های قدیمی از کش حافظه داخلی خود ادامه می‌دهد. این مقاله به بررسی مشکل کش توزیع‌شده، محدودیت‌های HybridCache، استفاده از Redis Pub/Sub به عنوان بک‌پلان و پیاده‌سازی نامعتبرسازی کش بی‌درنگ می‌پردازد. کاهش مدت زمان کش L1 یک راه حل رایج است، اما این کار باعث افزایش تأخیر و از دست دادن کارایی می‌شود.">
     <meta property="og:type" content="article">
@@ -60,8 +58,11 @@
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
         <div class='col-md-2'>
-         <table class='table mt-4 shadow-sm rounded table-hover mx-auto w-100 caption-bottom'>
-<caption><div class='row mt-1'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+         <div class='card mt-4 shadow-sm'>
+<div class='card-header text-center h5'>
+<a target='_blank' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a>
+</div>
+<table class='table shadow-sm mb-0 rounded table-hover mx-auto w-100 caption-bottom'>
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
@@ -81,9 +82,13 @@
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
 </tr>
+<tr>
+<td><a href='www.dntips.ir-questions-toc-page-1.html'>پرسش‌ها</a></td>
+</tr>
 </tbody>
 </table>
 
+</div>
 
         </div>
         <div class='col-md-10'>

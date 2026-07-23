@@ -148,8 +148,6 @@ protected override bool ShouldRender()
     progress = 100;
 }&lt;/pre&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;کنترل پررندر:&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;در Blazor Server، اگر پررندر باعث رندر اضافی می‌شود، می‌توانید آن را غیرفعال کنید. در فایل Program.cs یا در سطح کامپوننت:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;@rendermode InteractiveServer(false) // غیرفعال کردن پررندر&lt;/pre&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;استفاده از نوع‌های شناخته‌شده (Known Types):&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;Blazor برای نوع‌های ساده (Primitive Types) مانند int یا string، تغییرات را به‌خوبی تشخیص می‌دهد و رندر غیرضروری را کاهش می‌دهد. در مقابل، برای نوع‌های مرجع (Reference Types)، بهتر است تغییرات را صراحتاً بررسی کنید.&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;مدیریت رندر در Blazor مهارتی است که با درک عمیق‌تر چرخه حیات و رفتار فریم‌ورک به دست می‌آید. رندر بیش‌ازحد نه‌تنها منابع را هدر می‌دهد، بلکه می‌تواند عملکرد برنامه را تحت تأثیر قرار دهد. با استفاده از ابزارهای تشخیص مانند لاگ‌گذاری و دیباگر، و پیاده‌سازی راهکارهایی مانند ShouldRender، کنترل رویدادها و بهینه‌سازی متدهای async، می‌توانید این مشکل را به‌طور مؤثری حل کنید. &lt;/div&gt;">
     <meta name="robots" content="index, follow">
-    <meta name="llms.txt" content="llms.txt">
-    <meta name="llms-full.txt" content="llms-full.txt">
     <meta property="og:title" content="بهینه‌سازی رندر در Blazor">
     <meta property="og:description" content="&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;مقدمه&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;یکی از چالش‌های رایج در مسیر توسعه‌ی برنامه‌های Blazor، مدیریت رندر (Rendering) کامپوننت‌ها است. گاهی اوقات، یک کامپوننت بیش از حد انتظار رندر می‌شود که می‌تواند عملکرد برنامه را تحت تأثیر قرار دهد و تجربه کاربری را تضعیف کند. این مقاله با هدف آموزش بهینه‌سازی رندر در Blazor نوشته شده است و بر اساس تجربه‌ای واقعی از تحلیل و رفع مشکل رندر غیرضروری یک کامپوننت، به شما کمک می‌کند تا درک بهتری از رفتار Blazor داشته باشید و راهکارهایی عملی برای بهبود آن پیاده‌سازی کنید. در این مسیر، مفاهیم کلیدی مانند چرخه حیات کامپوننت (Component Lifecycle)، متد ShouldRender و استفاده از ابزارهای دیباگ (Debugging Tools) بررسی می‌شوند.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;درک مشکل رندر بیش‌ازحد&lt;/strong&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; style=&quot;text-align: right;&quot; class=&quot;ql-direction-rtl&quot;&gt;در Blazor، رندر یک کامپوننت زمانی رخ می‌دهد که فریم‌ورک تشخیص دهد وضعیت (State) آن تغییر کرده است. این تغییر می‌تواند ناشی از به‌روزرسانی پارامترها، اجرای رویدادها یا فراخوانی دستی متد StateHasChanged باشد. اما گاهی اوقات، رندر بیش از حد اتفاق می‌افتد، حتی وقتی تغییر واقعی در وضعیت وجود ندارد. به عنوان مثال، فرض کنید یک کامپوننت ساده دارید که یک لیست کشویی (Dropdown) را نمایش می‌دهد:&lt;/div&gt;&lt;pre data-language=&quot;cs&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;@inject NavigationManager NavigationManager
 
@@ -415,8 +413,11 @@ protected override bool ShouldRender()
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
         <div class='col-md-2'>
-         <table class='table mt-4 shadow-sm rounded table-hover mx-auto w-100 caption-bottom'>
-<caption><div class='row mt-1'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+         <div class='card mt-4 shadow-sm'>
+<div class='card-header text-center h5'>
+<a target='_blank' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a>
+</div>
+<table class='table shadow-sm mb-0 rounded table-hover mx-auto w-100 caption-bottom'>
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
@@ -436,9 +437,13 @@ protected override bool ShouldRender()
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
 </tr>
+<tr>
+<td><a href='www.dntips.ir-questions-toc-page-1.html'>پرسش‌ها</a></td>
+</tr>
 </tbody>
 </table>
 
+</div>
 
         </div>
         <div class='col-md-10'>

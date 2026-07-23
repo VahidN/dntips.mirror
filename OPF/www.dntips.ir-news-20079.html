@@ -30,8 +30,6 @@
     &amp;lt;/ItemGroup&amp;gt;
 &amp;lt;/Project&amp;gt;&lt;/pre&gt;&lt;ul&gt;&lt;li&gt;استفاده از (MSBuildThisFileDirectory)$ برای جلوگیری از خطاهای بیلد در پروژه‌های دیگر بسیار مهم است.&lt;/li&gt;&lt;li&gt;این رویکرد قوانین را به همه‌ی پروژه‌ها در داخل دایرکتوری و زیرشاخه‌های آن اعمال می‌کند.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;اجازه دادن به موارد خاص&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;    از دستورات pragma# برای غیرفعال کردن هشدارها برای مواردی خاص از یک فراخوانی مسدود شده استفاده کنید. منوی &amp;quot;Context Actions&amp;quot; -&amp;gt; &amp;quot;Inspection&amp;quot; -&amp;gt; &amp;quot;Disable with #pragma&amp;quot; در Rider می‌تواند در این مورد کمک کند. بهتر است یک کامنت نیز برای توضیح اینکه چرا استفاده‌ی خاصی مجاز است، اضافه کنید.&lt;/div&gt;">
     <meta name="robots" content="index, follow">
-    <meta name="llms.txt" content="llms.txt">
-    <meta name="llms-full.txt" content="llms-full.txt">
     <meta property="og:title" content="مسدود کردن استفاده از متدهای ناامن در پروژه‌های دات‌نت با Roslyn">
     <meta property="og:description" content="&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;این مقاله نحوه‌ی استفاده از BannedApiAnalyzers در Roslyn را برای مسدود کردن فراخوانی متدهای خاص در پروژه‌های دات‌نت، بهبود کیفیت کد و جلوگیری از استفاده از توابع ناامن یا منسوخ‌شده شرح می‌دهد.&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;مشکل&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;فراخوانی توابع همگام می‌تواند ناخواسته معرفی شود؛ حتی زمانیکه نسخه‌های ناهمگام ترجیح داده می‌شوند (به عنوان مثال، ToList در مقابل ToListAsync).&lt;/li&gt;&lt;li&gt;یافتن و جایگزینی دستی همه‌ی موارد یک فراخوانی تابع، خسته‌کننده و مستعد خطا است.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;راه حل: استفاده از BannedApiAnalyzers&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;BannedApiAnalyzers اجازه می‌دهد قوانینی را برای مسدود کردن قطعه کدهای خاصی تعریف کنید و هشدارها یا خطاهای کامپایلری را ایجاد کنید.&lt;/li&gt;&lt;li&gt;مشابه ESLint برای NodeJS، به اجرای استانداردهای کدنویسی کمک می‌کند.&lt;/li&gt;&lt;/ul&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;strong&gt;مراحل پیاده‌سازی&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot; dir=&quot;rtl&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;ul&gt;&lt;li&gt;بسته NuGet: بسته NuGet Microsoft.CodeAnalysis.BannedApiAnalyzers را به پروژه خود اضافه کنید.&lt;/li&gt;&lt;li&gt;BannedSymbols.txt: فایلی به نام BannedSymbols.txt را در پروژه خود ایجاد کنید.&lt;/li&gt;&lt;li&gt;پیکربندی csproj: موارد زیر را به فایل .csproj خود اضافه کنید:&lt;/li&gt;&lt;/ul&gt;&lt;pre data-language=&quot;xml&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;lt;ItemGroup&amp;gt;
   &amp;lt;AdditionalFiles Include=&amp;quot;BannedSymbols.txt&amp;quot; /&amp;gt;
@@ -120,8 +118,11 @@
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
         <div class='col-md-2'>
-         <table class='table mt-4 shadow-sm rounded table-hover mx-auto w-100 caption-bottom'>
-<caption><div class='row mt-1'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+         <div class='card mt-4 shadow-sm'>
+<div class='card-header text-center h5'>
+<a target='_blank' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a>
+</div>
+<table class='table shadow-sm mb-0 rounded table-hover mx-auto w-100 caption-bottom'>
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
@@ -141,9 +142,13 @@
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
 </tr>
+<tr>
+<td><a href='www.dntips.ir-questions-toc-page-1.html'>پرسش‌ها</a></td>
+</tr>
 </tbody>
 </table>
 
+</div>
 
         </div>
         <div class='col-md-10'>

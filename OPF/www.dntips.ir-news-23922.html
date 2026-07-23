@@ -22,8 +22,6 @@
 
 کلاس &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;GCHandleStore&lt;/code&gt; به طور مداوم سعی می‌کند سر لیست آزاد را با استفاده از عملیات CAS (مقایسه و جایگزینی) اتمی جایگزین کند، تا زمانی که یا موفق شود یا &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;_freeHead&lt;/code&gt; به -1 برسد (که به این معنی است که کسی آخرین slot آزاد را تخصیص داده است). با این حال، یک race condition ظریف در این کد وجود دارد، اگر سناریوی زیر را در نظر بگیریم: thread T1 مقدار &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;_freeHead = 5&lt;/code&gt; را می‌خواند و &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;slot5-&amp;gt;ExtraInfo = 6&lt;/code&gt; را می‌خواند. thread T2 مقدار 5 را pop می‌کند (head اکنون 6 است)، مقدار 6 را pop می‌کند (head اکنون 7 است)، سپس مقدار 5 را push می‌کند (head دوباره 5 است، اما با &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;slot5-&amp;gt;ExtraInfo = 7&lt;/code&gt;). عملیات CAS thread T1 موفق می‌شود (head دوباره 5 است) و &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;_freeHead&lt;/code&gt; را به 6 تنظیم می‌کند (منسوخ شده)، node 7 را از دست می‌دهد و زنجیره را خراب می‌کند. این سناریو به عنوان مشکل ABA شناخته می‌شود. راه حل رایج، بسته‌بندی یک tag است...">
     <meta name="robots" content="index, follow">
-    <meta name="llms.txt" content="llms.txt">
-    <meta name="llms-full.txt" content="llms-full.txt">
     <meta property="og:title" content="نوشتن یک جمع‌آورکننده زباله .NET در C# – قسمت 7: علامت‌گذاری هندل‌ها">
     <meta property="og:description" content="در قسمت قبلی این مجموعه، پیاده‌سازی فاز علامت‌گذاری و فاز جاروب جمع‌آورکننده زباله آغاز شد. در آنجا توضیح داده شد که ریشه‌ها به سه دسته تقسیم می‌شوند: متغیرهای محلی و فضای ذخیره‌سازی thread-static، هندل‌های GC و صف نهایی‌سازی. تا کنون، تنها دسته اول اسکن شده بود. اکنون به اسکن هندل‌های GC می‌پردازیم.
 
@@ -100,8 +98,11 @@
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
         <div class='col-md-2'>
-         <table class='table mt-4 shadow-sm rounded table-hover mx-auto w-100 caption-bottom'>
-<caption><div class='row mt-1'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+         <div class='card mt-4 shadow-sm'>
+<div class='card-header text-center h5'>
+<a target='_blank' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a>
+</div>
+<table class='table shadow-sm mb-0 rounded table-hover mx-auto w-100 caption-bottom'>
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
@@ -121,9 +122,13 @@
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
 </tr>
+<tr>
+<td><a href='www.dntips.ir-questions-toc-page-1.html'>پرسش‌ها</a></td>
+</tr>
 </tbody>
 </table>
 
+</div>
 
         </div>
         <div class='col-md-10'>

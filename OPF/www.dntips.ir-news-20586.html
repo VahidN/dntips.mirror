@@ -164,8 +164,6 @@ vecInt *= 2;
 // و یک شیء جدید می‌سازد (Fallback)
 vecDec *= 3.4m;&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;در خط &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;vecInt *= 2&lt;/code&gt;، متد بهینه‌ی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;operator *=&lt;/code&gt; فراخوانی می‌شود. اما در خط &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;vecDec *= 3.4m&lt;/code&gt;، چون نسخه‌ی &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;operator *=(decimal right)&lt;/code&gt; وجود ندارد، سی‌شارپ به حالت قبل بازگشته و عبارت را به صورت &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;vecDec = vecDec * 3.4m&lt;/code&gt; تفسیر می‌کند که منجر به ساخت یک شیء جدید و کاهش کارایی می‌شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;نتیجه‌گیری&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-align-right ql-direction-rtl&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;انتساب‌های ترکیبی سفارشی&lt;/strong&gt; یک ویژگی کوچک اما قدرتمند در C# 14 است. اگر با ساختارهای داده بزرگ کار می‌کنید یا به عنوان یک توسعه‌دهنده کتابخانه به دنبال حداکثر کارایی هستید، این قابلیت قطعاً ارزش بررسی را دارد. با این حال، همیشه به خاطر داشته باشید که این ویژگی ممکن است منجر به تکرار کد (مثلاً بین منطق &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;+&lt;/code&gt; و &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;+=&lt;/code&gt;) شود. بنابراین، باید بین مزایای عملکردی و هزینه‌ی نگهداری کد تعادل برقرار کنید.&lt;/div&gt;">
     <meta name="robots" content="index, follow">
-    <meta name="llms.txt" content="llms.txt">
-    <meta name="llms-full.txt" content="llms-full.txt">
     <meta property="og:title" content="نگاهی عمیق به انتساب‌های ترکیبی سفارشی در C# 14">
     <meta property="og:description" content="&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;سی‌شارپ ۱۴ که همراه با دات‌نت ۱۰ عرضه خواهد شد، قابلیت جدید و کارآمدی به نام &lt;strong&gt;انتساب‌های ترکیبی سفارشی (User-Defined Compound Assignments)&lt;/strong&gt; را معرفی می‌کند. این ویژگی به توسعه‌دهندگان اجازه می‌دهد تا نسخه‌های بهینه‌تری از عملگرهای انتسابی مانند &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;+=&lt;/code&gt; یا &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;*=&lt;/code&gt; را پیاده‌سازی کرده و از ساخت بی‌مورد اشیاء در حافظه جلوگیری کنند. در این مقاله، نحوه‌ی پیاده‌سازی و استفاده از این قابلیت جدید را بررسی کرده و به نکات و دام‌های احتمالی آن می‌پردازیم.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div dir=&quot;rtl&quot; class=&quot;ql-align-right ql-direction-rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;strong&gt;پیش‌نیازها برای شروع&lt;/strong&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;کدهای این مقاله با C# 14 نوشته شده‌اند که در زمان نگارش این متن، هنوز در مرحله پیش‌نمایش قرار دارد. این یعنی ممکن است سینتکس نهایی تا زمان انتشار رسمی دات‌نت ۱۰ دستخوش تغییرات جزئی شود.&lt;/div&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&quot; dir=&quot;rtl&quot; style=&quot;text-align: right;&quot;&gt;برای اجرای کدها، باید آخرین نسخه پیش‌نمایش &lt;strong&gt;SDK دات‌نت ۱۰&lt;/strong&gt; را نصب کنید. سپس یک پروژه جدید (در اینجا Console App) ایجاد کرده و مطمئن شوید که &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;.net10.0&lt;/code&gt; را هدف قرار داده است. در نهایت، برای فعال‌سازی ویژگی‌های پیش‌نمایش زبان، فایل &lt;code dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;*.csproj&lt;/code&gt; پروژه خود را باز کرده و تگ  را به آن اضافه کنید:&lt;/div&gt;&lt;pre data-language=&quot;xml&quot; dir=&quot;ltr&quot; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;&amp;lt;Project Sdk=&amp;quot;Microsoft.NET.Sdk&amp;quot;&amp;gt;
   &amp;lt;PropertyGroup&amp;gt;
@@ -455,8 +453,11 @@ vecDec *= 3.4m;&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&q
 <div class='container-fluid min-vh-100 d-flex flex-column'>
     <div class='row flex-grow-1'>
         <div class='col-md-2'>
-         <table class='table mt-4 shadow-sm rounded table-hover mx-auto w-100 caption-bottom'>
-<caption><div class='row mt-1'><a target='_blank' style='text-align: center !important;' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a></div></caption>
+         <div class='card mt-4 shadow-sm'>
+<div class='card-header text-center h5'>
+<a target='_blank' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a>
+</div>
+<table class='table shadow-sm mb-0 rounded table-hover mx-auto w-100 caption-bottom'>
 <tbody class="table-group-divider">
 <tr>
 <td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
@@ -476,9 +477,13 @@ vecDec *= 3.4m;&lt;/pre&gt;&lt;div class=&quot;ql-direction-rtl ql-align-right&q
 <tr>
 <td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
 </tr>
+<tr>
+<td><a href='www.dntips.ir-questions-toc-page-1.html'>پرسش‌ها</a></td>
+</tr>
 </tbody>
 </table>
 
+</div>
 
         </div>
         <div class='col-md-10'>
