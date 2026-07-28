@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫ساده‌سازی اتصالات LINQ بدون انتخاب‌گر نتیجه (Result Selector) در NET 11.</title>     <meta name="description" content="  چکیده   زبان پرس‌وجوی یکپارچه (LINQ) همواره یکی از ارکان اصلی افزایش بهره‌وری و خوانایی کد در اکوسیستم دات‌نت بوده است. یکی از متداول‌ترین عملیات‌ها در LINQ، اتصال داده‌ها (Join) بر اساس کلیدهای مشترک است. تا پیش از معرفی پیش‌نمایش .NET 11، متد  Join  توسعه‌دهندگان را ملزم می‌کرد که همواره پارامتر چهارم یا همان انتخاب‌گر نتیجه ( resultSelector ) را برای نگاشت خروجی مشخص کنند؛ امری که در اکثر موارد منجر به نوشتن کدهای تکراری و عبارات چندگ ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="ساده‌سازی اتصالات LINQ بدون انتخاب‌گر نتیجه (Result Selector) در NET 11.">
+    <meta itemprop="description" content="  چکیده   زبان پرس‌وجوی یکپارچه (LINQ) همواره یکی از ارکان اصلی افزایش بهره‌وری و خوانایی کد در اکوسیستم دات‌نت بوده است. یکی از متداول‌ترین عملیات‌ها در LINQ، اتصال داده‌ها (Join) بر اساس کلیدهای مشترک است. تا پیش از معرفی پیش‌نمایش .NET 11، متد  Join  توسعه‌دهندگان را ملزم می‌کرد که همواره پارامتر چهارم یا همان انتخاب‌گر نتیجه ( resultSelector ) را برای نگاشت خروجی مشخص کنند؛ امری که در اکثر موارد منجر به نوشتن کدهای تکراری و عبارات چندگ ...">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="ساده‌سازی اتصالات LINQ بدون انتخاب‌گر نتیجه (Result Selector) در NET 11.">
+    <meta property="og:description" content="  چکیده   زبان پرس‌وجوی یکپارچه (LINQ) همواره یکی از ارکان اصلی افزایش بهره‌وری و خوانایی کد در اکوسیستم دات‌نت بوده است. یکی از متداول‌ترین عملیات‌ها در LINQ، اتصال داده‌ها (Join) بر اساس کلیدهای مشترک است. تا پیش از معرفی پیش‌نمایش .NET 11، متد  Join  توسعه‌دهندگان را ملزم می‌کرد که همواره پارامتر چهارم یا همان انتخاب‌گر نتیجه ( resultSelector ) را برای نگاشت خروجی مشخص کنند؛ امری که در اکثر موارد منجر به نوشتن کدهای تکراری و عبارات چندگ ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="ساده‌سازی اتصالات LINQ بدون انتخاب‌گر نتیجه (Result Selector) در NET 11.">
+    <meta name="twitter:description" content="  چکیده   زبان پرس‌وجوی یکپارچه (LINQ) همواره یکی از ارکان اصلی افزایش بهره‌وری و خوانایی کد در اکوسیستم دات‌نت بوده است. یکی از متداول‌ترین عملیات‌ها در LINQ، اتصال داده‌ها (Join) بر اساس کلیدهای مشترک است. تا پیش از معرفی پیش‌نمایش .NET 11، متد  Join  توسعه‌دهندگان را ملزم می‌کرد که همواره پارامتر چهارم یا همان انتخاب‌گر نتیجه ( resultSelector ) را برای نگاشت خروجی مشخص کنند؛ امری که در اکثر موارد منجر به نوشتن کدهای تکراری و عبارات چندگ ...">
+    <meta name="twitter:card" content="  چکیده   زبان پرس‌وجوی یکپارچه (LINQ) همواره یکی از ارکان اصلی افزایش بهره‌وری و خوانایی کد در اکوسیستم دات‌نت بوده است. یکی از متداول‌ترین عملیات‌ها در LINQ، اتصال داده‌ها (Join) بر اساس کلیدهای مشترک است. تا پیش از معرفی پیش‌نمایش .NET 11، متد  Join  توسعه‌دهندگان را ملزم می‌کرد که همواره پارامتر چهارم یا همان انتخاب‌گر نتیجه ( resultSelector ) را برای نگاشت خروجی مشخص کنند؛ امری که در اکثر موارد منجر به نوشتن کدهای تکراری و عبارات چندگ ...">
+    <meta property="article:published_time" content="Mon, 27 Jul 2026 04:50:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫ساده‌سازی اتصالات LINQ بدون انتخاب‌گر نتیجه (Result Selector) در NET 11.";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <div class='card mt-4 shadow-sm'>
+<div class='card-header text-center h5'>
+<a target='_blank' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a>
+</div>
+<table class='table shadow-sm mb-0 rounded table-hover mx-auto w-100 caption-bottom'>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-questions-toc-page-1.html'>پرسش‌ها</a></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-3730.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫فرمت‌بندی و بازیابی دوطرفه اعداد ممیز شناور در قالب هگزادسیمال در NET 11.</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-3728.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫چرا Dictionary معمولی در اجرای موازی شکست می‌خورد؟</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫ساده‌سازی اتصالات LINQ بدون انتخاب‌گر نتیجه (Result Selector) در NET 11.</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۵/۰۵/۰۵ ۰۸:۲۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-3729.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl"><strong>چکیده</strong></div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl">زبان پرس‌وجوی یکپارچه (LINQ) همواره یکی از ارکان اصلی افزایش بهره‌وری و خوانایی کد در اکوسیستم دات‌نت بوده است. یکی از متداول‌ترین عملیات‌ها در LINQ، اتصال داده‌ها (Join) بر اساس کلیدهای مشترک است. تا پیش از معرفی پیش‌نمایش .NET 11، متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Join</code> توسعه‌دهندگان را ملزم می‌کرد که همواره پارامتر چهارم یا همان انتخاب‌گر نتیجه (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">resultSelector</code>) را برای نگاشت خروجی مشخص کنند؛ امری که در اکثر موارد منجر به نوشتن کدهای تکراری و عبارات چندگانه (Tuples) می‌شد. در این مقاله، به بررسی بهبود جدید ارائه شده در .NET 11 برای ساده‌سازی متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Join</code>، نحوه حذف تشریفات اضافی کد (Boilerplate)، بررسی دقیق رفتار کامپایلر و اثرات آن بر تمیزی کد می‌پردازیم.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>مقدمه</strong></div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl">توسعه‌دهندگان #C و دات‌نت سال‌هاست که از LINQ برای اجرای پرس‌وجوهای صریح، خوانا و ایمن از نظر نوع (Type-Safe) استفاده می‌کنند. عملیات Join یکی از قابلیت‌های اصلی LINQ است که امکان پیوند دادن دو مجموعه داده مجزا را بر اساس کلید یکسان فراهم می‌سازد.</div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl">با وجود کاربرد گسترده، نحو (Syntax) متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Enumerable.Join</code>، شامل یک الزام تاریخی بود: ارائه صریح تابع انتخاب‌گر خروجی. در سناریوهایی که هدف صرفاً دریافت جفت‌های منطبق از دو مجموعه بدون تغییر ساختار اولیه بود، توسعه‌دهندگان مجبور به تعریف دستی یک Tuple واسط بودند. .NET 11 با معرفی Overloadهای جدید و هوشمندتر، این تشریفات کدنویسی را برطرف کرده است.</div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>بررسی فنی و مقایسه نحو پیاده‌سازی</strong></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>تعریف مدل‌های داده و مجموعه‌ها</strong></div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl">برای درک بهتر تغییرات، دو کلاس ساده <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Product</code> (کالا) و <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Order</code> (سفارش) را در نظر بگیرید:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public class Product
+{
+    public required int ID { get; init; }
+    public required string Name { get; init; }
+}
+
+public class Order
+{
+    public required int OrderID { get; init; }
+    public required int ProductID { get; init; }
+    public required int Quantity { get; init; }
+}</pre><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl">سپس نمونه‌هایی از این داده‌ها را مقداردهی می‌کنیم:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Product[] products = [
+    new() { ID = 1, Name = &quot;Mango&quot; },
+    new() { ID = 2, Name = &quot;Banana&quot; },
+    new() { ID = 3, Name = &quot;Potato&quot; },
+    new() { ID = 4, Name = &quot;Cabbage&quot; }
+];
+
+Order[] orders = [
+    new() { OrderID = 1, ProductID = 1, Quantity = 10 },
+    new() { OrderID = 1, ProductID = 2, Quantity = 13 },
+    new() { OrderID = 2, ProductID = 3, Quantity = 5 },
+    new() { OrderID = 2, ProductID = 4, Quantity = 8 }
+];</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۱. روش سنتی (تا قبل از .NET 11)</strong></div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl">در نسخه‌های قبلی .NET، برای اتصال این دو مجموعه بر اساس کد محصول و دریافت شیء محصول و سفارش متناظر، باید یک عبارت لامبدا اضافی به عنوان <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">resultSelector</code> ارسال می‌شد:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">var result = products.Join(
+    orders,
+    product =&gt; product.ID,
+    order =&gt; order.ProductID,
+    (product, order) =&gt; (product, order) // انتخاب‌گر نتیجه اجباری (ValueTuple)
+);</pre><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl">عبارت <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">(product, order) =&gt; (product, order)</code> هیچ کار ساختاری یا محاسباتی خاصی انجام نمی‌داد و تنها برای تبدیل خروجی به یک <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ValueTuple</code> نوشته می‌شد.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۲. روش جدید و ساده‌شده در .NET 11</strong></div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl">در .NET 11 با ارائه Overload پیش‌فرض جدید برای <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Join</code>، نیازی به نگارش پارامتر چهارم نیست:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">var newResult = products.Join(
+    orders,
+    product =&gt; product.ID,
+    order =&gt; order.ProductID
+);</pre><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl">در هر دو حالت، خروجی حاصل یک مجموعه از جفت‌های <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">(Product product, Order order)</code> خواهد بود و پیمایش آن دقیقاً یکسان است:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">foreach (var (product, order) in newResult)
+{
+    Console.WriteLine($&quot;Product: {product.Name}, Quantity: {order.Quantity}&quot;);
+}</pre><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl"><strong>خروجی اجرا:</strong></div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Product: Mango, Quantity: 10
+Product: Banana, Quantity: 13
+Product: Potato, Quantity: 5
+Product: Cabbage, Quantity: 8</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>نکات تکمیلی</strong></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>الف) مقایسه نحوی Query Syntax در برابر Method Syntax</strong></div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl">در نحو پرس‌وجویی (Query Syntax)، LINQ از گذشته رفتار هوشمندانه‌ای داشت و اگر کلمه کلیدی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">join</code> استفاده می‌شد، می‌توانستید خروجی دلخواه را انتخاب کنید. اما در Method Syntax الزام وجود پارامتر چهارم همواره حس می‌شد. بهبود .NET 11 باعث شده است تا Method Syntax از نظر سادگی به همان میزان از تمیزی دست یابد.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>ب) خروجی کامپایلر و عملکرد (Performance)</strong></div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl">از نظر کارایی و حافظه، متد جدید دقیقاً همان ساختار داده خروجی (یک <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ValueTuple</code>) را تولید می‌کند که متد قبلی با انتخاب‌گر دستی تولید می‌کرد. بنابراین این تغییر هیچ افت عملکردی ایجاد نمی‌کند و با حذف نیاز به ارزیابی یک Delegate اضافه، کدهای CIL تمیزتری تولید می‌شود.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>ج) مقایسه با سایر متدهای LINQ</strong></div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl">این ساده‌سازی بخشی از تلاش‌های مستمر تیم دات‌نت برای کاهش کد تشریفاتی (Boilerplate Reduction) است که پیش از این نیز در متدهایی نظیر <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Zip</code> مشاهده شده بود.</div><table class="table table-striped table-hover table-bordered table-condensed" style="max-width: 100%; width: auto; margin-left: auto; margin-right: auto; direction: rtl;" dir="rtl"><tbody><tr><td data-row="1" class="ql-direction-ltr text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>ویژگی</strong></td><td data-row="1" class="text-center align-middle ql-align-right ql-direction-rtl" style="text-align: center; vertical-align: middle;"><strong>تا پیش از .NET 11</strong></td><td data-row="1" class="text-center align-middle ql-align-right ql-direction-rtl" style="text-align: center; vertical-align: middle;"><strong>در .NET 11 Preview</strong></td></tr><tr><td data-row="2" class="text-center align-middle ql-align-right ql-direction-rtl" style="text-align: center; vertical-align: middle;"><strong>تعداد پارامترهای اجباری Join</strong></td><td data-row="2" class="text-center align-middle ql-align-right ql-direction-rtl" style="text-align: center; vertical-align: middle;">۴ پارامتر</td><td data-row="2" class="text-center align-middle ql-align-right ql-direction-rtl" style="text-align: center; vertical-align: middle;">۳ پارامتر</td></tr><tr><td data-row="3" class="text-center align-middle ql-align-right ql-direction-rtl" style="text-align: center; vertical-align: middle;"><strong>نیاز به تعریف Manual Tuple</strong></td><td data-row="3" class="ql-direction-ltr text-center align-middle" style="text-align: center; vertical-align: middle;">بله <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">(a, b) =&gt; (a, b)</code></td><td data-row="3" class="text-center align-middle ql-align-right ql-direction-rtl" style="text-align: center; vertical-align: middle;">خیر (تولید خودکار ValueTuple)</td></tr><tr><td data-row="4" class="text-center align-middle ql-align-right ql-direction-rtl" style="text-align: center; vertical-align: middle;"><strong>خوانایی کد (Readability)</strong></td><td data-row="4" class="ql-direction-ltr text-center align-middle" style="text-align: center; vertical-align: middle;">همراه با شلوغی بصری</td><td data-row="4" class="ql-direction-ltr text-center align-middle" style="text-align: center; vertical-align: middle;">تمیز و مستقیم</td></tr><tr><td data-row="5" class="text-center align-middle ql-align-right ql-direction-rtl" style="text-align: center; vertical-align: middle;"><strong>نوع خروجی (Type Signature)</strong></td><td data-row="5" class="ql-direction-ltr text-center align-middle" style="text-align: center; vertical-align: middle;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IEnumerable&lt;(T1, T2)&gt;</code></td><td data-row="5" class="ql-direction-ltr text-center align-middle" style="text-align: center; vertical-align: middle;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IEnumerable&lt;(T1, T2)&gt;</code></td></tr></tbody></table><blockquote class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>نکته:</strong> اگر پس از انجام Join قصد داشته باشید مستقیماً یک DTO جدید بسازید یا فیلد خاصی را استخراج کنید، همچنان می‌توانید از Overload چهارپارامتری کلاسیک استفاده کنید. متد جدید صرفاً برای سناریوی شایع Projection کامل دو عنصر ارائه شده است.</blockquote><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>نتیجه‌گیری</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">تغییرات معرفی‌شده در پیش‌نمایش .NET 11 برای متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">LINQ Join</code> گامی کوچک اما ارزشمند در جهت تمیزتر شدن کدهای C# و کاهش تشریفات غیرضروری است. با حذف نیاز اجباری به <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">resultSelector</code> هنگام بازگرداندن ساده جفت‌های منطبق، توسعه‌دهندگان می‌توانند کدهایی خواناتر، کوتاه‌تر و گویاتر بنویسند.</div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20276.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>نحوه‌ی اعمال فیلتر بر روی روی داده‌های مرتبط (جوین‌شده) در Entity Framework Core</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20330.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>ارائه قابلیت LeftJoin و RightJoin به صورت بومی در NET 10.</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3674.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بررسی قابلیت FullJoin در NET 11.؛ قطعه گم‌شده پازل LINQ</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3259.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>امکان داشتن خروجی‌های Covariant در C# 9.0</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-503.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مدیریت Join در NHibernate 3.0</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1403.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>نوشتن پرس و جو در Entity Framework‌ با استفاده از LINQ To Entity قسمت اول</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1687.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>استفاده از EF در اپلیکیشن های N-Tier : قسمت اول</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-342.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با NHibernate - قسمت سوم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1696.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>استفاده از EF در اپلیکیشن های N-Tier : قسمت ششم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3674.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>بررسی قابلیت FullJoin در NET 11.؛ قطعه گم‌شده پازل LINQ</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>
