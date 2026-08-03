@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫مقاوم‌سازی مقایسه رمزنگاری در NET.: راهنمای جامع مقایسه زمان‌ثابت (Constant-Time Comparison)</title>     <meta name="description" content="  چکیده:  در پیاده‌سازی سیستم‌های احراز هویت و ذخیره‌سازی رمزهای عبور، مقایسه صحیح و ایمن هش‌ها یکی از حیاتی‌ترین حلقه‌های زنجیره امنیت است. متدهای معمولی مقایسه آرایه‌ها یا رشته‌ها در #C (مانند عملگر  ==  یا متد  SequenceEqual ) به محض یافتن اولین عدم تطابق، از ادامه پردازش انصراف می‌دهند. این رفتار، روزنه خطیری تحت عنوان «حمله کانال جانبی زمان‌بندی» (Timing Side-Channel Attack) ایجاد می‌کند که به مهاجم اجازه می‌دهد بایت به بایت مقادیر مح ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="مقاوم‌سازی مقایسه رمزنگاری در NET.: راهنمای جامع مقایسه زمان‌ثابت (Constant-Time Comparison)">
+    <meta itemprop="description" content="  چکیده:  در پیاده‌سازی سیستم‌های احراز هویت و ذخیره‌سازی رمزهای عبور، مقایسه صحیح و ایمن هش‌ها یکی از حیاتی‌ترین حلقه‌های زنجیره امنیت است. متدهای معمولی مقایسه آرایه‌ها یا رشته‌ها در #C (مانند عملگر  ==  یا متد  SequenceEqual ) به محض یافتن اولین عدم تطابق، از ادامه پردازش انصراف می‌دهند. این رفتار، روزنه خطیری تحت عنوان «حمله کانال جانبی زمان‌بندی» (Timing Side-Channel Attack) ایجاد می‌کند که به مهاجم اجازه می‌دهد بایت به بایت مقادیر مح ...">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="مقاوم‌سازی مقایسه رمزنگاری در NET.: راهنمای جامع مقایسه زمان‌ثابت (Constant-Time Comparison)">
+    <meta property="og:description" content="  چکیده:  در پیاده‌سازی سیستم‌های احراز هویت و ذخیره‌سازی رمزهای عبور، مقایسه صحیح و ایمن هش‌ها یکی از حیاتی‌ترین حلقه‌های زنجیره امنیت است. متدهای معمولی مقایسه آرایه‌ها یا رشته‌ها در #C (مانند عملگر  ==  یا متد  SequenceEqual ) به محض یافتن اولین عدم تطابق، از ادامه پردازش انصراف می‌دهند. این رفتار، روزنه خطیری تحت عنوان «حمله کانال جانبی زمان‌بندی» (Timing Side-Channel Attack) ایجاد می‌کند که به مهاجم اجازه می‌دهد بایت به بایت مقادیر مح ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="مقاوم‌سازی مقایسه رمزنگاری در NET.: راهنمای جامع مقایسه زمان‌ثابت (Constant-Time Comparison)">
+    <meta name="twitter:description" content="  چکیده:  در پیاده‌سازی سیستم‌های احراز هویت و ذخیره‌سازی رمزهای عبور، مقایسه صحیح و ایمن هش‌ها یکی از حیاتی‌ترین حلقه‌های زنجیره امنیت است. متدهای معمولی مقایسه آرایه‌ها یا رشته‌ها در #C (مانند عملگر  ==  یا متد  SequenceEqual ) به محض یافتن اولین عدم تطابق، از ادامه پردازش انصراف می‌دهند. این رفتار، روزنه خطیری تحت عنوان «حمله کانال جانبی زمان‌بندی» (Timing Side-Channel Attack) ایجاد می‌کند که به مهاجم اجازه می‌دهد بایت به بایت مقادیر مح ...">
+    <meta name="twitter:card" content="  چکیده:  در پیاده‌سازی سیستم‌های احراز هویت و ذخیره‌سازی رمزهای عبور، مقایسه صحیح و ایمن هش‌ها یکی از حیاتی‌ترین حلقه‌های زنجیره امنیت است. متدهای معمولی مقایسه آرایه‌ها یا رشته‌ها در #C (مانند عملگر  ==  یا متد  SequenceEqual ) به محض یافتن اولین عدم تطابق، از ادامه پردازش انصراف می‌دهند. این رفتار، روزنه خطیری تحت عنوان «حمله کانال جانبی زمان‌بندی» (Timing Side-Channel Attack) ایجاد می‌کند که به مهاجم اجازه می‌دهد بایت به بایت مقادیر مح ...">
+    <meta property="article:published_time" content="Sun, 02 Aug 2026 05:05:02 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫مقاوم‌سازی مقایسه رمزنگاری در NET.: راهنمای جامع مقایسه زمان‌ثابت (Constant-Time Comparison)";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <div class='card mt-4 shadow-sm'>
+<div class='card-header text-center h5'>
+<a target='_blank' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a>
+</div>
+<table class='table shadow-sm mb-0 rounded table-hover mx-auto w-100 caption-bottom'>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-questions-toc-page-1.html'>پرسش‌ها</a></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><div></div><a href='www.dntips.ir-posts-3737.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫مدیریت و قالب‌بندی DateTimeOffset در دات‌نت</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫مقاوم‌سازی مقایسه رمزنگاری در NET.: راهنمای جامع مقایسه زمان‌ثابت (Constant-Time Comparison)</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۵/۰۵/۱۱ ۰۸:۳۵</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-3738.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><blockquote class="ql-align-right ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>چکیده: </strong>در پیاده‌سازی سیستم‌های احراز هویت و ذخیره‌سازی رمزهای عبور، مقایسه صحیح و ایمن هش‌ها یکی از حیاتی‌ترین حلقه‌های زنجیره امنیت است. متدهای معمولی مقایسه آرایه‌ها یا رشته‌ها در #C (مانند عملگر <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">==</code> یا متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">SequenceEqual</code>) به محض یافتن اولین عدم تطابق، از ادامه پردازش انصراف می‌دهند. این رفتار، روزنه خطیری تحت عنوان «حمله کانال جانبی زمان‌بندی» (Timing Side-Channel Attack) ایجاد می‌کند که به مهاجم اجازه می‌دهد بایت به بایت مقادیر محرمانه را بازیابی کند. در این مقاله، مفهوم مقایسه زمان‌ثابت (Constant-Time Comparison) را بررسی کرده، متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CryptographicOperations.FixedTimeEquals</code> در مدرن NET. را تحلیل نموده و راهکارهای پیاده‌سازی استاندارد و ایمن برای نسخه‌های قدیمی‌تر (.NET Framework) را به همراه نکات پیشرفته بهینه‌سازی کامپایلری تشریح می‌کنیم.</blockquote><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۱. مقدمه</strong></div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl">طراحی سیستم‌های نرم‌افزاری امن مستلزم توجه دقیق به ریزه‌کاری‌هایی است که غالباً در توسعه عمومی وب یا نرم‌افزار نادیده گرفته می‌شوند. یکی از حساس‌ترین نقاط پردازشی، لحظه بررسی اعتبار گذرواژه یا توکن‌های امنیتی است. فرایند متداول بدین صورت است که گذرواژه واردشده توسط کاربر هش شده و سپس با هش ذخیره‌شده در پایگاه داده مقایسه می‌گردد.</div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl">تصور اولیه بسیار ساده است: <em>«دو آرایه بایتی را مقایسه کن و در صورت برابری، اجازه ورود بده.»</em> اما در رمزنگاری مدرن، کیفیت و ساختار الگوریتم مقایسه به اندازه استحکام الگوریتم هش‌سازی (مانند PBKDF2 یا Argon2) اهمیت دارد. استفاده از ابزارهای ساده مقایسه باعث افشای اطلاعات محرمانه از طریق «زمان اجرای پردازش» می‌شود.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۲. تحلیل آسیب‌پذیری: چرا مقایسه ناامن خطرناک است؟</strong></div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl">عملگرهای مقایسه استاندارد مانند <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">==</code>، <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">SequenceEqual</code> یا <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">string.Equals</code> جهت بهینه‌سازی سرعت و کاهش مصرف پردازنده (مفهوم Short-Circuiting) طراحی شده‌اند. الگوریتم کاری آن‌ها بدین شکل است:</div><ul><li>بررسی طول دو آرایه؛ اگر برابر نباشند سریعاً <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">false</code> برمی‌گردانند.</li><li>پیمایش بایت به بایت از ابتدا به انتها.</li><li>به محض مشاهده <strong>اولین بایت نابرابر</strong>، حلقه بلافاصله متوقف شده و <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">false</code> بازگردانده می‌شود.</li></ul><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl">همین بهینه‌سازی ساده، یک <strong>کانال جانبی زمان‌بندی (Timing Side-Channel)</strong> ایجاد می‌کند. اگر بایت اول ناهمخوان باشد، متد پس از چند نانوثانیه خارج می‌شود. اما اگر ۱۰ بایت اول مطابقت داشته باشند و بایت یازدهم متفاوت باشد، متد زمان بیشتری برای اجرا نیاز دارد.</div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl">مهاجم با ارسال درخواست‌های متوالی و اندازه‌گیری دقیق زمان پاسخ‌دهی سرور (حتی در حد میلی‌ثانیه یا میکروثانیه با میانگین‌گیری آماری)، می‌تواند متوجه شود که چه تعداد بایت از ابتدای هش حدسی او درست بوده است. این مسئله فضای جستجوی عظیم (مثلاً 512^2 حالت) را به یک مسئله خطی و قابل شکستن تبدیل می‌کند!</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۳. راهکار استاندارد در NET Core. و NET 5.+</strong></div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl">از نسخه .NET Core 2.1 به بعد، کلاس <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CryptographicOperations</code> در فضای نام <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">System.Security.Cryptography</code> معرفی شد. این کلاس حاوی متدی است به نام <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">FixedTimeEquals</code> که مقایسه را به صورت منحصربه‌فرد و مقاوم در برابر حملات زمان‌بندی انجام می‌دهد.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>نمونه کد استاندارد: تولید و راستی‌آزمایی هش گذرواژه</strong></div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl">کد زیر نمونه‌ای یکدست، جدید و بهینه از فرایند هش‌سازی با <strong>PBKDF2-HMAC-SHA512</strong> (با ۶۰۰,۰۰۰ دور تکرار مطابق با استانداردهای فعلی) و راستی‌آزمایی ایمن آن است:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">using System;
+using System.Security.Cryptography;
+
+public class PasswordHasher
+{
+    // تنظیمات استاندارد رمزنگاری مدرن
+    private const int SaltSize = 32; // ۳۲ بایت نمک تصادفی (Salt)
+    private const int HashSize = 64; // ۶۴ بایت خروجی SHA-512
+    private const int Iterations = 600_000; // تعداد تکرار مناسب و سنگین
+    private static readonly HashAlgorithmName Algorithm = HashAlgorithmName.SHA512;
+
+    /// &lt;summary&gt;
+    /// تولید نمک و هش گذرواژه
+    /// &lt;/summary&gt;
+    public static (byte[] Hash, byte[] Salt) HashPassword(string password)
+    {
+        byte[] salt = RandomNumberGenerator.GetBytes(SaltSize);
+        byte[] hash = Rfc2898DeriveBytes.Pbkdf2(password, salt, Iterations, Algorithm, HashSize);
+
+        return (hash, salt);
+    }
+
+    /// &lt;summary&gt;
+    /// راستی‌آزمایی زمان‌ثابت گذرواژه
+    /// &lt;/summary&gt;
+    public static bool VerifyPassword(string password, byte[] storedHash, byte[] storedSalt)
+    {
+        // محاسبه هش گذرواژه ورودی با همان نمک و تنظیمات
+        byte[] computedHash = Rfc2898DeriveBytes.Pbkdf2(password, storedSalt, Iterations, Algorithm, HashSize);
+
+        // مقایسه ایمن زمان‌ثابت - هرگز از == یا SequenceEqual استفاده نکنید
+        return CryptographicOperations.FixedTimeEquals(computedHash, storedHash);
+    }
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۴. راهکارهای سازگاری با نسخه‌های قدیمی (.NET Framework)</strong></div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl">در نسخه‌های قدیمی‌تر (مانند .NET Framework 4.x یا .NET Core 2.0 و قبل از آن)، کلاس <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CryptographicOperations</code> وجود ندارد. برای رعایت امنیت در این بسترها دو راهکار اصلی وجود دارد:</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>روش اول: پیاده‌سازی دستی FixedTimeEquals (روش پیشنهادی و دقیق)</strong></div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl">در این روش با استفاده از عملگرهای بیت‌به‌بیت (XOR و OR)، به نحوی کدنویسی می‌کنیم که تمام بایت‌های آرایه فارغ از درست یا غلط بودن بایت‌های قبلی تا انتها پیمایش شوند:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">using System.Runtime.CompilerServices;
+
+public static class LegacyCryptoUtils
+{
+    // جلوگیری از بهینه‌سازی کامپایلر JIT جهت تضمین عدم انصراف زودهنگام
+    [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
+    public static bool FixedTimeEquals(byte[] a, byte[] b)
+    {
+        if (a == null || b == null || a.Length != b.Length)
+        {
+            return false;
+        }
+
+        int result = 0;
+        for (int i = 0; i &lt; a.Length; i++)
+        {
+            // تفاوت بیت‌ها باعث غیر صفر شدن result می‌شود
+            result |= a[i] ^ b[i];
+        }
+
+        return result == 0;
+    }
+}</pre><blockquote class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>نکته (کامپایلر و JIT):</strong></blockquote><blockquote class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">در پیاده‌سازی دستی، کامپایلر JIT ممکن است کدهای ساده را بهینه‌سازی کرده یا بازنویسی کند. استفاده از ویژگی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">[MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]</code> تضمین می‌کند که JIT حلقه را ساده‌سازی نکرده و میان‌بر ایجاد نمی‌کند.</blockquote><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>روش دوم: استفاده از StructuralComparisons در .NET 4.0+</strong></div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl">کلاس <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">StructuralComparisons</code> برای مقایسه محتوایی ساختارها طراحی شده است. اگرچه تمام عناصر را پیمایش می‌کند، اما به دلیل هزینه overhead ناشی از Boxing و تخصیص حافظه، پیاده‌سازی دستی بیت‌به‌بیت (روش اول) هم از نظر کارایی و هم شفافیت امنیتی برتری دارد.</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">using System.Collections;
+
+public static bool HashesEqualStructural(byte[] a, byte[] b)
+{
+    if (a == null || b == null || a.Length != b.Length)
+    {
+        return false;
+    }
+
+    return StructuralComparisons.StructuralEqualityComparer.Equals(a, b);
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۵. مقایسه جامع روش‌ها</strong></div><table class="table table-striped table-hover table-bordered table-condensed" style="max-width: 100%; width: auto; margin-left: auto; margin-right: auto; direction: rtl;" dir="rtl"><tbody><tr><td data-row="1" class="ql-direction-ltr text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>روش مقایسه</strong></td><td data-row="1" class="ql-direction-ltr text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>مقاوم در برابر Timing Attack</strong></td><td data-row="1" class="ql-direction-ltr text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>پیچیدگی اجرای زمانی</strong></td><td data-row="1" class="ql-direction-ltr text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>پشتیبانی فریم‌ورک</strong></td></tr><tr><td data-row="2" class="ql-direction-ltr text-center align-middle" style="text-align: center; vertical-align: middle;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">a == b</code> یا <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">SequenceEqual</code></td><td data-row="2" class="text-center align-middle ql-align-right ql-direction-rtl" style="text-align: center; vertical-align: middle;">❌ خیر (خروج سریع)</td><td data-row="2" class="text-center align-middle ql-align-right ql-direction-rtl" style="text-align: center; vertical-align: middle;">O(1) تا O(N) متغیر</td><td data-row="2" class="ql-direction-ltr text-center align-middle" style="text-align: center; vertical-align: middle;">تمام نسخه‌ها</td></tr><tr><td data-row="3" class="ql-direction-ltr text-center align-middle" style="text-align: center; vertical-align: middle;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CryptographicOperations.FixedTimeEquals</code></td><td data-row="3" class="text-center align-middle ql-align-right ql-direction-rtl" style="text-align: center; vertical-align: middle;">✅ بله (استاندارد عالی)</td><td data-row="3" class="text-center align-middle ql-align-right ql-direction-rtl" style="text-align: center; vertical-align: middle;">O(N) کاملاً ثابت</td><td data-row="3" class="ql-direction-ltr text-center align-middle" style="text-align: center; vertical-align: middle;">.NET Core 2.1+ / .NET 5+</td></tr><tr><td data-row="4" class="text-center align-middle ql-align-right ql-direction-rtl" style="text-align: center; vertical-align: middle;">پیاده‌سازی دستی با XOR و Bitwise OR</td><td data-row="4" class="text-center align-middle ql-align-right ql-direction-rtl" style="text-align: center; vertical-align: middle;">✅ بله (با کنترل JIT)</td><td data-row="4" class="text-center align-middle ql-align-right ql-direction-rtl" style="text-align: center; vertical-align: middle;">O(N) کاملاً ثابت</td><td data-row="4" class="ql-direction-ltr text-center align-middle" style="text-align: center; vertical-align: middle;">تمام نسخه‌ها (.NET Framework)</td></tr><tr><td data-row="5" class="ql-direction-ltr text-center align-middle" style="text-align: center; vertical-align: middle;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">StructuralComparisons</code></td><td data-row="5" class="text-center align-middle ql-align-right ql-direction-rtl" style="text-align: center; vertical-align: middle;">⚠️ نسبی (غیرتخصصی)</td><td data-row="5" class="text-center align-middle ql-align-right ql-direction-rtl" style="text-align: center; vertical-align: middle;">O(N) همراه با Boxing</td><td data-row="5" class="ql-direction-ltr text-center align-middle" style="text-align: center; vertical-align: middle;">.NET Framework 4.0+</td></tr></tbody></table><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۶. نکات تکمیلی</strong></div><ul><li><strong>مدیریت زمان در طول‌های ناهمگون:</strong> اگر طول دو آرایه برابر نباشد، متد مقایسه زمان‌ثابت بلافاصله <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">false</code> برمی‌گرداند. این موضوع در اکثر سیستم‌ها خطری ایجاد نمی‌کند زیرا طول هش‌ها ثابت است. اما اگر طول هش خود یک راز باشد، باید طول نیز به صورت زمان‌ثابت پردازش شود.</li><li><strong>پاکسازی حافظه (Memory Sanitation):</strong> متغیرهایی مانند گذرواژه متنی یا بایتی کلیدها باید پس از استفاده سریعاً از حافظه پاک شوند (Zeroing out) تا در حملات خواندن حافظه (Heap Inspection) افشا نشوند.</li><li><strong>الگوریتم‌های مقاوم در برابر الگوی سخت‌افزاری:</strong> هرچند PBKDF2 با SHA-512 همچنان استاندارد و محبوب است، برای پروژه‌های جدید استفاده از الگوریتم‌هایی نظیر <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Argon2id</code> یا <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">scrypt</code> که در برابر حملات کارت گرافیک (GPU) و ASIC مقاوم هستند، توصیه می‌شود.</li></ul><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۷. نتیجه‌گیری</strong></div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl">طراحی نرم‌افزار ایمن مستلزم رعایت دقیق اصول رمزنگاری در کوچک‌ترین جزئیات کدنویسی است. مقایسه ساده دو آرایه بایتی با متدهای رایج #C، برنامه‌های کاربردی را در معرض حملات کانال جانبی زمان‌بندی قرار می‌دهد. توسعه‌دهندگان .NET باید قانون طلایی رمزنگاری را همواره رعایت کنند:</div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl"><em>«هرگز متد مقایسه رازهای امنیتی را خودتان بازنویسی نکنید مگر اینکه الزامات زمان‌ثابت را کاملاً لحاظ کرده باشید.»</em></div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl">در دات‌نت مدرن، همیشه از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CryptographicOperations.FixedTimeEquals</code> استفاده کنید و در صورت نیاز به پشتیبانی از نسخه‌های قدیمی .NET Framework، الگوریتم زمان‌ثابت اختصاصی را همراه با تنظیمات عدم بهینه‌سازی کامپایلر پیاده‌سازی نمایید.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20388.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>ساده سازی روش‌های هش کردن اطلاعات در دات‌نت 9</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20172.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>بهبودهای NET 9. و C# 13 برای جستجوی دیکشنری (Dictionary)</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20364.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>بهینه‌سازی عملکرد در برنامه‌نویسی NET.: چالش یک میلیارد سطر</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20660.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>رمزنگاری پساکوانتومی و امن‌تر در .NET 10</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3732.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>تبادل کلید X25519 در NET 11.: ساده‌سازی امنیت و رمزنگاری منحنی بیضوی</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2860.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>اجزاء معماری سیستم عامل اندروید (قسمت اول رمزنگاری اندروید) :: بخش پنجم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2005.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>نحوه‌ی محاسبه‌ی هش کلمات عبور کاربران در ASP.NET Identity</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3633.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>تخصیص شی روی استک در دات نت 10 (Object Stack Allocation)</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-4331.html'><span class='badge bg-warning-subtle text-warning-emphasis bg-gradient rounded-pill me-2'>نظرات اشتراک‌ها</span>روش امن نگهداری پسورد کاربران</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2005.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>نحوه‌ی محاسبه‌ی هش کلمات عبور کاربران در ASP.NET Identity</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>
