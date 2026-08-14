@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫بررسی عمیق Runtime Async در دات‌نت ۱۱: جهش بزرگ در کارایی کدهای غیرهمگام</title>     <meta name="description" content=" چکیده: الگوی  async/await  در دات‌نت سال‌هاست که بستری استاندارد برای برنامه‌نویسی غیرهمگام (Asynchronous) فراهم کرده است. با این حال، پیاده‌سازی سنتی این الگو مبتنی بر ساخت ماشین حالت (State Machine) توسط کامپایلر سی‌شارپ ( roslyn ) بوده که هزینه‌های پردازشی و اختصاص حافظه (Allocation) قابل توجهی را - به‌ویژه در فراخوانی‌هایی که به‌صورت همگام (Synchronous) به پایان می‌رسند - به سیستم تحمیل می‌کرد. تیم دات‌نت در نسخه  .NET 11  با معرفی چا ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="بررسی عمیق Runtime Async در دات‌نت ۱۱: جهش بزرگ در کارایی کدهای غیرهمگام">
+    <meta itemprop="description" content=" چکیده: الگوی  async/await  در دات‌نت سال‌هاست که بستری استاندارد برای برنامه‌نویسی غیرهمگام (Asynchronous) فراهم کرده است. با این حال، پیاده‌سازی سنتی این الگو مبتنی بر ساخت ماشین حالت (State Machine) توسط کامپایلر سی‌شارپ ( roslyn ) بوده که هزینه‌های پردازشی و اختصاص حافظه (Allocation) قابل توجهی را - به‌ویژه در فراخوانی‌هایی که به‌صورت همگام (Synchronous) به پایان می‌رسند - به سیستم تحمیل می‌کرد. تیم دات‌نت در نسخه  .NET 11  با معرفی چا ...">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="بررسی عمیق Runtime Async در دات‌نت ۱۱: جهش بزرگ در کارایی کدهای غیرهمگام">
+    <meta property="og:description" content=" چکیده: الگوی  async/await  در دات‌نت سال‌هاست که بستری استاندارد برای برنامه‌نویسی غیرهمگام (Asynchronous) فراهم کرده است. با این حال، پیاده‌سازی سنتی این الگو مبتنی بر ساخت ماشین حالت (State Machine) توسط کامپایلر سی‌شارپ ( roslyn ) بوده که هزینه‌های پردازشی و اختصاص حافظه (Allocation) قابل توجهی را - به‌ویژه در فراخوانی‌هایی که به‌صورت همگام (Synchronous) به پایان می‌رسند - به سیستم تحمیل می‌کرد. تیم دات‌نت در نسخه  .NET 11  با معرفی چا ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="بررسی عمیق Runtime Async در دات‌نت ۱۱: جهش بزرگ در کارایی کدهای غیرهمگام">
+    <meta name="twitter:description" content=" چکیده: الگوی  async/await  در دات‌نت سال‌هاست که بستری استاندارد برای برنامه‌نویسی غیرهمگام (Asynchronous) فراهم کرده است. با این حال، پیاده‌سازی سنتی این الگو مبتنی بر ساخت ماشین حالت (State Machine) توسط کامپایلر سی‌شارپ ( roslyn ) بوده که هزینه‌های پردازشی و اختصاص حافظه (Allocation) قابل توجهی را - به‌ویژه در فراخوانی‌هایی که به‌صورت همگام (Synchronous) به پایان می‌رسند - به سیستم تحمیل می‌کرد. تیم دات‌نت در نسخه  .NET 11  با معرفی چا ...">
+    <meta name="twitter:card" content=" چکیده: الگوی  async/await  در دات‌نت سال‌هاست که بستری استاندارد برای برنامه‌نویسی غیرهمگام (Asynchronous) فراهم کرده است. با این حال، پیاده‌سازی سنتی این الگو مبتنی بر ساخت ماشین حالت (State Machine) توسط کامپایلر سی‌شارپ ( roslyn ) بوده که هزینه‌های پردازشی و اختصاص حافظه (Allocation) قابل توجهی را - به‌ویژه در فراخوانی‌هایی که به‌صورت همگام (Synchronous) به پایان می‌رسند - به سیستم تحمیل می‌کرد. تیم دات‌نت در نسخه  .NET 11  با معرفی چا ...">
+    <meta property="article:published_time" content="Thu, 13 Aug 2026 04:45:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫بررسی عمیق Runtime Async در دات‌نت ۱۱: جهش بزرگ در کارایی کدهای غیرهمگام";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <div class='card mt-4 shadow-sm'>
+<div class='card-header text-center h5'>
+<a target='_blank' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a>
+</div>
+<table class='table shadow-sm mb-0 rounded table-hover mx-auto w-100 caption-bottom'>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-questions-toc-page-1.html'>پرسش‌ها</a></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-3745.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫تحلیل و بررسی قابلیت Partial Numeric Parsing در NET 11.</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-3743.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫ایندکسرهای الحاقی (Extension Indexers) در C# 15</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫بررسی عمیق Runtime Async در دات‌نت ۱۱: جهش بزرگ در کارایی کدهای غیرهمگام</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۵/۰۵/۲۲ ۰۸:۱۵</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-3744.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><blockquote class="ql-direction-rtl ql-align-right" style="text-align: right;" dir="rtl">چکیده: الگوی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">async/await</code> در دات‌نت سال‌هاست که بستری استاندارد برای برنامه‌نویسی غیرهمگام (Asynchronous) فراهم کرده است. با این حال، پیاده‌سازی سنتی این الگو مبتنی بر ساخت ماشین حالت (State Machine) توسط کامپایلر سی‌شارپ (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">roslyn</code>) بوده که هزینه‌های پردازشی و اختصاص حافظه (Allocation) قابل توجهی را - به‌ویژه در فراخوانی‌هایی که به‌صورت همگام (Synchronous) به پایان می‌رسند - به سیستم تحمیل می‌کرد. تیم دات‌نت در نسخه <strong>.NET 11</strong> با معرفی چارچوب جدید <strong>Runtime Async</strong>، مسئولیت مدیریت و بهینه‌سازی کدهای غیرهمگام را از کامپایلر به JIT (Just-In-Time Compiler) منتقل کرده است. در این مقاله، ابتدا به محدودیتی‌های الگوی سنتی و تجربه ناموفق Green Threads می‌پردازیم؛ سپس قرارداد فراخوانی جدید (Async Calling Convention)، نحوه کدژانری JIT، جزییات سطوح پایین خط دستورات اسمبلی و نتایج بنچمارک‌های مقایسه‌ای بین .NET 10 و .NET 11 را بررسی می‌کنیم.</blockquote><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۱. مقدمه: الگوی سنتی Async/Await و محدودیت‌های آن</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در الگوی سنتی، کامپایلر سی‌شارپ متدهای علامت‌گذاری‌شده با <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">async</code> را طی یک تبدیل بر پایه <strong>CPS (Continuation-Passing Style)</strong> به یک <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">struct</code> یا <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">class</code> ماشین حالت تبدیل می‌کند.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۱.۱. مکانیسم ماشین حالت</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">کد زیر یک نمونه ساده از الگوی سنتی است:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public async Task&lt;int&gt; GetDataAsync()
+{
+    await Task.Delay(1000);
+    return 42;
+}</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">کامپایلر، منطق فوق را شبیه به کد ساختاریافته زیر در قالب یک ماشین حالت پیاده‌سازی می‌کرد:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">internal class GetDataAsync_StateMachine : IAsyncStateMachine
+{
+    public int state = 0;
+    public AsyncTaskMethodBuilder&lt;int&gt; builder;
+    private TaskAwaiter awaiter;
+
+    public void MoveNext()
+    {
+        try
+        {
+            switch (state)
+            {
+                case 0:
+                    awaiter = Task.Delay(1000).GetAwaiter();
+                    if (!awaiter.IsCompleted)
+                    {
+                        state = 1;
+                        // ثبت ادامه اجرا (Continuation)
+                        builder.AwaitUnsafeOnCompleted(ref awaiter, ref this);
+                        return;
+                    }
+                    goto case 1;
+
+                case 1:
+                    state = -1;
+                    awaiter.GetResult();
+                    builder.SetResult(42);
+                    return;
+            }
+        }
+        catch (Exception ex)
+        {
+            builder.SetException(ex);
+        }
+    }
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۱.۲. چرا این الگو محدودیت ایجاد می‌کرد؟</strong></div><ul><li><strong>تکه‌تکه شدن جریان کنترل (Control Flow Destruction):</strong> کامپایلر پیش از رسیدن کد به JIT، ساختار متد را خرد می‌کرد. JIT به‌جای یک فراخوانی شفاف <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">A -&gt; B -&gt; C</code> با مجموعه‌ای از ماشین‌های حالت، شیءهای <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Task</code> و متدهای <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">MoveNext</code> روبه‌رو می‌شد و توانایی انجام بهینه‌سازی‌های بین-متدی (Cross-method Optimizations) مانند Inline‌کردن را از دست می‌داد.</li><li><strong>عدم انطباق با اجرای همگام:</strong> در سامانه‌های توزیع‌شده و معماری‌های لایه‌ای، درصد بالایی از متدهای <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">async</code> بدون تعلیق واقعی (Suspension) به‌صورت همگام مقدار را برمی‌گردانند (مثلاً خواندن از Cache). در الگوی سنتی، حتی اگر متدی تعلیق نمی‌شد، هزینه ساخت ماشین حالت و ایجاد شیء <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Task</code> (در صورت عدم استفاده از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ValueTask</code>) پرداخت می‌شد.</li></ul><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۲. چرا Green Threads پاسخ مناسبی برای دات‌نت نبود؟</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">تیم دات‌نت پیش از ایده Runtime Async، پروژه آزمایشی <strong>Green Threads</strong> (شبیه به Goroutines در Go یا Virtual Threads در جاوا) را بررسی کرد. اما این رویکرد به دلایل زیر در اکوسیستم دات‌نت کنار گذاشته شد:</div><ul><li><strong>هزینه حافظه Stack:</strong> هر نخ سبز حداقل به یک پشته اختصاصی در فضای کاربر (حدود 2KB) نیاز دارد. این میزان در مقایسه با حجم چند ده بایتی یک ماشین حالت بسیار سنگین است.</li><li><strong>افت شدید کارایی System Call ها:</strong> به دلیل عدم تطابق نخ‌های فضای کاربر با OS Threads، نشت فراخوانی‌های سیستمی رخ می‌داد. در آزمایش‌های دات‌نت، ۱۰۰ میلیون فراخوانی سیستمی از ۳۰۰ میلی‌ثانیه به ۱۸۰۰ میلی‌ثانیه (بیش از ۵ برابر کندتر) رسید.</li><li><strong>سازگاری با امنیت سخت‌افزاری:</strong> ویژگی‌هایی مانند Intel CET Shadow Stack در سوئیچ پشته‌های کاربر در سطح runtime با چالش‌های امنیتی و پیچیدگی‌های تعاملی مواجه می‌شدند.</li><li><strong>وابستگی به Thread Affinity:</strong> برنامه‌های گرافیکی (GUI) و بخش‌هایی از سیستم‌عامل که به Thread-Local Storage وابسته هستند، با تغییر نخ اجرا دچار اختلال شده یا نیازمند سوئیچ‌های گران‌قیمت می‌شدند.</li></ul><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در نهایت، آزمایش Green Threads در ASP.NET Core نه تنها نرخ RPS (Request Per Second) را افزایش نداد، بلکه باعث افت کارایی شد.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۳. معماری Runtime Async در .NET 11</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">راهکار دات‌نت ۱۱ ساده و در عین حال بنیادی است: <strong>ساخت ماشین حالت را در کامپایلر متوقف کرده و جریان کنترل غیرهمگام را مستقیماً به JIT بسپارید.</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۳.۱. قرارداد فراخوانی جدید (Async Calling Convention)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در Runtime Async، متدها با خصوصیت داخلی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">MethodImplOptions.Async</code> نشانه‌گذاری می‌شوند. JIT متد را به‌گونه‌ای مدیریت می‌کند که علاوه بر آرگومان‌های ورودی معمولی، یک پارامتر اضافه به نام <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Continuation</code> دریافت و دو مقدار را برمی‌گرداند: <strong>مقدار بازگشتی اصلی + شیء Continuation</strong>.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">مفهوم این مدل فراخوانی را می‌توان به شکل زیر تصوری کرد:</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">(Result, Continuation) = Method(Continuation, Args)</code></div><ul><li><strong>اجرای همگام (Fast Path):</strong> در اولین فراخوانی، مقدار <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Continuation</code> برابر <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">null</code> است. اگر متد بدون تعلیق اجرا شود، مقدار پاسخ همراه با <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Continuation = null</code> مستقیماً از طریق <strong>ثبات‌های پردازنده (Registers)</strong> بازگردانده می‌شود. در این حالت، هیچ شیء <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Task</code> یا ماشین حالتی در Heap اختصاص داده نمی‌شود (Zero Allocation).</li><li><strong>اجرای غیرهمگام (Slow Path):</strong> اگر متد به نقطه تعلیق (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">await</code> کامل‌نشده) برسد، JIT در همان لحظه یک شیء سبک <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Continuation</code> شامل متغیرهای محلی و نقطه بازگشت ساخته و آن را برمی‌گرداند.</li></ul><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۴. بررسی اسمبلی و کد تولیدی JIT</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">برای درک ملموس موضوع، متد محاسبه فیبوناچی غیرهمگام زیر را در نظر بگیرید:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">class Program
+{
+    async Task&lt;int&gt; Fib(int n)
+    {
+        if (n &lt;= 1)
+            return n;
+        return await Fib(n - 1) + await Fib(n - 2);
+    }
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۴.۱. خروجی IL</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در خروجی کد واسط (IL)، هیچ اثری از ساختار ماشین حالت یا <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IAsyncStateMachine</code> دیده نمی‌شود:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">[MethodImpl(MethodImplOptions.Async)]
+public Task&lt;int&gt; Fib(int n)
+{
+    if (n &gt; 1)
+    {
+        int num = AsyncHelpers.Await(Fib(n - 1));
+        int num2 = AsyncHelpers.Await(Fib(n - 2));
+        return (Task&lt;int&gt;)(num + num2);
+    }
+    return (Task&lt;int&gt;)n;
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۴.۲. تحلیل ماشین اسمبلی JIT (معماری x64)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">JIT برای متد فوق کدی شبیه به ساختار زیر در سطح اسمبلی تولید می‌کند:</div><pre data-language="ini" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Program:Fib(int):int:this
+    ; آماده‌سازی فراخوانی اول: await Fib(n - 1)
+    lea      edx, [rbx-0x01]          ; n - 1
+    mov      rdi, r14                 ; this
+    xor      rsi, rsi                 ; Continuation = null
+    call     [Program:Fib(int):int:this]
+
+    mov      r12d, eax                ; دریافت پاسخ در ثبات eax
+    test     rcx, rcx                 ; آیا Continuation null است؟
+    jne      SHORT SUSPEND_FIRST      ; اگر null نبود، وارد مسیر تعلیق بشو
+
+    ; آماده‌سازی فراخوانی دوم: await Fib(n - 2)
+    lea      edx, [rbx-0x02]          ; n - 2
+    mov      rdi, r14 
+    xor      rsi, rsi                 ; Continuation = null
+    call     [Program:Fib(int):int:this]
+
+    mov      ebx, eax                 ; دریافت پاسخ دوم در ثبات eax
+    test     rcx, rcx                 ; آیا Continuation null است؟
+    jne      SHORT SUSPEND_SECOND
+
+    ; هر دو فراخوانی به‌صورت همگام تمام شدند
+    add      ebx, r12d                ; ebx = result1 + result2
+    mov      eax, ebx                 ; قرار دادن نتیجه در eax
+    xor      ecx, ecx                 ; null کردن rcx (یعنی Continuation = null)
+    ret
+
+SUSPEND_FIRST:
+    ; ایجاد Continuation تنها در صورت تعلیق واقعی
+    mov      rdi, rcx
+    call     [CORINFO_HELP_ALLOC_CONTINUATION]
+    mov      r12, rax
+    mov      dword ptr [r12+0x48], ebx ; ذخیره وضعیت محلی n
+    mov      rcx, r12                 ; بازگرداندن Continuation در rcx
+    ret</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۴.۳. نقش Async Thunk</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">از آنجا که کدهای خارج از این بنچمارک انتظار دریافت <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Task</code> دارند، JIT یک لایه واسط سبک به نام <strong>Async Thunk</strong> ایجاد می‌کند. این Thunk متد اصلی را فراخوانی کرده، در صورت تکمیل همگام، نتیجه را در یک <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Task.FromResult</code> می‌پوشاند (که با Inline شدن و Escape Analysis حتی همین تخصیص حافظه نیز می‌تواند حذف شود) و در صورت تعلیق، شیء <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Task</code> واقعی را به تعویق می‌اندازد.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۵. ارزیابی کارایی و نتایج بنچمارک (Benchmarks)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در مقایسه سناریوهای مختلف روی ۱۰ process run با ۱۰۰ میلیون بار اجرا بین <strong>.NET 10 (Async1)</strong> و <strong>.NET 11 Runtime Async (Async2)</strong> نتایج زیر به دست آمده است:</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><table class="table table-striped table-hover table-bordered table-condensed" style="max-width: 100%; width: auto; margin-left: auto; margin-right: auto; direction: rtl;" dir="rtl"><tbody><tr><td data-row="1" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>سناریوی بنچمارک</strong></td><td data-row="1" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>زمان اجرای .NET 10</strong></td><td data-row="1" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>زمان اجرای .NET 11</strong></td><td data-row="1" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>میزان بهبود کارایی</strong></td><td data-row="1" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>تخصیص حافظه (Allocations)</strong></td></tr><tr><td data-row="2" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>Synchronous Baseline</strong></td><td data-row="2" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">~120 ms</td><td data-row="2" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">~120 ms</td><td data-row="2" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">برابر</td><td data-row="2" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>0 B</strong></td></tr><tr><td data-row="3" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>Async (بدون تعلیق - Fast Path)</strong></td><td data-row="3" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">~2,400 ms</td><td data-row="3" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>~125 ms</strong></td><td data-row="3" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>~۱۹.۲ برابر سریع‌تر</strong></td><td data-row="3" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>0 B (در برابر 64B در دات‌نت ۱۰)</strong></td></tr><tr><td data-row="4" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>ThreadPool Continuation</strong></td><td data-row="4" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">~8,500 ms</td><td data-row="4" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>~2,200 ms</strong></td><td data-row="4" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>~۳.۸ برابر سریع‌تر</strong></td><td data-row="4" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">کاهش ~۶۰ درصدی</td></tr><tr><td data-row="5" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>TaskCompletionSource</strong></td><td data-row="5" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">~9,100 ms</td><td data-row="5" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>~2,700 ms</strong></td><td data-row="5" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>~۳.۳ برابر سریع‌تر</strong></td><td data-row="5" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">کاهش ~۵۰ درصدی</td></tr><tr><td data-row="6" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>Deep Async Chain (زنجیره عمیق)</strong></td><td data-row="6" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">~18,200 ms</td><td data-row="6" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>~2,450 ms</strong></td><td data-row="6" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>~۷.۴ برابر سریع‌تر</strong></td><td data-row="6" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">کاهش چشمگیر اختصاص Gen0</td></tr></tbody></table><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>تحلیل نتایج:</strong></div><ul><li><strong>پیروی از الگوی Pay-for-Play:</strong> در مسایلی که تعلیق رخ نمی‌دهد، زمان اجرای کدهای <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">async</code> تقریباً با کدهای همگام (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Synchronous Baseline</code>) یکسان شده است.</li><li><strong>کاهش تخصیص حافظه به صفر:</strong> در مسیر اجراهای سریع (Fast Path)، هیچ شیء در حافظه heap ساخته نشده و فشار روی Garbage Collector به حد صفر می‌رسد.</li><li><strong>بهبود زنجیره‌های عمیق:</strong> هرچه عمق فراخوانی‌های غیرهمگام بیشتر باشد، تأثیر حذف ماشین‌های حالت لایه به لایه بیشتر نمایان می‌شود.</li></ul><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۶. نتیجه‌گیری</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">معماری <strong>Runtime Async</strong> در دات‌نت ۱۱ یکی از بنیادی‌ترین بهینه‌سازی‌های سیستم Runtime در چند سال اخیر محسوب می‌شود. با انتقال مسئولیت پردازش غیرهمگام به کامپایلر JIT:</div><ul><li>الگوی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">async/await</code> بدون فرض پیش‌فرض تعلیق، رفتاری بسیار شبیه به کدهای همگام را در اجرای سریع نشان می‌دهد.</li><li>هزینه‌های پردازشی و تخصیص حافظه تابع اصل <strong>Pay-for-Play</strong> می‌شوند؛ یعنی تنها در صورت تعلیق واقعی برنامه، هزینه ساخت <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Continuation</code> پرداخت می‌شود.</li><li>فرصت‌های بهینه‌سازی بسیار بیشتری (مانند Inlining عمیق و Escape Analysis) برای JIT فراهم گردیده است.</li></ul><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">این تغییر، برنامه‌نویسان دات‌نت را قادر می‌سازد تا بدون دغدغه از هزینه‌های جانبی الگوی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">async/await</code>، کدهای خوانا، تمیز و در عین حال با بالاترین کارایی ممکن (High Performance) بنویسند.</div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-24569.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>بنچمارک‌ Runtime Async در نسخه Nightly دات‌نت ۱۱ (.NET 11)</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20304.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>چگونه متدهای virtual، sealed و static بر عملکرد کدها در #C تأثیر می‌گذارند؟</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20325.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>مقایسه نخ‌های مجازی (Virtual Threads) در جاوا و async/await در سی‌شارپ: رویکردهای مدرن به برنامه‌نویسی ناهمگام</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20118.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>زیرساخت پیاده سازی Async در دات‌نت به‌زودی تغییر خواهد کرد</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-23446.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>مدل رنگی قرمز، آبی و بنفش در برنامه‌نویسی ناهمگام C#</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3666.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Runtime Async در دات‌نت ۱۱: تحولی بنیادین در برنامه‌نویسی غیرهمگام (Async)</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2052.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>NET Just-In-Time Optimization.</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3439.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بررسی تفاوت Task و ValueTask</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3666.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>Runtime Async در دات‌نت ۱۱: تحولی بنیادین در برنامه‌نویسی غیرهمگام (Async)</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3666.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>Runtime Async در دات‌نت ۱۱: تحولی بنیادین در برنامه‌نویسی غیرهمگام (Async)</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>

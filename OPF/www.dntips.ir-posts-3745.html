@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫تحلیل و بررسی قابلیت Partial Numeric Parsing در NET 11.</title>     <meta name="description" content="  چکیده:  در نسخه‌های پیشین .NET، پردازش و پارس کردن رشته‌های حاوی اعداد در قالب‌هایی مانند CSV، JSON یا فرمت‌های سفارشی، مستلزم جداسازی پیش‌فرض (Splitting)، کپی‌سازی حافظه (Allocation) یا انجام فرآیندهای پیچیده پردازش رشته بود. هرگونه کاراکتر اضافی در انتهای بخش عددی به عنوان خطای پارس (Parse Failure) تلقی می‌شد. در  .NET 11 Preview 7 ، مایکروسافت با معرفی متد جدید  TryParsePartial  در اینترفیس  INumberBase ، امکان پارس جزیی یا تدریجی (Pa ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="تحلیل و بررسی قابلیت Partial Numeric Parsing در NET 11.">
+    <meta itemprop="description" content="  چکیده:  در نسخه‌های پیشین .NET، پردازش و پارس کردن رشته‌های حاوی اعداد در قالب‌هایی مانند CSV، JSON یا فرمت‌های سفارشی، مستلزم جداسازی پیش‌فرض (Splitting)، کپی‌سازی حافظه (Allocation) یا انجام فرآیندهای پیچیده پردازش رشته بود. هرگونه کاراکتر اضافی در انتهای بخش عددی به عنوان خطای پارس (Parse Failure) تلقی می‌شد. در  .NET 11 Preview 7 ، مایکروسافت با معرفی متد جدید  TryParsePartial  در اینترفیس  INumberBase ، امکان پارس جزیی یا تدریجی (Pa ...">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="تحلیل و بررسی قابلیت Partial Numeric Parsing در NET 11.">
+    <meta property="og:description" content="  چکیده:  در نسخه‌های پیشین .NET، پردازش و پارس کردن رشته‌های حاوی اعداد در قالب‌هایی مانند CSV، JSON یا فرمت‌های سفارشی، مستلزم جداسازی پیش‌فرض (Splitting)، کپی‌سازی حافظه (Allocation) یا انجام فرآیندهای پیچیده پردازش رشته بود. هرگونه کاراکتر اضافی در انتهای بخش عددی به عنوان خطای پارس (Parse Failure) تلقی می‌شد. در  .NET 11 Preview 7 ، مایکروسافت با معرفی متد جدید  TryParsePartial  در اینترفیس  INumberBase ، امکان پارس جزیی یا تدریجی (Pa ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="تحلیل و بررسی قابلیت Partial Numeric Parsing در NET 11.">
+    <meta name="twitter:description" content="  چکیده:  در نسخه‌های پیشین .NET، پردازش و پارس کردن رشته‌های حاوی اعداد در قالب‌هایی مانند CSV، JSON یا فرمت‌های سفارشی، مستلزم جداسازی پیش‌فرض (Splitting)، کپی‌سازی حافظه (Allocation) یا انجام فرآیندهای پیچیده پردازش رشته بود. هرگونه کاراکتر اضافی در انتهای بخش عددی به عنوان خطای پارس (Parse Failure) تلقی می‌شد. در  .NET 11 Preview 7 ، مایکروسافت با معرفی متد جدید  TryParsePartial  در اینترفیس  INumberBase ، امکان پارس جزیی یا تدریجی (Pa ...">
+    <meta name="twitter:card" content="  چکیده:  در نسخه‌های پیشین .NET، پردازش و پارس کردن رشته‌های حاوی اعداد در قالب‌هایی مانند CSV، JSON یا فرمت‌های سفارشی، مستلزم جداسازی پیش‌فرض (Splitting)، کپی‌سازی حافظه (Allocation) یا انجام فرآیندهای پیچیده پردازش رشته بود. هرگونه کاراکتر اضافی در انتهای بخش عددی به عنوان خطای پارس (Parse Failure) تلقی می‌شد. در  .NET 11 Preview 7 ، مایکروسافت با معرفی متد جدید  TryParsePartial  در اینترفیس  INumberBase ، امکان پارس جزیی یا تدریجی (Pa ...">
+    <meta property="article:published_time" content="Thu, 13 Aug 2026 06:45:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫تحلیل و بررسی قابلیت Partial Numeric Parsing در NET 11.";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <div class='card mt-4 shadow-sm'>
+<div class='card-header text-center h5'>
+<a target='_blank' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a>
+</div>
+<table class='table shadow-sm mb-0 rounded table-hover mx-auto w-100 caption-bottom'>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-questions-toc-page-1.html'>پرسش‌ها</a></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><div></div><a href='www.dntips.ir-posts-3744.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫بررسی عمیق Runtime Async در دات‌نت ۱۱: جهش بزرگ در کارایی کدهای غیرهمگام</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫تحلیل و بررسی قابلیت Partial Numeric Parsing در NET 11.</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۵/۰۵/۲۲ ۱۰:۱۵</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-3745.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><blockquote class="ql-direction-rtl ql-align-right" style="text-align: right;" dir="rtl"><strong>چکیده:</strong> در نسخه‌های پیشین .NET، پردازش و پارس کردن رشته‌های حاوی اعداد در قالب‌هایی مانند CSV، JSON یا فرمت‌های سفارشی، مستلزم جداسازی پیش‌فرض (Splitting)، کپی‌سازی حافظه (Allocation) یا انجام فرآیندهای پیچیده پردازش رشته بود. هرگونه کاراکتر اضافی در انتهای بخش عددی به عنوان خطای پارس (Parse Failure) تلقی می‌شد. در <strong>.NET 11 Preview 7</strong>، مایکروسافت با معرفی متد جدید <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">TryParsePartial</code> در اینترفیس <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">INumberBase</code>، امکان پارس جزیی یا تدریجی (Partial Parsing) اعداد را فراهم کرده است. این قابلیت به توسعه‌دهنده اجازه می‌دهد بدون نیاز به کپی‌سازی داده یا برش پیش‌فرض متون، مقدار عددی اولیه را استخراج کرده و از تعداد کاراکترهای مصرف‌شده (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">charsConsumed</code>) برای ادامه پردازش مابقی ورودی استفاده کند. در این مقاله، نیازمندی‌ها، ساختار فنی، نحوه پیاده‌سازی و جزئیات معماری داخلی این ویژگی مورد بررسی قرار می‌گیرد.</blockquote><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۱. مقدمه</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">با رشد روزافزون نیاز به پردازش کارآمد داده‌ها با حجم بالا (High-Performance &amp; Low-Allocation Parsing)، فریم‌ورک دات‌نت در نسخه‌های اخیر تمرکز ویژه‌ای بر ارائه ابزارهای کار با حافظه مانند <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ReadOnlySpan</code> و <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ReadOnlySequence</code> داشته است. با این حال، یکی از چالش‌های همیشگی در پردازش فرمت‌های متنی ساختاریافته (نظیر فایل‌های CSV، گزارش‌های متنی یا پروتکل‌های شبکه)، استخراج مقادیر عددی از میان متون متصل به هم بوده است. پیش از .NET 11، متدهای <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">TryParse</code> انتظار داشتند که تمام ورودی داده‌شده منطبق با فرمت عددی درخواستی باشد. وجود هرگونه کاراکتر جداکننده (Delimiter) مانند کاما یا نقطه-کاما در انتهای عدد، منجر به شکست عملیات پارس می‌شد. توسعه‌دهندگان مجبور بودند ابتدا جداکننده را پیدا کرده، بخش عددی را برش بزنند (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Slice</code>) و سپس آن را پارس کنند. ویژگی <strong>Partial Numeric Parsing</strong> با افزودن اورلودهای جدید <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">TryParsePartial</code> به اینترفیس <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">INumberBase</code>، این فرآیند را به‌طور بنیادین ساده و بهینه‌سازی کرده است.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۲. بررسی مکانیزم و نحوه عملکرد</strong></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۲.۱. معرفی متد</strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">TryParsePartial</code></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">TryParsePartial</code> به توسعه‌دهنده امکان می‌دهد یک عدد را از ابتدای ورودی پارس کند و در پارامتر خروجی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">charsConsumed</code> دقیقاً تعداد کاراکترها یا بایت‌های خوانده‌شده را دریافت کند. این متد برای سه قالب ورودی اصلی پشتیبانی می‌شود:</div><ul><li><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">string</code></li><li><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ReadOnlySpan</code></li><li><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ReadOnlySpan</code> (برای متون UTF-8)</li></ul><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۲.۲. نمونه کد عملی</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">کد زیر نحوه استفاده از این قابلیت را در یک سناریوی واقعی (مانند خواندن رشته‌ای حاوی مقادیر مجزا با <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">;</code>) نشان می‌دهد:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">using System;
+using System.Globalization;
+
+// ورودی حاوی یک عدد و ادامه متن است
+ReadOnlySpan&lt;char&gt; input = &quot;123; 456&quot;;
+
+// استفاده از متد جدید TryParsePartial
+if (int.TryParsePartial(
+        input,
+        NumberStyles.Integer,
+        CultureInfo.InvariantCulture,
+        out int value,
+        out int charsConsumed))
+{
+    Console.WriteLine($&quot;مقدار پارس شده: {value}&quot;); // خروجی: 123
+    
+    // پیش بردن نماگر حافظه به اندازه کاراکترهای مصرف‌شده
+    input = input[charsConsumed..];
+    
+    Console.WriteLine($&quot;مابقی ورودی: {input}&quot;); // خروجی: ; 456
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۲.۳. مزایای کلیدی در کارایی</strong></div><ul><li><strong>عدم تخصیص حافظه جدید (Zero-Allocation):</strong> نیازی به ساخت رشته‌های جدید یا اسلایس پیش‌فرض قبل از پارس نیست.</li><li><strong>کاهش پیچیدگی کد:</strong> عدم نیاز به جستجوی دستی کاراکترهای جداکننده (مانند <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IndexOf</code>) پیش از فراخوانی پارسر.</li><li><strong>یکپارچگی با Generic Math:</strong> به دلیل اضافه شدن این متد به <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">INumberBase</code>، تمامی انواع عددی استاندارد دات‌نت (از جمله <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">int</code>, <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">double</code>, <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">decimal</code>, <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">BigInteger</code> و...) به طور یکسان از آن پشتیبانی می‌کنند.</li></ul><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۳. جزییات معماری و تغییرات داخلی فریم‌ورک</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">برای درک بهتر این ویژگی، بررسی تغییرات سطح پایین و تصمیمات معماران دات‌نت خالی از لطف نیست:</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۳.۱. جایگاه در</strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">INumberBase</code><strong>و روش پیاده‌سازی</strong></div><ul><li>متدهای <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">TryParsePartial</code> به عنوان <strong>Default Interface Methods (DIM)</strong> در static virtual به اینترفیس <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">INumberBase</code> اضافه شده‌اند.</li><li>جهت حفظ پشتیبانی و سازگاری عقب‌رو (Backward Compatibility)، یک پیاده‌سازی پیش‌فرض (Fallback) برای آن‌ها قرار داده شده است که در صورت عدم اعطای پیاده‌سازی اختصاصی توسط یک نوع عددی سفارشی، متد پایه به <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">TryParse</code> متوسل می‌شود و در صورت موفقیت، کل طول ورودی را به عنوان <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">charsConsumed</code> گزارش می‌کند.</li></ul><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۳.۲. مدیریت Flagهای داخلی و حذف</strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">AllowTrailingInvalidCharacters</code></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در طرح اولیه پیشنهاد این API، یک پرچم عمومی (Public Flag) به نام <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">NumberStyles.AllowTrailingInvalidCharacters</code> در نظر گرفته شده بود. اما در طراحی نهایی تصمیم بر آن شد که این پرچم از دسترسی عمومی خارج شده و با یک <strong>سنتینل داخلی (Internal Sentinel)</strong> به نام <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Number.AllowTrailingInvalidCharacters</code> جایگزین شود.</div><ul><li><strong>نحوه عملکرد سنتینل:</strong> متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">TryParsePartial</code> پس از اعتبارسنجی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">NumberStyles</code> ورودی کاربر، این سنتینل را که از بالاترین بیت حافظه (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">0x8000_0000</code>) استفاده می‌کند، با استایل کاربر ترکیب (OR) می‌کند. این کار مانع از آن می‌شود که کاربر بتواند به صورت مستقیم یا غیرمجاز پرچم را از طریق متدهای عادی ارسال کند.</li><li><strong>سازگاری با انواع خاص:</strong> انواعی مانند <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">BigInteger</code> و <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Complex</code> به دلیل داشتن روتین‌های پارس مشترک و متفاوت از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CoreLib</code>، به‌گونه‌ای به‌روزرسانی شده‌اند که سنتینل فوق را پیش از اعتبارسنجی نهایی جدا کرده و پردازش کنند.</li></ul><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۳.۳. دامنه و محدودیت‌ها</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">شایان ذکر است که این قابلیت در <strong>.NET 11</strong> منحصراً برای انواع عددی و در سطح <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">INumberBase</code> پیاده‌سازی شده است. اینترفیس‌های کلی‌تر پارس متن یعنی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IParsable</code>، <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ISpanParsable</code> و <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IUtf8SpanParsable</code> برای این نسخه خارج از scope قرار گرفته‌اند و ممکن است در نسخه‌های بعدی .NET ارتقا یابند.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۴. نکته تکمیلی: کاربرد در خط‌لوله‌های پردازشی</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">توسعه‌دهندگانی که با پروتکل‌های شبکه یا <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">System.IO.Pipelines</code> کار می‌کنند، معمولاً با داده‌های بافرشده در قالب <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ReadOnlySequence</code> یا <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ReadOnlySpan</code> سرکار دارند. تا پیش از این، برای خواندن یک عدد از بایت‌های ورودی شبکه، مجبور بودید مطمئن شوید که تمام بایت‌های عددی در بافر موجودند و کاراکتر انتهایی آن حتماً پردازش شده است. با <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">TryParsePartial</code> روی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ReadOnlySpan</code>، پردازش پروتکل‌های متنی متداول مانند <strong>RESP (پروتکل Redis)</strong> یا <strong>HTTP Headerها</strong> بسیار ساده‌تر و سریع‌تر می‌شود؛ چرا که می‌توانید طول exact مقدار عددی را در لحظه دریافت کرده و بلافاصله Offset بافر خواندن را به‌روزرسانی کنید.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۵. نتیجه‌گیری</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">معرفی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">TryParsePartial</code> در <strong>.NET 11 Preview 7</strong> گام مهمی در جهت تکمیل ابزارهای Generic Math و بهبود کارایی پردازش متون در دات‌نت است. این قابلیت با رفع نیاز به کپی‌سازی حافظه و جداسازی‌های دستی، امکان نگارش پارسرهای سریع‌تر، امن‌تر و خواناتر را برای توسعه‌دهندگان فراهم می‌سازد. پایداری اجرای تست‌ها (عبور موفق بیش از ۷۶ هزار تست واحد در مخزن runtime) نشان از دقت و آمادگی بالای این تغییر معماری در هسته دات‌نت دارد.</div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20364.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>بهینه‌سازی عملکرد در برنامه‌نویسی NET.: چالش یک میلیارد سطر</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-24573.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>معرفی کتابخانه StringExtension برای مدیریت بهینه رشته‌ها در C#</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20446.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>معرفی ZLinq: کتابخانه LINQ با تخصیص حافظه صفر برای دات‌نت</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20171.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>جستجوی جایگزین برای دیکشنری (Dictionary) و هش‌ست (HashSet) در دات‌نت 9</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20173.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>طراحی یک دیکشنری کارآمد برای ردیابی آدرس IP با استفاده از  AlternateLookup و IAlternateEqualityComparer دات‌نت 9</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-learning-paths-toc-page-1.html'><span class='badge bg-danger rounded-pill me-2'>مسیرراه‌ها</span>بررسی ویژگی‌‌های جدید C# 15 و NET 11.</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3716.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بهبود مقایسه برابری کاراکترها در NET 11.</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3730.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>فرمت‌بندی و بازیابی دوطرفه اعداد ممیز شناور در قالب هگزادسیمال در NET 11.</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3737.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مدیریت و قالب‌بندی DateTimeOffset در دات‌نت</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3704.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>چالش‌های ورودی‌های متنی عددی کاربران و راهکارهای جامع نرمال‌سازی</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>
