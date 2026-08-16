@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫از DAC تا cDAC؛ دات‌نت چگونه معماری Debugging داخلی CLR را بازطراحی می‌کند؟</title>     <meta name="description" content=" دیباگر چگونه می‌فهمد Byteهای موجود در حافظه چه معنایی دارند. برای مثال، فرض کنید در یک Crash Dump آدرسی مانند زیر داریم:  0x000001F3A82C4010  این فقط یک عدد است.  از کجا باید بدانیم این آدرس به یک Managed Object اشاره می‌کند؟ اگر Object است،  MethodTable  آن کجاست؟ اگر به یک Thread داخلی CLR رسیده‌ایم، Offset مربوط به  ThreadId  کدام است؟ GC Heap از چند Segment تشکیل شده است؟ Pointer مربوط به Segment بعدی در کدام Offset قرار دارد؟ JIT Cod ...">
+    <meta name="author" content="امیر مکارچی">
+    <meta itemprop="name" content="از DAC تا cDAC؛ دات‌نت چگونه معماری Debugging داخلی CLR را بازطراحی می‌کند؟">
+    <meta itemprop="description" content=" دیباگر چگونه می‌فهمد Byteهای موجود در حافظه چه معنایی دارند. برای مثال، فرض کنید در یک Crash Dump آدرسی مانند زیر داریم:  0x000001F3A82C4010  این فقط یک عدد است.  از کجا باید بدانیم این آدرس به یک Managed Object اشاره می‌کند؟ اگر Object است،  MethodTable  آن کجاست؟ اگر به یک Thread داخلی CLR رسیده‌ایم، Offset مربوط به  ThreadId  کدام است؟ GC Heap از چند Segment تشکیل شده است؟ Pointer مربوط به Segment بعدی در کدام Offset قرار دارد؟ JIT Cod ...">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="از DAC تا cDAC؛ دات‌نت چگونه معماری Debugging داخلی CLR را بازطراحی می‌کند؟">
+    <meta property="og:description" content=" دیباگر چگونه می‌فهمد Byteهای موجود در حافظه چه معنایی دارند. برای مثال، فرض کنید در یک Crash Dump آدرسی مانند زیر داریم:  0x000001F3A82C4010  این فقط یک عدد است.  از کجا باید بدانیم این آدرس به یک Managed Object اشاره می‌کند؟ اگر Object است،  MethodTable  آن کجاست؟ اگر به یک Thread داخلی CLR رسیده‌ایم، Offset مربوط به  ThreadId  کدام است؟ GC Heap از چند Segment تشکیل شده است؟ Pointer مربوط به Segment بعدی در کدام Offset قرار دارد؟ JIT Cod ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="از DAC تا cDAC؛ دات‌نت چگونه معماری Debugging داخلی CLR را بازطراحی می‌کند؟">
+    <meta name="twitter:description" content=" دیباگر چگونه می‌فهمد Byteهای موجود در حافظه چه معنایی دارند. برای مثال، فرض کنید در یک Crash Dump آدرسی مانند زیر داریم:  0x000001F3A82C4010  این فقط یک عدد است.  از کجا باید بدانیم این آدرس به یک Managed Object اشاره می‌کند؟ اگر Object است،  MethodTable  آن کجاست؟ اگر به یک Thread داخلی CLR رسیده‌ایم، Offset مربوط به  ThreadId  کدام است؟ GC Heap از چند Segment تشکیل شده است؟ Pointer مربوط به Segment بعدی در کدام Offset قرار دارد؟ JIT Cod ...">
+    <meta name="twitter:card" content=" دیباگر چگونه می‌فهمد Byteهای موجود در حافظه چه معنایی دارند. برای مثال، فرض کنید در یک Crash Dump آدرسی مانند زیر داریم:  0x000001F3A82C4010  این فقط یک عدد است.  از کجا باید بدانیم این آدرس به یک Managed Object اشاره می‌کند؟ اگر Object است،  MethodTable  آن کجاست؟ اگر به یک Thread داخلی CLR رسیده‌ایم، Offset مربوط به  ThreadId  کدام است؟ GC Heap از چند Segment تشکیل شده است؟ Pointer مربوط به Segment بعدی در کدام Offset قرار دارد؟ JIT Cod ...">
+    <meta property="article:published_time" content="Sat, 15 Aug 2026 04:40:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫از DAC تا cDAC؛ دات‌نت چگونه معماری Debugging داخلی CLR را بازطراحی می‌کند؟";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <div class='card mt-4 shadow-sm'>
+<div class='card-header text-center h5'>
+<a target='_blank' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a>
+</div>
+<table class='table shadow-sm mb-0 rounded table-hover mx-auto w-100 caption-bottom'>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-questions-toc-page-1.html'>پرسش‌ها</a></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-posts-3749.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫ارتقا به NET 10. و EF Core 10: تغییرات رفتار زمان اجرا که در زمان کامپایل پنهان می‌مانند</span>
+   </h6>
+</a><a href='www.dntips.ir-posts-3747.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫پشتیبانی بومی از رمزگذاری و تعیین کلمه‌عبور در فایل‌های ZIP در دات‌نت ۱۱</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫از DAC تا cDAC؛ دات‌نت چگونه معماری Debugging داخلی CLR را بازطراحی می‌کند؟</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>امیر مکارچی<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۵/۰۵/۲۴ ۰۸:۱۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-3748.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">دیباگر چگونه می‌فهمد Byteهای موجود در حافظه چه معنایی دارند. برای مثال، فرض کنید در یک Crash Dump آدرسی مانند زیر داریم:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">0x000001F3A82C4010</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">این فقط یک عدد است.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">از کجا باید بدانیم این آدرس به یک Managed Object اشاره می‌کند؟ اگر Object است، <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">MethodTable</code> آن کجاست؟ اگر به یک Thread داخلی CLR رسیده‌ایم، Offset مربوط به <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ThreadId</code> کدام است؟ GC Heap از چند Segment تشکیل شده است؟ Pointer مربوط به Segment بعدی در کدام Offset قرار دارد؟ JIT Code Heapها چگونه به یکدیگر متصل شده‌اند؟ و مهم‌تر از همه، اگر ساختار داخلی CLR در نسخه بعدی .NET تغییر کرد، ابزار تشخیصی از کجا باید بفهمد Layout جدید چیست؟</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">سال‌ها پاسخ دات‌نت به این سؤال‌ها چیزی به نام <strong>DAC</strong> بوده است. اکنون این معماری در حال تغییر بنیادی است.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">تیم Runtime دات‌نت در حال حرکت به سمت مدلی مبتنی بر <strong>Data Contract</strong> است؛ معماری‌ای که با نام <strong>cDAC</strong> شناخته می‌شود. به‌جای اینکه ابزار تشخیصی یک Binary دقیقاً منطبق با Runtime پیدا کند که «رازهای داخلی CLR» را از قبل بداند، خود Runtime بخشی از ساختار داخلی‌اش را در قالب یک Contract توصیف می‌کند و Reader می‌تواند آن را تفسیر کند. مستندات طراحی رسمی .NET نیز Data Contract را مکانیزمی برای مشاهده مستقیم وضعیت داخلی Runtime از طریق خواندن حافظه، هم در Live Debugging و هم در Post-mortem Debugging، تعریف می‌کنند.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">این تغییر ممکن است در نگاه اول فقط یک Refactoring داخلی در Diagnostics دات‌نت به نظر برسد، اما در واقع یکی از مهم‌ترین تغییرات معماری در نحوه مشاهده CLR از بیرون است. برای درک اهمیت آن، ابتدا باید بفهمیم اصلاً چه مشکلی قرار است حل شود.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>قبل از DAC: مسئله اصلی چیست؟</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">یک برنامه Managed روی CLR اجرا می‌شود. زمانی که برنامه‌ای مانند این را می‌نویسیم:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">var customer = new Customer();</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">برای Developer، مفهوم <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Customer</code>، Object، Field و Reference معنا دارد. اما در پایین‌ترین سطح، Process Memory چیزی جز Byte نیست. CLR باید مجموعه بزرگی از ساختارهای Native را برای مدیریت برنامه نگه‌داری کند:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">MethodTable
+MethodDesc
+Thread
+Module
+Assembly
+AppDomain
+LoaderAllocator
+LoaderHeap
+GCHeap
+HeapSegment
+SyncBlock
+CodeHeap
+...</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">این ساختارها API عمومی دات‌نت نیستند. آن‌ها Implementation Detailهای Runtime هستند.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">ممکن است Layout یک Structure در یک Build از Runtime چنین باشد:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Thread
++0x00 State
++0x10 Id
++0x20 Next
+...</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">و در Build دیگری تغییر کند:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Thread
++0x00 State
++0x18 Id
++0x28 Next
+...</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">Debugger نمی‌تواند صرفاً آدرس حافظه را بخواند و حدس بزند کدام Byte چه معنایی دارد. باید یک موجودیت وجود داشته باشد که دانش ساختارهای داخلی Runtime را داشته باشد. در معماری کلاسیک CLR، این وظیفه به DAC سپرده شد.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>DAC چیست؟</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">DAC مخفف: <strong>Data Access Component</strong> است. در CoreCLR معمولاً آن را در قالب فایل زیر می‌بینیم:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">mscordaccore.dll</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">یا معادل Platform-specific آن. وظیفه DAC این نیست که برنامه شما را Debug کند. وظیفه اصلی آن این است که به Debugger و ابزارهای Diagnostics کمک کند <strong>حافظه یک CLR را معنی‌دار تفسیر کنند</strong>. Issue اصلی cDAC در Repository رسمی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">dotnet/runtime</code> نیز DAC را Componentای معرفی می‌کند که به Debuggerها و Diagnostic Toolها کمک می‌کند حافظه Process مربوط به .NET Runtime را بفهمند.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">به زبان ساده می‌توان گفت:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Process Memory
+      │
+      ▼
+     DAC
+      │
+      ▼
+CLR concepts</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">Debugger می‌گوید: این آدرس را دارم. Threadهای CLR را به من بده.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">DAC می‌داند: ThreadStore کجاست. Thread چه Layoutی دارد. Next Thread در چه Offsetی قرار گرفته است. State را از کجا باید خواند. و اطلاعات معنی‌دار را به Debugger برمی‌گرداند.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;">SOS در این معماری کجاست؟</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">اگر با Dump Debugging در .NET کار کرده باشید احتمالاً با <strong>SOS</strong> آشنا هستید. SOS یک Debugging Extension برای مشاهده وضعیت Managed Runtime است.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">دستورهایی مانند:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">!dumpheap
+!clrstack
+!dumpobj
+!threads
+!eeheap
+!gcroot</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">از طریق SOS در دسترس هستند. طبق مستندات رسمی Microsoft، SOS می‌تواند اطلاعات مربوط به Managed Heap، Corruptionهای Heap، Typeهای داخلی Runtime و Managed Code را هم روی Live Process و هم روی Dump نمایش دهد. SOS همچنین همراه <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">dotnet-dump</code> و WinDbg در دسترس است. برای مثال وقتی می‌نویسید:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">!dumpheap -stat</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">SOS باید بتواند بفهمد:</div><ul><li>GC Heapها کجا هستند؛</li><li>Segmentها کجا قرار گرفته‌اند؛</li><li>Objectها چگونه Layout شده‌اند؛</li><li>MethodTable هر Object چیست.</li></ul><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">اما SOS قرار نیست تمام Layout داخلی هر نسخه CLR را Hard-code کند. در معماری سنتی، بخش بزرگی از این دانش از طریق DAC در اختیار آن قرار می‌گیرد.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">مدل ساده‌شده چیزی شبیه این است:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">WinDbg / LLDB / dotnet-dump
+           │
+           ▼
+          SOS
+           │
+           ▼
+          DAC
+           │
+           ▼
+   CLR Process / Dump</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">مستندات Microsoft برای Debugging Managed Code با WinDbg نیز صراحتاً SOS و Data Access Component را جزو اجزای موردنیاز برای مشاهده Managed Runtime معرفی می‌کنند.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>ClrMD چه نقشی دارد؟</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">حالا فرض کنید نمی‌خواهید با دستورهای SOS کار کنید. می‌خواهید ابزار Diagnostics اختصاصی خودتان را با #C بسازید. اینجاست که <strong>ClrMD</strong> یا Microsoft.Diagnostics.Runtime وارد داستان می‌شود. ClrMD یک API مدیریت‌شده برای بررسی Live Processها و Crash Dumpهای .NET فراهم می‌کند. با آن می‌توان کدی شبیه این نوشت:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">using DataTarget target =
+    DataTarget.LoadDump(&quot;memory.dmp&quot;);
+
+ClrRuntime runtime =
+    target.ClrVersions[0].CreateRuntime();
+
+foreach (ClrThread thread in runtime.Threads)
+{
+    Console.WriteLine(thread.ManagedThreadId);
+}</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">از دید Developer فوق‌العاده ساده است. اما پشت این APIهای Friendly هنوز باید یک Component بداند Structure داخلی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Thread</code> در Runtime موردنظر چگونه است. ClrMD در معماری سنتی برای بخش مهمی از این اطلاعات به DAC متکی است. مستندات امنیتی خود ClrMD نیز توضیح می‌دهند که این Library فایل Native DAC را Load و Execute می‌کند و حتی به همین دلیل Signature Verification برای DAC در نظر گرفته شده است. این مدل سال‌ها جواب داده است. پس مشکل چیست؟</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>مشکل اول: DAC باید با Runtime تطابق داشته باشد</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">مهم‌ترین محدودیت معماری قدیمی این است که DAC نسبت به ران تایم <strong>Version-resilient</strong> نیست. DAC دانش Structureهای داخلی Runtime را هنگام Build درون خودش دارد. اگر Runtime تغییر کند، ممکن است:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Thread
+MethodTable
+MethodDesc
+GCHeap
+HeapSegment
+LoaderHeap</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">هم تغییر کنند. بنابراین DAC مربوط به Runtime A الزاماً قادر نیست حافظه Runtime B را بفهمد. تیم .NET این مشکل را به‌صراحت در طراحی cDAC توضیح داده است: معماری سنتی CoreCLR نیاز دارد Debugger نسخه DAC و DBIای را پیدا و Load کند که با Runtime مورد Debug تطابق داشته باشد.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">یعنی:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Runtime 8.0.x build A
+        │
+        └── DAC build A</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">نه:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Runtime 8.0.x build A
+        │
+        └── DAC build B</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">این موضوع مخصوصاً در Dump Debugging دردسرساز می‌شود.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>سناریوی واقعی: Dump روی یک Server، تحلیل روی ماشین دیگر</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">تصور کنید Production روی Linux اجرا می‌شود. برنامه Crash می‌کند و شما Dump را می‌گیرید:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">production.dmp</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">سپس Dump را به Workstation خود منتقل می‌کنید. حالا Tool تشخیصی باید Runtime دقیق موجود در Dump را تشخیص دهد و DAC سازگار با همان Runtime را پیدا کند. اگر Runtime مربوط به:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">8.0.x
+Linux
+x64
+specific servicing build</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">بوده باشد، DAC نیز باید اطلاعات سازگار با همان Target را داشته باشد. این همان چیزی است که در سال‌های گذشته باعث خطاهای آشنایی مانند:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Failed to load DAC</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">یا مشکلات مربوط به پیدا کردن <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">mscordaccore</code> شده است. حتی مستندات رسمی تحلیل Dump روی Linux هنوز هشدار می‌دهند که در معماری سنتی، Analysis ممکن است نیازمند ماشین با Architecture و Linux Distribution سازگار با محیط Capture باشد.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>مشکل دوم: Cross-Architecture</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">فرض کنید Dump مربوط به Linux ARM64 است اما می‌خواهید آن را روی Windows x64 بررسی کنید. در معماری قدیمی، Host و Target Architecture وارد معادله DAC می‌شوند. Issue طراحی cDAC این محدودیت را یکی از انگیزه‌های اصلی معماری جدید معرفی کرده است؛ چراکه بعضی ترکیب‌های Host/Target برای DAC اصلاً قابل دسترس نیستند. در عمل نیز ClrMD در سال‌های گذشته با مشکلاتی مانند نبود DAC مناسب برای برخی Architectureها روبه‌رو بوده است؛ برای مثال Issue مربوط به Windows ARM64 دقیقاً به نبود DAC مناسب اشاره می‌کند.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>مشکل سوم: Security</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">فرض کنید Runtime یک Build رسمی Microsoft نیست. ممکن است:</div><ul><li>Runtime را خودتان Build کرده باشید؛</li><li>Vendor دیگری Runtime سفارشی داشته باشد؛</li><li>Runtime Patch شده باشد.</li></ul><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">برای تحلیل آن باید DAC مرتبط را Load کنید. اما DAC یک Native Binary است. یعنی Debugger عملاً باید Code دیگری را داخل Process خودش Load و Execute کند. به همین دلیل مسئله Trust مطرح می‌شود. ClrMD امروزی به‌صورت پیش‌فرض DACهای Windows را از نظر Authenticode بررسی می‌کند و مستندات آن هشدار می‌دهند Disableکردن Signature Verification عمدتاً برای Runtimeهای Local-build شده مناسب است. تیم Runtime نیز Security را یکی از چهار مشکل اصلی معماری DAC/DBI قدیمی معرفی کرده است.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>مشکل چهارم: Servicing</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">یک مشکل عمیق‌تر نیز وجود دارد. فرض کنید Bug در خود Runtime نیست. Bug در DAC است. یعنی Tool حافظه را اشتباه تفسیر می‌کند. در معماری قدیمی، اصلاح DAC به Runtime Build وابسته است. تیم .NET این مسئله را <strong>Servicing Problem</strong> می‌نامد: ارائه یک Fix صرفاً برای Debugger/DAC بدون انتشار Runtime Build جدید دشوار است. یعنی Diagnostics بیش از حد به Lifecycle خود Runtime گره خورده است.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>مشکل بنیادی‌تر: Runtime خودش را توصیف نمی‌کند</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">ریشه تمام این مسائل را می‌توان در یک جمله خلاصه کرد:</div><blockquote class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">در معماری DAC، دانش ساختار داخلی Runtime داخل یک Binary خارجی Build شده است.</blockquote><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">به بیان دیگر:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Runtime memory</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">خودش نمی‌گوید:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Thread.Id is at offset 16
+HeapSegment.Next is at offset 48
+pointer size is 8
+GC contract version is c1</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">این دانش در DAC قرار دارد. cDAC دقیقاً همین فرض بنیادی را تغییر می‌دهد.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>ایده cDAC: Runtime خودش را معرفی کند</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">cDAC را می‌توان این‌طور خلاصه کرد:</div><blockquote class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">به‌جای اینکه یک Binary خارجی ساختار Runtime را از قبل بداند، خود Runtime اطلاعات لازم برای تفسیر حافظه‌اش را منتشر کند.</blockquote><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">این یعنی حرکت از Tool knows Runtime layout به سمت Runtime describes its layout این تغییر بسیار مهم است. در معماری جدید، Target می‌تواند بگوید:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">PointerSize = 8
+
+Type Thread:
+    Id    -&gt; offset 16
+    OSId  -&gt; offset 224
+    State -&gt; offset 0
+
+GC Contract:
+    version = c1</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">Reader دیگر لازم نیست Build دقیق Runtime را بشناسد. باید <strong>Contract</strong> را بفهمد. طراحی رسمی Data Contract می‌گوید هدف این معماری حذف نیاز به DAC و DBI دقیقاً منطبق و فراهم‌کردن روشی پایدار برای اینکه Tool خارجی بتواند رفتار Runtime را مشاهده و درک کند است.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>حرف c در cDAC به چه معناست؟</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">نام cDAC ممکن است کمی گمراه‌کننده باشد. در Glossary رسمی Repository دات‌نت، <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CDAC</code> به‌عنوان Codename مربوط به <strong>Data Contracts</strong> معرفی شده است.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">در عمل می‌توان آن را contract-based DAC در نظر گرفت. هدف آن ارائه همان نوع قابلیت Diagnostics است، اما بر مبنای Contractهای صریح و Versioned، نه دانش Hard-coded وابسته به یک Runtime Build.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>Data Contract دقیقاً چیست؟</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">برای فهم cDAC باید بین دو مفهوم تفاوت بگذاریم Data Descriptor و Algorithmic Contract این تفکیک قلب معماری جدید است.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>بخش اول: Data Descriptor</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">Data Descriptor پاسخ می‌دهد:</div><blockquote class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">داده‌های Runtime در حافظه چه شکلی هستند؟</blockquote><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">مثلاً:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Thread.Id offset = 16
+Thread.OSId offset = 224
+HeapSegment.Next offset = 80</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">یا:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">NumHeaps global exists</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">یا:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">GC contract version = c1</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">Data Descriptor شامل چیزهایی مانند:</div><ul><li>Typeها؛</li><li>Field Offsetها؛</li><li>Size بعضی Typeها؛</li><li>Global Valueها؛</li><li>Sub-descriptorها؛</li><li>Version Contractها</li></ul><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">است. طراحی رسمی نیز Data Descriptor را موجودیتی می‌داند که Layout Typeهای موردنیاز Contractها و Global Valueهای Runtime Target را تعریف می‌کند.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>بخش دوم: Algorithmic Contract</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">اما دانستن Offset کافی نیست. فرض کنید Descriptor به ما بگوید:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">LoaderHeap.FirstBlock offset = 32
+LoaderHeapBlock.Next offset = 24</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">هنوز باید بدانیم چگونه Loader Heap را Enumerate کنیم. Algorithm ممکن است بگوید:</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">1. FirstBlock را بخوان.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">2. VirtualAddress و VirtualSize را استخراج کن.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">3. Next را بخوان.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">4. تا Null شدن Next ادامه بده.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">این همان <strong>Algorithmic Contract</strong> است. در مستندات رسمی، Algorithmic Contract به‌عنوان الگوریتمی تعریف شده که با استفاده از Data Structureها و Global Valueهای Descriptor، اطلاعات مفید درباره Runtime تولید می‌کند.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">پس:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Data Descriptor
+      =
+What does memory look like?
+
+Algorithmic Contract
+      =
+How should I interpret it?</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">این تفکیک، پایه معماری cDAC است.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>Runtime چگونه Descriptor را در اختیار Tool می‌گذارد؟</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">همه‌چیز از یک Symbol صادرشده شروع می‌شود:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">DotNetRuntimeContractDescriptor</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">این Symbol به Struct کوچکی اشاره می‌کند:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">struct DotNetRuntimeContractDescriptor
+{
+    uint64_t  magic;
+    uint32_t  flags;
+    uint32_t  descriptor_size;
+    const char *descriptor;
+    uint32_t  pointer_data_count;
+    uint32_t  pad0;
+    uintptr_t *pointer_data;
+};</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">Layout رسمی همین Structure در Specification مربوط به Contract Descriptor تعریف شده است. این Structure عملاً Bootstrap Point کل سیستم است. Reader ابتدا همین Symbol را پیدا می‌کند و سپس از روی آن بقیه اطلاعات Runtime را کشف می‌کند.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>Descriptor در واقع JSON است</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">یکی از جذاب‌ترین قسمت‌های طراحی این است که بخش عمده Metadata در قالب JSON بیان می‌شود. نمونه ساده‌شده:</div><pre data-language="json" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">{
+  &quot;version&quot;: &quot;1&quot;,
+
+  &quot;types&quot;: {
+    &quot;Thread&quot;: {
+      &quot;Id&quot;: 16,
+      &quot;OSId&quot;: 224,
+      &quot;State&quot;: 0
+    }
+  },
+
+  &quot;globals&quot;: {
+    &quot;GCInfoVersion&quot;: &quot;0x4&quot;,
+    &quot;AppDomain&quot;: [[2], &quot;pointer&quot;]
+  },
+
+  &quot;sub-descriptors&quot;: {
+    &quot;GC&quot;: [[45], &quot;pointer&quot;]
+  },
+
+  &quot;contracts&quot;: {
+    &quot;GC&quot;: &quot;c1&quot;,
+    &quot;Thread&quot;: &quot;c1&quot;,
+    &quot;SyncBlock&quot;: &quot;c1&quot;
+  }
+}</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>چرا Pointerهای واقعی داخل JSON نیستند؟</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">JSON هنگام Build ساخته می‌شود. اما آدرس واقعی چیزهایی مانند:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">AppDomain
+GC heap table
+ThreadStore</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">در Runtime مشخص می‌شود. بنابراین نمی‌توان آدرس واقعی آن‌ها را مستقیماً در JSON ثابت قرار داد. راه‌حل cDAC یک Array جانبی است:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">pointer_data</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">JSON به‌جای Address واقعی می‌گوید:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">&quot;AppDomain&quot;: [[2], &quot;pointer&quot;]</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">Reader می‌فهمد باید مقدار Slot شماره دو از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">pointer_data</code> را بخواند. به این ترتیب:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Static metadata</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">از:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Runtime addresses</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">جدا می‌شود. Contract Descriptor رسمی نیز <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">pointer_data</code> را Auxiliary Data مربوط به JSON Descriptor تعریف می‌کند.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>آیا با JSON همه‌چیز حل شد؟</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">خیر. این نکته مهم است. Descriptor فقط می‌گوید داده چگونه Layout شده است. مثلاً:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">HeapSegment.Next -&gt; offset X</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">اما نمی‌گوید چگونه کل GC Heap را Enumerate کنیم. Algorithmها در Repository خود <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">dotnet/runtime</code> مستند می‌شوند. ساختار کلی به این صورت است:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">docs/design/datacontracts/</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">و Contractهایی مانند:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">GC.md
+Loader.md
+ExecutionManager.md
+Thread.md
+...</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">در آن قرار دارند. طراحی رسمی الزام می‌کند Specification هر Contract در فایل مستقل خود و Versionهای مختلف همان Contract در همان فایل مستند شوند. هم‌زمان Microsoft یک Reader واقعی #C نیز در:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">src/native/managed/cdac</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">توسعه می‌دهد. Repository رسمی امروز پروژه‌های مربوط به <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Microsoft.Diagnostics.DataContractReader</code> را در همین مسیر نگه‌داری می‌کند.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>این تفاوت با DAC چرا مهم است؟</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">در معماری قدیمی:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Runtime version
+       +
+Architecture
+       +
+Platform
+       ↓
+matching DAC</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">بخش مهمی از امکان Analysis را تعیین می‌کرد. در معماری Contract محور، هدف نهایی بسیار نزدیک‌تر به این است:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Memory Reader
+      +
+Contract Descriptor
+      +
+Algorithm implementation
+      ↓
+Runtime analysis</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">این یعنی Coupling از exact Runtime binary به documented Contract منتقل می‌شود. Issue اصلی cDAC هدف بلندمدت را Libraryای توصیف می‌کند که بتواند روی Runtimeهای متعدد از CoreCLR از .NET 9 به بعد و در آینده حتی Runtimeهایی مانند NativeAOT و Mono کار کند. این هدف هنوز به‌طور کامل تحقق نیافته، اما جهت معماری روشن است.</div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>Versioning؛ بخش کلیدی معماری</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">اگر قرار است cDAC مشکل Version Lock را حل کند، طبیعتاً باید مدل Versioning خوبی داشته باشد. اما Versioning در cDAC کمی متفاوت از چیزی است که معمولاً تصور می‌کنیم. Descriptor ممکن است بگوید:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">&quot;GC&quot;: &quot;c1&quot;</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">یا Contract دیگری Version متفاوتی داشته باشد.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>نکته مهم:</strong></div><blockquote class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">Version بزرگ‌تر لزوماً Version جدیدتر یا بهتر نیست.</blockquote><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">طراحی رسمی صراحتاً می‌گوید Contract Version Identifier باید مانند یک شناسه Opaque در نظر گرفته شود؛ مقدار «بزرگ‌تر» الزاماً جدیدتر نیست.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">مثلاً ممکن است:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">GC c1</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">یک Algorithm داشته باشد و:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">GC c2</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">Algorithm دیگری. Reader باید Dispatch کند:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IGC gc = version switch
+{
+    &quot;c1&quot; =&gt; new GCContractV1(target),
+    &quot;c2&quot; =&gt; new GCContractV2(target),
+
+    _ =&gt; throw new NotSupportedException()
+};</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>آیا این یعنی DAC همین امروز حذف شده است؟</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">خیر. و این یکی از نکاتی است که هنگام صحبت درباره cDAC باید با دقت بیان شود. cDAC یک مهاجرت تدریجی است، نه Switch یک‌شبه. برنامه اولیه تیم Runtime این بود که DAC موجود بتواند بعضی Operationها را به cDAC Delegate کند. یکی از Milestoneهای اولیه نیز پیاده‌سازی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">!PrintException</code> روی cDAC بود. سپس دامنه APIهای موردنیاز SOS و CLRMA به‌تدریج گسترش یافت. این یعنی مدتی معماری Hybrid خواهیم داشت:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Diagnostic Tool
+       │
+       ▼
+Legacy DAC surface
+       │
+       ├── old implementation
+       │
+       └── cDAC-backed implementation</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">هدف این است که با افزایش Coverage، وابستگی به DAC سنتی کمتر و کمتر شود.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>وضعیت cDAC در ۲۰۲۶</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">تا اوت ۲۰۲۶، cDAC دیگر یک Experiment ابتدایی نیست. Repository رسمی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">dotnet/runtime</code> مجموعه بزرگی از Contractها، Managed Reader و تست‌های Cross-platform برای آن دارد و فعالیت توسعه cDAC همچنان بسیار بالاست. حتی Pull Requestهای روز ۱۴ اوت ۲۰۲۶ همچنان تغییرات جدید cDAC را شامل می‌شوند. برای .NET 11، کار مشخصی روی Deployکردن cDAC همراه SOS و CLRMA انجام شده است. Tracking مربوط به APIهای SOS نشان می‌دهد بخش هدف‌گذاری‌شده آن برای Milestone .NET 11 تکمیل شده، در حالی که Trackingهای دیگری برای DacDbi و سایر قابلیت‌ها همچنان فعال هستند.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">بنابراین بهتر است وضعیت را این‌طور توصیف کنیم:</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">.NET 9: زیرساخت‌ها و backportهای اولیه Contract</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">.NET 10: گسترش Reader و APIها و مسیر Delegation</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">.NET 11: ادغام بسیار جدی‌تر با SOS / CLRMA / Debugging stack</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">بعد از آن: کاهش بیشتر Legacy DAC dependency</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">+ NativeAOT</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">+ Mono</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">+ public contract-based diagnostics API</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">این Timeline خلاصه‌ای مفهومی از Tracking رسمی پروژه است و نباید به معنای Completeبودن تمام قابلیت‌ها در هر Version تلقی شود. Epic کلی Portable Data Contract-based DAC اکنون کارهای Future را نیز دنبال می‌کند و Milestone آن روی .NET 12 قرار گرفته است.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>چرا cDAC برای Dump Debugging مهم است؟</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">بزرگ‌ترین دستاورد بالقوه cDAC شاید برای Developer عادی هنگام Debug کردن Production Dump دیده شود. مدل ایده‌آل آینده:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Dump
+ │
+ ├── Runtime memory
+ │
+ └── Runtime contract descriptor
+          │
+          ▼
+   portable managed reader</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">است. Tool مجبور نیست برای هر Build:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">find exact DAC
+download exact DAC
+load native DAC
+trust native DAC
+match architecture</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">را تکرار کند. به‌جای آن Runtime در Snapshot خودش اطلاعاتی دارد که Reader برای فهم Layout به آن نیاز دارد. این همان تغییری است که می‌تواند Dump Analysis را از یک مدل:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">binary-match driven</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">به:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">contract-driven</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">تبدیل کند.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>چرا cDAC برای ابزارهای Observability هم مهم است؟</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">Data Contract صرفاً برای WinDbg ساخته نشده است. Specification رسمی صراحتاً Debugger، Post-mortem Debugging، Profiler و سایر Diagnostic Toolها را از مصرف‌کنندگان این Contractها می‌داند و حتی سناریوهایی مانند Unwinding کد JITشده از طریق eBPF را به‌عنوان کاربرد بالقوه مطرح می‌کند. یعنی در آینده Toolهای بیشتری می‌توانند بدون Private Knowledge عمیق از Build خاص CLR، Runtime Internals را مشاهده کنند.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">این موضوع می‌تواند روی:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">profilers
+production diagnostics
+memory analyzers
+crash analyzers
+runtime inspection tools
+eBPF-based observability</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">اثر بگذارد.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>چرا cDAC برای تیم Runtime هم بهتر است؟</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">در معماری قبلی، تغییر Structure داخلی ممکن بود اثرهای زنجیره‌ای پیچیده‌ای روی DAC داشته باشد. در مدل Contract، Runtime باید آن چیزی را که Diagnostic Consumerها مجاز به تکیه‌کردن بر آن هستند، Explicitly منتشر کند. این موضوع مرز بهتری ایجاد می‌کند:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Runtime private implementation
+        │
+        ├── completely private details
+        │
+        └── diagnostic contract surface</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">اما هزینه هم دارد. تیم Runtime حالا باید Contractها، Type Definitionها، Versionها و Reader Implementationها را روی Buildها و Architectureهای مختلف با دقت Validate کند.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>cDAC چه چیزی نیست؟</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">برای جلوگیری از چند سوءبرداشت، باید روشن کنیم cDAC:</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">جایگزین GC نیست هیچ تغییری در نحوه مدیریت حافظه برنامه ایجاد نمی‌کند.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">جایگزین JIT نیست کد را Compile نمی‌کند.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">جایگزین SOS به معنای مستقیم نیست SOS می‌تواند Consumer قابلیت‌های cDAC باشد.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">یک Serialization عمومی از کل CLR نیست Runtime تمام Implementation Detailهای خود را منتشر نمی‌کند؛ تنها Surface لازم برای Contractهای تشخیصی را منتشر می‌کند.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">تضمین نمی‌کند هر Dump خراب قابل تحلیل باشد اگر Memory Capture ناقص یا Corrupt باشد، Reader همچنان باید Defensive Programming داشته باشد.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>این تغییر برای یک Developer معمولی چه معنایی دارد؟</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">ممکن است هیچ‌وقت <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">DotNetRuntimeContractDescriptor</code> را مستقیماً نخوانید. ممکن است هیچ‌وقت Contract <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">GC.md</code> را Implementation نکنید. اما نتیجه این معماری را احتمالاً در Toolهایی که روزانه استفاده می‌کنید خواهید دید. در بلندمدت انتظار می‌رود مواردی مانند:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">dotnet-dump
+dotnet-debug
+SOS
+ClrMD
+WinDbg integrations
+cross-platform diagnostics</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">بتوانند وابستگی کمتری به DAC دقیق Runtime داشته باشند. خود <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">dotnet-dump</code> امروز Tool رسمی برای Capture و Analysis Dump روی Windows، Linux و macOS است و SOS Commandها را برای بررسی Crash و GC ارائه می‌کند. در کنار آن، <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">dotnet-debug</code> نیز در نسخه‌های جدید برای Attach به Live Process و Analysis تعاملی Dump عرضه شده و همان مجموعه SOS Commandها را ارائه می‌کند. cDAC در لایه پایین‌تر می‌تواند زیرساختی باشد که این Toolها را در آینده Portableتر و Runtime-version-resilientتر می‌کند.</div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-18541.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>قسمت 4 از آموزش سی شارپ</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-24521.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>ادغام Garbage Collector دات‌نت در برنامه‌های توسعه‌یافته با C++</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-14493.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>چگونه به برنامه‌های قدیمی NET. پشتیبانی از TLS 1.2 را اضافه کنیم؟</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1106.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>آشنایی با SQL Server Data Tools</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3165.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Garbage Collector در #C - قسمت سوم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3666.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Runtime Async در دات‌نت ۱۱: تحولی بنیادین در برنامه‌نویسی غیرهمگام (Async)</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3673.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>پارادایم جدید امنیت حافظه در C# 16: بازطراحی مکانیسم Unsafe با الهام از Rust</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3553.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بهینه‌سازی GC در دات‌نت 9 : تقویت مدیریت حافظه با کاهش Fragmentation و افزایش کارایی</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3129.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>Garbage Collector در #C - قسمت اول</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2492.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>شروع به کار با EF Core 1.0 - قسمت 4 - کار با بانک‌های اطلاعاتی از پیش موجود</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>
