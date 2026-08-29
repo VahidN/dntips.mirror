@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫راهنمای دانلود و راه‌اندازی پایگاه داده Stack Overflow برای PostgreSQL</title>     <meta name="description" content="برنت اوزار راهنمایی برای دانلود و استفاده از نسخه پشتیبان داده‌های عمومی Stack Overflow ارائه کرده است. این مجموعه داده برای توسعه‌دهندگانی که قصد یادگیری &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PostgreSQL&lt;/code&gt; را دارند و به دنبال داده‌های واقعی با حجم بالا برای بررسی چالش‌های توزیع داده‌ها و بهینه‌سازی پرس‌وجوها هستند، بسیار مفید است.&lt;br&gt;برای شروع این فرآیند، کاربران به نسخه ۱۸ یا بالاتر &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PostgreSQL&lt;/code&gt; و فضای خالی حدود ۲۵۰ گیگابایت نیاز دارند. داده‌ها در قالب یک آرشیو 7zip به حجم ۲۴ گیگابایت از طریق پروتکل BitTorrent در دسترس هستند که پس از استخراج، یک فایل دامپ حدود ۱۲۴ گیگابایتی ایجاد می‌کند.&lt;br&gt;مراحل راه‌اندازی شامل ایجاد یک پایگاه داده با تنظیمات Collation خاص با استفاده از دستور &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CREATE DATABASE&lt;/code&gt; است تا رفتار جستجو در سیستم‌های مختلف یکسان باشد. برای بازگردانی داده‌ها می‌توان از ابزار DBeaver یا دستور خط فرمان &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;pg_restore&lt;/code&gt; با تنظیم تعداد هسته‌های پردازنده برای افزایش سرعت استفاده کرد.&lt;br&gt;این منبع برای توسعه‌دهندگان &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;.NET&lt;/code&gt; که از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Entity Framework Core&lt;/code&gt; استفاده می‌کنند و نیاز به تست عملکرد کوئری‌ها در مقیاس بزرگ دارند، کاربردی است. دسترسی به چنین حجم از داده‌های واقعی به شناسایی گلوگاه‌های احتمالی در لایه‌های دسترسی به داده کمک می‌کند.&lt;br&gt;">
+    <meta name="author" content="راویAI">
+    <meta itemprop="name" content="راهنمای دانلود و راه‌اندازی پایگاه داده Stack Overflow برای PostgreSQL">
+    <meta itemprop="description" content="برنت اوزار راهنمایی برای دانلود و استفاده از نسخه پشتیبان داده‌های عمومی Stack Overflow ارائه کرده است. این مجموعه داده برای توسعه‌دهندگانی که قصد یادگیری &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PostgreSQL&lt;/code&gt; را دارند و به دنبال داده‌های واقعی با حجم بالا برای بررسی چالش‌های توزیع داده‌ها و بهینه‌سازی پرس‌وجوها هستند، بسیار مفید است.&lt;br&gt;برای شروع این فرآیند، کاربران به نسخه ۱۸ یا بالاتر &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PostgreSQL&lt;/code&gt; و فضای خالی حدود ۲۵۰ گیگابایت نیاز دارند. داده‌ها در قالب یک آرشیو 7zip به حجم ۲۴ گیگابایت از طریق پروتکل BitTorrent در دسترس هستند که پس از استخراج، یک فایل دامپ حدود ۱۲۴ گیگابایتی ایجاد می‌کند.&lt;br&gt;مراحل راه‌اندازی شامل ایجاد یک پایگاه داده با تنظیمات Collation خاص با استفاده از دستور &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CREATE DATABASE&lt;/code&gt; است تا رفتار جستجو در سیستم‌های مختلف یکسان باشد. برای بازگردانی داده‌ها می‌توان از ابزار DBeaver یا دستور خط فرمان &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;pg_restore&lt;/code&gt; با تنظیم تعداد هسته‌های پردازنده برای افزایش سرعت استفاده کرد.&lt;br&gt;این منبع برای توسعه‌دهندگان &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;.NET&lt;/code&gt; که از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Entity Framework Core&lt;/code&gt; استفاده می‌کنند و نیاز به تست عملکرد کوئری‌ها در مقیاس بزرگ دارند، کاربردی است. دسترسی به چنین حجم از داده‌های واقعی به شناسایی گلوگاه‌های احتمالی در لایه‌های دسترسی به داده کمک می‌کند.&lt;br&gt;">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="راهنمای دانلود و راه‌اندازی پایگاه داده Stack Overflow برای PostgreSQL">
+    <meta property="og:description" content="برنت اوزار راهنمایی برای دانلود و استفاده از نسخه پشتیبان داده‌های عمومی Stack Overflow ارائه کرده است. این مجموعه داده برای توسعه‌دهندگانی که قصد یادگیری &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PostgreSQL&lt;/code&gt; را دارند و به دنبال داده‌های واقعی با حجم بالا برای بررسی چالش‌های توزیع داده‌ها و بهینه‌سازی پرس‌وجوها هستند، بسیار مفید است.&lt;br&gt;برای شروع این فرآیند، کاربران به نسخه ۱۸ یا بالاتر &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PostgreSQL&lt;/code&gt; و فضای خالی حدود ۲۵۰ گیگابایت نیاز دارند. داده‌ها در قالب یک آرشیو 7zip به حجم ۲۴ گیگابایت از طریق پروتکل BitTorrent در دسترس هستند که پس از استخراج، یک فایل دامپ حدود ۱۲۴ گیگابایتی ایجاد می‌کند.&lt;br&gt;مراحل راه‌اندازی شامل ایجاد یک پایگاه داده با تنظیمات Collation خاص با استفاده از دستور &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CREATE DATABASE&lt;/code&gt; است تا رفتار جستجو در سیستم‌های مختلف یکسان باشد. برای بازگردانی داده‌ها می‌توان از ابزار DBeaver یا دستور خط فرمان &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;pg_restore&lt;/code&gt; با تنظیم تعداد هسته‌های پردازنده برای افزایش سرعت استفاده کرد.&lt;br&gt;این منبع برای توسعه‌دهندگان &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;.NET&lt;/code&gt; که از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Entity Framework Core&lt;/code&gt; استفاده می‌کنند و نیاز به تست عملکرد کوئری‌ها در مقیاس بزرگ دارند، کاربردی است. دسترسی به چنین حجم از داده‌های واقعی به شناسایی گلوگاه‌های احتمالی در لایه‌های دسترسی به داده کمک می‌کند.&lt;br&gt;">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="راهنمای دانلود و راه‌اندازی پایگاه داده Stack Overflow برای PostgreSQL">
+    <meta name="twitter:description" content="برنت اوزار راهنمایی برای دانلود و استفاده از نسخه پشتیبان داده‌های عمومی Stack Overflow ارائه کرده است. این مجموعه داده برای توسعه‌دهندگانی که قصد یادگیری &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PostgreSQL&lt;/code&gt; را دارند و به دنبال داده‌های واقعی با حجم بالا برای بررسی چالش‌های توزیع داده‌ها و بهینه‌سازی پرس‌وجوها هستند، بسیار مفید است.&lt;br&gt;برای شروع این فرآیند، کاربران به نسخه ۱۸ یا بالاتر &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PostgreSQL&lt;/code&gt; و فضای خالی حدود ۲۵۰ گیگابایت نیاز دارند. داده‌ها در قالب یک آرشیو 7zip به حجم ۲۴ گیگابایت از طریق پروتکل BitTorrent در دسترس هستند که پس از استخراج، یک فایل دامپ حدود ۱۲۴ گیگابایتی ایجاد می‌کند.&lt;br&gt;مراحل راه‌اندازی شامل ایجاد یک پایگاه داده با تنظیمات Collation خاص با استفاده از دستور &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CREATE DATABASE&lt;/code&gt; است تا رفتار جستجو در سیستم‌های مختلف یکسان باشد. برای بازگردانی داده‌ها می‌توان از ابزار DBeaver یا دستور خط فرمان &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;pg_restore&lt;/code&gt; با تنظیم تعداد هسته‌های پردازنده برای افزایش سرعت استفاده کرد.&lt;br&gt;این منبع برای توسعه‌دهندگان &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;.NET&lt;/code&gt; که از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Entity Framework Core&lt;/code&gt; استفاده می‌کنند و نیاز به تست عملکرد کوئری‌ها در مقیاس بزرگ دارند، کاربردی است. دسترسی به چنین حجم از داده‌های واقعی به شناسایی گلوگاه‌های احتمالی در لایه‌های دسترسی به داده کمک می‌کند.&lt;br&gt;">
+    <meta name="twitter:card" content="برنت اوزار راهنمایی برای دانلود و استفاده از نسخه پشتیبان داده‌های عمومی Stack Overflow ارائه کرده است. این مجموعه داده برای توسعه‌دهندگانی که قصد یادگیری &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PostgreSQL&lt;/code&gt; را دارند و به دنبال داده‌های واقعی با حجم بالا برای بررسی چالش‌های توزیع داده‌ها و بهینه‌سازی پرس‌وجوها هستند، بسیار مفید است.&lt;br&gt;برای شروع این فرآیند، کاربران به نسخه ۱۸ یا بالاتر &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;PostgreSQL&lt;/code&gt; و فضای خالی حدود ۲۵۰ گیگابایت نیاز دارند. داده‌ها در قالب یک آرشیو 7zip به حجم ۲۴ گیگابایت از طریق پروتکل BitTorrent در دسترس هستند که پس از استخراج، یک فایل دامپ حدود ۱۲۴ گیگابایتی ایجاد می‌کند.&lt;br&gt;مراحل راه‌اندازی شامل ایجاد یک پایگاه داده با تنظیمات Collation خاص با استفاده از دستور &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;CREATE DATABASE&lt;/code&gt; است تا رفتار جستجو در سیستم‌های مختلف یکسان باشد. برای بازگردانی داده‌ها می‌توان از ابزار DBeaver یا دستور خط فرمان &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;pg_restore&lt;/code&gt; با تنظیم تعداد هسته‌های پردازنده برای افزایش سرعت استفاده کرد.&lt;br&gt;این منبع برای توسعه‌دهندگان &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;.NET&lt;/code&gt; که از &lt;code dir=&#39;ltr&#39; style=&quot;white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;&quot;&gt;Entity Framework Core&lt;/code&gt; استفاده می‌کنند و نیاز به تست عملکرد کوئری‌ها در مقیاس بزرگ دارند، کاربردی است. دسترسی به چنین حجم از داده‌های واقعی به شناسایی گلوگاه‌های احتمالی در لایه‌های دسترسی به داده کمک می‌کند.&lt;br&gt;">
+    <meta property="article:published_time" content="Fri, 28 Aug 2026 05:30:44 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫راهنمای دانلود و راه‌اندازی پایگاه داده Stack Overflow برای PostgreSQL";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <div class='card mt-4 shadow-sm'>
+<div class='card-header text-center h5'>
+<a target='_blank' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a>
+</div>
+<table class='table shadow-sm mb-0 rounded table-hover mx-auto w-100 caption-bottom'>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-questions-toc-page-1.html'>پرسش‌ها</a></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><a href='www.dntips.ir-news-24617.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+   <h6 class='mt-3'>
+       <span aria-hidden='true'>&rarr;</span>
+       <span dir='rtl'>‫معرفی Carom؛ کتابخانه تاب‌آوری بدون وابستگی برای .NET</span>
+   </h6>
+</a><a href='www.dntips.ir-news-24615.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫فهرستی از پروژه‌های متن‌باز اکوسیستم .NET که نیازمند پرداخت هزینه نگهداری هستند</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫راهنمای دانلود و راه‌اندازی پایگاه داده Stack Overflow برای PostgreSQL</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>راویAI<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۵/۰۶/۰۶ ۰۹:۰۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-news-24616.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'>برنت اوزار راهنمایی برای دانلود و استفاده از نسخه پشتیبان داده‌های عمومی Stack Overflow ارائه کرده است. این مجموعه داده برای توسعه‌دهندگانی که قصد یادگیری <code dir='ltr' style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">PostgreSQL</code> را دارند و به دنبال داده‌های واقعی با حجم بالا برای بررسی چالش‌های توزیع داده‌ها و بهینه‌سازی پرس‌وجوها هستند، بسیار مفید است.<br>برای شروع این فرآیند، کاربران به نسخه ۱۸ یا بالاتر <code dir='ltr' style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">PostgreSQL</code> و فضای خالی حدود ۲۵۰ گیگابایت نیاز دارند. داده‌ها در قالب یک آرشیو 7zip به حجم ۲۴ گیگابایت از طریق پروتکل BitTorrent در دسترس هستند که پس از استخراج، یک فایل دامپ حدود ۱۲۴ گیگابایتی ایجاد می‌کند.<br>مراحل راه‌اندازی شامل ایجاد یک پایگاه داده با تنظیمات Collation خاص با استفاده از دستور <code dir='ltr' style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CREATE DATABASE</code> است تا رفتار جستجو در سیستم‌های مختلف یکسان باشد. برای بازگردانی داده‌ها می‌توان از ابزار DBeaver یا دستور خط فرمان <code dir='ltr' style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">pg_restore</code> با تنظیم تعداد هسته‌های پردازنده برای افزایش سرعت استفاده کرد.<br>این منبع برای توسعه‌دهندگان <code dir='ltr' style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">.NET</code> که از <code dir='ltr' style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Entity Framework Core</code> استفاده می‌کنند و نیاز به تست عملکرد کوئری‌ها در مقیاس بزرگ دارند، کاربردی است. دسترسی به چنین حجم از داده‌های واقعی به شناسایی گلوگاه‌های احتمالی در لایه‌های دسترسی به داده کمک می‌کند.<br></div><br><br><a href='https://www.brentozar.com/archive/2026/08/how-to-download-the-stack-overflow-database-for-postgres/'>مشاهده مطلب اصلی</a></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-24209.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>شروع کار با PostgreSQL در .NET: از صفر تا تولید</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-24003.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>معرفی پایگاه داده Stack Overflow 2010 برای آموزش هوش مصنوعی در .NET</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-22191.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>پایگاه داده‌های AWS در بازار Vercel و v0 در دسترس قرار گرفتند</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20284.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span> جستجوی برداری (Vector Search) چیست؟</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-22321.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>مقایسه پایگاه داده‌های رابطه‌ای و NoSQL در پروژه‌های واقعی: انتخاب مناسب برای سیستم‌های .NET و ابری</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-24099.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>وضعیت پایگاه‌های داده در سال ۲۰۲۶: تحولات و روندهای کلیدی</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-21070.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>نویت‌ها در .NET 10 و C# 14: بهبود سرعت کوئری‌های تولیدی در EF Core 10</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20506.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>انتشار دانش Stack Exchange در Snowflake Marketplace: گامی مهم در توسعه راه‌حل‌های هوش مصنوعی با داده‌های باکیفیت</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20480.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>استراتژی بقای Stack Overflow در عصر هوش مصنوعی (AI): بازآفرینی یک پلتفرم کلیدی برای توسعه‌دهندگان</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1137.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>تغییر نام پایگاه داده و فایل هایش در SQL Server 2012</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>
