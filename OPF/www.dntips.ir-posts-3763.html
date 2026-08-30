@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫مکانیزم ChangeToken در دات‌نت؛ مدیریت تغییرات واکنشی و ابطال کش بدون سربار اضافه</title>     <meta name="description" content="  چکیده:  در اکوسیستم دات‌نت ( .NET )، قابلیت‌هایی مانند بارگذاری مجدد پیکربندی‌ها با  reloadOnChange: true ، پایش پویای تنظیمات از طریق  IOptionsMonitor  و ابطال حافظه نهان ( MemoryCache ) وابستگی عمیقی به یک مکانیزم درونی دارند:  ChangeToken  در فضای نام  Microsoft.Extensions.Primitives . بیشتر توسعه‌دهندگان این اینترفیس را مستقیماً به‌کار نمی‌گیرند، در حالی که شناخت معماری تک‌باره (One-shot) و روش ثبت مجدد خودکار در  ChangeToken.OnChang ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="مکانیزم ChangeToken در دات‌نت؛ مدیریت تغییرات واکنشی و ابطال کش بدون سربار اضافه">
+    <meta itemprop="description" content="  چکیده:  در اکوسیستم دات‌نت ( .NET )، قابلیت‌هایی مانند بارگذاری مجدد پیکربندی‌ها با  reloadOnChange: true ، پایش پویای تنظیمات از طریق  IOptionsMonitor  و ابطال حافظه نهان ( MemoryCache ) وابستگی عمیقی به یک مکانیزم درونی دارند:  ChangeToken  در فضای نام  Microsoft.Extensions.Primitives . بیشتر توسعه‌دهندگان این اینترفیس را مستقیماً به‌کار نمی‌گیرند، در حالی که شناخت معماری تک‌باره (One-shot) و روش ثبت مجدد خودکار در  ChangeToken.OnChang ...">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="مکانیزم ChangeToken در دات‌نت؛ مدیریت تغییرات واکنشی و ابطال کش بدون سربار اضافه">
+    <meta property="og:description" content="  چکیده:  در اکوسیستم دات‌نت ( .NET )، قابلیت‌هایی مانند بارگذاری مجدد پیکربندی‌ها با  reloadOnChange: true ، پایش پویای تنظیمات از طریق  IOptionsMonitor  و ابطال حافظه نهان ( MemoryCache ) وابستگی عمیقی به یک مکانیزم درونی دارند:  ChangeToken  در فضای نام  Microsoft.Extensions.Primitives . بیشتر توسعه‌دهندگان این اینترفیس را مستقیماً به‌کار نمی‌گیرند، در حالی که شناخت معماری تک‌باره (One-shot) و روش ثبت مجدد خودکار در  ChangeToken.OnChang ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="مکانیزم ChangeToken در دات‌نت؛ مدیریت تغییرات واکنشی و ابطال کش بدون سربار اضافه">
+    <meta name="twitter:description" content="  چکیده:  در اکوسیستم دات‌نت ( .NET )، قابلیت‌هایی مانند بارگذاری مجدد پیکربندی‌ها با  reloadOnChange: true ، پایش پویای تنظیمات از طریق  IOptionsMonitor  و ابطال حافظه نهان ( MemoryCache ) وابستگی عمیقی به یک مکانیزم درونی دارند:  ChangeToken  در فضای نام  Microsoft.Extensions.Primitives . بیشتر توسعه‌دهندگان این اینترفیس را مستقیماً به‌کار نمی‌گیرند، در حالی که شناخت معماری تک‌باره (One-shot) و روش ثبت مجدد خودکار در  ChangeToken.OnChang ...">
+    <meta name="twitter:card" content="  چکیده:  در اکوسیستم دات‌نت ( .NET )، قابلیت‌هایی مانند بارگذاری مجدد پیکربندی‌ها با  reloadOnChange: true ، پایش پویای تنظیمات از طریق  IOptionsMonitor  و ابطال حافظه نهان ( MemoryCache ) وابستگی عمیقی به یک مکانیزم درونی دارند:  ChangeToken  در فضای نام  Microsoft.Extensions.Primitives . بیشتر توسعه‌دهندگان این اینترفیس را مستقیماً به‌کار نمی‌گیرند، در حالی که شناخت معماری تک‌باره (One-shot) و روش ثبت مجدد خودکار در  ChangeToken.OnChang ...">
+    <meta property="article:published_time" content="Sat, 29 Aug 2026 08:55:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫مکانیزم ChangeToken در دات‌نت؛ مدیریت تغییرات واکنشی و ابطال کش بدون سربار اضافه";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <div class='card mt-4 shadow-sm'>
+<div class='card-header text-center h5'>
+<a target='_blank' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a>
+</div>
+<table class='table shadow-sm mb-0 rounded table-hover mx-auto w-100 caption-bottom'>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-questions-toc-page-1.html'>پرسش‌ها</a></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><div></div><a href='www.dntips.ir-posts-3762.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫مدیریت نرخ درخواست در ASP.NET Core: پیکربندی‌هایی که زیر بار ترافیکی شکست می‌خورند</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫مکانیزم ChangeToken در دات‌نت؛ مدیریت تغییرات واکنشی و ابطال کش بدون سربار اضافه</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۵/۰۶/۰۷ ۱۲:۲۵</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-3763.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><blockquote class="ql-direction-rtl ql-align-right" style="text-align: right;" dir="rtl"><strong>چکیده: </strong>در اکوسیستم دات‌نت (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">.NET</code>)، قابلیت‌هایی مانند بارگذاری مجدد پیکربندی‌ها با <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">reloadOnChange: true</code>، پایش پویای تنظیمات از طریق <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IOptionsMonitor</code> و ابطال حافظه نهان (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">MemoryCache</code>) وابستگی عمیقی به یک مکانیزم درونی دارند: <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ChangeToken</code> در فضای نام <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Microsoft.Extensions.Primitives</code>. بیشتر توسعه‌دهندگان این اینترفیس را مستقیماً به‌کار نمی‌گیرند، در حالی که شناخت معماری تک‌باره (One-shot) و روش ثبت مجدد خودکار در <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ChangeToken.OnChange()</code> امکان پیاده‌سازی سیستم‌های پایش فایل، چرخش گواهی‌نامه‌ها و اعتبارسنجی مجدد کش را با همان استاندارد و قابلیت اطمینان داخلی فریم‌ورک فراهم می‌کند. در این مقاله به کالبدشکافی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IChangeToken</code>، نحوه کارکرد متد استاتیک <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">OnChange</code>، ساخت مکانیزم‌های سفارشی با <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CancellationChangeToken</code> و بررسی مقایسه‌ای کاربردهای بهینه و نامناسب آن می‌پردازیم.</blockquote><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>مقدمه</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">توسعه‌دهندگان مدرن دات‌نت پیوسته از الگوهای واکنشی (Reactive) استفاده می‌کنند، بدون آنکه همواره با موتور محرک پشت صحنه آن‌ها درگیر شوند. زمانی که فایلی روی دیسک ویرایش می‌شود و تنظیمات بدون راه‌اندازی مجدد برنامه (Restart) به‌روز می‌گردند، یا یک ورودی کش وابسته به دیتابیس باطل می‌شود، یک واسط مشترک در حال مخابره پیام است: <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IChangeToken</code>. این انتزاع سبک، یک پیاده‌سازی استاندارد و بهینه‌سازی‌شده از الگوی طراحی ناظر (Observer Pattern) در سطح دات‌نت است. شناخت این ابزار به توسعه‌دهنده اجازه می‌دهد منطق واکنشی و اعلان تغییرات را بدون نیاز به سربار نظرسنجی دوره‌ای (Polling) یا کتابخانه‌های سنگین جانبی توسعه دهد.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>بخش‌های اصلی اکوسیستم که بر پایه ChangeToken کار می‌کنند</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">چهار مولفه پرکاربرد دات‌نت متکی بر این مکانیزم هستند:</div><ul><li><strong>بارگذاری مجدد پیکربندی (Configuration Reloading):</strong> قابلیت <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">AddJsonFile</code> با دریافت <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">reloadOnChange: true</code>، از طریق متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IFileProvider.Watch()</code> یک توکن دریافت کرده و در صورت تغییر فایل، ساختار پیکربندی را بازسازی می‌کند.</li><li><strong>پایش تنظیمات (</strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IOptionsMonitor</code><strong>):</strong> از طریق <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IOptionsChangeTokenSource</code> تغییرات را رصد می‌کند تا ویژگی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CurrentValue</code> همیشه آخرین مقدار را ارائه دهد.</li><li><strong>انقضای کش حافظه (</strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">MemoryCache Expiration</code><strong>):</strong> متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">AddExpirationToken</code> در <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">MemoryCacheEntryOptions</code> این امکان را فراهم می‌سازد تا طول عمر داده درون کش مستقیماً به رخداد یک توکن متصل شود.</li><li><strong>پایش فایل‌ها (</strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">File Watching</code><strong>):</strong> متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IFileProvider.Watch(&quot;*.json&quot;)</code> مستقیماً یک <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IChangeToken</code> برمی‌گرداند.</li></ul><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">// ۱. بارگذاری مجدد تنظیمات
+builder.Configuration.AddJsonFile(&quot;appsettings.json&quot;, optional: true, reloadOnChange: true);
+
+// ۲. واکشی مقدار همواره تازه تنظیمات
+app.MapGet(&quot;/config&quot;, (IOptionsMonitor&lt;MyOptions&gt; monitor) =&gt; monitor.CurrentValue);
+
+// ۳. انقضای کش متصل به تغییرات فایل
+var entry = cache.CreateEntry(&quot;report_data&quot;);
+entry.AddExpirationToken(fileProvider.Watch(&quot;report.json&quot;));
+
+// ۴. دریافت مستقیم توکن پایش فایل
+IChangeToken token = fileProvider.Watch(&quot;*.json&quot;);</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>کالبدشکافی اینترفیس IChangeToken</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">ساختار این اینترفیس بسیار فشرده و متمرکز است:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public interface IChangeToken
+{
+    bool HasChanged { get; }
+    bool ActiveChangeCallbacks { get; }
+    IDisposable RegisterChangeCallback(Action&lt;object?&gt; callback, object? state);
+}</pre><ul><li><strong>طراحی تک‌باره (</strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">HasChanged</code><strong>):</strong> این خصوصیت پس از وقوع تغییر، برابر با <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">true</code> می‌شود و هرگز به <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">false</code> بازنمی‌گردد. یعنی هر نمونه از توکن تنها برای نمایش <strong>یک‌بار رخداد تغییر</strong> معتبر است (One-shot Lifecycle).</li><li><strong>نقش </strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ActiveChangeCallbacks</code><strong>:</strong> مشخص می‌کند که آیا توکن به‌صورت فعال (Push) کال‌بک شما را اجرا می‌کند یا اینکه مصرف‌کننده باید به‌صورت دستی خصوصیت <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">HasChanged</code> را استعلام (Poll) کند. در اکثر پیاده‌سازی‌های رسمی دات‌نت، مقدار این فیلد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">true</code> است.</li><li><strong>ثبت کال‌بک (</strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">RegisterChangeCallback</code><strong>):</strong> تابعی را برای اجرا در لحظه وقوع تغییر متصل کرده و شیء <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IDisposable</code> برای لغو اشتراک برمی‌گرداند.</li></ul><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>سازوکار ChangeToken.OnChange: چرخه خودکار ثبت مجدد</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">به‌دلیل رفتار تک‌باره <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IChangeToken</code>، اگر مستقیماً از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">RegisterChangeCallback</code> استفاده کنید، موظفید پس از هر بار وقوع رخداد، توکن جدیدی درخواست کرده و کال‌بک را مجدداً روی آن ثبت کنید؛ در غیر این صورت پایش متوقف خواهد شد.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">کلاس استاتیک <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ChangeToken</code> متد کمکی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">OnChange</code> را برای مدیریت این چرخه ارائه می‌دهد:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public static IDisposable OnChange(
+    Func&lt;IChangeToken?&gt; changeTokenProducer,
+    Action changeTokenConsumer);</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>نحوه عملکرد داخلی:</strong></div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl">- متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">OnChange</code> ابتدا تولیدکننده توکن (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">changeTokenProducer</code>) را فراخوانی می‌کند.</div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl">- کال‌بکِ داخلیِ خود را روی توکن ثبت می‌نماید.</div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl">با وقوع تغییر:</div><ul><li><strong>ابتدا</strong> توکن جدیدی را از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">changeTokenProducer</code> دریافت و ثبت‌نام را تجدید می‌کند (Re-registration).</li><li><strong>سپس</strong> تابع مصرف‌کننده شما (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">changeTokenConsumer</code>) را صدا می‌زند.</li></ul><div class="ql-direction-rtl" style="text-align: right;" dir="rtl">- با فراخوانی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Dispose</code> روی خروجی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">OnChange</code>، کل زنجیره متوقف می‌شود.</div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><blockquote class="ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>نکته تکمیلی (مدیریت Exception و Threading):</strong> کال‌بک‌های <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ChangeToken</code> معمولاً روی یک نخ کمکی یا نخ فراخواننده منبع تغییر (مانند رویداد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">FileSystemWatcher</code>) اجرا می‌شوند. بنابراین اجرای منطق‌های طولانی و بلاک‌کننده در بخش <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Consumer</code> توصیه نمی‌شود و بهتر است خطاهای احتمالی درون کال‌بک مدیریت شوند تا فرآیند پایش مختل نگردد.</blockquote><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>پیاده‌سازی عملی: پایش پوشه و توکن‌های سفارشی</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>۱. پایش سیستم فایل با</strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">PhysicalFileProvider</code></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Primitives;
+
+var watchPath = Path.Combine(Path.GetTempPath(), &quot;file-drop&quot;);
+Directory.CreateDirectory(watchPath);
+
+using var fileProvider = new PhysicalFileProvider(watchPath);
+
+// OnChange به طور خودکار پس از هر رویداد، توکن جدیدی از تولیدکننده دریافت می‌کند
+using var watcher = ChangeToken.OnChange(
+    () =&gt; fileProvider.Watch(&quot;*.*&quot;),
+    () =&gt; Console.WriteLine($&quot;[{DateTime.Now:HH:mm:ss}] تغییر در فایل‌های پوشه رخ داد.&quot;)
+);
+
+Console.WriteLine(&quot;سیستم در حال پایش است. برای توقف، کلیدی را فشار دهید...&quot;);
+Console.ReadKey();</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۲. ساخت توکن سفارشی با</strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CancellationChangeToken</code></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">برای زمان‌هایی که منبع تغییرات یک فایل نیست (مانند پایش دیتابیس، دریافت وب‌هوک، یا چرخش توکن‌های امنیتی)، می‌توان از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CancellationChangeToken</code> استفاده کرد:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">using Microsoft.Extensions.Primitives;
+
+// شبیه‌سازی سرویس مدیریت اعلان‌های سفارشی
+public class CustomNotificationService : IDisposable
+{
+    private CancellationTokenSource _cts = new();
+
+    public IChangeToken GetChangeToken() =&gt; new CancellationChangeToken(_cts.Token);
+
+    public void NotifyChange()
+    {
+        var oldCts = Interlocked.Exchange(ref _cts, new CancellationTokenSource());
+        oldCts.Cancel();
+        oldCts.Dispose();
+    }
+
+    public void Dispose() =&gt; _cts.Dispose();
+}</pre><blockquote class="ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>نکته معماری:</strong> برای ترکیب چند منبع تغییر ناهمگن (مثلاً انقضای کش با تغییر فایل یا لغو ادمین)، کلاس <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CompositeChangeToken</code> به شما اجازه می‌دهد مجموعه‌ای از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IChangeToken</code>ها را در قالب یک توکن واحد ادغام کنید که با فعال شدن هر کدام از آن‌ها، وضعیت تغییر را گزارش کند.</blockquote><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>چه زمانی باید از ChangeToken استفاده کنیم؟</strong></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><table class="table table-striped table-hover table-bordered table-condensed" style="max-width: 100%; width: auto; margin-left: auto; margin-right: auto; direction: rtl;" dir="rtl"><tbody><tr><td data-row="1" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>سناریوی مناسب (Use Cases)</strong></td><td data-row="1" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>ابزار جایگزین بهتر (Alternatives)</strong></td><td data-row="1" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>علت عدم پیشنهاد ChangeToken</strong></td></tr><tr><td data-row="2" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">ابطال حافظه نهان (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Cache Invalidation</code>)</td><td data-row="2" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">—</td><td data-row="2" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">یکپارچگی پیش‌فرض با <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IMemoryCache</code></td></tr><tr><td data-row="3" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">بارگذاری مجدد تنظیمات و سورس‌های سفارشی</td><td data-row="3" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">—</td><td data-row="3" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">استاندارد سیستم پیکربندی دات‌نت</td></tr><tr><td data-row="4" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">اعلان‌های بسیار پرتکرار (High-Frequency Streams)</td><td data-row="4" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">System.Threading.Channels</code> یا <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Rx</code></td><td data-row="4" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">عدم پشتیبانی از Backpressure و صف‌بندی</td></tr><tr><td data-row="5" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">ارتباط تضمینی، ماندگار یا بین‌سرویسی</td><td data-row="5" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">Message Brokers (مانند RabbitMQ/Kafka)</td><td data-row="5" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">نبود قابلیت Retry، پایداری و Ordering</td></tr><tr><td data-row="6" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">رویدادهای ساده درون‌برنامه‌ای تک‌مقصدی</td><td data-row="6" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">رویدادهای استاندارد C# (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">event</code>)</td><td data-row="6" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">عدم نیاز به لایه انتزاعی توکن</td></tr></tbody></table><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>نتیجه‌گیری</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">الگوی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ChangeToken</code> استاندارد رسمی فریم‌ورک دات‌نت برای هماهنگ‌سازی منطق‌های واکنشی با کمترین وابستگی و سربار ممکن است. معماری تک‌باره آن پیچیدگی‌های همگام‌سازی چندنخی را کاهش داده و متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ChangeToken.OnChange</code> چرخه حیات پایش مداوم را بدون خطای انسانی ساده می‌سازد. شناخت این الگو به شما اجازه می‌دهد ماژول‌های توسعه‌یافته خود را دقیقاً با همان استانداردهای رفتاری هسته دات‌نت پیاده‌سازی کنید.</div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-9271.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>پایش و رفع اشکال بانک های اطلاعاتی SQL Server</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20574.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>راهنمای جامع مدیریت تنظیمات در دات‌نت کور: IConfiguration, IOptions</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3749.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>ارتقا به NET 10. و EF Core 10: تغییرات رفتار زمان اجرا که در زمان کامپایل پنهان می‌مانند</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2792.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>احراز هویت و اعتبارسنجی کاربران در برنامه‌های Angular - قسمت چهارم - به روز رسانی خودکار توکن‌ها</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3757.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>ارتقای هوشمند فرایند ساخت در دات‌نت ۱۱؛ تحلیل معماری و اثرات فعال‌سازی پیش‌فرض MSBuild Server</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3763.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>مکانیزم ChangeToken در دات‌نت؛ مدیریت تغییرات واکنشی و ابطال کش بدون سربار اضافه</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2792.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>احراز هویت و اعتبارسنجی کاربران در برنامه‌های Angular - قسمت چهارم - به روز رسانی خودکار توکن‌ها</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3760.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>فرسایش خاموش منابع: تحلیل اشتباهات رایج در طراحی BackgroundServiceها</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2792.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>احراز هویت و اعتبارسنجی کاربران در برنامه‌های Angular - قسمت چهارم - به روز رسانی خودکار توکن‌ها</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2451.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>ارتقاء به ASP.NET Core 1.0 - قسمت 7 - کار با فایل‌های config</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۴۰۵/۰۶/۰۷ ۱۸:۳۹</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>پیاده‌سازی یک Custom Configuration Provider با قابلیت بارگذاری مجدد زنده (Hot Reload)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">برای اینکار، دات‌نت از کلاس پایه <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ConfigurationProvider</code> استفاده می‌کند. این کلاس یک متد محافظت‌شده به نام <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">OnReload()</code> دارد که پشت صحنه با ساخت یک <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IChangeToken</code> جدید و فعال‌سازی توکن قبلی، تغییرات را به سیستم <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IOptionsMonitor</code> و کل زنجیره Configuration اعلام می‌کند.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در ادامه، نحوه پیاده‌سازی گام‌به‌گام یک تأمین‌کننده پیکربندی دیتابیس یا وب‌سرویس (به عنوان مثال یک API سرور تنظیمات) با پشتیبانی از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ChangeToken</code> آورده شده است.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۱. پیاده‌سازی ConfigurationProvider</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">این کلاس مسئول خواندن داده‌ها و اعلام رخداد تغییر از طریق متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">OnReload()</code> است:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Primitives;
+
+public class RemoteApiConfigurationProvider : ConfigurationProvider, IDisposable
+{
+    private readonly string _endpointUrl;
+    private readonly TimeSpan _refreshInterval;
+    private readonly Timer _timer;
+
+    public RemoteApiConfigurationProvider(string endpointUrl, TimeSpan refreshInterval)
+    {
+        _endpointUrl = endpointUrl;
+        _refreshInterval = refreshInterval;
+        
+        // راه‌اندازی تایمر برای استعلام دوره‌ای (یا جایگزینی با Webhook/SignalR)
+        _timer = new Timer(async _ =&gt; await CheckForUpdatesAsync(), null, _refreshInterval, _refreshInterval);
+    }
+
+    public override void Load()
+    {
+        // فراخوانی سنکرون در زمان استارتاپ اولیه اپلیکیشن
+        Data = FetchDataFromRemoteSource();
+    }
+
+    private async Task CheckForUpdatesAsync()
+    {
+        try
+        {
+            var latestData = FetchDataFromRemoteSource();
+
+            // در صورتی که داده‌ها تغییر کرده باشند
+            if (HasConfigurationChanged(Data, latestData))
+            {
+                Data = latestData;
+
+                // متد OnReload توکن قبلی را سیگنال کرده و به IOptionsMonitor اعلام می‌کند
+                OnReload();
+            }
+        }
+        catch (Exception ex)
+        {
+            // مدیریت خطا برای جلوگیری از متوقف شدن تایمر
+            Console.WriteLine($&quot;Error reloading configuration: {ex.Message}&quot;);
+        }
+    }
+
+    private IDictionary&lt;string, string?&gt; FetchDataFromRemoteSource()
+    {
+        // شبیه‌سازی دریافت داده از دیتابیس یا سرور پیکربندی
+        return new Dictionary&lt;string, string?&gt;(StringComparer.OrdinalIgnoreCase)
+        {
+            [&quot;FeatureToggle:BetaDashboard&quot;] = DateTime.UtcNow.Second % 2 == 0 ? &quot;true&quot; : &quot;false&quot;,
+            [&quot;AppLimits:MaxConcurrentRequests&quot;] = &quot;100&quot;
+        };
+    }
+
+    private static bool HasConfigurationChanged(IDictionary&lt;string, string?&gt; oldData, IDictionary&lt;string, string?&gt; newData)
+    {
+        if (oldData.Count != newData.Count) return true;
+
+        foreach (var kvp in oldData)
+        {
+            if (!newData.TryGetValue(kvp.Key, out var newVal) || newVal != kvp.Value)
+                return true;
+        }
+        return false;
+    }
+
+    public void Dispose()
+    {
+        _timer?.Dispose();
+    }
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۲. پیاده‌سازی ConfigurationSource</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">کلاس سورس (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IConfigurationSource</code>) به عنوان Factory عمل کرده و نمونه Provider را به اکوسیستم تزریق می‌کند:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">using Microsoft.Extensions.Configuration;
+
+public class RemoteApiConfigurationSource : IConfigurationSource
+{
+    public string EndpointUrl { get; set; } = string.Empty;
+    public TimeSpan RefreshInterval { get; set; } = TimeSpan.FromSeconds(10);
+
+    public IConfigurationProvider Build(IConfigurationBuilder builder)
+    {
+        return new RemoteApiConfigurationProvider(EndpointUrl, RefreshInterval);
+    }
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۳. ساخت Extension Method برای رجیستر آسان</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">برای اتصال روان به <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ConfigurationManager</code> در ASP.NET Core:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">using Microsoft.Extensions.Configuration;
+
+public static class RemoteConfigurationExtensions
+{
+    public static IConfigurationBuilder AddRemoteApiConfiguration(
+        this IConfigurationBuilder builder,
+        string endpointUrl,
+        TimeSpan? refreshInterval = null)
+    {
+        return builder.Add(new RemoteApiConfigurationSource
+        {
+            EndpointUrl = endpointUrl,
+            RefreshInterval = refreshInterval ?? TimeSpan.FromSeconds(5)
+        });
+    }
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>۴. استفاده در</strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Program.cs</code><strong>و دریافت آنی مقادیر با</strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IOptionsMonitor</code></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">var builder = WebApplication.CreateBuilder(args);
+
+// ۱. اضافه کردن پرووایدر سفارشی به سیستم Configuration
+builder.Configuration.AddRemoteApiConfiguration(&quot;https://config.example.com/api&quot;, TimeSpan.FromSeconds(5));
+
+// ۲. مپ کردن بخش مربوطه به یک POCO کلاس
+builder.Services.Configure&lt;FeatureToggleOptions&gt;(builder.Configuration.GetSection(&quot;FeatureToggle&quot;));
+
+var app = builder.Build();
+
+// ۳. تست دریافت مقدار با IOptionsMonitor (بدون ریستارت اپلیکیشن)
+app.MapGet(&quot;/features&quot;, (IOptionsMonitor&lt;FeatureToggleOptions&gt; options) =&gt;
+{
+    return Results.Ok(new
+    {
+        BetaDashboard = options.CurrentValue.BetaDashboard,
+        Timestamp = DateTime.Now.ToString(&quot;T&quot;)
+    });
+});
+
+app.Run();
+
+public class FeatureToggleOptions
+{
+    public bool BetaDashboard { get; set; }
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;">مکانیزم کارکرد پشت صحنه (چگونه IChangeToken درگیر می‌شود؟)</div><ul><li>کلاس پایه <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ConfigurationProvider</code> دارای فیلدی به نام <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ConfigurationReloadToken</code> (پیاده‌سازی داخلی از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IChangeToken</code>) است.</li><li>زمانی که شیء <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IConfigurationRoot</code> ساخته می‌شود، متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">GetReloadToken()</code> همه پرووایدرها را رصد می‌کند.</li><li>با فراخوانی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">OnReload()</code> در پرووایدر، توکن قدیمی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Cancel</code> شده و یک توکن جدید جایگزین می‌شود.</li><li><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IOptionsMonitor</code> متوجه تغییر توکن شده و مدلِ <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CurrentValue</code> را مجدداً از دیتای جدید <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IConfiguration</code> پر می‌کند.</li></ul></div>
+</div></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>
