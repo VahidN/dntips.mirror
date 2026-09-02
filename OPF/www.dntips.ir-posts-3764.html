@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫مدیریت جامع مهلت زمانی و لغو درخواست‌ها در ASP.NET Core و Blazor</title>     <meta name="description" content="  ۱. چکیده:  در برنامه‌های تحت وب مدرن، پردازش درخواست‌هایی که کلاینت پیش از دریافت پاسخ اتصال آن‌ها را قطع کرده است، یا کوئری‌های سنگینی که بیش از حد مجاز به طول می‌انجامند، هدررفت جدی منابع سرور (CPU، حافظه، اتصالات پایگاه‌داده و پهنای باند) را به همراه دارد. به صورت پیش‌فرض، فریم‌ورک ASP.NET Core هیچ مهلت زمانی (Timeout) خودکاری روی درخواست‌های ورودی اعمال نمی‌کند. این مقاله به بررسی جامع مکانیزم  لغو همکارانه (Cooperative Cancellation) ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="مدیریت جامع مهلت زمانی و لغو درخواست‌ها در ASP.NET Core و Blazor">
+    <meta itemprop="description" content="  ۱. چکیده:  در برنامه‌های تحت وب مدرن، پردازش درخواست‌هایی که کلاینت پیش از دریافت پاسخ اتصال آن‌ها را قطع کرده است، یا کوئری‌های سنگینی که بیش از حد مجاز به طول می‌انجامند، هدررفت جدی منابع سرور (CPU، حافظه، اتصالات پایگاه‌داده و پهنای باند) را به همراه دارد. به صورت پیش‌فرض، فریم‌ورک ASP.NET Core هیچ مهلت زمانی (Timeout) خودکاری روی درخواست‌های ورودی اعمال نمی‌کند. این مقاله به بررسی جامع مکانیزم  لغو همکارانه (Cooperative Cancellation) ...">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="مدیریت جامع مهلت زمانی و لغو درخواست‌ها در ASP.NET Core و Blazor">
+    <meta property="og:description" content="  ۱. چکیده:  در برنامه‌های تحت وب مدرن، پردازش درخواست‌هایی که کلاینت پیش از دریافت پاسخ اتصال آن‌ها را قطع کرده است، یا کوئری‌های سنگینی که بیش از حد مجاز به طول می‌انجامند، هدررفت جدی منابع سرور (CPU، حافظه، اتصالات پایگاه‌داده و پهنای باند) را به همراه دارد. به صورت پیش‌فرض، فریم‌ورک ASP.NET Core هیچ مهلت زمانی (Timeout) خودکاری روی درخواست‌های ورودی اعمال نمی‌کند. این مقاله به بررسی جامع مکانیزم  لغو همکارانه (Cooperative Cancellation) ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="مدیریت جامع مهلت زمانی و لغو درخواست‌ها در ASP.NET Core و Blazor">
+    <meta name="twitter:description" content="  ۱. چکیده:  در برنامه‌های تحت وب مدرن، پردازش درخواست‌هایی که کلاینت پیش از دریافت پاسخ اتصال آن‌ها را قطع کرده است، یا کوئری‌های سنگینی که بیش از حد مجاز به طول می‌انجامند، هدررفت جدی منابع سرور (CPU، حافظه، اتصالات پایگاه‌داده و پهنای باند) را به همراه دارد. به صورت پیش‌فرض، فریم‌ورک ASP.NET Core هیچ مهلت زمانی (Timeout) خودکاری روی درخواست‌های ورودی اعمال نمی‌کند. این مقاله به بررسی جامع مکانیزم  لغو همکارانه (Cooperative Cancellation) ...">
+    <meta name="twitter:card" content="  ۱. چکیده:  در برنامه‌های تحت وب مدرن، پردازش درخواست‌هایی که کلاینت پیش از دریافت پاسخ اتصال آن‌ها را قطع کرده است، یا کوئری‌های سنگینی که بیش از حد مجاز به طول می‌انجامند، هدررفت جدی منابع سرور (CPU، حافظه، اتصالات پایگاه‌داده و پهنای باند) را به همراه دارد. به صورت پیش‌فرض، فریم‌ورک ASP.NET Core هیچ مهلت زمانی (Timeout) خودکاری روی درخواست‌های ورودی اعمال نمی‌کند. این مقاله به بررسی جامع مکانیزم  لغو همکارانه (Cooperative Cancellation) ...">
+    <meta property="article:published_time" content="Tue, 01 Sep 2026 06:20:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫مدیریت جامع مهلت زمانی و لغو درخواست‌ها در ASP.NET Core و Blazor";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <div class='card mt-4 shadow-sm'>
+<div class='card-header text-center h5'>
+<a target='_blank' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a>
+</div>
+<table class='table shadow-sm mb-0 rounded table-hover mx-auto w-100 caption-bottom'>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-questions-toc-page-1.html'>پرسش‌ها</a></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><div></div><a href='www.dntips.ir-posts-3763.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫مکانیزم ChangeToken در دات‌نت؛ مدیریت تغییرات واکنشی و ابطال کش بدون سربار اضافه</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫مدیریت جامع مهلت زمانی و لغو درخواست‌ها در ASP.NET Core و Blazor</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۵/۰۶/۱۰ ۰۹:۵۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-3764.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><blockquote class="ql-direction-rtl ql-align-right" style="text-align: right;" dir="rtl"><strong>۱. چکیده:</strong> در برنامه‌های تحت وب مدرن، پردازش درخواست‌هایی که کلاینت پیش از دریافت پاسخ اتصال آن‌ها را قطع کرده است، یا کوئری‌های سنگینی که بیش از حد مجاز به طول می‌انجامند، هدررفت جدی منابع سرور (CPU، حافظه، اتصالات پایگاه‌داده و پهنای باند) را به همراه دارد. به صورت پیش‌فرض، فریم‌ورک ASP.NET Core هیچ مهلت زمانی (Timeout) خودکاری روی درخواست‌های ورودی اعمال نمی‌کند. این مقاله به بررسی جامع مکانیزم <strong>لغو همکارانه (Cooperative Cancellation)</strong> از طریق توکن‌های لغو (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CancellationToken</code>)، قابلیت نوین <strong>میدل‌ور مهلت زمانی درخواست (Request Timeout Middleware)</strong> معرفی‌شده در دات‌نت ۸، و نحوه انتشار بهینه این توکن‌ها در تمام لایه‌های معماری (شامل کنترلرها، Minimal APIs، لایه سرویس، EF Core و مؤلفه‌های Blazor) می‌پردازد.</blockquote><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۲. مقدمه</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">هنگامی که یک کلاینت (کاربر یا سرویس خارجی) درخواستی را به سرور ASP.NET Core ارسال می‌کند، سناریوهای متعددی ممکن است فرآیند پاسخ‌دهی را بیهوده سازند:</div><ul><li>قطع اتصال کلاینت (Client Disconnection) به دلیل بستن تب، خروج از صفحه یا از دست رفتن اتصال شبکه.</li><li>طولانی شدن یک کوئری در پایگاه‌داده یا قفل شدن یک فراخوانی HTTP خارجی (External API Dependency).</li></ul><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">اگرچه ابزارهای پراکسی معکوس (Reverse Proxy) نظیر Nginx یا YARP می‌توانند Timeout مستقل خود را داشته باشند، اما این نوع لغو در لایه بالادست رخ می‌دهد؛ یعنی پراکسی به کلاینت پاسخ خطا می‌دهد در حالی که سرور میزبان همچنان به پردازش بیهوده ادامه می‌دهد.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">برای حل این چالش، اکوسیستم دات‌نت از الگوی لغو همکارانه استفاده می‌کند. این رویکرد به دو ابزار مکمل متکی است:</div><ul><li><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">HttpContext.RequestAborted</code>: جهت آگاهی از قطعی ارتباط کلاینت.</li><li><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Request Timeout Middleware</code> (در دات‌نت ۸ و نسخه‌های جدیدتر): جهت اعمال ضرب‌الاجل‌های مشخص برای پردازش درخواست‌ها.</li></ul><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۳. الگوی لغو همکارانه (Cooperative Cancellation Model)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">مدل لغو در پلتفرم دات‌نت ماهیتی <strong>همکارانه</strong> دارد؛ بدین معنا که فریم‌ورک یا وب‌سرور نخ‌های اجرایی (Threads) را به صورت اجباری متوقف (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Thread.Abort</code>) نمی‌کند، بلکه صرفاً وضعیت لغو شدن را از طریق آبجکت <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CancellationToken</code> اعلام می‌نماید. وظیفه توسعه‌دهنده این است که این توکن را به تمامی لایه‌ها و عملگرهای ناهمگام (Asynchronous Operations) منتقل کند تا در صورت لغو، فرآیند متوقف شده و استثنای <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">OperationCanceledException</code> پرتاب شود.</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">[کلاینت / میدل‌ور Timeout]
+           │
+           ▼ (سیگنال لغو)
+  HttpContext.RequestAborted
+           │
+           ▼
+ [کنترلر یا Minimal API]
+           │
+           ▼
+    [لایه سرویس/بیزینس]
+           │
+           ▼
+[EF Core / HttpClient Provider] ──► لغو اتصال و بازپس‌گیری منابع</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۴. ابزار نوین دات‌نت ۸: میدل‌ور مهلت زمانی درخواست (Request Timeouts)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">دات‌نت ۸ قابلیت اعمال مهلت زمانی را به عنوان یک میدل‌ور رسمی ارائه داده است. این میدل‌ور به محض اتمام زمان تعریف‌شده، <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">HttpContext.RequestAborted</code> را لغو می‌کند و در صورتی که پاسخی پیش از این به کلاینت ارسال نشده باشد، کد خطای استاندارد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">504 Gateway Timeout</code> را بازمی‌گرداند.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۴.۱. پیکربندی پایه در Minimal APIs</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">برای فعال‌سازی، ابتدا سرویس‌ها را ثبت و میدل‌ور را در خط لوله (Pipeline) فعال می‌کنیم:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">var builder = WebApplication.CreateBuilder(args);
+
+// ثبت سرویس‌های مورد نیاز میدل‌ور
+builder.Services.AddRequestTimeouts();
+
+var app = builder.Build();
+
+// قرار دادن میدل‌ور در پایپ‌لاین
+app.UseRequestTimeouts();
+
+app.MapGet(&quot;/reports&quot;, async (CancellationToken cancellationToken) =&gt;
+{
+    // شبیه‌سازی عملیاتی به مدت ۱۰ ثانیه
+    await Task.Delay(TimeSpan.FromSeconds(10), cancellationToken);
+
+    return Results.Ok(&quot;گزارش با موفقیت آماده شد.&quot;);
+})
+.WithRequestTimeout(TimeSpan.FromSeconds(3)); // تعیین مهلت ۳ ثانیه
+
+app.Run();</pre><blockquote class="ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>نکته مهم در تست و اشکال‌زدایی (Debugging):</strong> هنگام اجرای برنامه در حالت متصل به دیباگر (Attached Debugger)، میدل‌ور جهت تسهیل عیب‌یابی Timeout را تریگر نمی‌کند. برای تست صحیح، برنامه را در حالت بدون دیباگر (Release یا <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Ctrl + F5</code>) اجرا کنید.</blockquote><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۴.۲. تعریف سیاست‌های نام‌گذاری‌شده (Named Timeout Policies)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">تمام اندپوینت‌ها بودجه تأخیر (Latency Budget) یکسانی ندارند. برای مثال یک فراخوانی ساده خواندن به ۳ ثانیه زمان نیاز دارد، اما تولید خروجی اکسل یا گزارش‌های تحلیلی ممکن است تا ۳۰ ثانیه زمان ببرد. همچنین اندپوینت‌های مبتنی بر استریم، نیازمند غیرفعال‌سازی مهلت زمانی هستند.</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">builder.Services.AddRequestTimeouts(options =&gt;
+{
+    // سیاست پیش‌فرض برای اندپوینت‌های سبک
+    options.AddPolicy(&quot;ApiReadPolicy&quot;, TimeSpan.FromSeconds(3));
+
+    // سیاست ویژه پردازش‌های تحلیلی
+    options.AddPolicy(&quot;ReportExportPolicy&quot;, TimeSpan.FromSeconds(30));
+});
+
+// تخصیص سیاست‌ها به اندپوینت‌ها
+app.MapGet(&quot;/orders/{id:guid}&quot;, GetOrder)
+   .WithRequestTimeout(&quot;ApiReadPolicy&quot;);
+
+app.MapGet(&quot;/reports/{id:guid}&quot;, ExportReport)
+   .WithRequestTimeout(&quot;ReportExportPolicy&quot;);
+
+// غیرفعال‌سازی برای سناریوهای استریم نظیر SSE یا وب‌سوکت
+app.MapGet(&quot;/events/stream&quot;, StreamEvents)
+   .DisableRequestTimeout();</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۵. نحوه تزریق و دریافت CancellationToken در لایه‌های مختلف</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">برای اینکه مکانیزم لغو اثرگذار باشد، توکن باید از اندپوینت تا آخرین نقطه اجرای کار (دیتابیس یا سرویس خارجی) دست‌به‌دست شود.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۵.۱. کنترلرهای MVC و Web API</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در کنترلرها می‌توان توکن را مستقیماً از طریق پارامتر متد (با بهره‌گیری از Model Binding خودکار) یا از طریق نمونه <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">HttpContext</code> دریافت کرد:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">[ApiController]
+[Route(&quot;api/[controller]&quot;)]
+public class WeatherForecastController : ControllerBase
+{
+    // ۱. تزریق خودکار از طریق ModelBinder
+    [HttpGet(&quot;forecast&quot;)]
+    public async Task&lt;IActionResult&gt; GetForecast(CancellationToken cancellationToken)
+    {
+        var data = await GetDataAsync(cancellationToken);
+        return Ok(data);
+    }
+
+    // ۲. دریافت مستقیم از شیء HttpContext
+    [HttpGet(&quot;direct&quot;)]
+    public async Task&lt;IActionResult&gt; GetDirect()
+    {
+        CancellationToken cancellationToken = HttpContext.RequestAborted;
+        var data = await GetDataAsync(cancellationToken);
+        return Ok(data);
+    }
+
+    private async Task&lt;IReadOnlyCollection&lt;WeatherForecast&gt;&gt; GetDataAsync(CancellationToken cancellationToken)
+    {
+        await Task.Delay(2000, cancellationToken);
+        return Array.Empty&lt;WeatherForecast&gt;();
+    }
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۵.۲. صفحات Razor Pages</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در صفحات Razor، دسترسی از طریق نمونه <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">HttpContext.RequestAborted</code> یا ارسال به متدهای Handler مقدور است:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">@page
+@model IndexModel
+
+&lt;div&gt;
+    &lt;p&gt;وضعیت پردازش: @Model.Result&lt;/p&gt;
+&lt;/div&gt;
+
+@functions {
+    public string Result { get; set; } = string.Empty;
+
+    public async Task OnGetAsync(CancellationToken cancellationToken)
+    {
+        Result = await FetchExternalDataAsync(cancellationToken);
+    }
+
+    private async Task&lt;string&gt; FetchExternalDataAsync(CancellationToken cancellationToken)
+    {
+        await Task.Delay(1000, cancellationToken);
+        return &quot;تکمیل شد&quot;;
+    }
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۵.۳. لایه دسترسی به داده (EF Core) و کلاینت‌های HTTP</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">انتشار توکن در لایه‌های زیرین، اتصال پایگاه‌داده را آزاد کرده و ارسال بسته‌ها در شبکه را متوقف می‌کند:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public class OrderRepository : IOrderRepository
+{
+    private readonly ApplicationDbContext _dbContext;
+    private readonly HttpClient _httpClient;
+
+    public OrderRepository(ApplicationDbContext dbContext, HttpClient httpClient)
+    {
+        _dbContext = dbContext;
+        _httpClient = httpClient;
+    }
+
+    public async Task&lt;Order?&gt; GetOrderWithDetailsAsync(Guid id, CancellationToken cancellationToken)
+    {
+        // لغو اجرای کوئری در پایگاه‌داده
+        var order = await _dbContext.Orders
+            .AsNoTracking()
+            .SingleOrDefaultAsync(o =&gt; o.Id == id, cancellationToken);
+
+        if (order is null) return null;
+
+        // لغو فراخوانی خارجی
+        var response = await _httpClient.GetAsync($&quot;https://api.shipping.internal/status/{id}&quot;, cancellationToken);
+        
+        return order;
+    }
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۶. پیاده‌سازی متمرکز CancellationToken در معماری Blazor</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در معماری کامپوننت‌محور Blazor، لغو فرآیندهای ناهمگام هنگام خروج کاربر از کامپوننت یا از بین رفتن آن (Dispose)، از نشت حافظه و عملیات پس‌زمینه ناخواسته جلوگیری می‌کند.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۶.۱. ایجاد یک Base Component با قابلیت لغو خودکار</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">می‌توان یک کامپوننت پایه انتزاعی ایجاد کرد که چرخه عمر <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CancellationTokenSource</code> را هم‌گام با چرخه حیات کامپوننت مدیریت کند:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">@* فایل: CustomComponentBase.razor *@
+@implements IDisposable
+
+@code {
+    private readonly CancellationTokenSource _cts = new CancellationTokenSource();
+
+    protected CancellationToken ComponentCancellationToken =&gt; _cts.Token;
+
+    public virtual void Dispose()
+    {
+        // در زمان خروج یا انهدام کامپوننت، تمامی تسک‌های متصل لغو می‌شوند
+        _cts.Cancel();
+        _cts.Dispose();
+    }
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۶.۲. اعمال سراسری با</strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">_Imports.razor</code></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">برای جلوگیری از نوشتن تکراری <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">inherits@</code> در تمام صفحات، می‌توان ارث‌بری پیش‌فرض را در فایل <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">_Imports.razor</code> مشخص کرد:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">@* فایل: /Components/Pages/_Imports.razor *@
+@inherits YourNamespace.Components.CustomComponentBase</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">اکنون هر کامپوننتی در آن مسیر یا زیرمسیرها به صورت پیش‌فرض به توکن لغو دسترسی خواهد داشت:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">@* فایل: Dashboard.razor *@
+@page &quot;/dashboard&quot;
+
+&lt;h3&gt;داشبورد وضعیت&lt;/h3&gt;
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        // استفاده مستقیم از توکن فراهم‌شده توسط کلاس پایه
+        await LoadDashboardDataAsync(ComponentCancellationToken);
+    }
+
+    private async Task LoadDashboardDataAsync(CancellationToken cancellationToken)
+    {
+        await Task.Delay(1000, cancellationToken);
+    }
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۷. نکات تکمیلی و الگوهای پیشرفته معماری</strong></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><table class="table table-striped table-hover table-bordered table-condensed" style="max-width: 100%; width: auto; margin-left: auto; margin-right: auto; direction: rtl;" dir="rtl"><tbody><tr><td data-row="1" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>چالش / سناریو</strong></td><td data-row="1" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>رویکرد پیشنهادی</strong></td></tr><tr><td data-row="2" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>عملیات چنددقیقه‌ای و سنگین</strong></td><td data-row="2" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">استفاده از الگوی <strong>Async Request-Reply</strong> با بازگرداندن وضعیت <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">202 Accepted</code> و پردازش به وسیله Worker Service</td></tr><tr><td data-row="3" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>استریم داده (SSE / WebSockets)</strong></td><td data-row="3" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">بهره‌گیری از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">.DisableRequestTimeout()</code> به دلیل عدم امکان بازگرداندن ۵۰۴ پس از شروع استریم</td></tr><tr><td data-row="4" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>عملیات بحرانی غیرقابل توقف</strong></td><td data-row="4" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">جداسازی کوئری‌های خواندن (قابل لغو) از تراکنش‌های حساس نوشتن دیتابیس (غیرقابل لغو از طریق توکن‌های مجزا)</td></tr></tbody></table><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۸. نتیجه‌گیری</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">پیاده‌سازی مکانیزم مدیریت مهلت زمانی درخواست‌ها در ASP.NET Core نیازمند رویکردی هماهنگ در معماری نرم‌افزار است:</div><ul><li><strong>فعال‌سازی میدل‌ور Request Timeouts:</strong> اعمال سقف‌های زمانی منطقی و متناسب با ماهیت هر اندپوینت.</li><li><strong>انتقال پیوسته توکن لغو:</strong> هدایت بدون وقفه <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">HttpContext.RequestAborted</code> به تمام متدهای ناهمگام، پایگاه‌های داده و کلاینت‌های HTTP.</li><li><strong>لغو چرخه‌محور در Blazor:</strong> همگام‌سازی عملیات ناهمگام با انهدام کامپوننت‌ها به کمک کامپوننت‌های پایه.</li></ul><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">رعایت این اصول، پایداری سرویس را در زیر بار شدید تضمین کرده و مانع از هدررفت منابع ارزشمند زیرساخت در عملیات بی‌فایده می‌گردد.</div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20468.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>مدیریت لغو عملیات در برنامه‌نویسی ناهمگام با Task.FromCanceled </a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20449.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>چرا نادیده گرفتن CancellationToken هزینه‌ساز است؟</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20462.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>درک Task.Delay در برنامه‌نویسی ناهمگام #C</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20652.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>خدمات پس‌زمینه در .NET 10: چگونه ExecuteAsync بالاخره روی نخ جداگانه‌ای اجرا می‌شود</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/questions/details/30#comment-76'><span class='badge bg-primary rounded-pill me-2'>پاسخ به پرسش‌ها</span>آیا استفاده از مقادیر اختیاری Optional در Interface صحیح است؟</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-allcoursestopics-170.html'><span class='badge bg-warning rounded-pill me-2'>مطالب دوره‌ها</span>پیاده‌سازی اصولی لغو عملیات (Cancellation Support) در تمام لایه‌های دات‌نت</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='https://www.dntips.ir/courses/topic/14/30d50f58-9a19-44b8-8033-f70c3db1a636'><span class='badge bg-warning rounded-pill me-2'>مطالب دوره‌ها</span>لغو اعمال غیرهمزمان</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3760.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>فرسایش خاموش منابع: تحلیل اشتباهات رایج در طراحی BackgroundServiceها</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-2997.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>پشتیبانی توکار از انجام کارهای پس‌زمینه در ASP.NET Core 2x</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3760.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>فرسایش خاموش منابع: تحلیل اشتباهات رایج در طراحی BackgroundServiceها</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>
