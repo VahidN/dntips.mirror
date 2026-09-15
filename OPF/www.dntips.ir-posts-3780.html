@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫فیلتر کردن مجموعه‌های بزرگ در EF Core 10: واکاوی رفتار در مرز ۲۱۰۰ پارامتر در SQL Server</title>     <meta name="description" content="  چکیده:  فیلتر کردن پرس‌وجوها با مجموعه‌ای از شناسه‌ها با متد  Contains  یکی از الگوهای متداول در برنامه‌های مبتنی بر Entity Framework Core است. در ارتباط با SQL Server، همواره محدودیت تاریخی ۲۱۰۰ پارامتر مطرح بوده است. برخلاف تصور عمومی،  EF Core 10  با عبور از این مرز خطایی صادر نمی‌کند؛ بلکه استراتژی ترجمه پرس‌وجو را به‌صورت خودکار تغییر می‌دهد. این تغییر رفتار اگرچه از بروز استثنا جلوگیری می‌کند، اما در بازه مقادیر نزدیک به مرز مجاز پ ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="فیلتر کردن مجموعه‌های بزرگ در EF Core 10: واکاوی رفتار در مرز ۲۱۰۰ پارامتر در SQL Server">
+    <meta itemprop="description" content="  چکیده:  فیلتر کردن پرس‌وجوها با مجموعه‌ای از شناسه‌ها با متد  Contains  یکی از الگوهای متداول در برنامه‌های مبتنی بر Entity Framework Core است. در ارتباط با SQL Server، همواره محدودیت تاریخی ۲۱۰۰ پارامتر مطرح بوده است. برخلاف تصور عمومی،  EF Core 10  با عبور از این مرز خطایی صادر نمی‌کند؛ بلکه استراتژی ترجمه پرس‌وجو را به‌صورت خودکار تغییر می‌دهد. این تغییر رفتار اگرچه از بروز استثنا جلوگیری می‌کند، اما در بازه مقادیر نزدیک به مرز مجاز پ ...">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="فیلتر کردن مجموعه‌های بزرگ در EF Core 10: واکاوی رفتار در مرز ۲۱۰۰ پارامتر در SQL Server">
+    <meta property="og:description" content="  چکیده:  فیلتر کردن پرس‌وجوها با مجموعه‌ای از شناسه‌ها با متد  Contains  یکی از الگوهای متداول در برنامه‌های مبتنی بر Entity Framework Core است. در ارتباط با SQL Server، همواره محدودیت تاریخی ۲۱۰۰ پارامتر مطرح بوده است. برخلاف تصور عمومی،  EF Core 10  با عبور از این مرز خطایی صادر نمی‌کند؛ بلکه استراتژی ترجمه پرس‌وجو را به‌صورت خودکار تغییر می‌دهد. این تغییر رفتار اگرچه از بروز استثنا جلوگیری می‌کند، اما در بازه مقادیر نزدیک به مرز مجاز پ ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="فیلتر کردن مجموعه‌های بزرگ در EF Core 10: واکاوی رفتار در مرز ۲۱۰۰ پارامتر در SQL Server">
+    <meta name="twitter:description" content="  چکیده:  فیلتر کردن پرس‌وجوها با مجموعه‌ای از شناسه‌ها با متد  Contains  یکی از الگوهای متداول در برنامه‌های مبتنی بر Entity Framework Core است. در ارتباط با SQL Server، همواره محدودیت تاریخی ۲۱۰۰ پارامتر مطرح بوده است. برخلاف تصور عمومی،  EF Core 10  با عبور از این مرز خطایی صادر نمی‌کند؛ بلکه استراتژی ترجمه پرس‌وجو را به‌صورت خودکار تغییر می‌دهد. این تغییر رفتار اگرچه از بروز استثنا جلوگیری می‌کند، اما در بازه مقادیر نزدیک به مرز مجاز پ ...">
+    <meta name="twitter:card" content="  چکیده:  فیلتر کردن پرس‌وجوها با مجموعه‌ای از شناسه‌ها با متد  Contains  یکی از الگوهای متداول در برنامه‌های مبتنی بر Entity Framework Core است. در ارتباط با SQL Server، همواره محدودیت تاریخی ۲۱۰۰ پارامتر مطرح بوده است. برخلاف تصور عمومی،  EF Core 10  با عبور از این مرز خطایی صادر نمی‌کند؛ بلکه استراتژی ترجمه پرس‌وجو را به‌صورت خودکار تغییر می‌دهد. این تغییر رفتار اگرچه از بروز استثنا جلوگیری می‌کند، اما در بازه مقادیر نزدیک به مرز مجاز پ ...">
+    <meta property="article:published_time" content="Mon, 14 Sep 2026 06:00:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫فیلتر کردن مجموعه‌های بزرگ در EF Core 10: واکاوی رفتار در مرز ۲۱۰۰ پارامتر در SQL Server";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <div class='card mt-4 shadow-sm'>
+<div class='card-header text-center h5'>
+<a target='_blank' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a>
+</div>
+<table class='table shadow-sm mb-0 rounded table-hover mx-auto w-100 caption-bottom'>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-questions-toc-page-1.html'>پرسش‌ها</a></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><div></div><a href='www.dntips.ir-posts-3779.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫چالش بهینه‌سازی کارایی در Entity Framework Core: کاهش زمان پاسخ از ۴۸۲۰ به ۲۰ میلی‌ثانیه</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫فیلتر کردن مجموعه‌های بزرگ در EF Core 10: واکاوی رفتار در مرز ۲۱۰۰ پارامتر در SQL Server</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۵/۰۶/۲۳ ۰۹:۳۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-3780.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><blockquote class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>چکیده:</strong> فیلتر کردن پرس‌وجوها با مجموعه‌ای از شناسه‌ها با متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Contains</code> یکی از الگوهای متداول در برنامه‌های مبتنی بر Entity Framework Core است. در ارتباط با SQL Server، همواره محدودیت تاریخی ۲۱۰۰ پارامتر مطرح بوده است. برخلاف تصور عمومی، <strong>EF Core 10</strong> با عبور از این مرز خطایی صادر نمی‌کند؛ بلکه استراتژی ترجمه پرس‌وجو را به‌صورت خودکار تغییر می‌دهد. این تغییر رفتار اگرچه از بروز استثنا جلوگیری می‌کند، اما در بازه مقادیر نزدیک به مرز مجاز پدیده‌ای موسوم به <strong>افت ناگهانی کارایی (Performance Cliff)</strong> ایجاد می‌کند؛ به‌گونه‌ای که یک پرس‌وجو با ۲۰۹۸ شناسه زمان اجرایی معادل ۳۴.۶ میلی‌ثانیه ثبت می‌کند، درحالی‌که با اضافه شدن تنها یک شناسه (۲۰۹۹ شناسه)، زمان اجرا به ۴.۰ میلی‌ثانیه کاهش می‌یابد (تقریباً ۸ برابر سریع‌تر). این مقاله با تکیه بر بنچ‌مارک‌های استاندارد BenchmarkDotNet روی جدولی با ۱ میلیون رکورد، سازوکار داخلی ترجمه در EF Core 10، دسته‌بندی پارامترها (Parameter Bucketing)، محدودیت واقعی ۲۰۹۸ پارامتر در هماهنگی با <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">sp_executesql</code>، اثرات کش نقشه اجرای پرس‌وجو (Plan Cache)، و راهکارهای کارآمد برای کلیدهای ترکیبی (Composite Keys) را منحصراً بر پایه قابلیت‌های توکار فریم‌ورک و رویکردهای Native دات‌نت بررسی می‌کند.</blockquote><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>۱. مقدمه</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">توسعه‌دهندگان بستر دات‌نت سال‌هاست با خطای نام‌آشنای زیر در کار با پایگاه‌داده SQL Server مواجه می‌شوند:</div><div style="text-align: right;" dir="rtl" class="ql-align-right ql-direction-rtl"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">The incoming request has too many parameters. The server supports a maximum of 2100 parameters.</code></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">این محدودیت، تنظیماتی در سطح EF Core نیست؛ بلکه سقفی تعریف‌شده در معماری SQL Server برای رویه‌های ذخیره‌شده (Stored Procedures) است. از آن‌جا که درایور <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Microsoft.Data.SqlClient</code> پرس‌وجوهای پارامتری‌شده را به‌کمک <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">sp_executesql</code> به سرور ارسال می‌کند، این سقف عیناً به پرس‌وجوهای ارسالی اعمال می‌شود.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">در نگارش‌های پیشین نظیر EF Core 8 و EF Core 9، فریم‌ورک مجموعه‌های ورودی را به‌صورت پیش‌فرض در قالب یک رشته آرایه JSON به همراه تابع <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">OPENJSON</code> به دیتابیس می‌فرستاد. این شیوه تنها از <strong>یک پارامتر</strong> بهره می‌برد و خطر برخورد به سقف ۲۱۰۰ پارامتر را در متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Contains</code> به صفر می‌رساند، اما چالش‌هایی نظیر عدم تخمین دقیق کاردینالیتی (Cardinality Estimation) برای مجموعه‌های کوچک ایجاد می‌کرد.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">تیم توسعه EF Core در نگارش ۱۰، استراتژی پیش‌فرض ترجمه را به <strong>چندین پارامتر اسکالر به ازای هر مقدار (Scalar Parameters)</strong> تغییر داد. این تصمیم اگرچه به تولید برنامه‌های اجرایی پایدارتر و تخمین بهتر کمک می‌کند، اما پیامدهای پنهان و شایان توجهی در ابعاد بزرگ داده به همراه دارد.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>۲. رفتار ترجمه در EF Core 10 و دسته‌بندی پارامترها</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">در یک پرس‌وجوی معمولی:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">var ids = new List&lt;int&gt; { 1, 2, 3 };
+
+var matched = await context.Products
+    .AsNoTracking()
+    .Where(p =&gt; ids.Contains(p.Id))
+    .ToListAsync();</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">در EF Core 10، عبارت بالا به یک گزاره <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IN</code> سنتی همراه با پارامترهای مجزا ترجمه می‌شود:</div><pre data-language="sql" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">SELECT [p].[Id], [p].[Name], ...
+FROM [Products] AS [p]
+WHERE [p].[Id] IN (@ids1, @ids2, @ids3)</pre><blockquote class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>نکته نام‌گذاری:</strong> پیشوند سنتی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">@__ids_0</code> در EF Core 10 حذف شده و نام‌ها به فرمت تمیزتر <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">@ids1</code> تغییر یافته‌اند. این تغییر موجب بی‌اعتبار شدن نقشه‌های اجرایی کش‌شده قبلی (Plan Cache Invalidation) در زمان ارتقای نسخه و بار کاری موقت کامپایل در سرور پایگاه‌داده خواهد شد.</blockquote><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>مکانیسم لایه‌بندی پارامترها (Parameter Bucketing)</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">برای جلوگیری از آلودگی کش نقشه اجرا (Plan Cache Pollution) در اثر طول‌های متفاوت لیست‌ها، EF Core 10 از تکنیک Padding (تکمیل ظرفیت تا سقف یک باکت مشخص) استفاده می‌کند. به عنوان مثال، اگر ۸ شناسه ارسال کنید، EF Core تعداد ۱۰ پارامتر تولید می‌کند و پارامترهای ۹ و ۱۰ را با مقدار پارامتر ۸ تکرار می‌نماید تا تغییری در نتیجه منطقی شرط ایجاد نشود.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">قاعده این دسته‌بندی در متد داخلی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CalculateParameterBucketSize</code> در سورس‌کد درایور SQL Server پیاده‌سازی شده است:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">protected override int CalculateParameterBucketSize(int count, RelationalTypeMapping elementTypeMapping)
+{
+    if (count &lt;= 5) return 1;
+    if (count &lt;= 150) return 10;
+    if (count &lt;= 750) return 50;
+    if (count &lt;= 2000) return 100;
+    if (count &lt;= 2070) return 10;
+    if (count &lt;= MaxParameterCount) return 1; // عدم Padding بین 2070 تا سقف نهایی
+    return 200;
+}</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">جدول زیر اندازه باکت‌ها و رفتار واقعی سیستم را نشان می‌دهد:</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><table class="table table-striped table-hover table-bordered table-condensed" dir="rtl"><tbody><tr><td data-row="1" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>دامنه طول لیست</strong></td><td data-row="1" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>اندازه باکت (گام افزایش)</strong></td><td data-row="1" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>نمونه طول ورودی</strong></td><td data-row="1" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>تعداد پارامتر ارسالی به SQL Server</strong></td></tr><tr><td data-row="2" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">۱ تا ۵</td><td data-row="2" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">دقیق (بدون تکمیل)</td><td data-row="2" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">۳</td><td data-row="2" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">۳</td></tr><tr><td data-row="3" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">۶ تا ۱۵۰</td><td data-row="3" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">مضرب بعدی ۱۰</td><td data-row="3" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">۸</td><td data-row="3" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">۱۰</td></tr><tr><td data-row="4" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">۱۵۱ تا ۷۵۰</td><td data-row="4" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">مضرب بعدی ۵۰</td><td data-row="4" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">۱۵۱</td><td data-row="4" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">۲۰۰</td></tr><tr><td data-row="5" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">۷۵۱ تا ۲۰۰۰</td><td data-row="5" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">مضرب بعدی ۱۰۰</td><td data-row="5" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">۷۵۱</td><td data-row="5" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">۸۰۰</td></tr><tr><td data-row="6" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">۲۰۰۱ تا ۲۰۷۰</td><td data-row="6" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">مضرب بعدی ۱۰</td><td data-row="6" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">۲۰۰۱</td><td data-row="6" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">۲۰۱۰</td></tr><tr><td data-row="7" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">۲۰۷۱ تا ۲۰۹۸</td><td data-row="7" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">دقیق (بدون تکمیل)</td><td data-row="7" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">۲۰۹۴</td><td data-row="7" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">۲۰۹۴</td></tr></tbody></table><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">این رفتار نشان می‌دهد که به دلیل Padding، تعداد پارامترهای ارسالی همواره بزرگ‌تر یا مساوی طول لیست شماست و مرز بحرانی زودتر از آنچه به نظر می‌رسد فرا می‌رسد.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>۳. سقف واقعی: ۲۰۹۸ پارامتر و رفتار پس از عبور از آن</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">سقف مستندشده SQL Server عدد ۲۱۰۰ است، اما در واقعیت سقف کاربردی در پرس‌وجوهای پارامتری برابر با <strong>۲۰۹۸</strong> است. دو پارامتر از این بودجه صرف پارامترهای کنترلی دستور <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">sp_executesql</code> در لایه SqlClient می‌شود (این نکته در انتشار EF Core 10.0.2 اصلاح و نهایی شد).</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>عبور نامحسوس به استراتژی JSON</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">هنگامی که طول لیست شما از ۲۰۹۸ پارامتر فراتر رود، متد داخلی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">VisitIn</code> در موتور تحلیل عبارت‌های EF Core نوع ترجمه را تغییر می‌دهد:</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><table class="table table-striped table-hover table-bordered table-condensed" dir="rtl"><tbody><tr><td data-row="1" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>تعداد شناسه‌ها</strong></td><td data-row="1" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>تعداد پارامتر ارسالی</strong></td><td data-row="1" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>استراتژی تولید کد SQL</strong></td></tr><tr><td data-row="2" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>۲۰۹۶</strong></td><td data-row="2" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">۲۰۹۶</td><td data-row="2" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IN (@ids1, ... @ids2096)</code></td></tr><tr><td data-row="3" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>۲۰۹۸</strong></td><td data-row="3" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">۲۰۹۸</td><td data-row="3" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IN (@ids1, ... @ids2098)</code></td></tr><tr><td data-row="4" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>۲۰۹۹</strong></td><td data-row="4" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">۱</td><td data-row="4" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IN (SELECT [Value] FROM OPENJSON(@ids) ...)</code></td></tr><tr><td data-row="5" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>۵۰۰۰</strong></td><td data-row="5" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">۱</td><td data-row="5" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IN (SELECT [Value] FROM OPENJSON(@ids) ...)</code></td></tr><tr><td data-row="6" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>۱۰۰,۰۰۰</strong></td><td data-row="6" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">۱</td><td data-row="6" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IN (SELECT [Value] FROM OPENJSON(@ids) ...)</code></td></tr></tbody></table><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>کد ترجمه‌شده در مقادیر ۲۰۹۹ و بالاتر:</strong></div><pre data-language="sql" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">SELECT COUNT(*)
+FROM [Products] AS [p]
+WHERE [p].[Id] IN (
+    SELECT [__openjson0].[Value]
+    FROM OPENJSON(@ids) WITH ([Value] int &#39;$&#39;) AS [__openjson0]
+)</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>مقایسه کارایی در مرز تغییر استراتژی</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">تغییر استراتژی بدون استثنا انجام می‌گیرد، اما اثر آن بر عملکرد سیستم چشمگیر است. نتایج ارزیابی بر روی یک جدول با ۱ میلیون رکورد دارای ایندکس خوشه‌ای:</div><ul><li><strong>۲۰۹۸ شناسه (استراتژی پیش‌فرض پارامتری):</strong> زمان اجرا <strong>۳۴.۶ میلی‌ثانیه</strong> | حافظه تخصیص‌داده‌شده: <strong>۳,۳۹۳ کیلوبایت</strong></li><li><strong>۲۰۹۹ شناسه (استراتژی OPENJSON):</strong> زمان اجرا <strong>۴.۰ میلی‌ثانیه</strong> | حافظه تخصیص‌داده‌شده: <strong>۷۴۳ کیلوبایت</strong></li></ul><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">این پدیده بیانگر آن است که محدوده ۱۰۰۰ تا ۲۰۹۸ پارامتر در استراتژی پیش‌فرض، پرهزینه‌ترین بازه پردازشی در EF Core 10 است؛ پدیده‌ای که در کد #C اثری از آن دیده نمی‌شود.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>۴. مقایسه حالت‌های ترجمه توکار و اثر آن بر کش نقشه اجرا (Plan Cache)</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">فریم‌ورک EF Core سه حالت اصلی ترجمه برای مجموعه‌ها ارائه می‌دهد:</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>۱. تنظیم سراسری (Global Configuration)</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">از طریق متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">UseParameterizedCollectionMode</code> می‌توان استراتژی پیش‌فرض را در سطح <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">DbContext</code> تغییر داد:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+{
+    optionsBuilder.UseSqlServer(connectionString, sqlOptions =&gt;
+    {
+        // تغییر رفتار پیش‌فرض به استراتژی تک‌پارامتری JSON
+        sqlOptions.UseParameterizedCollectionMode(ParameterTranslationMode.Parameter);
+    });
+}</pre><blockquote class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>نکته مهاجرت:</strong> متدهای قدیمی‌تر مانند <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">TranslateParameterizedCollectionsToParameters</code> در EF Core 10 منسوخ (Obsolete) شده و با متد فوق جایگزین شده‌اند.</blockquote><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>۲. تنظیم در سطح پرس‌وجو (Per-Query Overrides)</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">می‌توان بدون تغییر پیکربندی سراسری، استراتژی فیلتر را صراحتاً تعیین کرد:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">// ۱. پیش‌فرض نگارش ۱۰: ارسال پارامترهای اسکالر به تعداد عناصر (با اعمال Padding)
+.Where(p =&gt; EF.MultipleParameters(ids).Contains(p.Id))
+
+// ۲. رفتار نگارش‌های ۸ و ۹: یک پارامتر آرایه JSON همراه با OPENJSON
+.Where(p =&gt; EF.Parameter(ids).Contains(p.Id))
+
+// ۳. جای‌گذاری مقادیر به صورت صریح در متن SQL (Inlined Constants)
+.Where(p =&gt; EF.Constant(ids).Contains(p.Id))</pre><blockquote class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>نکته امنیتی و لاگینگ:</strong> در EF Core 10 مقادیر درون‌خطی (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">EF.Constant</code>) برای اهداف امنیتی به‌صورت پیش‌فرض در خروجی لاگ‌ها سانسور می‌شوند (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IN (?, ?, ?)</code>)؛ مگر آنکه گزینه <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">EnableSensitiveDataLogging()</code> در زمان پیکربندی فعال شده باشد.</blockquote><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>سنجش عملی آلودگی Plan Cache</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">در آزمایشی با اجرای ۲۰ پرس‌وجو در اندازه‌های مختلف لیست پس از پاکسازی کامل کش SQL Server (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">DBCC FREEPROCCACHE</code>)، نتایج به شرح زیر ثبت شد:</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><table class="table table-striped table-hover table-bordered table-condensed" dir="rtl"><tbody><tr><td data-row="1" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>استراتژی</strong></td><td data-row="1" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>تعداد نقشه‌های متمایز ذخیره‌شده در Cache</strong></td><td data-row="1" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>تحلیل رفتار</strong></td></tr><tr><td data-row="2" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">EF.Parameter</code><strong> (تک پارامتر JSON)</strong></td><td data-row="2" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>۲</strong></td><td data-row="2" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">بالاترین انطباق؛ بدون تأثیرپذیری از طول یا محتوای لیست</td></tr><tr><td data-row="3" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>پیش‌فرض (</strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">EF.MultipleParameters</code><strong>)</strong></td><td data-row="3" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>۴</strong></td><td data-row="3" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">مکانیزم Padding موفق شده است ۲۰ طول مختلف را در ۴ نقشه ادغام کند</td></tr><tr><td data-row="4" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">EF.Constant</code><strong> (ثوابت درون‌خطی)</strong></td><td data-row="4" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>۲۱</strong></td><td data-row="4" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">به ازای هر ترکیب منحصربه‌فرد، یک کامپایل و نقشه جدید ثبت می‌شود</td></tr></tbody></table><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">استفاده از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">EF.Constant</code> صرفاً برای مجموعه‌های کوتاه، ثابت و پرتکرار (مانند فیلتر کردن وضعیت‌های Enum یا نقش‌های ثابت سیستم) توجیه‌پذیر است؛ چرا که به موتور بهینه‌ساز امکان بهره‌گیری از آمار واقعی مقادیر (Histogram) را می‌دهد، بدون اینکه کش نقشه اجرا دچار تورم شود.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>۵. ارزیابی جامع کارایی (Benchmarks)</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">آزمون‌های زیر با استفاده از کتابخانه <strong>BenchmarkDotNet 0.15.8</strong> روی سیستم‌عامل تحت .NET 10.0.11 و پایگاه‌داده SQL Server 2025 با جدولی شامل <strong>یک میلیون سطر</strong> و شناسه با ایندکس خوشه‌ای (Clustered Index) به ازای سناریوهای مختلف اجرا شده است. تمامی پرس‌وجوها با <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">AsNoTracking()</code> اجرا شده‌اند تا سربار Change Tracker حذف شود:</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><table class="table table-striped table-hover table-bordered table-condensed" dir="rtl"><tbody><tr><td data-row="1" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>روش اجرایی</strong></td><td data-row="1" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>۱,۰۰۰ آیتم</strong></td><td data-row="1" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>۲,۰۹۸ آیتم</strong></td><td data-row="1" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>۲,۰۹۹ آیتم</strong></td><td data-row="1" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>۵,۰۰۰ آیتم</strong></td><td data-row="1" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>۱۰,۰۰۰ آیتم</strong></td><td data-row="1" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>۱۰۰,۰۰۰ آیتم</strong></td></tr><tr><td data-row="2" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>Contains (پیش‌فرض)</strong></td><td data-row="2" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">12.8 ms</td><td data-row="2" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">34.6 ms</td><td data-row="2" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">4.0 ms</td><td data-row="2" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">6.2 ms</td><td data-row="2" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">14.8 ms</td><td data-row="2" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">273 ms</td></tr><tr><td data-row="3" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>EF.Parameter (تک پارامتر)</strong></td><td data-row="3" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>2.6 ms</strong></td><td data-row="3" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>4.3 ms</strong></td><td data-row="3" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>4.6 ms</strong></td><td data-row="3" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">7.6 ms</td><td data-row="3" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>13.5 ms</strong></td><td data-row="3" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">243 ms</td></tr><tr><td data-row="4" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>EF.Constant (ثوابت مستقیم)</strong></td><td data-row="4" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">3.6 ms</td><td data-row="4" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">5.9 ms</td><td data-row="4" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">5.1 ms</td><td data-row="4" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">102 ms</td><td data-row="4" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">118 ms</td><td data-row="4" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>شکست (خطای پردازشگر SQL)</strong></td></tr><tr><td data-row="5" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>تکه‌تکه‌کردن (Chunking 2000)</strong></td><td data-row="5" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">16.0 ms</td><td data-row="5" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">34.3 ms</td><td data-row="5" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">35.5 ms</td><td data-row="5" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">72 ms</td><td data-row="5" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">145 ms</td><td data-row="5" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">1,347 ms</td></tr><tr><td data-row="6" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>جدول موقت دستی (Temp Table)</strong></td><td data-row="6" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">5.8 ms</td><td data-row="6" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">9.9 ms</td><td data-row="6" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">7.8 ms</td><td data-row="6" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">93 ms</td><td data-row="6" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">101 ms</td><td data-row="6" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>187 ms</strong></td></tr></tbody></table><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>تحلیل داده‌ها</strong></div><ul><li><strong>افت در مجاورت سقف:</strong> در مرز ۲۰۹۸ شناسه، متد پیش‌فرض ۳۴.۶ میلی‌ثانیه زمان برده در حالی که استفاده از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">EF.Parameter</code> آن را به ۴.۳ میلی‌ثانیه کاهش داده است (بهبودی نزدیک به <strong>۸ برابر</strong> تنها با یک تغییر کلمه در LINQ).</li><li><strong>ناکارآمدی الگوی Chunking:</strong> قطعه‌قطعه کردن لیست به دسته‌های ۲۰۰۰تایی (که پاسخی سنتی در پروژه‌ها بود) بدترین کارایی را ثبت کرده است. در ۱۰۰,۰۰۰ رکورد، این الگو ۵۰ رفت‌وبرگشت به دیتابیس (Round-trip) تحمیل کرده و بیش از ۱.۳ ثانیه زمان برده است.</li><li><strong>ریزش شدید </strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">EF.Constant</code><strong>:</strong> تا مرز ۲۰۰۰ آیتم عملکرد مناسبی دارد، اما در ۵۰۰۰ آیتم با افت چشمگیر مواجه شده و در مقیاس ۱۰۰,۰۰۰ آیتم، موتور بهینه‌سازی SQL Server با خطای <em>کمبود منابع داخلی در تولید Query Plan</em> متوقف می‌شود (۲۰.۵ ثانیه نگه‌داشتن اتصال پیش از لغو).</li><li><strong>برتری جدول موقت در مقیاس بسیار بزرگ:</strong> تا ۱۰,۰۰۰ آیتم، راهکارهای توکار دات‌نت به مراتب سریع‌تر از تولید جدول موقت هستند. تنها در ۱۰۰,۰۰۰ آیتم است که ساخت جدول موقت دستی با ۱۸۷ میلی‌ثانیه گوی سبقت را می‌رباید.</li></ul><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>۶. عبور از فیلترهای اسکالر: چالش کلیدهای ترکیبی (Composite Keys)</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">تمامی راهکارهای مبتنی بر متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Contains</code> محدود به کلیدهای تک‌ستونی (Scalar) هستند. در سناریوهایی نظیر کلیدهای ترکیبی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">(TenantId, ProductId)</code>، هیچ‌یک از ساختارهای زیر در EF Core قابل ترجمه به SQL نیستند:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">// تمام این الگوها خطای ترجمه (Translation Failure) صادر می‌کنند:
+.Where(i =&gt; keys.Contains(new { i.TenantId, i.ProductId }))
+.Where(i =&gt; keys.Any(k =&gt; k.TenantId == i.TenantId &amp;&amp; k.ProductId == i.ProductId))</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>۱. تله استفاده از ادغام رشته‌ای (String Concatenation Trap)</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">برخی توسعه‌دهندگان ستون‌ها را به یک رشته واحد تبدیل می‌کنند تا از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Contains</code> استفاده کنند:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">var keys = pairs.Select(p =&gt; $&quot;{p.TenantId}-{p.ProductId}&quot;).ToList();
+
+var matched = await context.Inventory
+    .Where(i =&gt; keys.Contains(i.TenantId + &quot;-&quot; + i.ProductId))
+    .ToListAsync();</pre><ul><li><strong>پیامد:</strong> ستون‌های کلیدی داخل تابع تبدیل (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CAST</code>) قرار می‌گیرند. این امر موجب از بین رفتن خاصیت <strong>SARGability</strong> و ناکارآمد شدن ایندکس می‌شود.</li><li>دیتابیس برای تمامی رکوردهای جدول، تبدیل و الحاق رشته‌ای را ارزیابی می‌کند. در آزمون ۱۰۰۰ جفت‌کلید، این روش به اتمام مهلت فرمان (Command Timeout - ۳۰ ثانیه) برخورد کرد.</li></ul><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>۲. زنجیره شرطی</strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">OR</code><strong>و خطر سرریز پشته (Stack Overflow)</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">الگوی معمول دیگر، ترکیب شروط با عملگر <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">OR</code> به کمک حلقه یا افزونه‌های ساخت Expression Tree است:</div><pre data-language="sql" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">WHERE ([TenantId] = @p0 AND [ProductId] = @p1)
+   OR ([TenantId] = @p2 AND [ProductId] = @p3) ...</pre><ul><li><strong>فروپاشی پردازه در ۴۹۰ شرط:</strong> ایجاد زنجیره با الحاق مستقیم در حلقه، یک درخت عبارت با عمق زیاد (Left-Deep Expression Tree) می‌سازد. در زمان تحلیل بازگشتی این درخت در لایه داخلی EF Core، پردازه دات‌نت در ۴۹۰ شرط با خطای بحرانی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">0xC00000FD</code><strong> (STATUS_STACK_OVERFLOW)</strong> بسته می‌شود؛ خطایی که قابل رهگیری با <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">try-catch</code> نیست و به خاموشی ناگهانی پردازه منجر می‌گردد.</li><li><strong>درخت متعادل (Balanced Tree):</strong> در صورت بازنویسی الگوریتم به‌صورت درخت دودویی متعادل، مشکل سرریز پشته برطرف می‌شود، اما با رسیدن به ۱۰۴۹ جفت‌کلید (معادل ۲۰۹۸ پارامتر اسکالر)، خطای واقعی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Too many parameters</code> رخ می‌دهد؛ زیرا عبارت <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">OR</code> ساختار آرایه‌ای ندارد و از مکانیزم نجات‌بخش <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">OPENJSON</code> بهره‌مند نمی‌شود.</li></ul><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">// الگوریتم ساخت درخت متعادل برای جلوگیری از Stack Overflow
+static Expression BuildBalancedOrTree(IReadOnlyList&lt;Expression&gt; expressions)
+{
+    var current = expressions;
+    while (current.Count &gt; 1)
+    {
+        var next = new List&lt;Expression&gt;((current.Count + 1) / 2);
+        for (int i = 0; i &lt; current.Count; i += 2)
+        {
+            next.Add(i + 1 &lt; current.Count 
+                ? Expression.OrElse(current[i], current[i + 1]) 
+                : current[i]);
+        }
+        current = next;
+    }
+    return current[0];
+}</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>۷. راهکارهای پیشنهادی بدون اتکا به پکیج‌های ثالث</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">برای مدیریت حجم‌های بزرگ داده و به‌ویژه کلیدهای ترکیبی، بدون نیاز به لایسنس یا پکیج‌های تجاری، دو رویکرد توکار و پایدار وجود دارد:</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>راهکار اول: جدول موقت دستی به همراه</strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">SqlBulkCopy</code></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">برای مقیاس‌های بسیار بزرگ (۱۰۰,۰۰۰ شناسه یا کلیدهای ترکیبی حجیم)، ایجاد جدول موقت روی کانکشن جاریِ <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">DbContext</code> بالاترین کارایی را فراهم می‌سازد:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public async Task&lt;List&lt;Product&gt;&gt; FilterByLargeKeysAsync(
+    AppDbContext context, 
+    DataTable keysDataTable, 
+    CancellationToken ct = default)
+{
+    var connection = (SqlConnection)context.Database.GetDbConnection();
+    await context.Database.OpenConnectionAsync(ct);
+
+    try
+    {
+        // ۱. ساخت جدول موقت
+        await using (var cmd = connection.CreateCommand())
+        {
+            cmd.CommandText = @&quot;
+                CREATE TABLE #TempKeys (
+                    TenantId INT NOT NULL,
+                    ProductId INT NOT NULL,
+                    PRIMARY KEY (TenantId, ProductId)
+                );&quot;;
+            await cmd.ExecuteNonQueryAsync(ct);
+        }
+
+        // ۲. درج فوق سریع مقادیر با SqlBulkCopy
+        using (var bulkCopy = new SqlBulkCopy(connection))
+        {
+            bulkCopy.DestinationTableName = &quot;#TempKeys&quot;;
+            bulkCopy.ColumnMappings.Add(&quot;TenantId&quot;, &quot;TenantId&quot;);
+            bulkCopy.ColumnMappings.Add(&quot;ProductId&quot;, &quot;ProductId&quot;);
+            await bulkCopy.WriteToServerAsync(keysDataTable, ct);
+        }
+
+        // ۳. اجرای پرس‌وجو با اتصال (Join) روی جدول موقت در بستر EF Core
+        var result = await context.Inventory
+            .FromSqlRaw(@&quot;
+                SELECT i.* 
+                FROM [Inventory] AS i
+                INNER JOIN #TempKeys AS k 
+                    ON i.[TenantId] = k.[TenantId] 
+                   AND i.[ProductId] = k.[ProductId]&quot;)
+            .AsNoTracking()
+            .ToListAsync(ct);
+
+        return result;
+    }
+    finally
+    {
+        await context.Database.CloseConnectionAsync();
+    }
+}</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">این روش با حفظ مدیریت تراکنش و استفاده از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">FromSqlRaw</code>، نتیجه را مستقیماً به موجودیت‌های EF Core نگاشت می‌کند، بدون آنکه پارامتری به SQL Server ارسال شود.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>راهکار دوم: استفاده از User-Defined Table Type (UDTT) و پارامتر ساختاریافته</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">برای حجم داده‌های متوسط تا بزرگ با کلیدهای اسکالر یا ترکیبی، تعریف ساختار جدولی درون دیتابیس یک رویکرد استاندارد سازمانی است:</div><pre data-language="sql" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">-- یک‌بار در دیتابیس ایجاد می‌شود
+CREATE TYPE [dbo].[IntIdList] AS TABLE (
+    [Id] INT PRIMARY KEY
+);</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">سپس در برنامه:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">var table = new DataTable();
+table.Columns.Add(&quot;Id&quot;, typeof(int));
+foreach (var id in ids) table.Rows.Add(id);
+
+var parameter = new SqlParameter(&quot;@IdList&quot;, SqlDbType.Structured)
+{
+    TypeName = &quot;dbo.IntIdList&quot;,
+    Value = table
+};
+
+var matched = await context.Products
+    .FromSqlRaw(&quot;SELECT p.* FROM [Products] p INNER JOIN @IdList t ON p.[Id] = t.[Id]&quot;, parameter)
+    .AsNoTracking()
+    .ToListAsync();</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">این روش علاوه بر ارسال تنها <strong>یک پارامتر</strong> به پایگاه‌داده، کامپایل بهینه، تایپ امن و قابلیت بازاستفاده در رویه‌های ذخیره‌شده را به همراه دارد.</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>۸. پایش و مراقبت در محیط عملیاتی (Observability)</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">تغییر آرام و بدون استثنای استراتژی در EF Core 10 ایجاب می‌کند سیاست‌های مانیتورینگ متفاوتی اتخاذ شود:</div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>رهگیری تعداد واقعی پارامترها با Interceptor</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">تعداد آیتم‌های لیست ارسالی نشان‌دهنده تعداد پارامترها نیست. برای آگاهی از پارامترهای واقعی، یک اینترسپتور ساده پیاده‌سازی کنید:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public sealed class ParameterCountDiagnosticsInterceptor : DbCommandInterceptor
+{
+    private readonly ILogger&lt;ParameterCountDiagnosticsInterceptor&gt; _logger;
+
+    public ParameterCountDiagnosticsInterceptor(ILogger&lt;ParameterCountDiagnosticsInterceptor&gt; logger)
+    {
+        _logger = logger;
+    }
+
+    public override InterceptionResult&lt;DbDataReader&gt; ReaderExecuting(
+        DbCommand command, 
+        CommandEventData eventData, 
+        InterceptionResult&lt;DbDataReader&gt; result)
+    {
+        // ثبت هشدار در صورت ورود به بازه هزینه‌بر
+        if (command.Parameters.Count &gt;= 1000 &amp;&amp; command.Parameters.Count &lt;= 2098)
+        {
+            _logger.LogWarning(
+                &quot;Query executed in the expensive parameter band. Parameter Count: {Count}. Command: {Sql}&quot;,
+                command.Parameters.Count,
+                command.CommandText);
+        }
+
+        return base.ReaderExecuting(command, eventData, result);
+    }
+}</pre><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>۹. ماتریس تصمیم‌گیری (Decision Matrix)</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><br></div><table class="table table-striped table-hover table-bordered table-condensed" dir="rtl"><tbody><tr><td data-row="1" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>شرایط سناریو</strong></td><td data-row="1" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>استراتژی پیشنهادی</strong></td><td data-row="1" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>علت و منطق فنی</strong></td></tr><tr><td data-row="2" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>کمتر از ۱,۰۰۰ شناسه اسکالر</strong></td><td data-row="2" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">متد پیش‌فرض <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Contains</code></td><td data-row="2" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">تفاوت کارایی روش‌ها در این دامنه ناچیز است؛ سادگی کد اولویت دارد.</td></tr><tr><td data-row="3" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>۱,۰۰۰ تا ۲,۰۹۸ شناسه اسکالر</strong></td><td data-row="3" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">EF.Parameter(ids)</code></td><td data-row="3" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">جلوگیری از افت کارایی پیش‌فرض؛ حدود <strong>۸ برابر سریع‌تر</strong> در سقف بازه.</td></tr><tr><td data-row="4" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>بیش از ۲,۰۹۸ شناسه اسکالر</strong></td><td data-row="4" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">متد پیش‌فرض <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Contains</code></td><td data-row="4" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">فریم‌ورک به‌صورت خودکار به استراتژی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">OPENJSON</code> سوئیچ می‌کند.</td></tr><tr><td data-row="5" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>مجموعه کوتاه و پایدار (مانند Enum)</strong></td><td data-row="5" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">EF.Constant(ids)</code></td><td data-row="5" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">ایجاد نقشه بهینه بر اساس مقادیر واقعی بدون آلوده ساختن Plan Cache.</td></tr><tr><td data-row="6" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>فیلتر با کلیدهای ترکیبی</strong></td><td data-row="6" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">جدول موقت دستی با <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">SqlBulkCopy</code> یا <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">FromSqlRaw</code></td><td data-row="6" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">عدم پشتیبانی موتور ترجمه از تاپل‌ها؛ عبور از ریسک Stack Overflow در عبارات <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">OR</code>.</td></tr><tr><td data-row="7" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>بیش از ۱۰۰,۰۰۰ شناسه (تمام حالات)</strong></td><td data-row="7" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">جدول موقت دستی با <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">SqlBulkCopy</code></td><td data-row="7" class="ql-direction-rtl ql-align-center text-center align-middle" style="text-align: center; vertical-align: middle;">بالاترین کارایی و کمترین مصرف حافظه در مقیاس‌های کلان.</td></tr></tbody></table><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>۱۰. نتیجه‌گیری</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">رفتار ترجمه پرس‌وجوها در EF Core 10، دچار تحولی زیربنایی شده است. رفع خطای مرز ۲۱۰۰ پارامتر در متد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Contains</code> به بهای رفتارهای نامحسوس پردازشی در بازه‌های نزدیک به سقف تمام شده است. کلید تسلط بر عملکرد پایگاه‌داده در دات‌نت، شناخت نحوه تعامل لایه‌های انتزاعی با سرور پایگاه‌داده است:</div><ul><li>مرز عملیاتی مفید پارامترها با در نظر گرفتن <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">sp_executesql</code> برابر با <strong>۲۰۹۸</strong> است نه ۲۱۰۰.</li><li>استراتژی پیش‌فرض برای مقادیر بین ۱,۰۰۰ تا ۲,۰۹۸ شناسه نامناسب‌ترین بهره‌وری را دارد؛ در این بازه استفاده صریح از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">EF.Parameter</code> توصیه می‌شود.</li><li>در مقیاس‌های کلان یا ساختارهای پیچیده مانند کلیدهای ترکیبی، نباید به لایه ترجمه خودکار اتکا کرد؛ بلکه باید از الگوهای مبتنی بر مجموعه‌های جدولی موقت (مانند Table Types یا Temp Tables با Bulk Copy) استفاده نمود.</li></ul></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20174.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>بهبود پارامترسازی کوئری‌ها در Entity Framework Core 9.0</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-11970.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>آپلود فایل در asp.net core با استفاده از Sql Server File Table</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3749.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>ارتقا به NET 10. و EF Core 10: تغییرات رفتار زمان اجرا که در زمان کامپایل پنهان می‌مانند</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3675.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بهینه‌سازی انقلابی مکانیزم Split Queries در EF Core 11</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3375.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>جستجوی غیر حساس به بزرگی و کوچکی حروف در SQLite توسط EF-Core</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3690.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>ارتقای سطح سازگاری پیش‌فرض به SQL Server 2022 در EF Core 11</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3780.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>فیلتر کردن مجموعه‌های بزرگ در EF Core 10: واکاوی رفتار در مرز ۲۱۰۰ پارامتر در SQL Server</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3760.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>فرسایش خاموش منابع: تحلیل اشتباهات رایج در طراحی BackgroundServiceها</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3684.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>بررسی تاثیر تبدیل ضمنی نوع‌های داده‌ی رشته‌ای بر روی کارآیی کوئری‌ها</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3760.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>فرسایش خاموش منابع: تحلیل اشتباهات رایج در طراحی BackgroundServiceها</a></ul>
+</div>
+
+<div style="page-break-inside:avoid;page-break-before:always;"></div>
+<div class='postBody mt5'>
+<h3>نظرات</h3>
+<div id='userComments'><ul><li><div class='postBody'>
+  <div class='replyInfo'>
+       <strong>وحید نصیری</strong>  در  <span dir='ltr'>۱۴۰۵/۰۶/۲۳ ۰۹:۳۶</span>
+  </div>
+  <div style='text-align: right; font-family:inherit; font-size:inherit;' dir='rtl'><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>سؤال: چگونه یک اکستنشن متد جنریک بر روی IQueryable پیاده‌سازی کنیم که با استفاده از SqlBulkCopy و Temp Table، کلیدهای ترکیبی را بدون نیاز به پکیج‌های جانبی فیلتر کند؟ </strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">برای پیاده‌سازی یک اکستنشن‌متد جنریک روی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IQueryable</code> که بدون وابستگی به پکیج‌های جانبی، مجموعه‌ای از کلیدها (اسکالر یا ترکیبی) را در قالب یک <strong>Temp Table</strong> با <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">SqlBulkCopy</code> درج کرده و سپس نتیجه را با کوئری اصلی فیلتر (JOIN) کند، با یک چالش اساسی روبه‌رو هستیم:</div><blockquote class="ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>چالش معماری:</strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IQueryable</code> تنها یک تعریف درخت عبارت (Expression Tree) است و تا زمانی که ماتریالایز نشود (مثلاً فراخوانی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">ToListAsync</code>)، به دیتابیس متصل نمی‌شود. از طرفی یک جدول موقت لوکال (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">#TempTable</code>) <strong>فقط در طول عمر اتصال (Connection Session) جاری معتبر است</strong>. بنابراین، فرآیند درج در جدول موقت و اجرای پرس‌وجوی نهایی حتماً باید بر روی همان کانکشن باز و فعال <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">DbContext</code> رخ دهد.</blockquote><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در ادامه، یک پیاده‌سازی تمیز، جنریک و بهینه برای حل این مسئله با استفاده از قابلیت‌های پیش‌فرض دات‌نت و EF Core ارائه شده است.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۱. پیاده‌سازی کلاس کمکی</strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">GenericBulkFilterExtensions</code></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">این متد کلیدهای ارسالی را می‌گیرد، با خواندن متادیتای کلاس کمکی یا Anonymous Type جدول موقت محلی را می‌سازد، عملیات درج را با <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">SqlBulkCopy</code> انجام می‌دهد و سپس از طریق <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">FromSqlInterpolated</code> و ترکیب عبارات LINQ کوئری فیلترشده را خروجی می‌دهد.</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">using System.Data;
+using System.Linq.Expressions;
+using System.Reflection;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+
+namespace EfCoreCustomBulkExtensions;
+
+public static class GenericBulkFilterExtensions
+{
+    /// &lt;summary&gt;
+    /// فیلتر کردن IQueryable بر اساس مجموعه‌ای از کلیدهای اسکالر یا ترکیبی به کمک Temp Table و SqlBulkCopy
+    /// &lt;/summary&gt;
+    /// &lt;typeparam name=&quot;TEntity&quot;&gt;موجودیت اصلی پایگاه داده&lt;/typeparam&gt;
+    /// &lt;typeparam name=&quot;TKey&quot;&gt;نوع کلید یا کلاس نگهدارنده کلید ترکیبی&lt;/typeparam&gt;
+    public static async Task&lt;List&lt;TEntity&gt;&gt; WhereBulkContainsAsync&lt;TEntity, TKey&gt;(
+        this IQueryable&lt;TEntity&gt; source,
+        DbContext context,
+        IEnumerable&lt;TKey&gt; keys,
+        CancellationToken cancellationToken = default)
+        where TEntity : class
+        where TKey : class
+    {
+        var keyList = keys as IReadOnlyList&lt;TKey&gt; ?? keys.ToList();
+        if (keyList.Count == 0)
+        {
+            return new List&lt;TEntity&gt;();
+        }
+
+        var properties = typeof(TKey).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+        if (properties.Length == 0)
+        {
+            throw new InvalidOperationException($&quot;نوع داده {typeof(TKey).Name} هیچ Property عمومی معتبری ندارد.&quot;);
+        }
+
+        // ۱. ساخت نام یکتا برای جدول موقت جهت جلوگیری از تداخل در نشست‌های همزمان
+        var tempTableName = $&quot;#TempKeys_{Guid.NewGuid():N}&quot;;
+
+        // ۲. تبدیل کلیدها به DataTable به صورت جنریک
+        using var dataTable = BuildDataTable(keyList, properties);
+
+        // ۳. دسترسی به Connection و مدیریت نشست
+        var connection = (SqlConnection)context.Database.GetDbConnection();
+        var currentTransaction = context.Database.CurrentTransaction?.GetDbTransaction() as SqlTransaction;
+
+        bool shouldCloseConnection = false;
+        if (connection.State != ConnectionState.Open)
+        {
+            await connection.OpenAsync(cancellationToken);
+            shouldCloseConnection = true;
+        }
+
+        try
+        {
+            // ۴. ساخت جدول موقت متناظر با مشخصات ستون‌ها
+            await CreateTempTableAsync(connection, currentTransaction, tempTableName, properties, cancellationToken);
+
+            // ۵. انتقال سریع داده‌ها با SqlBulkCopy بر بستر همان کانکشن و تراکنش جاری
+            using (var bulkCopy = new SqlBulkCopy(connection, SqlBulkCopyOptions.Default, currentTransaction))
+            {
+                bulkCopy.DestinationTableName = tempTableName;
+                bulkCopy.BatchSize = Math.Min(keyList.Count, 10_000);
+
+                foreach (var prop in properties)
+                {
+                    bulkCopy.ColumnMappings.Add(prop.Name, prop.Name);
+                }
+
+                await bulkCopy.WriteToServerAsync(dataTable, cancellationToken);
+            }
+
+            // ۶. استخراج متادیتای جدول مبدا از EF Core جهت استخراج نام ستون‌ها
+            var entityType = context.Model.FindEntityType(typeof(TEntity))
+                ?? throw new InvalidOperationException($&quot;نوع {typeof(TEntity).Name} به عنوان Entity در مدل EF ثبت نشده است.&quot;);
+
+            var tableName = entityType.GetTableName();
+            var schema = entityType.GetSchema() ?? &quot;dbo&quot;;
+
+            // ۷. ساخت شرط JOIN بین ستون‌های موجودیت و جدول موقت
+            var joinConditions = properties.Select(p =&gt;
+            {
+                var storeProperty = entityType.FindProperty(p.Name)
+                    ?? throw new InvalidOperationException($&quot;Property به نام {p.Name} در Entity با نام {typeof(TEntity).Name} یافت نشد.&quot;);
+                
+                var columnName = storeProperty.GetColumnName();
+                return $&quot;source.[{columnName}] = temp.[{p.Name}]&quot;;
+            });
+
+            var joinClause = string.Join(&quot; AND &quot;, joinConditions);
+
+            // ۸. اجرای نهایی پرس‌وجو به صورت Native و نگاشت به Entity مربوطه
+            var rawSql = $@&quot;
+                SELECT source.* 
+                FROM [{schema}].[{tableName}] AS source
+                INNER JOIN {tempTableName} AS temp 
+                    ON {joinClause}&quot;;
+
+            // استفاده از FromSqlRaw برای بهره‌مندی از Change Tracking یا AsNoTracking بسته به کوئری ورودی
+            var query = context.Set&lt;TEntity&gt;().FromSqlRaw(rawSql);
+
+            if (!source.Provider.CreateQuery(source.Expression).ElementType.Equals(typeof(TEntity)) ||
+                source.Expression.ToString().Contains(&quot;.AsNoTracking(&quot;))
+            {
+                query = query.AsNoTracking();
+            }
+
+            return await query.ToListAsync(cancellationToken);
+        }
+        finally
+        {
+            // ۹. پاکسازی جدول موقت و در صورت نیاز بستن کانکشن
+            try
+            {
+                await using var dropCmd = connection.CreateCommand();
+                dropCmd.Transaction = currentTransaction;
+                dropCmd.CommandText = $&quot;IF OBJECT_ID(&#39;tempdb..{tempTableName}&#39;) IS NOT NULL DROP TABLE {tempTableName};&quot;;
+                await dropCmd.ExecuteNonQueryAsync(CancellationToken.None);
+            }
+            catch
+            {
+                // نادیده گرفتن خطای Drop در زمان بروز خطاهای لغو عملیات
+            }
+
+            if (shouldCloseConnection)
+            {
+                await connection.CloseAsync();
+            }
+        }
+    }
+
+    private static DataTable BuildDataTable&lt;TKey&gt;(IReadOnlyList&lt;TKey&gt; items, PropertyInfo[] properties)
+    {
+        var dt = new DataTable();
+        foreach (var prop in properties)
+        {
+            var propType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
+            dt.Columns.Add(prop.Name, propType);
+        }
+
+        foreach (var item in items)
+        {
+            var row = dt.NewRow();
+            foreach (var prop in properties)
+            {
+                row[prop.Name] = prop.GetValue(item) ?? DBNull.Value;
+            }
+            dt.Rows.Add(row);
+        }
+
+        return dt;
+    }
+
+    private static async Task CreateTempTableAsync(
+        SqlConnection connection,
+        SqlTransaction? transaction,
+        string tempTableName,
+        PropertyInfo[] properties,
+        CancellationToken cancellationToken)
+    {
+        var columnDefinitions = properties.Select(p =&gt;
+        {
+            var sqlType = GetSqlType(p.PropertyType);
+            return $&quot;[{p.Name}] {sqlType} NOT NULL&quot;;
+        });
+
+        var pkColumns = string.Join(&quot;, &quot;, properties.Select(p =&gt; $&quot;[{p.Name}]&quot;));
+
+        var sql = $@&quot;
+            CREATE TABLE {tempTableName} (
+                {string.Join(&quot;,\n&quot;, columnDefinitions)},
+                PRIMARY KEY ({pkColumns})
+            );&quot;;
+
+        await using var cmd = connection.CreateCommand();
+        cmd.Transaction = transaction;
+        cmd.CommandText = sql;
+        await cmd.ExecuteNonQueryAsync(cancellationToken);
+    }
+
+    private static string GetSqlType(Type type)
+    {
+        var underType = Nullable.GetUnderlyingType(type) ?? type;
+
+        return underType switch
+        {
+            _ when underType == typeof(int) =&gt; &quot;INT&quot;,
+            _ when underType == typeof(long) =&gt; &quot;BIGINT&quot;,
+            _ when underType == typeof(short) =&gt; &quot;SMALLINT&quot;,
+            _ when underType == typeof(byte) =&gt; &quot;TINYINT&quot;,
+            _ when underType == typeof(Guid) =&gt; &quot;UNIQUEIDENTIFIER&quot;,
+            _ when underType == typeof(string) =&gt; &quot;NVARCHAR(450)&quot;,
+            _ when underType == typeof(DateTime) =&gt; &quot;DATETIME2&quot;,
+            _ when underType == typeof(bool) =&gt; &quot;BIT&quot;,
+            _ =&gt; throw exoticType(underType)
+        };
+
+        static NotSupportedException exoticType(Type t) =&gt;
+            new($&quot;نوع داده {t.Name} پشتیبانی نمی‌شود. در صورت نیاز نگاشت آن را اضافه کنید.&quot;);
+    }
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۲. نحوه استفاده در سناریوهای واقعی</strong></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>سناریو: فیلتر موجودی انبار بر اساس کلید ترکیبی</strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">(TenantId, ProductId)</code></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">فرض کنید انبارداری چندمستأجره دارید که کلید اصلی آن شامل دو فیلد است:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public class InventoryItem
+{
+    public int TenantId { get; set; }
+    public int ProductId { get; set; }
+    public int StockCount { get; set; }
+}
+
+// کلاس مدل یا record برای ارسال کلیدها
+public record InventoryKey(int TenantId, int ProductId);</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">اکنون می‌توانید ۵۰,۰۰۰ جفت‌کلید را بدون نگرانی از خطای سقف پارامترها یا Stack Overflow واکشی کنید:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">var targetKeys = new List&lt;InventoryKey&gt;
+{
+    new(TenantId: 1, ProductId: 101),
+    new(TenantId: 1, ProductId: 205),
+    new(TenantId: 2, ProductId: 101),
+    // ... هزاران کلید دیگر
+};
+
+// فراخوانی اکستنشن متد
+var items = await context.Inventory
+    .AsNoTracking()
+    .WhereBulkContainsAsync(context, targetKeys);</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۳. تحلیل مزایا و نکات ظریف پیاده‌سازی</strong></div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>- مدیریت صحیح Connection و Transaction:</strong></div><ul><li>چنانچه کد شما درون یک <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">IDbContextTransaction</code> در حال اجرا باشد، با استفاده از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">GetDbTransaction()</code>، عملیات <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">SqlBulkCopy</code> و دستور ساخت جدول موقت مستقیماً وارد همان تراکنش می‌شوند و با شکست عملیات Rollback خواهند شد.</li></ul><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>- پرهیز از تداخل همزمانی (Concurrency-Safe):</strong></div><ul><li>با استفاده از نام رندوم برای جدول موقت (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">#TempKeys_{guid}</code>)، درخواست‌های موازی روی کانکشن‌های مختلف، با نام تکراری جدول روبه‌رو نمی‌شوند.</li></ul><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>- ایندکس Primary Key در Temp Table:</strong></div><ul><li>در زمان ایجاد جدول موقت، کلیه فیلدهای کلید به عنوان <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">PRIMARY KEY</code> تعریف می‌شوند. این امر باعث ایجاد <strong>Clustered Index</strong> شده و <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">INNER JOIN</code> با جدول اصلی را از نوع پرسرعت <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Merge Join</code> یا <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Index Seek</code> قرار می‌دهد.</li></ul><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><strong>- Zero Parameters:</strong></div><ul><li>تعداد پارامترهای ارسالی به دیتابیس <strong>۰ عدد</strong> است. در نتیجه با صدها هزار ردیف نیز هرگز با خطای ۲۱۰۰ پارامتر یا افت کارایی مواجه نخواهید شد.</li></ul></div>
+</div></li></ul></div>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>
