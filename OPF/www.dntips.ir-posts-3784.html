@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫بهینه‌سازی زمان کامپایل در Visual Studio: راهنمای جامع گره‌های موازی MSBuild و کش محلی مصنوعات</title>     <meta name="description" content="  چکیده:  در توسعه سامانه‌های بزرگ‌مقیاس دات‌نت مبتنی بر میکروسرویس‌ها، وب‌سرویس‌های سازمانی و پروژه‌های دسکتاپ، طولانی شدن چرخه بازخورد درونی (Inner-Loop) یکی از عوامل اصلی اتلاف زمان تیم‌های مهندسی نرم‌افزار است. وابستگی موتور کامپایل به برچسب‌های زمانی فایل‌ها و کامپایل متوالی، به بازسازی‌های غیرضروری آبشاری منجر می‌شود. این مقاله معماری نوین کامپایل موازی خارج از پردازه (Out-of-Process)، کش محلی مبتنی بر محتوا (Content-Addressable Cach ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="بهینه‌سازی زمان کامپایل در Visual Studio: راهنمای جامع گره‌های موازی MSBuild و کش محلی مصنوعات">
+    <meta itemprop="description" content="  چکیده:  در توسعه سامانه‌های بزرگ‌مقیاس دات‌نت مبتنی بر میکروسرویس‌ها، وب‌سرویس‌های سازمانی و پروژه‌های دسکتاپ، طولانی شدن چرخه بازخورد درونی (Inner-Loop) یکی از عوامل اصلی اتلاف زمان تیم‌های مهندسی نرم‌افزار است. وابستگی موتور کامپایل به برچسب‌های زمانی فایل‌ها و کامپایل متوالی، به بازسازی‌های غیرضروری آبشاری منجر می‌شود. این مقاله معماری نوین کامپایل موازی خارج از پردازه (Out-of-Process)، کش محلی مبتنی بر محتوا (Content-Addressable Cach ...">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="بهینه‌سازی زمان کامپایل در Visual Studio: راهنمای جامع گره‌های موازی MSBuild و کش محلی مصنوعات">
+    <meta property="og:description" content="  چکیده:  در توسعه سامانه‌های بزرگ‌مقیاس دات‌نت مبتنی بر میکروسرویس‌ها، وب‌سرویس‌های سازمانی و پروژه‌های دسکتاپ، طولانی شدن چرخه بازخورد درونی (Inner-Loop) یکی از عوامل اصلی اتلاف زمان تیم‌های مهندسی نرم‌افزار است. وابستگی موتور کامپایل به برچسب‌های زمانی فایل‌ها و کامپایل متوالی، به بازسازی‌های غیرضروری آبشاری منجر می‌شود. این مقاله معماری نوین کامپایل موازی خارج از پردازه (Out-of-Process)، کش محلی مبتنی بر محتوا (Content-Addressable Cach ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="بهینه‌سازی زمان کامپایل در Visual Studio: راهنمای جامع گره‌های موازی MSBuild و کش محلی مصنوعات">
+    <meta name="twitter:description" content="  چکیده:  در توسعه سامانه‌های بزرگ‌مقیاس دات‌نت مبتنی بر میکروسرویس‌ها، وب‌سرویس‌های سازمانی و پروژه‌های دسکتاپ، طولانی شدن چرخه بازخورد درونی (Inner-Loop) یکی از عوامل اصلی اتلاف زمان تیم‌های مهندسی نرم‌افزار است. وابستگی موتور کامپایل به برچسب‌های زمانی فایل‌ها و کامپایل متوالی، به بازسازی‌های غیرضروری آبشاری منجر می‌شود. این مقاله معماری نوین کامپایل موازی خارج از پردازه (Out-of-Process)، کش محلی مبتنی بر محتوا (Content-Addressable Cach ...">
+    <meta name="twitter:card" content="  چکیده:  در توسعه سامانه‌های بزرگ‌مقیاس دات‌نت مبتنی بر میکروسرویس‌ها، وب‌سرویس‌های سازمانی و پروژه‌های دسکتاپ، طولانی شدن چرخه بازخورد درونی (Inner-Loop) یکی از عوامل اصلی اتلاف زمان تیم‌های مهندسی نرم‌افزار است. وابستگی موتور کامپایل به برچسب‌های زمانی فایل‌ها و کامپایل متوالی، به بازسازی‌های غیرضروری آبشاری منجر می‌شود. این مقاله معماری نوین کامپایل موازی خارج از پردازه (Out-of-Process)، کش محلی مبتنی بر محتوا (Content-Addressable Cach ...">
+    <meta property="article:published_time" content="Thu, 17 Sep 2026 06:50:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫بهینه‌سازی زمان کامپایل در Visual Studio: راهنمای جامع گره‌های موازی MSBuild و کش محلی مصنوعات";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <div class='card mt-4 shadow-sm'>
+<div class='card-header text-center h5'>
+<a target='_blank' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a>
+</div>
+<table class='table shadow-sm mb-0 rounded table-hover mx-auto w-100 caption-bottom'>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-questions-toc-page-1.html'>پرسش‌ها</a></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><div></div><a href='www.dntips.ir-posts-3783.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫مدیریت مدرن کیوسک‌های تعاملی در ویندوز فرمز 11x</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫بهینه‌سازی زمان کامپایل در Visual Studio: راهنمای جامع گره‌های موازی MSBuild و کش محلی مصنوعات</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۵/۰۶/۲۶ ۱۰:۲۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-3784.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><blockquote class="ql-direction-rtl ql-align-right" style="text-align: right;" dir="rtl"><strong>چکیده:</strong> در توسعه سامانه‌های بزرگ‌مقیاس دات‌نت مبتنی بر میکروسرویس‌ها، وب‌سرویس‌های سازمانی و پروژه‌های دسکتاپ، طولانی شدن چرخه بازخورد درونی (Inner-Loop) یکی از عوامل اصلی اتلاف زمان تیم‌های مهندسی نرم‌افزار است. وابستگی موتور کامپایل به برچسب‌های زمانی فایل‌ها و کامپایل متوالی، به بازسازی‌های غیرضروری آبشاری منجر می‌شود. این مقاله معماری نوین کامپایل موازی خارج از پردازه (Out-of-Process)، کش محلی مبتنی بر محتوا (Content-Addressable Caching) و شتاب‌دهی بر پایه مقایسه رابط باینری برنامه‌نویسی (ABI) را بررسی می‌کند. همچنین با اصلاح گلوگاه‌های ورودی/خروجی دیسک و استفاده از فایل متمرکز <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Directory.Build.props</code>، استراتژی‌هایی ارائه می‌شود که زمان ساخت افزایشی (Incremental Build) را تا ۶۵ درصد کاهش می‌دهد.</blockquote><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>مقدمه</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">توسعه نرم‌افزار ماهیتی افزایشی و تکرارپذیر دارد؛ برنامه‌نویس با تغییر در منطق بیزینس یا تست واحد، نیازمند اعتبارسنجی سریع کد است. تأخیرهای چند دقیقه‌ای در کامپایل پروژه‌های پرتعداد، تمرکز ذهنی مهندس را برهم زده و بهره‌وری را به‌شدت کاهش می‌دهد.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در پیکربندی‌های پیش‌فرض <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">MSBuild</code>، حتی تغییر یک خط کد در لایه‌های پایین‌دستی معمولاً سبب ارزیابی مجدد و کامپایل تمام پروژه‌های وابسته می‌شود. ارتقای سخت‌افزار به‌تنهایی این معضل را حل نمی‌کند؛ بلکه معماری سیستم ساخت باید به‌درستی برای مهار توان پردازشی و تفکیک انتزاع‌ها تنظیم گردد. هدف این نوشتار، ارائه نقشه‌راهی عملی برای بهینه‌سازی این فرآیند است.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>تحلیل و پیاده‌سازی مکانیزم‌های بهینه‌سازی</strong></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۱. موازی‌سازی گره‌های کاری MSBuild و جداسازی پردازه‌ها</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در معماری‌های قدیمی‌تر، پردازش بیلد درون رشته اصلی محیط توسعه اجرا می‌شد یا گره‌های موازی وابستگی بالایی به حافظه اشتراکی محیط داشتند. پیاده‌سازی گره‌های ایزوله خارج از پردازه (Out-of-Process Worker Nodes) اجازه می‌دهد فرآیند کامپایل در گره‌های مستقل توزیع شود.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;">تنظیمات محیط توسعه:</div><ul><li>مسیر <strong>Tools &gt; Options &gt; Projects and Solutions &gt; Build and Run</strong> را باز کنید.</li><li>پارامتر <strong>maximum number of parallel project builds</strong> را متناسب با تعداد رشته‌های منطقی (Logical Threads) پردازنده سیستم (برای مثال ۸، ۱۶ یا ۲۴) تنظیم کنید.</li><li>گزینه <strong>Enable out-of-process build worker isolation</strong> را فعال کنید تا کامپایل در پس‌زمینه مانع از پاسخ‌دهی ویرایشگر کد نشود.</li></ul><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">برای اجرای یکپارچه در خط فرمان و اسکریپت‌های اتوماسیون، دستور زیر همین رفتار را با استفاده از تمام توان پردازنده تضمین می‌کند:</div><pre data-language="bash" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">dotnet build MySolution.sln -m -v:m</pre><blockquote class="ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>نکته فنی و نیازمندی منابع:</strong> اجرای گره‌های موازی به ازای هر پردازه مصرف حافظه رم مجزا دارد. برای راه‌حل‌هایی با بیش از ۵۰ پروژه، داشتن حداقل ۱۶ تا ۳۲ گیگابایت حافظه رم از وقوع Page Fault و استفاده بیش‌ازحد از دیسک (Paging/Swapping) جلوگیری می‌کند. معماری‌های مدرن نظیر x64 و ARM64 به‌صورت بومی از این قابلیت پشتیبانی می‌کنند.</blockquote><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۲. نگاشت پیش‌بینانه وابستگی‌ها (ABI Filtering)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">به‌طور سنتی، اگر پروژه A به پروژه B وابسته باشد، دستکاری هر خط کد در B باعث کامپایل مجدد A می‌شود. در عمل، بیش از ۸۰ درصد تغییرات روزمره به پیاده‌سازی متدهای خصوصی (Private)، اصلاح الگوریتم‌ها یا لاگ‌گذاری مربوط است و ساختار بیرونی اسمبلی را تغییر نمی‌دهد.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">قابلیت <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">AccelerateBuildsInVisualStudio</code> با ارزیابی امضای دودویی عمومی (Public ABI) عمل می‌کند. تا زمانی که متدها، کلاس‌ها یا اینترفیس‌های عمومی تغییر نکرده باشند، پروژه‌های مصرف‌کننده پایین‌دستی از صف کامپایل حذف می‌شوند و زمان تلف‌شده برای لینک و بیلد به صفر میل می‌کند.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۳. ذخیره‌سازی محلی و محتوا-پایه مصنوعات (Local Artifact Caching)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">تغییر شاخه‌ها در Git اغلب باعث به‌هم‌ریختگی برچسب زمانی فایل‌ها (Timestamp) و در نتیجه کامپایل کامل (Full Rebuild) پروژه می‌شود. راه‌حل بنیادین، جایگزینی برچسب زمانی با تولید شناسه رمزنگاری‌شده (هش SHA-256) از محتوای سورس‌کد، وابستگی‌های NuGet و پارامترهای کامپایلر است.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">بهترین رویکرد معماری برای اعمال یکدست این رفتار بدون تغییر دستی تک‌تک فایل‌های <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">.csproj</code>، تعریف فایل متمرکز <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Directory.Build.props</code> در ریشه مخزن (Repository Root) است:</div><pre data-language="xml" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">&lt;Project&gt;
+  &lt;PropertyGroup&gt;
+    &lt;!-- فعال‌سازی شتاب‌دهنده بیلد در محیط ویژوال استودیو --&gt;
+    &lt;AccelerateBuildsInVisualStudio&gt;true&lt;/AccelerateBuildsInVisualStudio&gt;
+
+    &lt;!-- فعال‌سازی کش محلی بیلد بر پایه محتوای فایل‌ها --&gt;
+    &lt;UseBuildCache&gt;true&lt;/UseBuildCache&gt;
+
+    &lt;!-- متمرکزسازی مسیر کش مصنوعات در سطح مخزن --&gt;
+    &lt;BuildCachePath&gt;$(MSBuildThisFileDirectory).buildcache&lt;/BuildCachePath&gt;
+
+    &lt;!-- تجمیع خروجی پروژه‌ها در یک پوشه واحد جهت کاهش بار Disk I/O --&gt;
+    &lt;UseArtifactsOutput&gt;true&lt;/UseArtifactsOutput&gt;
+  &lt;/PropertyGroup&gt;
+&lt;/Project&gt;</pre><blockquote class="ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>هشدار:</strong> دایرکتوری <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">.buildcache/</code> مربوط به مصنوعات ماشین محلی است و حتماً باید در فایل <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">.gitignore</code> قرار گیرد تا وارد سابقه مخزن نشود:</blockquote><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">.buildcache/</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۴. مهار گلوگاه‌های دیسک و تداخل لایه‌های امنیتی</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">کامپایلر در طول بیلد هزاران فایل موقت، نماد‌های خطایابی (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">.pdb</code>)، اسمبلی‌های واسط و کدهای تولیدشده توسط Roslyn Source Generators را تولید می‌کند. اسکن بلادرنگ آنتی‌ویروس‌ها (مانند Windows Defender) در لحظه نوشتن این فایل‌ها، قفل‌های کوتاه‌مدت روی دیسک ایجاد می‌کند که افت عملکرد ۲۰ تا ۴۰ درصدی به همراه دارد.</div><ul><li><strong>استثناهای امنیتی (Defender Exclusions):</strong> مسیر پوشه ریشه پروژه‌های کدنویسی، و همچنین پردازه‌های <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">devenv.exe</code> و <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">msbuild.exe</code> را در بخش Exclusions تنظیمات آنتی‌ویروس قرار دهید.</li><li><strong>بهره‌گیری از حافظه‌های نسل جدید:</strong> مخزن کد را همیشه روی درایوهای پرسرعت NVMe (ترجیحاً PCIe 4.0 یا PCIe 5.0) نگه دارید و از کامپایل پروژه‌ها روی فضاهای اشتراکی شبکه یا درایوهای اکسترنال خودداری کنید.</li></ul><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۵. مانیتورینگ عملکرد با لاگ‌های ساختاریافته (Binary Logging)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">برای اعتبارسنجی دقیق اثر بهینه‌سازی‌ها، ارزیابی کمی ضرورت دارد. ثبت رویدادهای باینری موتور بیلد امکان رصد گلوگاه‌ها را به دقت فراهم می‌کند:</div><pre data-language="bash" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">dotnet build MySolution.sln /bl:build.binlog</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">با باز کردن فایل <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">build.binlog</code> در ابزار منبع‌باز <strong>MSBuild Structured Log Viewer</strong> و مراجعه به تب <strong>Timeline</strong>، موارد زیر بلافاصله قابل بررسی هستند:</div><ul><li>میزان توزیع موازی پردازه‌ها روی هسته‌های پردازنده.</li><li>ژنراتورهای کد (Source Generators) یا Taskهای سفارشی کند و فاقد کش.</li><li>پروژه‌هایی که به دلیل وابستگی‌های نامناسب، زنجیره موازی‌سازی را متوقف کرده‌اند.</li></ul><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">+-------------------------------------------------------------------------+
+|                  نمای تایم‌لاین ابزار Structured Log Viewer             
++-------------------------------------------------------------------------+
+| Thread 1: [ Project.Core ]=====&gt; [ Project.Services ]                  
+| Thread 2: [ Project.Contracts ]  [ Project.Data ]=======&gt;               
+| Thread 3: [ Project.Common ]====&gt; (Idle)         [ Project.API ]=====&gt;  
+| Thread 4: (Waiting on Core)       [ Project.Tests ]=====&gt;               
++-------------------------------------------------------------------------+
+* نوارهای طویل نشان‌دهنده پروژه‌های مسدودکننده (Bottlenecks) هستند.</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>مقایسه مؤلفه‌های بهینه‌سازی</strong></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><table class="table table-striped table-hover table-bordered table-condensed" style="max-width: 100%; width: auto; margin-left: auto; margin-right: auto; direction: rtl;" dir="rtl"><tbody><tr><td data-row="1" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>مکانیزم بهینه‌سازی</strong></td><td data-row="1" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>کارکرد اصلی</strong></td><td data-row="1" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>نحوه اثرگذاری بر فرآیند بیلد</strong></td></tr><tr><td data-row="2" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>Out-of-Process Nodes</strong></td><td data-row="2" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">جداسازی پردازه‌های فرزند MSBuild</td><td data-row="2" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">استفاده حداکثری از همه هسته‌ها بدون قفل شدن رابط کاربری</td></tr><tr><td data-row="3" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>ABI Filtering</strong></td><td data-row="3" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">بررسی امضای بیرونی متدها و کلاس‌ها</td><td data-row="3" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">عدم کامپایل مجدد پروژه‌های بالادستی در تغییرات درونی</td></tr><tr><td data-row="4" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>Content-Addressable Cache</strong></td><td data-row="4" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">ارزیابی هش محتوا به جای برچسب زمانی</td><td data-row="4" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">بازیابی میلی‌ثانیه‌ای خروجی‌ها در هنگام جابه‌جایی بین شاخه‌های گیت</td></tr><tr><td data-row="5" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>Defender Exclusions</strong></td><td data-row="5" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">حذف سربار I/O هنگام نوشتن فایل‌ها</td><td data-row="5" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">رفع تأخیر ۳۰ درصدی ناشی از اسکن فایل‌های موقت <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">.pdb</code> و <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">.dll</code></td></tr></tbody></table><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>نتیجه‌گیری</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">تسریع بیلد درون‌حلقه‌ای (Inner-Loop) صرفاً یک اقدام تکنیکی نیست، بلکه با کاهش وقفه‌های شناختی و حفظ تمرکز ذهنی برنامه‌نویس، کیفیت کد و سرعت تحویل نرم‌افزار را بالا می‌برد. با ترکیب موازی‌سازی کامل، کش مبتنی بر محتوا، تفکیک تغییرات داخلی از تغییرات رابط بیرونی و رفع گلوگاه‌های I/O دیسک، می‌توان زمان کامپایل را بدون ایجاد کوچک‌ترین تغییر در خروجی‌های نهایی محیط تولید (Production Releases) تا دو سوم کاهش داد. پیکربندی متمرکز این تنظیمات در فایل <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Directory.Build.props</code> ضامن اعمال پایدار این معماری در تمام گستره مخزن کد خواهد بود.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>پرسش‌های متداول (FAQ)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>آیا این بهینه‌سازی‌ها بر پایپ‌لاین‌های CI/CD یا خروجی Publish اثر منفی دارند؟</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">خیر؛ این مکانیزم‌ها صرفاً رفتار کامپایل افزایشی در حلقه توسعه محلی را بازتعریف می‌کنند. بیلد‌های مبتنی بر خط فرمان با پرچم Rebuild، خروجی‌های Release و فرآیندهای Continuous Integration کماکان فایل‌های باینری بایت‌به‌بایت منطبق بر استانداردهای تولید تحویل می‌دهند.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>چرا کش مبتنی بر محتوا بهتر از متد پیش‌فرض برچسب زمانی است؟</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">برچسب‌های زمانی با عملیاتی نظیر <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">git checkout</code> تغییر می‌کنند و سیستم را فریب می‌دهند تا فایل‌های دست‌نخورده را دوباره کامپایل کند؛ درحالی‌که هش محتوا بر داده‌های باینری و متنی سورس متکی است و تا زمانی که منطق کد تغییر نکند، بیلد تکرار نخواهد شد.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>اگر پروژه‌ای از پکیج‌های سفارشی یا کارهای پیش از ساخت (Pre-build Tasks) سنگین استفاده کند، آیا این تنظیمات کمک‌کننده است؟</strong></div><div class="ql-align-right ql-direction-rtl" dir="rtl" style="text-align: right;">بله، اما کارهای سفارشی (Custom Targets) باید از ویژگی‌های خروجی و ورودی (Inputs/Outputs) پشتیبانی کنند تا شرط Up-to-Date بودن برای آن‌ها کار کند. بررسی لاگ باینری با <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">/bl</code> بهترین نقطه برای یافتن تسک‌های دست‌سازی است که این زنجیره را می‌شکنند.</div></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20429.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>تغییر مکان پوشه‌های bin و obj در پروژه‌های دات‌نت</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20608.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>رفع دوگانگی محیط اجرای MSBuild در NET 10 RC 2.</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20306.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>معرفی Incrementalist؛ ابزاری برای کاهش زمان Build پروژه‌های بزرگ، از یک ساعت به 15 دقیقه</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20550.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>مشکلات احتمالی بیلد پروژه‌های NET 10. در صورت ارجاع مستقیم به بسته‌های SDK</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3757.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>ارتقای هوشمند فرایند ساخت در دات‌نت ۱۱؛ تحلیل معماری و اثرات فعال‌سازی پیش‌فرض MSBuild Server</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3774.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مهاجرت از Mono به CoreCLR در دات‌نت 11</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1197.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>MSBuild</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3661.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>ساخت MSBuild SDK سفارشی در دات‌نت: خداحافظی با کدهای تکراری!</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1845.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>فعال سازی Multicore JIT</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1198.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Build Events</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>
