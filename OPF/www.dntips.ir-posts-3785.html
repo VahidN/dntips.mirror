@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫کالبدشکافی بهینه‌سازی‌های کامپایلر JIT در دات‌نت ۱۱</title>     <meta name="description" content="  چکیده:  با انتشار هر نسخه جدید از پلتفرم دات‌نت (.NET)، مقالات رسمی مایکروسافت از بهبودهای چشمگیر عملکرد (Performance Improvements) سخن می‌گویند. با این حال، کامپایلرهای درجا (JIT Compilers) بهینه‌سازی‌ها را به‌صورت مشروط و صرفاً در صورت اثبات گزاره‌های قطعی در کد ماشین اعمال می‌کنند. در .NET 11، کامپایلر RyuJIT با تکیه بر استراتژی‌های استنتاجی جدید در چهار حوزه اساسی شامل  غیرمجازی‌سازی محافظت‌شده (Guarded Devirtualization) ،  تحلیل گری ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="کالبدشکافی بهینه‌سازی‌های کامپایلر JIT در دات‌نت ۱۱ ">
+    <meta itemprop="description" content="  چکیده:  با انتشار هر نسخه جدید از پلتفرم دات‌نت (.NET)، مقالات رسمی مایکروسافت از بهبودهای چشمگیر عملکرد (Performance Improvements) سخن می‌گویند. با این حال، کامپایلرهای درجا (JIT Compilers) بهینه‌سازی‌ها را به‌صورت مشروط و صرفاً در صورت اثبات گزاره‌های قطعی در کد ماشین اعمال می‌کنند. در .NET 11، کامپایلر RyuJIT با تکیه بر استراتژی‌های استنتاجی جدید در چهار حوزه اساسی شامل  غیرمجازی‌سازی محافظت‌شده (Guarded Devirtualization) ،  تحلیل گری ...">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="کالبدشکافی بهینه‌سازی‌های کامپایلر JIT در دات‌نت ۱۱ ">
+    <meta property="og:description" content="  چکیده:  با انتشار هر نسخه جدید از پلتفرم دات‌نت (.NET)، مقالات رسمی مایکروسافت از بهبودهای چشمگیر عملکرد (Performance Improvements) سخن می‌گویند. با این حال، کامپایلرهای درجا (JIT Compilers) بهینه‌سازی‌ها را به‌صورت مشروط و صرفاً در صورت اثبات گزاره‌های قطعی در کد ماشین اعمال می‌کنند. در .NET 11، کامپایلر RyuJIT با تکیه بر استراتژی‌های استنتاجی جدید در چهار حوزه اساسی شامل  غیرمجازی‌سازی محافظت‌شده (Guarded Devirtualization) ،  تحلیل گری ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="کالبدشکافی بهینه‌سازی‌های کامپایلر JIT در دات‌نت ۱۱ ">
+    <meta name="twitter:description" content="  چکیده:  با انتشار هر نسخه جدید از پلتفرم دات‌نت (.NET)، مقالات رسمی مایکروسافت از بهبودهای چشمگیر عملکرد (Performance Improvements) سخن می‌گویند. با این حال، کامپایلرهای درجا (JIT Compilers) بهینه‌سازی‌ها را به‌صورت مشروط و صرفاً در صورت اثبات گزاره‌های قطعی در کد ماشین اعمال می‌کنند. در .NET 11، کامپایلر RyuJIT با تکیه بر استراتژی‌های استنتاجی جدید در چهار حوزه اساسی شامل  غیرمجازی‌سازی محافظت‌شده (Guarded Devirtualization) ،  تحلیل گری ...">
+    <meta name="twitter:card" content="  چکیده:  با انتشار هر نسخه جدید از پلتفرم دات‌نت (.NET)، مقالات رسمی مایکروسافت از بهبودهای چشمگیر عملکرد (Performance Improvements) سخن می‌گویند. با این حال، کامپایلرهای درجا (JIT Compilers) بهینه‌سازی‌ها را به‌صورت مشروط و صرفاً در صورت اثبات گزاره‌های قطعی در کد ماشین اعمال می‌کنند. در .NET 11، کامپایلر RyuJIT با تکیه بر استراتژی‌های استنتاجی جدید در چهار حوزه اساسی شامل  غیرمجازی‌سازی محافظت‌شده (Guarded Devirtualization) ،  تحلیل گری ...">
+    <meta property="article:published_time" content="Wed, 23 Sep 2026 06:50:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫کالبدشکافی بهینه‌سازی‌های کامپایلر JIT در دات‌نت ۱۱";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <div class='card mt-4 shadow-sm'>
+<div class='card-header text-center h5'>
+<a target='_blank' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a>
+</div>
+<table class='table shadow-sm mb-0 rounded table-hover mx-auto w-100 caption-bottom'>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-questions-toc-page-1.html'>پرسش‌ها</a></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><div></div><a href='www.dntips.ir-posts-3784.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫بهینه‌سازی زمان کامپایل در Visual Studio: راهنمای جامع گره‌های موازی MSBuild و کش محلی مصنوعات</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫کالبدشکافی بهینه‌سازی‌های کامپایلر JIT در دات‌نت ۱۱ </h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۵/۰۷/۰۱ ۱۰:۲۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-3785.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><blockquote class="ql-direction-rtl ql-align-right" style="text-align: right;" dir="rtl"><strong>چکیده:</strong> با انتشار هر نسخه جدید از پلتفرم دات‌نت (.NET)، مقالات رسمی مایکروسافت از بهبودهای چشمگیر عملکرد (Performance Improvements) سخن می‌گویند. با این حال، کامپایلرهای درجا (JIT Compilers) بهینه‌سازی‌ها را به‌صورت مشروط و صرفاً در صورت اثبات گزاره‌های قطعی در کد ماشین اعمال می‌کنند. در .NET 11، کامپایلر RyuJIT با تکیه بر استراتژی‌های استنتاجی جدید در چهار حوزه اساسی شامل <strong>غیرمجازی‌سازی محافظت‌شده (Guarded Devirtualization)</strong>، <strong>تحلیل گریز (Escape Analysis)</strong>، <strong>بهینه‌سازی طرح حافظه چندنماینده‌ها (Delegate Memory Layout)</strong> و <strong>حذف بررسی محدوده آرایه‌ها (Bounds-Check Elimination)</strong> ارتقا یافته است. این مقاله با رویکردی تحلیلی و فنی، سازوکار درونی این بهینه‌سازی‌ها، موارد شکست شروط تحلیلی، و ابزارهای اعتبارسنجی سطح اسمبلی نظیر <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">DOTNET_JitDisasm</code> را بررسی می‌کند.</blockquote><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۱. مقدمه</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">هر ساله با عرضه نسخه جدید دات‌نت، پرسش بنیادین توسعه‌دهندگان این است: <em>«آیا کدهای موجود بدون تغییر، سریع‌تر اجرا می‌شوند؟»</em> پاسخ واقع‌بینانه در سطح کامپایلر چنین است: <strong>تنها در بخش‌هایی از کد که کامپایلر JIT قادر به اثبات ساختار آن باشد. </strong>کامپایلرهای مدرن بر پایه تحلیل‌های ایستا و مبتنی بر شواهد (Profile-Guided) کار می‌کنند. اگر شرط یک محافظ رد شود، هزینه ارزیابی پرداخت خواهد شد؛ اگر تخصیص حافظه از دامنه ردیابی خارج شود، در هیپ (Heap) جای می‌گیرد؛ و اگر اعتبار دسترسی به اندیس یک آرایه به‌طور قطعی اثبات نگردد، دستورات کنترل محدوده (Bounds Check) در خروجی اسمبلی باقی می‌مانند.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">دات‌نت ۱۱ مجموعه‌ای هدفمند از قواعد اثباتی جدید را در سطح کد ماشین پیاده کرده است. با صرف‌نظر از تغییرات سطح معماری مانند <em>Runtime Async</em> (انتقال کاهش انتزاع State Machine از کامپایلر زبان به زمان اجرا)، تمرکز اصلی روی بهینه‌سازی‌های لایه JIT و تولید کد ماشین است.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۲. بررسی ساختاری بهینه‌سازی‌های لایه RyuJIT</strong></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۲.۱. گسترش دامنه غیرمجازی‌سازی محافظت‌شده (Guarded Devirtualization - GDV)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">واسط‌ها (Interfaces) هسته اصلی برنامه‌نویسی شیءگرا و آزمون‌پذیری کد هستند؛ اما در سطح زمان اجرا، هر فراخوانی از طریق اینترفیس مستلزم یک ارجاع غیرمستقیم از طریق جدول توابع مجازی (vtable / Method Table) است. این گسست تحلیلی مانع از درون‌ریزی توابع (Inlining) می‌شود.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">راهکار RyuJIT برای این مسئله، <strong>غیرمجازی‌سازی محافظت‌شده (GDV)</strong> است. در این مکانیزم، کامپایلر ابتدا یک بررسی نوع (Type Check) سریع انجام می‌دهد؛ در صورت انطباق با نوع پرتکرار (Hot Path)، متد را به‌صورت مستقیم و درون‌ریزی‌شده صدا می‌زند و در غیر این صورت به فراخوانی غیرمستقیم بازمی‌گردد.</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public interface IValidator
+{
+    bool IsValid(Order order);
+}
+
+public sealed class DefaultValidator : IValidator
+{
+    public bool IsValid(Order order) =&gt; order.Total &gt; 0 &amp;&amp; order.Items.Count &gt; 0;
+}
+
+public decimal ProcessOrders(IEnumerable&lt;Order&gt; orders, IValidator validator)
+{
+    decimal total = 0;
+    foreach (var order in orders)
+    {
+        // در صورت مونومورفیک بودن، GDV حدس DefaultValidator را اعمال می‌کند
+        if (validator.IsValid(order))
+            total += order.Total;
+    }
+    return total;
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>تحول دات‌نت ۱۱ و متدهای مجازی جنریک (GVM)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">پیش از دات‌نت ۱۱، متدهای مجازی جنریک (Generic Virtual Methods) به دلیل سربار چندلایه تفکیک متادیتا، به‌ندرت واجد شرایط GDV می‌شدند. در .NET 11، این قابلیت به GVMها (چه نمونه‌های اشتراکی و چه غیراشتراکی) تعمیم یافته است.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>ملاحظات و نقاط شکست (Polymorphism Overhead)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">بهینه‌سازی GDV همواره رایگان نیست:</div><ul><li>اگر محل فراخوانی واقعاً چندریختی (Polymorphic) باشد و چندین نوع مختلف به‌طور متوازن ارسال شوند، بررسی نوع ناموفق بوده و علاوه بر سربار فراخوانی غیرمستقیم، هزینه شرط چک نشده نیز اضافه می‌شود.</li><li>GDV متکی بر داده‌های پروفایلینگ زمان اجرا (PGO) است؛ در نتیجه الگوهای مونو‌مورفیک (تک‌ریختی) بیشترین نفع را خواهند برد.</li></ul><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۲.۲. عمیق‌تر شدن تحلیل گریز (Escape Analysis)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">هدف تحلیل گریز، جلوگیری از تخصیص اشیاء در حافظه Managed Heap و هدایت آن‌ها به پشته (Stack) است؛ جایی که آزادسازی حافظه صرفاً با تغییر اشاره‌گر پشته (Stack Pointer) انجام شده و سرباری به Garbage Collector (GC) تحمیل نمی‌شود. تحلیل گریز بر پایه استنتاج قطعی است، نه تقریب.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در .NET 11 دامنه این استنتاج در سه الگوی پرتکرار بسط داده شده است:</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>الف) رفع Boxing در ساختارهای Nullable</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">باکسینگ ساختارهای <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Nullable</code> پیش‌تر یک جعبه سیاه برای تحلیل‌گر به شمار می‌رفت. در نسخه جدید، کامپایلر عملیات را پیش از تحلیل به اجزای پایه‌ای تجزیه می‌کند؛ بنابراین، اگر مرجع حاصله از دامنه متد فراتر نرود، تخصیص هیپ به‌طور کامل حذف (Elide) می‌شود:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public string FormatNullableInt(int? value)
+{
+    // در صورتی که مرجع به بیرون درز نکند، تخصیص حافظه در هیپ حذف می‌شود
+    object boxed = value; 
+    return boxed switch
+    {
+        null =&gt; &quot;none&quot;,
+        int i =&gt; i.ToString(),
+        _ =&gt; &quot;unexpected&quot;
+    };
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>ب) زنجیره‌سازی شمارنده‌ها (Enumerator Chaining)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در الگوهای سفارشی یا عبارات مجموعه‌ای (Collection Expressions)، فراخوانی <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">GetEnumerator()</code> اغلب به یک شمارنده داخلی تفویض می‌شود. کامپایلر دات‌نت ۱۱ با مدل تحلیل گریز شرطی (Conditional Escape Analysis - CEA) پیوستگی این تفویض‌ها را ردیابی کرده و مانع از ارجاع ناخواسته آن‌ها به هیپ می‌گردد.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>ج) فراخوانی‌های مقید (Constrained Calls)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در حلقه‌های پرتکرار که از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">EqualityComparer</code> روی Structها استفاده می‌شود، نحوه بازنمایی گیرنده (Receiver) در دستور IL معادل (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">constrained. callvirt</code>) موجب ارسال داده به هیپ می‌شد. این گره تحلیلی اکنون گشوده شده و امکان استقرار روی پشته فراهم شده است.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><blockquote class="ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>نکته کلیدی:</strong> تحلیل گریز قوانین خود را تغییر نداده است. ارجاع دادن شیء به فیلد یک کلاس، ثبت آن در یک کلوژر (Closure) با طول عمر بیشتر از متد، یا ارسال آن به متدی که درون‌ریزی (Inline) نمی‌شود، بی‌درنگ باعث نشت شیء به هیپ خواهد شد.</blockquote><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۲.۳. فشرده‌سازی و بهینه‌سازی چیدمان حافظه چندنماینده‌ها (Delegates)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در برنامه‌های وب و خطوط لوله داده (مانند ASP.NET Core)، کلاس <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">MulticastDelegate</code> یکی از پرتکرارترین نمونه‌های مرجع روی حافظه است. دات‌نت ۱۱ دو تغییر در سطح سطح پایین (Low-level Layout) بر روی آن اعمال کرده است:</div><pre data-language="plain" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">چیدمان مرسوم در دات‌نت ۱۰:
+[ MethodTable Pointer (8B) ] [ Target Object (8B) ] [ Extra Pointer (8B) ] [ MethodPtr (8B) ] ...
+                                                     └── حذف شد (کاهش ۸ بایت)
+
+چیدمان بهینه‌شده در دات‌نت ۱۱:
+[ MethodTable Pointer (8B) ] [ Target Object (8B) ] [ MethodPtr (8B) ] ...
+                             └─────────────────────┴──────────────────┘
+                                   فراخوانی جفتی روی Arm64 (Paired Load)</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">۱. <strong>کاهش ۸ بایت اندازه شیء:</strong> طبق <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">dotnet/runtime#99200</code>، با حذف یک فیلد اشاره‌گری اضافی، ۸ بایت از اندازه هر Delegate در معماری‌های ۶۴ بیتی کاسته شد که مستقیماً حجم تخصیص تجمعی را پایین می‌آورد.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">۲. <strong>بهبود مجاورت حافظه نهان (Cache Locality) و بارگذاری موازی:</strong> بر اساس <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">dotnet/runtime#129410</code>، ترتیب فیلدهای باقی‌مانده بازآرایی شده تا شیء هدف (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Target</code>) و اشاره‌گر متد (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">MethodPtr</code>) در کنار یکدیگر قرار گیرند. این چیدمان امکان استفاده از دستورالعمل‌های بارگذاری جفتی (Load-Pair / LDP) در پردازنده‌های مبتنی بر معماری Arm64 (سرورهای AWS Graviton و Azure Cobalt) را میسر ساخته و زمان تاخیر دسترسی به خط حافظه نهان (Cache Line) را کاهش می‌دهد.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۲.۴. بازنگری اساسی در استراتژی‌های حذف بررسی محدوده (Bounds-Check Elimination - BCE)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">بررسی محدوده دسترسی به آرایه و اسپن (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Span</code>) ویژگی ایمنی حافظه در محیط امن دات‌نت است. هزینه این ایمنی، دستورات مقایسه و پرش شرطی مکرر (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">cmp</code>, <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">jae</code>) در خروجی کد ماشین است. RyuJIT در .NET 11 به الگوهای استنتاجی جدیدی برای اثبات ایمنی و حذف این چک‌ها دست یافته است:</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><table class="table table-striped table-hover table-bordered table-condensed" style="max-width: 100%; width: auto; margin-left: auto; margin-right: auto; direction: rtl;" dir="rtl"><tbody><tr><td data-row="1" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>شناسه PR در Runtime</strong></td><td data-row="1" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>استراتژی استنتاجی</strong></td><td data-row="1" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>سناریوی کاربردی</strong></td></tr><tr><td data-row="2" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>#121273</strong></td><td data-row="2" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">تحلیل محدوده با گزاره نامساوی (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">!=</code>)</td><td data-row="2" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">بهبود الگوهای لیست سی‌شارپ (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">List Patterns</code>) نظیر <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">[ &#39;:&#39;, not &#39;:&#39;, .. ]</code></td></tr><tr><td data-row="3" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>#121527</strong></td><td data-row="3" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">انتشار گزاره در بلوک پایه مشترک</td><td data-row="3" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">استفاده مجدد از اثبات اولین بررسی محدوده برای دسترسی‌های بعدی به همان اندیس</td></tr><tr><td data-row="4" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>#122263</strong></td><td data-row="4" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">استنتاج کران بالا از عملیات بیتی (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">&amp;</code>, <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">|</code>)</td><td data-row="4" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">جداول تبدیل (Lookup Tables) نظیر تحلیل کدهای Base64</td></tr><tr><td data-row="5" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>#125056</strong></td><td data-row="5" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">استنتاج کران پایین از شروط نامنفی (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">(uint)i &lt; len</code>)</td><td data-row="5" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">امکان حذف چک برای اندیس‌های تفاضلی مانند <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">span[i - 1]</code></td></tr><tr><td data-row="6" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>#127439</strong></td><td data-row="6" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">ادغام بررسی‌های اندیس ثابت (Coalescing)</td><td data-row="6" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">یکی‌کردن چند چک پیاپی ثابت مانند <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">arr[0]</code> و <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">arr[1]</code> در یک گارد تکی</td></tr><tr><td data-row="7" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>#127488</strong></td><td data-row="7" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">ردیابی محدوده برش (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Slice</code>)</td><td data-row="7" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">بهینه‌سازی برش‌های قطعه‌بندی‌شده نظیر <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">span.Slice(span.Length - 4)</code></td></tr><tr><td data-row="8" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>#129268</strong></td><td data-row="8" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">شبیه‌سازی حلقه (Loop Cloning) با شرط <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">!=</code></td><td data-row="8" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">ایجاد نسخه سریع و بدون چک در حلقه‌های پیمایش اندیس سفارشی</td></tr></tbody></table><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">// نمونه بهینه‌سازی تلفیق عملیات بیتی (#122263)
+byte b = GetByte();
+int index = ((b &amp; 0x03) &lt;&lt; 4) | ((b &amp; 0xF0) &gt;&gt; 4);
+
+// با توجه به ماسک بیتی، JIT اثبات می‌کند که مقدار اندیس همواره کمتر از 64 است
+// در نتیجه، چک انتهای محدوده از کد ماشین آرایه حذف می‌گردد
+byte decoded = lookupTable[index];</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۳. متدولوژی راستی‌آزمایی با تحلیل کد ماشین</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">تکیه بر فرضیات بهینه‌سازی بدون بررسی کدهای خروجی، در سیستم‌های حساس به زمان پاسخ‌دهی (Latency-Sensitive) توصیه نمی‌شود. دات‌نت ابزار درونی دیس‌اسمبل کردن متدها را فراهم کرده است.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>مراحل بررسی کد اسمبلی در محیط اجرایی (PowerShell)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">برای تحلیل، ابتدا نام دقیق و Mangled شده متدها را با فعال‌سازی خلاصه JIT استخراج کنید:</div><pre data-language="bash" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;"># گام ۱: دریافت لیست نام‌های داخلی متدها در حالت Release
+$env:DOTNET_JitDisasmSummary = &quot;1&quot;
+dotnet run -c Release
+
+# گام ۲: دیس‌اسمبل کردن متد هدف
+$env:DOTNET_JitDisasmSummary = $null
+$env:DOTNET_JitDisasm = &quot;ProcessOrders&quot;
+dotnet run -c Release</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>نحوه تحلیل خروجی</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در کد اسمبلی تولیدشده، خطوط مربوط به متد را پیمایش کنید:</div><ul><li><strong>در حذف Bounds Check:</strong> به دنبال حذف زوج دستورالعمل‌های <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">cmp reg, [len]</code> و پرش‌های وابسته مانند <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">jae</code> (Jump if Above or Equal) بگردید.</li><li><strong>در تحلیل گریز:</strong> بررسی کنید که آیا فراخوانی به <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CORINFO_HELP_NEWSFAST</code> (تخصیص روی هیپ) به کلی حذف شده و جای خود را به دستکاری ثبات پشته (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">rsp</code>) داده است یا خیر.</li></ul><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۴. نتیجه‌گیری و رهنمودهای عملیاتی</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">تغییرات RyuJIT در دات‌نت ۱۱ نشان‌دهنده یک پیشرفت مستمر در منطق محاسباتی و اثباتی کامپایلر است. برای بهره‌گیری عملیاتی، سه قاعده زیر توصیه می‌شود:</div><ul><li><strong>بازسنجی کدهای بهینه‌سازی دستی (Workarounds):</strong> الگوهای پیچیده‌ای را که در نسخه‌های گذشته برای فرار از تخصیص حافظه (مثل تعریف استراکت‌های سفارشی برای دور زدن اینومریتورها یا استفاده از کلاس‌های ناامن <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Unsafe</code> جهت پرش از روی چک آرایه‌ها) پیاده کرده‌اید، مجدداً محک بزنید؛ کامپایلر اکنون بخش زیادی از این موارد را به‌طور خودکار رفع می‌کند.</li><li><strong>پرهیز از تعمیم کورکورانه:</strong> بهینه‌سازی‌ها محلی و مقید به دامنه هستند. اگر منطق محاسبه یک اندیس داخل تابعی قرار گیرد که درون‌ریزی نمی‌شود، یا شیء از دید تحلیل‌گر فرار کند، بهینه‌سازی متوقف می‌گردد.</li><li><strong>اندازه‌گیری مبتنی بر شواهد اسمبلی:</strong> مبنای سنجش نهایی باید ابزارهایی نظیر <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">BenchmarkDotNet</code> و تحلیل مستقیم اسمبلی (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">DOTNET_JitDisasm</code>) باشد. بهینه‌سازی در دنیای واقعی، نتیجه اثبات دقیق شروط کامپایلر است، نه فرضیات تئوریک.</li></ul></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20530.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>تحلیل گریز و بهینه‌سازی تخصیص حافظه دلیگیت‌ها در NET 10.</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20580.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>بهبودهای عملکردی در .NET 10: رویکردی مبتنی بر بهینه‌سازی‌های جامع</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20301.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>ویژگی جدید Object Stack Allocation در دات‌نت 9</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20271.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>تخصیص پشته‌ای آرایه‌های کوچک در دات‌نت 10</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-news-20266.html'><span class='badge bg-secondary-subtle text-secondary-emphasis bg-gradient rounded-pill me-2'>اشتراک‌ها</span>بهبودهای کارایی LINQ در دات‌نت ۹: نگاهی نو به ()Any و ()Exists</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-learning-paths-toc-page-1.html'><span class='badge bg-danger rounded-pill me-2'>مسیرراه‌ها</span>بررسی ویژگی‌‌های جدید C# 14 و NET 10.</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3744.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>بررسی عمیق Runtime Async در دات‌نت ۱۱: جهش بزرگ در کارایی کدهای غیرهمگام</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3666.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Runtime Async در دات‌نت ۱۱: تحولی بنیادین در برنامه‌نویسی غیرهمگام (Async)</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3774.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>مهاجرت از Mono به CoreCLR در دات‌نت 11</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3751.html'><span class='badge bg-primary-subtle text-primary-emphasis bg-gradient rounded-pill me-2'>نظرات مطالب</span>تغییرات سطح پایه پردازنده در NET 11.: پیامدها، ریسک‌ها و راهکارهای ارتقا در زیرساخت‌های عملیاتی</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>
