@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>‫‫جلوگیری از تداخل رزرو (Double Booking) در سطح پایگاه داده</title>     <meta name="description" content="  چکیده:  یکی از چالش‌های کلاسیک و در عین حال بحرانی در طراحی سیستم‌های رزرو (هتل، بلیط، نوبت‌دهی و مدیریت منابع)، پدیده  تداخل رزرو (Double Booking)  ناشی از  شرایط رقابتی بررسی و سپس اقدام (Check-Then-Act Race Condition)  است. در حالی که توسعه‌دهندگان معمولاً تلاش می‌کنند این مسئله را در لایه اپلیکیشن (Application Layer) با ابزارهایی مانند Semaphoreها یا قفل‌های توزیع‌شده (Distributed Locks) حل کنند، ذات توزیع‌پذیر و چند‌مسیری بودن سامان ...">
+    <meta name="author" content="وحید نصیری">
+    <meta itemprop="name" content="جلوگیری از تداخل رزرو (Double Booking) در سطح پایگاه داده">
+    <meta itemprop="description" content="  چکیده:  یکی از چالش‌های کلاسیک و در عین حال بحرانی در طراحی سیستم‌های رزرو (هتل، بلیط، نوبت‌دهی و مدیریت منابع)، پدیده  تداخل رزرو (Double Booking)  ناشی از  شرایط رقابتی بررسی و سپس اقدام (Check-Then-Act Race Condition)  است. در حالی که توسعه‌دهندگان معمولاً تلاش می‌کنند این مسئله را در لایه اپلیکیشن (Application Layer) با ابزارهایی مانند Semaphoreها یا قفل‌های توزیع‌شده (Distributed Locks) حل کنند، ذات توزیع‌پذیر و چند‌مسیری بودن سامان ...">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="جلوگیری از تداخل رزرو (Double Booking) در سطح پایگاه داده">
+    <meta property="og:description" content="  چکیده:  یکی از چالش‌های کلاسیک و در عین حال بحرانی در طراحی سیستم‌های رزرو (هتل، بلیط، نوبت‌دهی و مدیریت منابع)، پدیده  تداخل رزرو (Double Booking)  ناشی از  شرایط رقابتی بررسی و سپس اقدام (Check-Then-Act Race Condition)  است. در حالی که توسعه‌دهندگان معمولاً تلاش می‌کنند این مسئله را در لایه اپلیکیشن (Application Layer) با ابزارهایی مانند Semaphoreها یا قفل‌های توزیع‌شده (Distributed Locks) حل کنند، ذات توزیع‌پذیر و چند‌مسیری بودن سامان ...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="جلوگیری از تداخل رزرو (Double Booking) در سطح پایگاه داده">
+    <meta name="twitter:description" content="  چکیده:  یکی از چالش‌های کلاسیک و در عین حال بحرانی در طراحی سیستم‌های رزرو (هتل، بلیط، نوبت‌دهی و مدیریت منابع)، پدیده  تداخل رزرو (Double Booking)  ناشی از  شرایط رقابتی بررسی و سپس اقدام (Check-Then-Act Race Condition)  است. در حالی که توسعه‌دهندگان معمولاً تلاش می‌کنند این مسئله را در لایه اپلیکیشن (Application Layer) با ابزارهایی مانند Semaphoreها یا قفل‌های توزیع‌شده (Distributed Locks) حل کنند، ذات توزیع‌پذیر و چند‌مسیری بودن سامان ...">
+    <meta name="twitter:card" content="  چکیده:  یکی از چالش‌های کلاسیک و در عین حال بحرانی در طراحی سیستم‌های رزرو (هتل، بلیط، نوبت‌دهی و مدیریت منابع)، پدیده  تداخل رزرو (Double Booking)  ناشی از  شرایط رقابتی بررسی و سپس اقدام (Check-Then-Act Race Condition)  است. در حالی که توسعه‌دهندگان معمولاً تلاش می‌کنند این مسئله را در لایه اپلیکیشن (Application Layer) با ابزارهایی مانند Semaphoreها یا قفل‌های توزیع‌شده (Distributed Locks) حل کنند، ذات توزیع‌پذیر و چند‌مسیری بودن سامان ...">
+    <meta property="article:published_time" content="Thu, 08 Oct 2026 05:50:01 GMT">
+    <meta property="article:section" content="article">
+    <meta property="article:tag" content="article">
+	
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">	
+	<link href="bootstrap.rtl.min.css" rel="stylesheet" type="text/css">
+    <link href="vs.min.css" rel="stylesheet" type="text/css">
+    <script src="highlight.min.js" type="text/javascript"></script>	
+    <link href="styles.css" rel="stylesheet" type="text/css">	
+    <style>
+      @page { /* This is a C# string.Format() template and its non-index `brackets` should be escaped */
+        size: A4 portrait;
+
+        @top-center {
+            font-family: 'Samim', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            font-weight: bold;
+            border-color: #e6e5e1;
+            border-bottom: solid #e6e5e1 0.1px;
+            width: 98%;
+            content: "‫‫جلوگیری از تداخل رزرو (Double Booking) در سطح پایگاه داده";
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+
+        @bottom-center {
+            font-family: 'SamimFD', 'JetBrainsMono', Tahoma;
+            font-size: 14px;
+            color: gray;
+            content: counter(page) "/" counter(pages);
+            border-color: #e6e5e1;
+            border-top: solid #e6e5e1 0.1px;
+            width: 98%;
+            margin-top: 5pt;
+            margin-bottom: 5pt;
+        }
+     }
+    </style>    
+	<script src="SyntaxHighlighter.js" type="text/javascript" defer></script>
+</head>
+<body dir='rtl'>
+<div class='container-fluid min-vh-100 d-flex flex-column'>
+    <div class='row flex-grow-1'>
+        <div class='col-md-2'>
+         <div class='card mt-4 shadow-sm'>
+<div class='card-header text-center h5'>
+<a target='_blank' dir='ltr' href='https://www.dntips.ir/'>www.dntips.ir</a>
+</div>
+<table class='table shadow-sm mb-0 rounded table-hover mx-auto w-100 caption-bottom'>
+<tbody class="table-group-divider">
+<tr>
+<td><a href='www.dntips.ir-articles-toc-page-1.html'>مطالب</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-authors-toc-page-1.html'>نویسندگان</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-articles-tags-toc-page-1.html'>گروه‌های مطالب</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-learning-paths-toc-page-1.html'>نقشه‌های راه</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-courses-toc-page-1.html'>دوره‌ها</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-news-toc-page-1.html'>اشتراک‌ها</a></td>
+</tr>
+<tr>
+<td><a href='www.dntips.ir-questions-toc-page-1.html'>پرسش‌ها</a></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+        </div>
+        <div class='col-md-10'>
+            <div class='mt-4 mb-3 container-fluid'>
+              <nav class='card shadow-sm d-flex flex-row flex-wrap justify-content-between align-items-center pe-3 ps-3 pt-1 pb-2 mb-4' dir='rtl'><div></div><a href='www.dntips.ir-posts-3795.html' class='link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover'>
+    <h6 class='mt-3'>
+        <span dir='rtl'>‫طراحی و چاپ دقیق اسناد A4 در وب با ASP.NET Core MVC</span>
+        <span aria-hidden='true'>&larr;</span>
+    </h6>
+</a></nav>
+<div style="page-break-inside:avoid;page-break-before:always; margin-bottom:5pt;"></div>
+<div><div class='main'>
+ 	<span class='titles' lang='fa'>عنوان: </span><h1 dir='rtl'>‫جلوگیری از تداخل رزرو (Double Booking) در سطح پایگاه داده</h1><br>
+	<span class='titles' lang='fa'>نویسنده: </span>وحید نصیری<br>
+	<span class='titles' lang='fa'>تاریخ: </span><span dir='ltr'>۱۴۰۵/۰۷/۱۶ ۰۹:۲۰</span><br>
+	<span class='titles' lang='fa'>آدرس: </span>
+	<a dir='ltr' id='mainPostUrl' href='www.dntips.ir-posts-3796.html' target='_blank'>www.dntips.ir</a>
+</div></div>
+<div class='postBody'><blockquote class="ql-direction-rtl ql-align-right" style="text-align: right;" dir="rtl"><strong>چکیده:</strong> یکی از چالش‌های کلاسیک و در عین حال بحرانی در طراحی سیستم‌های رزرو (هتل، بلیط، نوبت‌دهی و مدیریت منابع)، پدیده <strong>تداخل رزرو (Double Booking)</strong> ناشی از <strong>شرایط رقابتی بررسی و سپس اقدام (Check-Then-Act Race Condition)</strong> است. در حالی که توسعه‌دهندگان معمولاً تلاش می‌کنند این مسئله را در لایه اپلیکیشن (Application Layer) با ابزارهایی مانند Semaphoreها یا قفل‌های توزیع‌شده (Distributed Locks) حل کنند، ذات توزیع‌پذیر و چند‌مسیری بودن سامانه‌ها این راهکارها را شکننده و آسیب‌پذیر می‌سازد. قاعده طلایی معماری داده حکم می‌کند که <strong>قوانین صحت داده (Data Integrity Constraints) باید مستقیماً توسط پایگاه داده تضمین شوند</strong>. پایگاه داده PostgreSQL با تکیه بر <strong>Exclusion Constraints</strong> و نمایه‌های <strong>GiST</strong> راهکاری ظریف، تک‌خطی و توکار ارائه می‌دهد. با این حال، پایگاه داده <strong>Microsoft SQL Server</strong> فاقد چنین محدودیتی به‌صورت ذاتی است. در این مقاله، ضمن کالبدشکافی ریاضی بازه‌های زمانی نیمه‌باز، نحوه پیاده‌سازی این الگو در PostgreSQL بررسی شده و سپس <strong>سه معماری و الگوی پیاده‌سازی معادل برای Microsoft SQL Server و Entity Framework Core (EF Core)</strong> با تحلیل مزایا، معایب و کدهای تست همزمانی ارائه می‌گردد.</blockquote><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۱. مقدمه</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در سامانه‌های مدرن مبتنی بر .NET، ساختار کد ایجاد رزرو معمولاً الگویی شبیه به این دارد:</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">if (await repo.IsAvailableAsync(roomId, checkIn, checkOut))
+{
+    await repo.AddAsync(new Booking(roomId, checkIn, checkOut));
+}</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">این کد در محیط تست و کاربری‌های کم‌حجم بدون خطا عمل می‌کند؛ اما در ساعات اوج بار، رخداد رقابتی اجتناب‌ناپذیر است:</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">دو کاربر به‌طور همزمان درخواست رزرو اتاقی یکسان را در یک بازه زمانی ثبت می‌کنند. هر دو پردازش استعلام موجودی را اجرا کرده و وضعیت اتاق را «آزاد» دریافت می‌کنند؛ سپس هر دو تراکنش مقدار را در پایگاه داده درج می‌نمایند. در نهایت، یک اتاق به دو کاربر مختلف اختصاص داده می‌شود.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>چرا راهکارهای لایه اپلیکیشن ناکارآمد هستند؟</strong></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><table class="table table-striped table-hover table-bordered table-condensed" style="max-width: 100%; width: auto; margin-left: auto; margin-right: auto; direction: rtl;" dir="rtl"><tbody><tr><td data-row="1" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>راهکار در لایه کد</strong></td><td data-row="1" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>محدودیت و نقطه شکست</strong></td></tr><tr><td data-row="2" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">SemaphoreSlim</code><strong> یا </strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">lock</code><strong> در #C</strong></td><td data-row="2" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">تنها در حافظه <strong>یک پردازش/سرور</strong> معنا دارد؛ در محیط‌های مقیاس‌پذیر افقی (Multi-instance / Kubernetes) کاملاً بی‌اثر است.</td></tr><tr><td data-row="3" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>قفل توزیع‌شده (مانند Redis / Redlock)</strong></td><td data-row="3" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">سربار شبکه بالا، احتمال منقضی شدن پیش از موعد قفل (Lock TTL Expiration)، و پیچیدگی ناشی از Drift ساعت سرورها. همچنین منبع واحد حقیقت (Single Source of Truth) داده نیست.</td></tr><tr><td data-row="4" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>سطح انزوای قابل سریال‌سازی (Serializable)</strong></td><td data-row="4" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">منجر به افزایش شدید خطاهای همزمانی (Deadlocks و Serialization Failures)، سربار بالا روی دیتابیس و الزام به لاجیک Retry در اپلیکیشن می‌شود.</td></tr><tr><td data-row="5" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;"><strong>قفل سطری موقت (</strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">SELECT ... FOR UPDATE</code><strong>)</strong></td><td data-row="5" class="ql-direction-rtl text-center align-middle" style="text-align: center; vertical-align: middle;">به شدت سرعت سامانه را کاهش می‌دهد و صف‌های پردازشی طولانی و ریسک Deadlock ایجاد می‌کند.</td></tr></tbody></table><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>اصل بنیادین:</strong> اگر قانون در سطح پایگاه داده تثبیت نشود، هر مسیر ورود داده دیگر (اسکریپت‌های Migration، ایمپورت اکسل، پنل‌های ادمین جانبی، پیام‌های صف) می‌تواند منجر به فساد داده (Data Corruption) شود.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۲. منطق ریاضی هم‌پوشانی بازه‌ها (Interval Mathematics)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">پیش از پیاده‌سازی، باید تعریف دقیقی از «تداخل زمانی» داشته باشیم. فرض کنید دو رزرو ثبت شده است:</div><ul><li>رزرو الف: ۱۰ تا ۱۵ ژوئیه</li><li>رزرو ب: ۱۵ تا ۱۸ ژوئیه</li></ul><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در سیستم هتلداری، مسافر اول در تاریخ ۱۵ خروج (Check-out) کرده و مسافر دوم در تاریخ ۱۵ ورود (Check-in) می‌کند. این وضعیت تداخل نیست و باید مجاز باشد. بنابراین، بازه باید به‌صورت <strong>نیمه‌باز (Half-Open Interval)</strong> تعریف شود: (CheckIn, CheckOut] که روز ورود مشمول بازه بوده ولی روز خروج خارج از آن است.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">شرط تداخل دو بازه زمانی (A_in, A_out] و (B_in, B_out] به زبان منطق گزاره‌ای عبارت است از: <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">A_in&lt;B_out ^ B_in&lt;A_out</code></div><blockquote class="ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>نکته حساس:</strong> یکی از رایج‌ترین باگ‌ها در سیستم‌های رزرواسیون، استفاده اشتباه از عملگر =&gt; به جای &gt; است که باعث مسدود شدن روزهای پشت‌سر‌هم (Back-to-Back) می‌شود.</blockquote><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۳. استاندارد طلایی در PostgreSQL: قید مانع (Exclusion Constraint)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در PostgreSQL، نوع داده‌های بازه‌ای (Range Types نظیر <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">daterange</code> و <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">tstzrange</code>) وجود دارند که به طور پیش‌فرض از الگوی بازه نیمه‌باز <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">[)</code> پشتیبانی می‌کنند. عملگر <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">&amp;&amp;</code> نیز هم‌پوشانی بازه‌ها را ارزیابی می‌کند.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">با استفاده از نمایه‌سازی <strong>GiST (Generalized Search Tree)</strong> و اکستنشن <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">btree_gist</code>، می‌توان قید منحصر‌به‌فردی تعریف کرد که از ثبت ردیف‌هایی با اتاق یکسان و بازه متداخل جلوگیری کند:</div><pre data-language="sql" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CREATE EXTENSION IF NOT EXISTS btree_gist;
+
+CREATE TABLE bookings (
+    id          BIGSERIAL PRIMARY KEY,
+    room_id     INT NOT NULL,
+    check_in    DATE NOT NULL,
+    check_out   DATE NOT NULL,
+    status      TEXT NOT NULL DEFAULT &#39;pending&#39;,
+    expires_at  TIMESTAMPTZ,
+    CONSTRAINT valid_stay CHECK (check_in &lt; check_out),
+    CONSTRAINT no_overlapping_bookings
+        EXCLUDE USING gist (
+            room_id WITH =,
+            daterange(check_in, check_out, &#39;[)&#39;) WITH &amp;&amp;
+        )
+        WHERE (status IN (&#39;pending&#39;, &#39;confirmed&#39;))
+);</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در صورت تلاش برای درج رزرو متداخل، دیتابیس خطای <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">23P01 (exclusion_violation)</code> صادر می‌کند که در EF Core قابل مدیریت است.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۴. معادل‌سازی در Microsoft SQL Server و EF Core</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">موتور رابطه‌ای <strong>SQL Server فاقد Exclusion Constraint و نمایه‌های فضایی بازه‌ای مشابه GiST برای داده‌های تاریخی است</strong>. بنابراین، توسعه‌دهندگان مایکروسافت باید از الگوهای جایگزین معادل با درجه اطمینان مشابه استفاده نمایند. در ادامه سه رویکرد از بهینه‌ترین تا فراگیرترین بررسی شده است.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>الگوی اول (بهترین رویکرد برای عملکرد بالا): جدول اتمیک شب‌ها (Room-Nights Pattern)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در این الگو، به جای ذخیره صرفاً یک بازه تاریخی در یک سطر، بازه رزرو به <strong>واحدهای اتمیک روزانه (یا شبانه)</strong> شکسته می‌شود. یک جدول رزرو والد و یک جدول جزئیات روزها تعریف می‌شود.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">مدل پایگاه داده (DDL):</div><pre data-language="sql" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CREATE TABLE Rooms (
+    Id INT PRIMARY KEY
+);
+
+CREATE TABLE Bookings (
+    Id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    RoomId INT NOT NULL FOREIGN KEY REFERENCES Rooms(Id),
+    CheckIn DATE NOT NULL,
+    CheckOut DATE NOT NULL,
+    Status NVARCHAR(20) NOT NULL DEFAULT &#39;pending&#39;,
+    ExpiresAt DATETIMEOFFSET NULL,
+    CONSTRAINT CK_Bookings_Dates CHECK (CheckIn &lt; CheckOut)
+);
+
+CREATE TABLE BookingNights (
+    BookingId BIGINT NOT NULL FOREIGN KEY REFERENCES Bookings(Id) ON DELETE CASCADE,
+    RoomId INT NOT NULL,
+    [Night] DATE NOT NULL,
+    IsActive BIT NOT NULL DEFAULT 1,
+    CONSTRAINT PK_BookingNights PRIMARY KEY (BookingId, [Night])
+);
+
+-- این نمایه مانع از تداخل می‌شود
+CREATE UNIQUE NONCLUSTERED INDEX UX_RoomNights_UniqueActiveNight
+ON BookingNights (RoomId, [Night])
+WHERE IsActive = 1;</pre><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>پیکربندی در EF Core (Fluent API):</strong></div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public class Booking
+{
+    public long Id { get; set; }
+    public int RoomId { get; set; }
+    public DateOnly CheckIn { get; set; }
+    public DateOnly CheckOut { get; set; }
+    public string Status { get; set; } = &quot;pending&quot;;
+    public DateTimeOffset? ExpiresAt { get; set; }
+    public List&lt;BookingNight&gt; Nights { get; set; } = new();
+}
+
+public class BookingNight
+{
+    public long BookingId { get; set; }
+    public Booking Booking { get; set; } = null!;
+    public int RoomId { get; set; }
+    public DateOnly Night { get; set; }
+    public bool IsActive { get; set; }
+}
+
+// در متد OnModelCreating
+modelBuilder.Entity&lt;BookingNight&gt;(entity =&gt;
+{
+    entity.HasKey(bn =&gt; new { bn.BookingId, bn.Night });
+
+    // قید یکتایی فیلترشده (Filtered Index)
+    entity.HasIndex(bn =&gt; new { bn.RoomId, bn.Night })
+          .IsUnique()
+          .HasFilter(&quot;[IsActive] = 1&quot;);
+});</pre><ul><li><strong>مزیت:</strong> سرعت فوق‌العاده بالا، خواندن بسیار ساده برای تقویم هتل، تکیه بر نمایه‌های B-Tree استاندارد، و استقلال ۱۰۰ درصدی از تریگرها.</li><li><strong>عیب:</strong> افزایش تعداد سطرها در جدول اقامت‌های طولانی (البته برای ذخیره‌سازی داده‌های تاریخ، بسیار سبک است).</li></ul><div class="ql-direction-rtl" style="text-align: right;" dir="rtl"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>الگوی دوم (نگه‌داری ساختار بازه‌ای): تریگر محافظ با سطح انزوای Snapshot / Serializable</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">اگر نمی‌خواهید ساختار سطرهای رزرو را به روزهای مجزا بشکنید و مایلید فقط دو ستون <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CheckIn</code> و <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CheckOut</code> داشته باشید، می‌توانید از یک <strong>Trigger</strong> در SQL Server استفاده کنید.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><blockquote class="ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>هشدار معماری بسیار مهم:</strong> تریگرهای معمولی در SQL Server به طور پیش‌فرض تحت سطح انزوای <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">READ COMMITTED</code> اجرا می‌شوند و در برابر شرایط رقابتی (Race Condition) <strong>به شدت آسیب‌پذیرند</strong>. برای مسدود کردن رخداد رقابتی در تریگر، استعلام تداخل در تریگر باید از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">WITH (HOLDLOCK)</code> (معادل Range-Lock / Serializable) یا جدول قفل منبع (Mutex Table) استفاده کند.</blockquote><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><strong>اسکریپت ساخت تریگر در SQL Server:</strong></div><pre data-language="sql" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">CREATE OR ALTER TRIGGER TR_Bookings_PreventOverlap
+ON Bookings
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- در صورتی که سطر درج شده فعال باشد
+    IF EXISTS (
+        SELECT 1
+        FROM inserted i
+        -- استفاده از HOLDLOCK برای تضمین ممانعت از race condition
+        JOIN Bookings b WITH (HOLDLOCK, UPDLOCK) ON i.RoomId = b.RoomId
+        WHERE i.Id &lt;&gt; b.Id
+          AND i.Status IN (&#39;pending&#39;, &#39;confirmed&#39;)
+          AND b.Status IN (&#39;pending&#39;, &#39;confirmed&#39;)
+          AND i.CheckIn &lt; b.CheckOut 
+          AND b.CheckIn &lt; i.CheckOut
+    )
+    BEGIN
+        RAISERROR(&#39;تداخل تاریخ برای این اتاق وجود دارد (Double Booking Detected).&#39;, 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+END;</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>نحوه مدیریت خطا در EF Core:</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">خطای نقض قید یکتایی (Unique Index Violation) در SQL Server با <strong>شماره خطای ۲۶۰۱ یا ۲۶۲۷</strong> و خطای تولید شده توسط تریگر از طریق <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">SqlException</code> مدیریت می‌شود.</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">public async Task&lt;IResult&gt; CreateBooking(CreateBookingRequest req, AppDbContext db, CancellationToken ct)
+{
+    var booking = new Booking
+    {
+        RoomId = req.RoomId,
+        CheckIn = req.CheckIn,
+        CheckOut = req.CheckOut,
+        Status = &quot;pending&quot;,
+        ExpiresAt = DateTimeOffset.UtcNow.AddMinutes(10)
+    };
+
+    // تولید شب‌ها برای الگوی Room-Nights
+    for (var date = req.CheckIn; date &lt; req.CheckOut; date = date.AddDays(1))
+    {
+        booking.Nights.Add(new BookingNight
+        {
+            RoomId = req.RoomId,
+            Night = date,
+            IsActive = true
+        });
+    }
+
+    db.Bookings.Add(booking);
+
+    try
+    {
+        await db.SaveChangesAsync(ct);
+        return Results.Created($&quot;/api/bookings/{booking.Id}&quot;, booking);
+    }
+    catch (DbUpdateException ex) when (ex.InnerException is SqlException sqlEx &amp;&amp; 
+                                      (sqlEx.Number == 2601 || sqlEx.Number == 2627))
+    {
+        // تشخیص نقض نمایه یکتا در الگوی جدول شب‌ها
+        return Results.Problem(
+            statusCode: StatusCodes.Status409Conflict,
+            title: &quot;این اتاق در بازه زمانی انتخابی قبلاً رزرو شده است.&quot;);
+    }
+    catch (DbUpdateException ex) when (ex.InnerException is SqlException sqlEx &amp;&amp; sqlEx.Number == 50000)
+    {
+        // خطای سفارشی RAISERROR ناشی از تریگر
+        return Results.Problem(
+            statusCode: StatusCodes.Status409Conflict,
+            title: sqlEx.Message);
+    }
+}</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۵. مدیریت چرخه حیات رزروهای موقت (Temporary Holds &amp; Expirations)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">در خریدهای آنلاین، کاربر اتاق را برای پرداخت به مدت ۱۰ دقیقه موقت (Pending Hold) نگه می‌دارد. اگر کاربر پرداخت نکند، اتاق باید آزاد شود.</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">از آنجا که ایندکس‌های پایگاه داده (چه GiST در پُستگرس و چه ایندکس‌های فیلترشده در اس‌کیو‌ال سرور) <strong>نمی‌توانند توابع وابسته به زمان مانند </strong><code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">GETUTCDATE()</code><strong> را درون شرط فیلتر ارزیابی کنند</strong>، باید فرایند آزادسازی رزروهای منقضی‌شده به صورت پویا مدیریت شود:</div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>استراتژی دوگانه (Dual Cleanup Strategy):</strong></div><ul><li><strong>پاک‌سازی در زمان نوشتن (Write-Time Cleanup):</strong> درون همان تراکنشِ ثبت رزرو جدید، ابتدا رکوردهای Pending منقضی شده مربوط به همان اتاق ابطال شوند.</li><li><strong>سرویس پس‌زمینه (.NET BackgroundService):</strong> دوره‌ای (مثلاً هر یک دقیقه) سطرهای منقضی‌شده عمومی را بروزرسانی کند.</li></ul><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;"><br></div><pre data-language="sql" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">-- اجرای درون تراکنش پیش از درج رزرو جدید
+BEGIN TRANSACTION;
+
+    -- آزاد کردن رزروهای منقضی شده همین اتاق
+    UPDATE Bookings
+    SET Status = &#39;expired&#39;
+    WHERE RoomId = @RoomId
+      AND Status = &#39;pending&#39;
+      AND ExpiresAt &lt; SYSUTCDATETIME();
+
+    -- در صورت استفاده از الگوی Room-Nights
+    UPDATE bn
+    SET bn.IsActive = 0
+    FROM BookingNights bn
+    INNER JOIN Bookings b ON bn.BookingId = b.Id
+    WHERE b.RoomId = @RoomId AND b.Status = &#39;expired&#39;;
+
+    -- اکنون عملیات درج رزرو با خیال راحت انجام می‌شود...
+COMMIT TRANSACTION;</pre><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۶. آزمون اعتبارسنجی همزمانی (Concurrency Integration Test)</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">صرف ادعای درستی کد کافی نیست. باید شرایط رقابتی را با آزمون چند‌نخی شبیه‌سازی کرد. نمونه آزمون xUnit با استفاده از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Task.WhenAll</code> بر روی دیتابیس واقعی (ترجیحاً از طریق <a href="https://dotnet.testcontainers.org/" rel="noopener noreferrer" target="_blank">Testcontainers for .NET</a>):</div><pre data-language="cs" dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">[Fact]
+public async Task ConcurrentBookings_ForSameRoomAndDates_OnlyOneSucceeds()
+{
+    // Arrange: ۱۰ درخواست رزرو همزمان برای یک اتاق و یک بازه
+    var request = new CreateBookingRequest(
+        RoomId: 101, 
+        CheckIn: new DateOnly(2026, 7, 10), 
+        CheckOut: new DateOnly(2026, 7, 15)
+    );
+
+    const int concurrentRequests = 10;
+
+    // Act: شبیه‌سازی ارسال همزمان درخواست‌ها
+    var tasks = Enumerable.Range(0, concurrentRequests)
+        .Select(_ =&gt; _client.PostAsJsonAsync(&quot;/api/bookings&quot;, request));
+
+    var responses = await Task.WhenAll(tasks);
+
+    // Assert: دقیقاً یک درخواست موفق و بقیه با خطای 409 برگردند
+    Assert.Single(responses, r =&gt; r.StatusCode == HttpStatusCode.Created);
+    Assert.Equal(concurrentRequests - 1, responses.Count(r =&gt; r.StatusCode == HttpStatusCode.Conflict));
+}</pre><blockquote class="ql-direction-rtl" dir="rtl" style="text-align: right;"><strong>تذکر مهم:</strong> هرگز این تست را با <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">InMemory Database</code> یا <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">SQLite in-memory</code> در EF Core اجرا نکنید؛ زیرا این فراهم‌کننده‌ها رفتار موتورهای قفل‌گذاری و نمایه‌سازی SQL Server یا PostgreSQL را شبیه‌سازی نمی‌کنند و نتایج به شدت گمراه‌کننده خواهند بود.</blockquote><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><br></div><div dir="rtl" class="ql-align-right ql-direction-rtl" style="text-align: right;"><strong>۷. جمع‌بندی و نتیجه‌گیری</strong></div><div class="ql-direction-rtl ql-align-right" dir="rtl" style="text-align: right;">تلاش برای حل مسئله شرایط رقابتی تداخل رزرو در لایه کد اپلیکیشن، نقض اصل پایداری داده‌هاست و سیستم را به شدت شکننده می‌سازد. پایگاه داده باید به عنوان <strong>منبع واحد حقیقت (Single Source of Truth)</strong> از وقوع ناهماهنگی جلوگیری کند.</div><ul><li><strong>در PostgreSQL:</strong> استفاده از <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">Exclusion Constraint</code> مبتنی بر GiST به همراه بازه‌های نیمه‌باز <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">[daterange)</code> بالاترین کارایی و کمترین کدنویسی را به همراه دارد.</li><li><strong>در SQL Server:</strong> با توجه به عدم وجود قیدهای بازه‌ای، <strong>«الگوی جدول شب‌ها (Room-Nights) به همراه Unique Filtered Index»</strong> بهترین، تمیزترین و پرفورمنس‌ترین الگو برای پروژه‌های بزرگ در اکوسیستم .NET و EF Core است. در صورتی که مدل داده نباید تغییر کند، تریگرهای مجهز به قفل‌های بازه‌ای یکپارچه (<code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">HOLDLOCK</code>) تنها سپر مطمئن خواهند بود.</li><li>در لایه #C، همیشه باید کدهای خطای خطوط پایگاه داده صید شده و در قالب پاسخ استاندارد <code dir="ltr" style="white-space: pre-wrap; overflow: auto; word-break: break-word; text-align: left; margin-top: 0.3rem; margin-bottom: 0.3rem;">HTTP 409 Conflict</code> به کاربر تحویل داده شوند.</li></ul></div><div class='card mt-3 mb-2 shadow-sm'>
+<div class='card-header entry-title shadow-sm d-flex flex-row flex-wrap align-items-center'>
+<strong>مطالب مشابه</strong>
+</div>
+<ul class='list-group'>
+<a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3220.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>کوئری نویسی در EF Core - قسمت اول - تشکیل بانک اطلاعاتی و مقدار دهی اولیه‌ی آن</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3321.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Blazor 5x - قسمت 29 - برنامه‌ی Blazor WASM - یک تمرین: رزرو کردن یک اتاق انتخابی</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3322.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Blazor 5x - قسمت 30 - برنامه‌ی Blazor WASM - افزودن پرداخت آنلاین توسط درگاه مجازی پرباد</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3224.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>کوئری نویسی در EF Core - قسمت سوم - جوین نویسی</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-1690.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>استفاده از EF در اپلیکیشن های N-Tier : قسمت سوم</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3316.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Blazor 5x - قسمت 24 - تهیه API مخصوص Blazor WASM - بخش 1 - ایجاد تنظیمات ابتدایی</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3231.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>کوئری نویسی در EF Core - قسمت ششم - کار با تاریخ و زمان</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3319.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Blazor 5x - قسمت 27 - برنامه‌ی Blazor WASM - کار با سرویس‌های Web API</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3302.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>Blazor 5x - قسمت 13 - کار با فرم‌ها - بخش 1 - کار با EF Core در برنامه‌های Blazor Server</a><a class='list-group-item list-group-item-action d-flex align-items-center' href='www.dntips.ir-posts-3230.html'><span class='badge bg-success-subtle text-success-emphasis rounded-pill me-2'>مطالب</span>کوئری نویسی در EF Core - قسمت پنجم - اعمال تجمعی -  بخش دوم</a></ul>
+</div>
+
+
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- to load custom fonts for printing -->
+<div class="useSamimFD">&nbsp;</div>
+</body>
+</html>
