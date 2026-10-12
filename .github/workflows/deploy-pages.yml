@@ -31,15 +31,37 @@ jobs:
         env:
           GA_ID: ${{ secrets.GA_MEASUREMENT_ID }}
         run: |
-          GA_SNIPPET="<!-- Google tag (gtag.js) --><script async src=\"https://www.googletagmanager.com/gtag/js?id=${GA_ID}\"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA_ID}');</script></head>"
+          python3 -c '
+          import os, sys
 
-          # جستجو فقط در پوشه OPF و درج تگ تنها در صورتی که قبلاً تگ گوگل آنالیتیکس وجود نداشته باشد
-          find OPF -type f -name "*.html" | while read -r file; do
-            if ! grep -q "googletagmanager.com" "$file"; then
-              sed -i "s|</head>|${GA_SNIPPET}|g" "$file"
-            fi
-          done
+          ga_id = os.environ.get("GA_ID")
+          if not ga_id:
+              print("GA_ID is empty or missing! Check repository secrets.", file=sys.stderr)
+              sys.exit(1)
 
+          snippet = f"""<!-- Google tag (gtag.js) -->
+          <script async src="https://www.googletagmanager.com/gtag/js?id={ga_id}"></script>
+          <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){{dataLayer.push(arguments);}}
+            gtag("js", new Date());
+            gtag("config", "{ga_id}");
+          </script>
+          </head>"""
+
+          target_dir = "OPF"
+          for root, _, files in os.walk(target_dir):
+              for file in files:
+                  if file.endswith(".html"):
+                      filepath = os.path.join(root, file)
+                      with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
+                          content = f.read()
+
+                      if "googletagmanager.com" not in content and "</head>" in content:
+                          content = content.replace("</head>", snippet, 1)
+                          with open(filepath, "w", encoding="utf-8") as f:
+                              f.write(content)
+          '
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v5
         with:
