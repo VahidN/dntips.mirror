@@ -27,6 +27,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
+      - name: Inject Google Analytics
+        env:
+          GA_ID: ${{ secrets.GA_MEASUREMENT_ID }}
+        run: |
+          GA_SNIPPET="<!-- Google tag (gtag.js) --><script async src=\"https://www.googletagmanager.com/gtag/js?id=${GA_ID}\"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA_ID}');</script></head>"
+
+          # جستجو فقط در پوشه OPF و درج تگ تنها در صورتی که قبلاً تگ گوگل آنالیتیکس وجود نداشته باشد
+          find OPF -type f -name "*.html" | while read -r file; do
+            if ! grep -q "googletagmanager.com" "$file"; then
+              sed -i "s|</head>|${GA_SNIPPET}|g" "$file"
+            fi
+          done
+
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v5
         with:
