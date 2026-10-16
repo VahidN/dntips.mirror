@@ -27,19 +27,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Inject Google Analytics
+      - name: Inject Google Analytics and Search Box
         env:
           GA_ID: ${{ secrets.GA_MEASUREMENT_ID }}
+          CSE_CX: ${{ secrets.GOOGLE_CSE_CX }}
         run: |
           python3 -c '
-          import os, sys
+          import os, re
 
           ga_id = os.environ.get("GA_ID")
-          if not ga_id:
-              print("GA_ID is empty or missing! Check repository secrets.", file=sys.stderr)
-              sys.exit(1)
+          cse_cx = os.environ.get("CSE_CX")
 
-          snippet = f"""<!-- Google tag (gtag.js) -->
+          ga_snippet = f"""<!-- Google tag (gtag.js) -->
           <script async src="https://www.googletagmanager.com/gtag/js?id={ga_id}"></script>
           <script>
             window.dataLayer = window.dataLayer || [];
@@ -49,7 +48,26 @@ jobs:
           </script>
           </head>"""
 
+          # قطعه‌کد جستجو متناسب با قرارگیری در داخل ستون بوت‌استرپ
+          search_snippet = f"""\n<!-- Google Custom Search Box -->
+          <div class="mt-4">
+            <style>
+              .gsc-control {  width: 100%; } 
+              form.gsc-search-box {  max-width: 100%;  }
+            </style>
+            <script async src="https://cse.google.com/cse.js?cx={cse_cx}">
+            </script>
+            <div class="gcse-search"></div>
+          </div>
+          """
+
           target_dir = "OPF"
+
+          # 1. تطابق با تگ دیو دارای کلاس col-md-10 (حتی اگر کلاس‌های دیگری هم داشته باشد)
+          col_regex = re.compile(r"(<div[^>]*class=[\"\'][^\"\']*\bcol-md-10\b[^\"\']*[\"\'][^>]*>)", re.IGNORECASE)
+          # 2. در صورت نبود ساختار گرید، تگ body به عنوان حالت جایگزین در نظر گرفته می‌شود
+          body_regex = re.compile(r"(<body[^>]*>)", re.IGNORECASE)
+
           for root, _, files in os.walk(target_dir):
               for file in files:
                   if file.endswith(".html"):
@@ -57,8 +75,25 @@ jobs:
                       with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
                           content = f.read()
 
-                      if "googletagmanager.com" not in content and "</head>" in content:
-                          content = content.replace("</head>", snippet, 1)
+                      modified = False
+
+                      # تزریق GA
+                      if ga_id and "googletagmanager.com" not in content and "</head>" in content:
+                          content = content.replace("</head>", ga_snippet, 1)
+                          modified = True
+
+                      # تزریق کادر جستجو
+                      if file != "search.html" and cse_cx and "cse.google.com/cse.js" not in content:
+                          if col_regex.search(content):
+                              # درج در ابتدای ستون col-md-10
+                              content = col_regex.sub(r"\1" + search_snippet, content, count=1)
+                              modified = True
+                          elif body_regex.search(content):
+                              # حالت پشتیبان برای صفحاتی که این ساختار ستونی را ندارند
+                              content = body_regex.sub(r"\1" + search_snippet, content, count=1)
+                              modified = True
+
+                      if modified:
                           with open(filepath, "w", encoding="utf-8") as f:
                               f.write(content)
           '
