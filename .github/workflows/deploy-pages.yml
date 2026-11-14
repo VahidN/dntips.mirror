@@ -27,7 +27,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Inject Google Analytics and Search Box
+      - name: Inject Google Analytics, Search Box, and Table Row
         env:
           GA_ID: ${{ secrets.GA_MEASUREMENT_ID }}
           CSE_CX: ${{ secrets.GOOGLE_CSE_CX }}
@@ -52,8 +52,8 @@ jobs:
           search_snippet = f"""\n<!-- Google Custom Search Box -->
           <div class="mt-4">
             <style>
-              .gsc-control {{  width: 100%; }} 
-              form.gsc-search-box {{  max-width: 100%;  }}
+              .gsc-control {{ width: 100%; }}
+              form.gsc-search-box {{ max-width: 100%; }}
             </style>
             <script async src="https://cse.google.com/cse.js?cx={cse_cx}">
             </script>
@@ -61,12 +61,42 @@ jobs:
           </div>
           """
 
+          # ردیف جدید برای افزودن به انتهای جدول
+          telegram_row = """
+          <tr>
+          <td>
+           <a dir="ltr" href="https://t.me/+A5caPziuZX5jYTY0">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="17" height="17">
+              <circle cx="12" cy="12" r="12" fill="#24A1DE"/>
+              <path fill="#FFFFFF" d="M17.5 7.4L15.4 17.3C15.2 18 14.8 18.2 14.2 17.9L10.9 15.4L9.3 17C9.1 17.2 9 17.3 8.6 17.3L8.8 14L14.9 8.5C15.2 8.2 14.8 8.1 14.5 8.3L7 13L3.8 12C3.1 11.8 3.1 11.3 4 11L16.5 6.2C17.1 6 17.6 6.3 17.5 7.4Z"/>
+            </svg>
+            @dntipsnews
+           </a>
+          </td>
+          </tr>
+          """
+
           target_dir = "OPF"
 
-          # 1. تطابق با تگ دیو دارای کلاس col-md-10 (حتی اگر کلاس‌های دیگری هم داشته باشد)
           col_regex = re.compile(r"(<div[^>]*class=[\"\'][^\"\']*\bcol-md-10\b[^\"\']*[\"\'][^>]*>)", re.IGNORECASE)
-          # 2. در صورت نبود ساختار گرید، تگ body به عنوان حالت جایگزین در نظر گرفته می‌شود
           body_regex = re.compile(r"(<body[^>]*>)", re.IGNORECASE)
+          # یافتن جدول با کلاس‌های مشخص‌شده تا انتهای بسته شدن جدول
+          table_regex = re.compile(
+              r'(<table[^>]*class=["\'][^"\']*table shadow-sm mb-0 rounded table-hover mx-auto w-100 caption-bottom[^"\']*["\'][^>]*>)(.*?)(</table>)',
+              re.IGNORECASE | re.DOTALL
+          )
+
+          def append_row_to_table(match):
+              open_tag, inner_html, close_tag = match.group(1), match.group(2), match.group(3)
+              # اگر از قبل لینک تلگرام وجود داشت، تغییر نده
+              if "+A5caPziuZX5jYTY0" in inner_html:
+                  return match.group(0)
+              # اگر جدول دارای تگ <tbody> بود، ردیف را قبل از بستن آخرین </tbody> بگذار
+              if re.search(r"</tbody>", inner_html, re.IGNORECASE):
+                  inner_html = re.sub(r"(</tbody>)(?![\s\S]*</tbody>)", telegram_row + r"\1", inner_html, count=1, flags=re.IGNORECASE)
+              else:
+                  inner_html = inner_html + telegram_row
+              return open_tag + inner_html + close_tag
 
           for root, _, files in os.walk(target_dir):
               for file in files:
@@ -77,26 +107,30 @@ jobs:
 
                       modified = False
 
-                      # تزریق GA
+                      # 1. تزریق GA
                       if ga_id and "googletagmanager.com" not in content and "</head>" in content:
                           content = content.replace("</head>", ga_snippet, 1)
                           modified = True
 
-                      # تزریق کادر جستجو
+                      # 2. تزریق کادر جستجو
                       if file != "search.html" and cse_cx and "cse.google.com/cse.js" not in content:
                           if col_regex.search(content):
-                              # درج در ابتدای ستون col-md-10
                               content = col_regex.sub(r"\1" + search_snippet, content, count=1)
                               modified = True
                           elif body_regex.search(content):
-                              # حالت پشتیبان برای صفحاتی که این ساختار ستونی را ندارند
                               content = body_regex.sub(r"\1" + search_snippet, content, count=1)
                               modified = True
+
+                      # 3. افزودن ردیف تلگرام به انتهای جدول مورد نظر
+                      if "+A5caPziuZX5jYTY0" not in content and table_regex.search(content):
+                          content = table_regex.sub(append_row_to_table, content, count=1)
+                          modified = True
 
                       if modified:
                           with open(filepath, "w", encoding="utf-8") as f:
                               f.write(content)
           PY
+
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v5
         with:
